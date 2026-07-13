@@ -1150,7 +1150,7 @@ function showStaff(notes, clef = 'treble') {
   staffCtx.fillStyle = "#161514";
   staffCtx.textBaseline = "middle";
   if (clef === 'bass') {
-    staffCtx.fillText("𝄢", left - 1, top + gap * 2.6 + 18); // ajuste para clave de fa
+    staffCtx.fillText("𝄢", left - 1, top + gap * 2.6); // ajuste para clave de fa
   } else {
     staffCtx.fillText("𝄞", left - 1, top + gap * 2.6);
   }
