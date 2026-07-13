@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Piano Virtual</title>
 <style>
+  /* (estilos completos, igual que antes) */
   :root{
     --ink: #161514;
     --charcoal: #24201d;
@@ -109,6 +110,30 @@
     color: var(--text);
   }
 
+  /* Cuadro para mostrar acorde */
+  #chordDisplay {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--gold);
+    background: rgba(0,0,0,0.35);
+    padding: 4px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 168, 79, 0.35);
+    text-align: center;
+    min-width: 120px;
+    white-space: nowrap;
+    box-shadow: 0 0 20px rgba(212,168,79,0.08);
+    letter-spacing: 0.02em;
+  }
+  #chordDisplay .sub {
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--muted);
+    display: block;
+    margin-top: -2px;
+  }
+
   .social-bar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .school-logo-link{ display:inline-block; line-height:0; margin-left:auto; }
   .school-logo{
@@ -126,6 +151,7 @@
     .topbar{ flex-direction:column; align-items:stretch; }
     .brand{ justify-content:center; flex-wrap:wrap; }
     .mode-switch{ margin-left:0; justify-content:center; }
+    #chordDisplay{ margin:6px auto; min-width:100px; font-size:1.2rem; }
     .social-bar{ justify-content:center; }
     .school-logo-link{ margin-left:0; }
   }
@@ -613,7 +639,6 @@
   .black-key.active{
     background:color-mix(in srgb, var(--active-color) 70%, black);
   }
-  /* Estilo para etiquetas de teclas negras en dos líneas */
   .black-key .label {
     position: absolute;
     bottom: 2px;
@@ -710,6 +735,12 @@
       <span class="mode-label active" id="modeLabelPro">Pro</span>
     </span>
   </h1>
+
+  <div id="chordDisplay">
+    <span id="chordName">—</span>
+    <span class="sub" id="chordSub"></span>
+  </div>
+
   <div class="social-bar">
     <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" aria-label="Instagram">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -759,7 +790,6 @@
 <main class="app-content">
 
   <div class="controlbar">
-    <!-- Nuevo selector de visualización de notas -->
     <div class="field">
       <label for="noteDisplay">Notas</label>
       <select id="noteDisplay">
@@ -779,7 +809,6 @@
       <input type="color" id="activeColor" value="#66b3ff">
     </div>
 
-    <!-- Selector de carpeta de samples -->
     <div class="sample-controls">
       <label for="sampleFolder" title="Selecciona la carpeta con tus samples de audio">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
@@ -797,7 +826,6 @@
       </button>
     </div>
 
-    <!-- Indicadores alineados a la derecha -->
     <div class="right-indicators">
       <span class="sound-source-indicator" id="soundSourceIndicator">cargando...</span>
       <span class="sample-status" id="sampleStatus">sin samples</span>
@@ -809,7 +837,6 @@
     </div>
   </div>
 
-  <!-- Contenedor dividido: pentagrama a la izquierda, visor PDF a la derecha -->
   <div class="staff-wrap">
     <div class="staff-left">
       <svg id="staffSvg" viewBox="0 0 2200 300" preserveAspectRatio="xMidYMid meet"></svg>
@@ -921,14 +948,32 @@
   // ---------- CONSTANTES Y UTILIDADES ----------
   const NOTE_NAMES_EN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   const NOTE_NAMES_ES = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
-  // Nombres de solfeo (do movible) para cada grado
   const SOLFEO_NATURAL = ["Do","Re","Mi","Fa","Sol","La","Si"];
-  const SOLFEO_SHARP = ["Di","Ri","Fi","Si","Li"]; // para Do#, Re#, Fa#, Sol#, La#
-  const SOLFEO_FLAT = ["Ra","Me","Se","Le","Te"];  // para Reb, Mib, Solb, Lab, Sib
+  const SOLFEO_SHARP = ["Di","Ri","Fi","Si","Li"];
+  const SOLFEO_FLAT = ["Ra","Me","Se","Le","Te"];
 
-  // Mapeo de índice de nota (0-11) a nombre en español, americano, solfeo
+  const SCALE = {
+    mayor:[2,2,1,2,2,2,1], mayor_armonica:[2,2,1,2,1,3,1], menor_melodica:[2,1,2,2,2,2,1], menor_armonica:[2,1,2,2,1,3,1],
+    jonico:[2,2,1,2,2,2,1], dorico:[2,1,2,2,2,1,2], frigio:[1,2,2,2,1,2,2], lidio:[2,2,2,1,2,2,1], mixolidio:[2,2,1,2,2,1,2], eolico:[2,1,2,2,1,2,2], locrio:[1,2,2,1,2,2,2],
+    jonico_b6:[2,2,1,2,1,3,1], locrio_s2s6:[2,1,2,1,3,1,2], mixolidio_b2_s2_no4:[1,2,1,3,1,2,2], dorico_s4_s7:[2,1,3,1,2,2,1], mixolidio_b2:[1,3,1,2,2,1,2], lidio_s2_s5:[3,1,2,2,1,2,1],
+    locrio_b7:[1,2,2,1,2,1,3], eolico_s7:[2,1,2,2,1,3,1], locrio_s6:[1,2,2,1,3,1,2], jonico_aumentado:[2,2,1,3,1,2,1], dorico_s4:[2,1,3,1,2,1,2], mixolidio_b2b6:[1,3,1,2,1,2,2], lidio_s2:[3,1,2,1,2,2,1], locrio_b4b7:[1,2,1,2,2,1,3], dorico_s7:[2,1,2,2,2,2,1], dorico_b2:[1,2,2,2,2,1,2], lidio_aumentado:[2,2,2,2,1,2,1], lidio_dominante:[2,2,2,1,2,1,2], mixolidio_b6:[2,2,1,2,1,2,2], locrio_s2:[2,1,2,1,2,2,2], alterado:[1,2,1,2,2,2,2],
+    pentatonica_mayor:[2,2,3,2,3], pentatonica_dominante:[2,2,3,3,2], blues:[3,2,1,1,3,2], por_tonos:[2,2,2,2,2,2],
+    disminuida_HW:[1,2,1,2,1,2,1,2], disminuida_WH:[2,1,2,1,2,1,2,1]
+  };
+  const CHORD_TYPES = {
+    mayor:{label:"Mayor", menuLabel:"mayor", family:"triad", intervals:[0,4,7], suffix:"", quality:"Tríada mayor (T-3-5)"},
+    menor:{label:"Menor", menuLabel:"menor", family:"triad", intervals:[0,3,7], suffix:"m", quality:"Tríada menor (T-b3-5)"},
+    aumentado:{label:"Aumentado", menuLabel:"aumentado", family:"triad", intervals:[0,4,8], suffix:"+", quality:"Tríada aumentada (T-3-#5)"},
+    disminuido:{label:"Disminuido", menuLabel:"disminuido", family:"triad", intervals:[0,3,6], suffix:"°", quality:"Tríada disminuida (T-b3-b5)"},
+    maj7:{label:"7M", menuLabel:"Maj7", family:"tetrad", intervals:[0,4,7,11], suffix:"7M", quality:"Cuatríada con 7ª mayor (T-3-5-7)"},
+    m7:{label:"m7", menuLabel:"m7", family:"tetrad", intervals:[0,3,7,10], suffix:"m7", quality:"Cuatríada menor (T-b3-5-b7)"},
+    dom7:{label:"7", menuLabel:"7", family:"tetrad", intervals:[0,4,7,10], suffix:"7", quality:"Cuatríada dominante (T-3-5-b7)"},
+    m7b5:{label:"m7(b5)", menuLabel:"m7(b5)", family:"tetrad", intervals:[0,3,6,10], suffix:"m7(b5)", quality:"Cuatríada semidisminuida (T-b3-b5-b7)"},
+    sus4_7:{label:"7sus4", menuLabel:"7sus4", family:"tetrad", intervals:[0,5,7,10], suffix:"7sus4", quality:"Cuatríada sus4 (T-4-5-b7)"},
+    sharp5_7:{label:"7(#5)", menuLabel:"7(#5)", family:"tetrad", intervals:[0,4,8,10], suffix:"7(#5)", quality:"Cuatríada con 5ª aumentada (T-3-#5-b7)"}
+  };
+
   function getNoteNames(lang, idx) {
-    // idx es el índice dentro de la octava (0=C, 1=C#, ...)
     const en = NOTE_NAMES_EN[idx];
     const es = NOTE_NAMES_ES[idx];
     const isSharp = en.includes('#');
@@ -936,7 +981,7 @@
       return { natural: es, sharp: isSharp ? es : null, flat: isSharp ? null : null };
     } else if (lang === 'en') {
       return { natural: en, sharp: isSharp ? en : null, flat: isSharp ? null : null };
-    } else { // solfeo
+    } else {
       if (idx === 0) return { natural: 'Do', sharp: null, flat: null };
       if (idx === 1) return { natural: null, sharp: 'Di', flat: 'Ra' };
       if (idx === 2) return { natural: 'Re', sharp: null, flat: null };
@@ -966,18 +1011,17 @@
     return (octave-4)*7 + map[letter];
   }
 
-  // Rango de notas para cada modo
   const RANGES = {
-    beginner: { min: 48, max: 83 }, // C3 a B5 (antes C3 a C5)
-    pro: { min: 21, max: 108 }      // 88 teclas
+    beginner: { min: 48, max: 83 },
+    pro: { min: 21, max: 108 }
   };
 
   // ---------- ESTADO GLOBAL ----------
-  let currentMode = 'beginner'; // 'beginner' o 'pro'
-  let currentDisplay = 'ocultar'; // 'mostrar', 'ocultar', 'solfeo'
+  let currentMode = 'beginner';
+  let currentDisplay = 'ocultar';
   let currentMidiRange = { min: 48, max: 83 };
   let keyElByMidi = {};
-  let allNotes = []; // array de objetos midiInfo para el rango actual
+  let allNotes = [];
 
   // ---------- DOM REFS ----------
   const keyboardEl = document.getElementById('keyboard');
@@ -987,13 +1031,13 @@
   const noteDisplaySelect = document.getElementById('noteDisplay');
   const hintText = document.getElementById('hintText');
 
+  const chordNameEl = document.getElementById('chordName');
+  const chordSubEl = document.getElementById('chordSub');
+
   // ---------- CONSTRUCCIÓN DEL TECLADO ----------
   function buildKeyboard(minMidi, maxMidi) {
-    // Limpiar teclado
     keyboardEl.innerHTML = '';
     keyElByMidi = {};
-
-    // Generar lista de notas en el rango
     const notes = [];
     for (let m = minMidi; m <= maxMidi; m++) {
       notes.push(midiToInfo(m));
@@ -1005,7 +1049,6 @@
     const whiteWidthPct = 100 / WHITE_COUNT;
     const blackWidthPct = whiteWidthPct * 0.58;
 
-    // Crear teclas blancas
     let whiteIndex = 0;
     notes.forEach(n => {
       if (n.isBlack) return;
@@ -1014,7 +1057,6 @@
       el.style.left = (whiteIndex * whiteWidthPct) + '%';
       el.style.width = whiteWidthPct + '%';
       el.dataset.midi = n.midi;
-      // Añadir etiqueta (se actualizará después)
       const label = document.createElement('div');
       label.className = 'label';
       el.appendChild(label);
@@ -1024,7 +1066,6 @@
       whiteIndex++;
     });
 
-    // Crear teclas negras
     let wi = 0;
     notes.forEach(n => {
       if (!n.isBlack) { wi++; return; }
@@ -1040,15 +1081,13 @@
       keyboardEl.appendChild(el);
       keyElByMidi[n.midi] = el;
       attachPointer(el, n);
-      // No incrementamos wi porque las negras no cuentan para el ancho de blancas
     });
 
-    // Actualizar etiquetas según el modo actual
     updateLabels();
     updateHint();
+    updateChordDisplay();
   }
 
-  // ---------- ACTUALIZAR ETIQUETAS (dos líneas para negras) ----------
   function updateLabels() {
     const display = currentDisplay;
     const mode = currentMode;
@@ -1076,23 +1115,19 @@
           bottomName = names.flat;
         } else {
           const names = getNoteNames(lang, idx);
-          topName = names.sharp; // ej. "Do#" o "C#"
-          // Obtener bemol correctamente: nota un semitono más arriba con 'b'
+          topName = names.sharp;
           const flatIdx = (idx + 1) % 12;
           const flatNoteName = getNoteNames(lang, flatIdx).natural;
           if (lang === 'es') {
-            bottomName = flatNoteName + 'b'; // ej. "Reb"
-          } else { // 'en'
-            bottomName = flatNoteName.charAt(0) + 'b'; // ej. "Db"
+            bottomName = flatNoteName + 'b';
+          } else {
+            bottomName = flatNoteName.charAt(0) + 'b';
           }
         }
-        // Mostrar en dos líneas: sostenido arriba, bemol abajo
         labelDiv.innerHTML = topName + '<br>' + bottomName;
       } else {
-        // Tecla blanca: una sola línea
         const names = getNoteNames(lang, idx);
         let text = names.natural || '';
-        // Si es solfeo y no está en el mapeo natural, mostrar el nombre natural correspondiente
         if (isSolfeo) {
           const solfeoNames = getNoteNames('solfeo', idx);
           text = solfeoNames.natural || '';
@@ -1102,7 +1137,6 @@
     }
   }
 
-  // ---------- ACTUALIZAR HINT ----------
   function updateHint() {
     const mode = currentMode;
     const modeName = (mode === 'beginner') ? 'Beginners (3 octavas: C3–B5)' : 'Pro (88 teclas)';
@@ -1110,7 +1144,6 @@
   }
 
   // ---------- EVENTOS DE TECLADO FÍSICO ----------
-  // Mapeo fijo (se mantiene igual, solo se tocan si la nota está en el rango)
   const keyMap = { a:60, w:61, s:62, e:63, d:64, f:65, t:66, g:67, y:68, h:69, u:70, j:71, k:72 };
   const heldKeys = new Set();
 
@@ -1118,10 +1151,7 @@
     return midi >= currentMidiRange.min && midi <= currentMidiRange.max;
   }
 
-  // Sobrescribir noteOn/noteOff para verificar rango (se definen más abajo)
-  let originalNoteOn, originalNoteOff;
-
-  // ---------- AUDIO (se mantiene igual) ----------
+  // ---------- AUDIO ----------
   let audioCtx = null;
   let masterBus = null;
   function ensureCtx() {
@@ -1211,6 +1241,7 @@
     delete activeSources[midi];
     setKeyActive(midi, false);
     setStaffNote(midi, false);
+    updateChordDisplay();
   }
 
   function releaseSustainedNotes() {
@@ -1226,7 +1257,7 @@
     if (!on) releaseSustainedNotes();
   }
 
-  // ---------- NOTE ON / OFF (con verificación de rango) ----------
+  // ---------- NOTE ON / OFF ----------
   function noteOn(n) {
     if (!isNoteInRange(n.midi)) return;
     if (sustainedNotes.has(n.midi)) {
@@ -1250,6 +1281,7 @@
       activeSources[n.midi] = { type: 'sample', source, gain };
       setKeyActive(n.midi, true);
       setStaffNote(n.midi, true);
+      updateChordDisplay();
       return;
     }
 
@@ -1260,6 +1292,7 @@
           activeSources[n.midi] = { type: 'sf', note: sfNote };
           setKeyActive(n.midi, true);
           setStaffNote(n.midi, true);
+          updateChordDisplay();
           return;
         }
       } catch(e) {
@@ -1267,7 +1300,6 @@
       }
     }
 
-    // Fallback: oscilador
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = 'triangle';
@@ -1279,6 +1311,7 @@
     activeSources[n.midi] = { type: 'osc', source: osc, gain };
     setKeyActive(n.midi, true);
     setStaffNote(n.midi, true);
+    updateChordDisplay();
   }
 
   function noteOff(n) {
@@ -1291,7 +1324,7 @@
     stopSoundNow(n.midi);
   }
 
-  // ---------- FUNCIONES AUXILIARES (teclas, staff) ----------
+  // ---------- FUNCIONES AUXILIARES ----------
   function setKeyActive(midi, on) {
     const el = keyElByMidi[midi];
     if (el) el.classList.toggle('active', on);
@@ -1309,7 +1342,7 @@
     el.addEventListener('touchcancel', end);
   }
 
-  // ---------- PENTAGRAMA (staff) ----------
+  // ---------- PENTAGRAMA ----------
   const svg = document.getElementById('staffSvg');
   const SVG_W = 2100, SVG_H = 450;
   const Y0 = 150, HALF = 140;
@@ -1359,7 +1392,6 @@
   }
   drawBaseStaff();
 
-  // ---------- FUNCIÓN PARA LÍNEAS ADICIONALES ----------
   function ledgerLinesFor(step, clef) {
     const lines = [];
     if (clef === 'treble') {
@@ -1393,7 +1425,6 @@
     renderStaffNotes();
   }
 
-  // ---------- RENDERIZADO DEL PENTAGRAMA CON OCTAVA (8va/8vb) ----------
   function renderStaffNotes() {
     svg.querySelectorAll('.note-el').forEach(e => e.remove());
     const active = Object.keys(activeStaffNotes).map(m => midiToInfo(parseInt(m))).sort((a,b) => a.midi - b.midi);
@@ -1406,15 +1437,12 @@
       const step = diatonicStep(n.name, n.octave);
       const clef = step >= 0 ? 'treble' : 'bass';
       let stepVisible = step;
-      let octaveShift = null; // '8va' o '8vb' o null
+      let octaveShift = null;
 
-      // Aplicar notación de octava para notas extremas
       if (step <= -13) {
-        // Grave: D#2 y menores -> dibujar una octava arriba, indicar 8vb
         stepVisible = step + 7;
         octaveShift = '8vb';
       } else if (step >= 13) {
-        // Aguda: D6 y mayores -> dibujar una octava abajo, indicar 8va
         stepVisible = step - 7;
         octaveShift = '8va';
       }
@@ -1425,7 +1453,6 @@
       prevStep = stepVisible;
       const x = cx + NOTE_X_OFFSET + (shiftToggle ? 300 : 0);
 
-      // Dibujar líneas adicionales para stepVisible
       const ledgerLines = ledgerLinesFor(stepVisible, clef);
       ledgerLines.forEach(L => {
         const ly = stepY(L);
@@ -1433,25 +1460,21 @@
         svg.appendChild(led);
       });
 
-      // Sostenido si la nota original es sostenida
       if (n.name.includes('#')) {
         const sharp = svgEl('text', { class: 'note-el', x: x-22, y: y+6, 'font-size': 18, fill: 'var(--active-color)', 'font-family': 'serif' });
         sharp.textContent = '♯';
         svg.appendChild(sharp);
       }
 
-      // Cabeza de nota (rellena, negra)
       const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 155, ry: 135, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
       svg.appendChild(head);
 
-      // Etiqueta con el nombre de la nota REAL (no la desplazada)
       const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 200, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
       lbl.textContent = n.name;
       svg.appendChild(lbl);
 
-      // Si hay desplazamiento de octava, añadir indicador (8va o 8vb)
       if (octaveShift) {
-        const offsetY = (octaveShift === '8va') ? -220 : 250; // encima o debajo
+        const offsetY = (octaveShift === '8va') ? -220 : 250;
         const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 100, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
         indicador.textContent = octaveShift;
         svg.appendChild(indicador);
@@ -1500,7 +1523,7 @@
     else if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) noteOff(n);
   }
 
-  // ---------- TECLADO FÍSICO (con verificación de rango) ----------
+  // ---------- TECLADO FÍSICO ----------
   window.addEventListener('keydown', (e) => {
     const k = e.key.toLowerCase();
     if (keyMap[k] !== undefined && !heldKeys.has(k)) {
@@ -1551,7 +1574,6 @@
       adjustVolume(delta);
       return;
     }
-    // Espacio, flechas izquierda/derecha para partitura (se mantiene)
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const tag = e.target && e.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -2206,14 +2228,12 @@
     const isPro = this.checked;
     currentMode = isPro ? 'pro' : 'beginner';
     currentMidiRange = RANGES[currentMode];
-    // Actualizar etiquetas de modo
     modeLabelBeginner.classList.toggle('active', !isPro);
     modeLabelPro.classList.toggle('active', isPro);
-    // Reconstruir teclado con el nuevo rango
     buildKeyboard(currentMidiRange.min, currentMidiRange.max);
-    // Actualizar etiquetas según el display actual
     updateLabels();
     updateHint();
+    updateChordDisplay();
   });
 
   // ---------- CAMBIO DE VISUALIZACIÓN ----------
@@ -2222,17 +2242,147 @@
     updateLabels();
   });
 
+  // ---------- DETECTOR DE ACORDES ----------
+  const CHORD_PATTERNS = [
+    { name: '', intervals: [0,4,7] },
+    { name: 'm', intervals: [0,3,7] },
+    { name: '+', intervals: [0,4,8] },
+    { name: '°', intervals: [0,3,6] },
+    { name: 'sus2', intervals: [0,2,7] },
+    { name: 'sus4', intervals: [0,5,7] },
+    { name: 'add2', intervals: [0,2,4,7] },
+    { name: 'add4', intervals: [0,4,5,7] },
+    { name: 'add9', intervals: [0,4,7,14] },
+    { name: 'm(add2)', intervals: [0,2,3,7] },
+    { name: 'm(add4)', intervals: [0,3,5,7] },
+    { name: 'm(add9)', intervals: [0,3,7,14] },
+    { name: '6', intervals: [0,4,7,9] },
+    { name: 'm6', intervals: [0,3,7,9] },
+    { name: '7', intervals: [0,4,7,10] },
+    { name: 'm7', intervals: [0,3,7,10] },
+    { name: 'maj7', intervals: [0,4,7,11] },
+    { name: '7sus4', intervals: [0,5,7,10] },
+    { name: '7#5', intervals: [0,4,8,10] },
+    { name: '7b5', intervals: [0,4,6,10] },
+    { name: 'm7b5', intervals: [0,3,6,10] },
+    { name: '°7', intervals: [0,3,6,9] },
+    { name: 'm7#5', intervals: [0,3,8,10] },
+    { name: 'm7add4', intervals: [0,3,5,7,10] },
+    { name: '7(6#5)', intervals: [0,4,8,9,10] },
+    { name: '9', intervals: [0,4,7,10,14] },
+    { name: 'm9', intervals: [0,3,7,10,14] },
+    { name: '7b9', intervals: [0,4,7,10,13] },
+    { name: '7#9', intervals: [0,4,7,10,15] },
+    { name: '9#5', intervals: [0,4,8,10,14] },
+    { name: '9b5', intervals: [0,4,6,10,14] },
+    { name: '9sus4', intervals: [0,5,7,10,14] },
+    { name: '7(13)', intervals: [0,4,7,10,21] },
+    { name: '11', intervals: [0,4,7,10,17] },
+    { name: 'm11', intervals: [0,3,7,10,17] },
+    { name: '7#11', intervals: [0,4,7,10,18] },
+    { name: 'm7#11', intervals: [0,3,7,10,18] },
+    { name: '9#11', intervals: [0,4,7,10,14,18] },
+    { name: 'm9#11', intervals: [0,3,7,10,14,18] },
+    { name: '13', intervals: [0,4,7,10,21] },
+    { name: 'm13', intervals: [0,3,7,10,21] },
+    { name: '13b9', intervals: [0,4,7,10,13,21] },
+    { name: '13#9', intervals: [0,4,7,10,15,21] },
+    { name: '13#11', intervals: [0,4,7,10,14,18,21] },
+    { name: '13sus4', intervals: [0,5,7,10,21] },
+    { name: '4/9', intervals: [0,5,7,14] },
+    { name: 'm4/9', intervals: [0,3,5,7,14] },
+    { name: '5', intervals: [0,7] }, // <-- acorde de quinta (C5)
+  ];
+
+  const CHORD_PATTERNS_SORTED = CHORD_PATTERNS.slice().sort((a,b) => b.intervals.length - a.intervals.length);
+
+  function identifyChord(midiNotes) {
+    if (!midiNotes || midiNotes.length < 2) return null;
+    const pcs = [...new Set(midiNotes.map(m => m % 12))].sort((a,b) => a-b);
+    if (pcs.length < 2) return null;
+
+    let bestMatch = null;
+    let bestScore = -1;
+
+    for (const root of pcs) {
+      const intervals = pcs.map(pc => {
+        let diff = (pc - root + 12) % 12;
+        return diff === 0 ? 0 : diff;
+      }).sort((a,b) => a-b);
+
+      for (const pattern of CHORD_PATTERNS_SORTED) {
+        const patternIntervals = pattern.intervals.slice().sort((a,b) => a-b);
+        let match = true;
+        for (const iv of patternIntervals) {
+          if (!intervals.includes(iv)) {
+            match = false;
+            break;
+          }
+        }
+        if (match) {
+          const score = patternIntervals.length * 100 + pattern.name.length;
+          if (score > bestScore) {
+            bestMatch = { root, name: pattern.name, intervals: patternIntervals };
+            bestScore = score;
+          }
+        }
+      }
+    }
+
+    if (!bestMatch) return null;
+
+    const lowestMidi = Math.min(...midiNotes);
+    const lowestPc = lowestMidi % 12;
+    const rootPc = bestMatch.root;
+    let inversion = '';
+    if (lowestPc !== rootPc) {
+      const bassNote = NOTE_NAMES_EN[lowestPc];
+      inversion = '/' + bassNote;
+    }
+
+    return {
+      rootName: NOTE_NAMES_EN[bestMatch.root],
+      suffix: bestMatch.name,
+      inversion: inversion,
+      noteCount: midiNotes.length
+    };
+  }
+
+  function updateChordDisplay() {
+    try {
+      const activeMidi = Object.keys(activeSources).map(Number);
+      if (activeMidi.length === 0) {
+        chordNameEl.textContent = '—';
+        chordSubEl.textContent = '';
+        return;
+      }
+
+      const result = identifyChord(activeMidi);
+      if (result) {
+        chordNameEl.textContent = result.rootName + result.suffix + result.inversion;
+        chordSubEl.textContent = result.noteCount + ' notas';
+      } else {
+        chordNameEl.textContent = '...';
+        chordSubEl.textContent = activeMidi.length + ' notas';
+      }
+    } catch(e) {
+      console.warn('Error en updateChordDisplay:', e);
+      chordNameEl.textContent = '?';
+      chordSubEl.textContent = 'error';
+    }
+  }
+
   // ---------- INICIALIZACIÓN ----------
-  // Iniciar en modo beginners (por defecto) con display 'ocultar'
   currentMode = 'beginner';
   currentDisplay = 'ocultar';
   currentMidiRange = RANGES.beginner;
-  modeToggle.checked = false; // false = beginner
+  modeToggle.checked = false;
   modeLabelBeginner.classList.add('active');
   modeLabelPro.classList.remove('active');
   noteDisplaySelect.value = 'ocultar';
   buildKeyboard(currentMidiRange.min, currentMidiRange.max);
   updateSampleStatus();
+  updateChordDisplay();
 
   document.addEventListener('click', () => {
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -2243,6 +2393,5 @@
 const footerYearEl = document.getElementById('footerYear');
 if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 </script>
-
 </body>
 </html>
