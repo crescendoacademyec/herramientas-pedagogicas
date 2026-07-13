@@ -60,6 +60,55 @@
     margin:0;
     color: var(--text);
   }
+
+  /* Switch Beginners / Pro */
+  .mode-switch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 8px;
+  }
+  .mode-switch input[type="checkbox"] {
+    appearance: none;
+    width: 44px;
+    height: 24px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.25);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .mode-switch input[type="checkbox"]:checked {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .mode-switch input[type="checkbox"]::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .mode-switch input[type="checkbox"]:checked::before {
+    transform: translateX(20px);
+  }
+  .mode-switch .mode-label {
+    user-select: none;
+    transition: color 0.2s;
+  }
+  .mode-switch .mode-label.active {
+    color: var(--text);
+  }
+
   .social-bar{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .school-logo-link{ display:inline-block; line-height:0; margin-left:auto; }
   .school-logo{
@@ -75,7 +124,8 @@
   .social-bar svg{ display:block; width:24px; height:24px; }
   @media (max-width:860px){
     .topbar{ flex-direction:column; align-items:stretch; }
-    .brand{ justify-content:center; }
+    .brand{ justify-content:center; flex-wrap:wrap; }
+    .mode-switch{ margin-left:0; justify-content:center; }
     .social-bar{ justify-content:center; }
     .school-logo-link{ margin-left:0; }
   }
@@ -563,6 +613,25 @@
   .black-key.active{
     background:color-mix(in srgb, var(--active-color) 70%, black);
   }
+  /* Estilo para etiquetas de teclas negras en dos líneas */
+  .black-key .label {
+    position: absolute;
+    bottom: 2px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 0.4rem;
+    line-height: 1.2;
+    color: #ccc;
+    pointer-events: none;
+    font-weight: 600;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
 
   .hint{
     flex:0 0 auto;
@@ -578,6 +647,29 @@
     border-radius:3px;
     padding:0 4px;
     color: var(--text);
+  }
+
+  /* Contenedor para imagen con zoom/pan */
+  #imageContainer {
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background: #e8e4db;
+    cursor: grab;
+  }
+  #imageContainer:active {
+    cursor: grabbing;
+  }
+  #imageContainer img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform-origin: 0 0;
+    user-select: none;
+    pointer-events: none;
   }
 
   @media (max-width: 700px){
@@ -612,6 +704,11 @@
 <header class="topbar">
   <h1 class="brand">
     <span>Piano Virtual</span>
+    <span class="mode-switch">
+      <span class="mode-label" id="modeLabelBeginner">Beginners</span>
+      <input type="checkbox" id="modeToggle">
+      <span class="mode-label active" id="modeLabelPro">Pro</span>
+    </span>
   </h1>
   <div class="social-bar">
     <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" aria-label="Instagram">
@@ -662,12 +759,13 @@
 <main class="app-content">
 
   <div class="controlbar">
+    <!-- Nuevo selector de visualización de notas -->
     <div class="field">
-      <select id="waveform">
-        <option value="triangle" selected>Piano suave</option>
-        <option value="sine">Suave</option>
-        <option value="sawtooth">Brillante</option>
-        <option value="square">Retro</option>
+      <label for="noteDisplay">Notas</label>
+      <select id="noteDisplay">
+        <option value="ocultar" selected>Ocultar notas</option>
+        <option value="mostrar">Mostrar notas</option>
+        <option value="solfeo">Modo solfeo</option>
       </select>
     </div>
 
@@ -701,7 +799,7 @@
 
     <!-- Indicadores alineados a la derecha -->
     <div class="right-indicators">
-      <span class="sound-source-indicator" id="soundSourceIndicator">🎹 cargando...</span>
+      <span class="sound-source-indicator" id="soundSourceIndicator">cargando...</span>
       <span class="sample-status" id="sampleStatus">sin samples</span>
       <span class="sustain-indicator" id="sustainIndicator" title="Estado del pedal de sustain (clic para probar sin pedal MIDI)">
         <span class="sustain-dot" id="sustainDot"></span>
@@ -720,6 +818,9 @@
       <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
       <iframe id="webViewer" class="pdf-viewer web-viewer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       <div id="osmdContainer" class="osmd-container"></div>
+      <div id="imageContainer">
+        <img id="imageViewer" src="" alt="Imagen cargada">
+      </div>
 
       <div class="web-controls" id="webControls">
         <input type="text" id="webUrlInput" placeholder="Pega un enlace (https://...)">
@@ -767,12 +868,12 @@
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
         </button>
       </div>
 
       <div class="pdf-controls">
-        <label for="pdfUpload" title="Selecciona un archivo PDF o MusicXML (.xml, .musicxml, .mxl) con la partitura">
+        <label for="pdfUpload" title="Selecciona un archivo PDF, MusicXML o imagen con la partitura o foto">
           <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
             <polyline points="17 8 12 3 7 8"/>
@@ -780,7 +881,7 @@
           </svg>
           Cargar partitura
         </label>
-        <input type="file" id="pdfUpload" accept=".pdf,.xml,.musicxml,.mxl" class="file-input-hidden">
+        <input type="file" id="pdfUpload" accept=".pdf,.xml,.musicxml,.mxl,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg" class="file-input-hidden">
         <span class="score-status" id="scoreStatus"></span>
         <button type="button" class="pdf-clear-btn" id="pdfClearBtn" title="Quitar la partitura actual">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
@@ -799,8 +900,8 @@
     <div id="keyboard"></div>
   </div>
 
-  <div class="hint">
-    Clic/touch para tocar · Teclado: <kbd>A S D F G H J K</kbd> blancas y <kbd>W E T Y U</kbd> negras · MIDI · Sonido: SoundFont de piano acústico por defecto (carga tu carpeta de samples para reemplazarlo). · Volumen: flechas <kbd>↑</kbd> <kbd>↓</kbd>
+  <div class="hint" id="hintText">
+    Clic/touch para tocar · Teclado: <kbd>A S D F G H J K</kbd> blancas y <kbd>W E T Y U</kbd> negras · MIDI · Sonido: SoundFont de piano acústico · Volumen: flechas <kbd>↑</kbd> <kbd>↓</kbd>
   </div>
 
 </main>
@@ -817,75 +918,215 @@
 
 <script>
 (function(){
-  const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-  const LETTER_STEP = {C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+  // ---------- CONSTANTES Y UTILIDADES ----------
+  const NOTE_NAMES_EN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+  const NOTE_NAMES_ES = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
+  // Nombres de solfeo (do movible) para cada grado
+  const SOLFEO_NATURAL = ["Do","Re","Mi","Fa","Sol","La","Si"];
+  const SOLFEO_SHARP = ["Di","Ri","Fi","Si","Li"]; // para Do#, Re#, Fa#, Sol#, La#
+  const SOLFEO_FLAT = ["Ra","Me","Se","Le","Te"];  // para Reb, Mib, Solb, Lab, Sib
+
+  // Mapeo de índice de nota (0-11) a nombre en español, americano, solfeo
+  function getNoteNames(lang, idx) {
+    // idx es el índice dentro de la octava (0=C, 1=C#, ...)
+    const en = NOTE_NAMES_EN[idx];
+    const es = NOTE_NAMES_ES[idx];
+    const isSharp = en.includes('#');
+    if (lang === 'es') {
+      return { natural: es, sharp: isSharp ? es : null, flat: isSharp ? null : null };
+    } else if (lang === 'en') {
+      return { natural: en, sharp: isSharp ? en : null, flat: isSharp ? null : null };
+    } else { // solfeo
+      if (idx === 0) return { natural: 'Do', sharp: null, flat: null };
+      if (idx === 1) return { natural: null, sharp: 'Di', flat: 'Ra' };
+      if (idx === 2) return { natural: 'Re', sharp: null, flat: null };
+      if (idx === 3) return { natural: null, sharp: 'Ri', flat: 'Me' };
+      if (idx === 4) return { natural: 'Mi', sharp: null, flat: null };
+      if (idx === 5) return { natural: 'Fa', sharp: null, flat: null };
+      if (idx === 6) return { natural: null, sharp: 'Fi', flat: 'Se' };
+      if (idx === 7) return { natural: 'Sol', sharp: null, flat: null };
+      if (idx === 8) return { natural: null, sharp: 'Si', flat: 'Le' };
+      if (idx === 9) return { natural: 'La', sharp: null, flat: null };
+      if (idx === 10) return { natural: null, sharp: 'Li', flat: 'Te' };
+      if (idx === 11) return { natural: 'Si', sharp: null, flat: null };
+    }
+  }
 
   function midiToInfo(m){
     const idx = m % 12;
     const octave = Math.floor(m/12) - 1;
-    const name = NOTE_NAMES[idx];
+    const name = NOTE_NAMES_EN[idx];
     const isBlack = name.includes('#');
-    return {midi:m, name, octave, isBlack, freq: 440 * Math.pow(2,(m-69)/12)};
+    return {midi:m, name, octave, isBlack, freq: 440 * Math.pow(2,(m-69)/12), idx};
   }
+
   function diatonicStep(name, octave){
     const letter = name.charAt(0);
-    return (octave-4)*7 + LETTER_STEP[letter];
+    const map = {C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+    return (octave-4)*7 + map[letter];
   }
 
-  const MIN_MIDI = 21, MAX_MIDI = 108;
-  const notes = [];
-  for(let m=MIN_MIDI;m<=MAX_MIDI;m++) notes.push(midiToInfo(m));
+  // Rango de notas para cada modo
+  const RANGES = {
+    beginner: { min: 48, max: 83 }, // C3 a B5 (antes C3 a C5)
+    pro: { min: 21, max: 108 }      // 88 teclas
+  };
 
-  const whiteNotes = notes.filter(n=>!n.isBlack);
-  const WHITE_COUNT = whiteNotes.length;
-  const whiteWidthPct = 100 / WHITE_COUNT;
-  const blackWidthPct = whiteWidthPct * 0.58;
+  // ---------- ESTADO GLOBAL ----------
+  let currentMode = 'beginner'; // 'beginner' o 'pro'
+  let currentDisplay = 'ocultar'; // 'mostrar', 'ocultar', 'solfeo'
+  let currentMidiRange = { min: 48, max: 83 };
+  let keyElByMidi = {};
+  let allNotes = []; // array de objetos midiInfo para el rango actual
 
+  // ---------- DOM REFS ----------
   const keyboardEl = document.getElementById('keyboard');
-  const keyElByMidi = {};
+  const modeToggle = document.getElementById('modeToggle');
+  const modeLabelBeginner = document.getElementById('modeLabelBeginner');
+  const modeLabelPro = document.getElementById('modeLabelPro');
+  const noteDisplaySelect = document.getElementById('noteDisplay');
+  const hintText = document.getElementById('hintText');
 
-  let whiteIndex = 0;
-  notes.forEach(n=>{
-    if(!n.isBlack){
+  // ---------- CONSTRUCCIÓN DEL TECLADO ----------
+  function buildKeyboard(minMidi, maxMidi) {
+    // Limpiar teclado
+    keyboardEl.innerHTML = '';
+    keyElByMidi = {};
+
+    // Generar lista de notas en el rango
+    const notes = [];
+    for (let m = minMidi; m <= maxMidi; m++) {
+      notes.push(midiToInfo(m));
+    }
+    allNotes = notes;
+
+    const whiteNotes = notes.filter(n => !n.isBlack);
+    const WHITE_COUNT = whiteNotes.length;
+    const whiteWidthPct = 100 / WHITE_COUNT;
+    const blackWidthPct = whiteWidthPct * 0.58;
+
+    // Crear teclas blancas
+    let whiteIndex = 0;
+    notes.forEach(n => {
+      if (n.isBlack) return;
       const el = document.createElement('div');
       el.className = 'white-key';
-      el.style.left = (whiteIndex*whiteWidthPct)+'%';
-      el.style.width = whiteWidthPct+'%';
+      el.style.left = (whiteIndex * whiteWidthPct) + '%';
+      el.style.width = whiteWidthPct + '%';
       el.dataset.midi = n.midi;
-      if(n.name==='C'){
-        const label=document.createElement('div');
-        label.className='label';
-        label.textContent='C'+n.octave;
-        el.appendChild(label);
-      }
+      // Añadir etiqueta (se actualizará después)
+      const label = document.createElement('div');
+      label.className = 'label';
+      el.appendChild(label);
       keyboardEl.appendChild(el);
-      keyElByMidi[n.midi]=el;
-      attachPointer(el,n);
+      keyElByMidi[n.midi] = el;
+      attachPointer(el, n);
       whiteIndex++;
-    }
-  });
-  let wi=0;
-  notes.forEach(n=>{
-    if(!n.isBlack){ wi++; return; }
-    const el=document.createElement('div');
-    el.className='black-key';
-    const left = wi*whiteWidthPct - blackWidthPct/2;
-    el.style.left = left+'%';
-    el.style.width = blackWidthPct+'%';
-    el.dataset.midi = n.midi;
-    keyboardEl.appendChild(el);
-    keyElByMidi[n.midi]=el;
-    attachPointer(el,n);
-  });
+    });
 
-  // ---------- AUDIO ----------
-  let audioCtx=null;
-  let masterBus=null; // punto de conexión de todas las voces (gain + limitador suave)
-  function ensureCtx(){
-    if(!audioCtx){
-      audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-      // Bus maestro: permite subir el volumen por encima de 1.0 sin que
-      // la suma de varias notas se distorsione de forma brusca.
+    // Crear teclas negras
+    let wi = 0;
+    notes.forEach(n => {
+      if (!n.isBlack) { wi++; return; }
+      const el = document.createElement('div');
+      el.className = 'black-key';
+      const left = wi * whiteWidthPct - blackWidthPct / 2;
+      el.style.left = left + '%';
+      el.style.width = blackWidthPct + '%';
+      el.dataset.midi = n.midi;
+      const label = document.createElement('div');
+      label.className = 'label';
+      el.appendChild(label);
+      keyboardEl.appendChild(el);
+      keyElByMidi[n.midi] = el;
+      attachPointer(el, n);
+      // No incrementamos wi porque las negras no cuentan para el ancho de blancas
+    });
+
+    // Actualizar etiquetas según el modo actual
+    updateLabels();
+    updateHint();
+  }
+
+  // ---------- ACTUALIZAR ETIQUETAS (dos líneas para negras) ----------
+  function updateLabels() {
+    const display = currentDisplay;
+    const mode = currentMode;
+    const lang = (mode === 'beginner') ? 'es' : 'en';
+    const isSolfeo = (display === 'solfeo');
+
+    for (const midi in keyElByMidi) {
+      const el = keyElByMidi[midi];
+      const labelDiv = el.querySelector('.label');
+      if (!labelDiv) continue;
+      const m = parseInt(midi);
+      const info = midiToInfo(m);
+      const idx = info.idx;
+
+      if (display === 'ocultar') {
+        labelDiv.innerHTML = '';
+        continue;
+      }
+
+      if (info.isBlack) {
+        let topName, bottomName;
+        if (isSolfeo) {
+          const names = getNoteNames('solfeo', idx);
+          topName = names.sharp;
+          bottomName = names.flat;
+        } else {
+          const names = getNoteNames(lang, idx);
+          topName = names.sharp; // ej. "Do#" o "C#"
+          // Obtener bemol correctamente: nota un semitono más arriba con 'b'
+          const flatIdx = (idx + 1) % 12;
+          const flatNoteName = getNoteNames(lang, flatIdx).natural;
+          if (lang === 'es') {
+            bottomName = flatNoteName + 'b'; // ej. "Reb"
+          } else { // 'en'
+            bottomName = flatNoteName.charAt(0) + 'b'; // ej. "Db"
+          }
+        }
+        // Mostrar en dos líneas: sostenido arriba, bemol abajo
+        labelDiv.innerHTML = topName + '<br>' + bottomName;
+      } else {
+        // Tecla blanca: una sola línea
+        const names = getNoteNames(lang, idx);
+        let text = names.natural || '';
+        // Si es solfeo y no está en el mapeo natural, mostrar el nombre natural correspondiente
+        if (isSolfeo) {
+          const solfeoNames = getNoteNames('solfeo', idx);
+          text = solfeoNames.natural || '';
+        }
+        labelDiv.textContent = text;
+      }
+    }
+  }
+
+  // ---------- ACTUALIZAR HINT ----------
+  function updateHint() {
+    const mode = currentMode;
+    const modeName = (mode === 'beginner') ? 'Beginners (3 octavas: C3–B5)' : 'Pro (88 teclas)';
+    hintText.innerHTML = `Modo ${modeName} · Clic/touch para tocar · Teclado: <kbd>A S D F G H J K</kbd> blancas y <kbd>W E T Y U</kbd> negras · MIDI · Sonido: SoundFont de piano acústico · Volumen: flechas <kbd>↑</kbd> <kbd>↓</kbd>`;
+  }
+
+  // ---------- EVENTOS DE TECLADO FÍSICO ----------
+  // Mapeo fijo (se mantiene igual, solo se tocan si la nota está en el rango)
+  const keyMap = { a:60, w:61, s:62, e:63, d:64, f:65, t:66, g:67, y:68, h:69, u:70, j:71, k:72 };
+  const heldKeys = new Set();
+
+  function isNoteInRange(midi) {
+    return midi >= currentMidiRange.min && midi <= currentMidiRange.max;
+  }
+
+  // Sobrescribir noteOn/noteOff para verificar rango (se definen más abajo)
+  let originalNoteOn, originalNoteOff;
+
+  // ---------- AUDIO (se mantiene igual) ----------
+  let audioCtx = null;
+  let masterBus = null;
+  function ensureCtx() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       masterBus = audioCtx.createGain();
       masterBus.gain.value = 1;
       const limiter = audioCtx.createDynamicsCompressor();
@@ -897,19 +1138,15 @@
       masterBus.connect(limiter);
       limiter.connect(audioCtx.destination);
     }
-    if(audioCtx.state==='suspended') audioCtx.resume();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
 
-  const waveformSelect=document.getElementById('waveform');
-  const volumeSlider=document.getElementById('volume');
-
+  const volumeSlider = document.getElementById('volume');
   const sampleMap = new Map();
   const activeSources = {};
-
   let sfPlayer = null;
   let sfLoading = false;
-
   const sourceIndicator = document.getElementById('soundSourceIndicator');
 
   function setSourceIndicator(text, cls) {
@@ -920,171 +1157,84 @@
   function initSoundFont() {
     if (sfPlayer || sfLoading) return;
     sfLoading = true;
-    setSourceIndicator('🎹 cargando SoundFont...', '');
+    setSourceIndicator('cargando SoundFont...', '');
     const ctx = ensureCtx();
     Soundfont.instrument(ctx, 'acoustic_grand_piano', { destination: masterBus })
       .then(instrument => {
         sfPlayer = instrument;
         sfLoading = false;
         if (sampleMap.size > 0) {
-          setSourceIndicator('📁 Samples personalizados', 'sample');
+          setSourceIndicator('Samples personalizados', 'sample');
         } else {
-          setSourceIndicator('🎹 SoundFont: acústico', 'sf');
+          setSourceIndicator('SoundFont: acústico', 'sf');
         }
         console.log('SoundFont de piano acústico cargado correctamente.');
       })
       .catch(err => {
         sfLoading = false;
         if (sampleMap.size > 0) {
-          setSourceIndicator('📁 Samples personalizados', 'sample');
+          setSourceIndicator('Samples personalizados', 'sample');
         } else {
-          setSourceIndicator('⚡ Sintético (fallback)', 'osc');
+          setSourceIndicator('Sintético (fallback)', 'osc');
         }
         console.warn('Error al cargar SoundFont, se usará oscilador:', err);
       });
   }
-
   setTimeout(initSoundFont, 100);
 
-  // ---------- Cargar samples ----------
-  async function loadSamplesFromFolder(files) {
+  // ---------- SUSTAIN ----------
+  let sustainOn = false;
+  const sustainedNotes = new Set();
+
+  function stopSoundNow(midi) {
     const ctx = ensureCtx();
-    const loaded = [];
-    const pattern = /([A-G])(#?)(\d+)/i;
-
-    for (const file of files) {
-      const match = file.name.match(pattern);
-      if (!match) continue;
-      const note = match[1].toUpperCase();
-      const hasSharp = match[2] === '#';
-      const octave = parseInt(match[3]);
-      const noteName = note + (hasSharp ? '#' : '');
-      const info = notes.find(n => n.name === noteName && n.octave === octave);
-      if (!info) continue;
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
-        sampleMap.set(info.midi, audioBuffer);
-        loaded.push(info.midi);
-      } catch(e) {
-        console.warn('Error al cargar sample:', file.name, e);
+    const now = ctx.currentTime;
+    const entry = activeSources[midi];
+    if (!entry) return;
+    if (entry.type === 'sample') {
+      const { source, gain } = entry;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      source.stop(now + 0.35);
+    } else if (entry.type === 'sf') {
+      if (entry.note && typeof entry.note.stop === 'function') {
+        entry.note.stop(now);
       }
+    } else if (entry.type === 'osc') {
+      const { source, gain } = entry;
+      gain.gain.cancelScheduledValues(now);
+      gain.gain.setValueAtTime(gain.gain.value, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+      source.stop(now + 0.4);
     }
-
-    updateSampleStatus();
-    if (sampleMap.size > 0) {
-      setSourceIndicator('📁 Samples personalizados', 'sample');
-    } else {
-      if (sfPlayer) {
-        setSourceIndicator('🎹 SoundFont: acústico', 'sf');
-      } else {
-        setSourceIndicator('⚡ Sintético (fallback)', 'osc');
-      }
-    }
-    return loaded;
+    delete activeSources[midi];
+    setKeyActive(midi, false);
+    setStaffNote(midi, false);
   }
 
-  function updateSampleStatus() {
-    const statusEl = document.getElementById('sampleStatus');
-    const clearBtn = document.getElementById('sampleClearBtn');
-    if (sampleMap.size === 0) {
-      statusEl.textContent = 'sin samples';
-      statusEl.className = 'sample-status fallback';
-      if (clearBtn) clearBtn.classList.remove('visible');
-    } else {
-      statusEl.textContent = `${sampleMap.size} samples cargados`;
-      statusEl.className = 'sample-status loaded';
-      if (clearBtn) clearBtn.classList.add('visible');
-    }
+  function releaseSustainedNotes() {
+    sustainedNotes.forEach(midi => stopSoundNow(midi));
+    sustainedNotes.clear();
   }
 
-  const folderInput = document.getElementById('sampleFolder');
-  folderInput.addEventListener('change', async function(e) {
-    const files = this.files;
-    if (files.length === 0) return;
-    const loaded = await loadSamplesFromFolder(files);
-    if (loaded.length === 0) {
-      alert('No se encontraron archivos de audio con nombres de nota válidos (ej. C4.wav, F#5.mp3).');
-    }
-    this.value = '';
-  });
-
-  // Quita los samples personalizados cargados y vuelve a usar el SoundFont de piano.
-  const sampleClearBtn = document.getElementById('sampleClearBtn');
-  sampleClearBtn.addEventListener('click', function(){
-    sampleMap.clear();
-    updateSampleStatus();
-    if (sfPlayer) {
-      setSourceIndicator('🎹 SoundFont: acústico', 'sf');
-    } else if (sfLoading) {
-      setSourceIndicator('🎹 cargando SoundFont...', '');
-    } else {
-      setSourceIndicator('⚡ Sintético (fallback)', 'osc');
-    }
-    folderInput.value = '';
-  });
-
-  // ---------- Control de volumen con teclas ----------
-  function adjustVolume(delta) {
-    const maxVol = parseFloat(volumeSlider.max) || 1;
-    const minVol = parseFloat(volumeSlider.min) || 0;
-    let newVal = parseFloat(volumeSlider.value) + delta;
-    newVal = Math.min(maxVol, Math.max(minVol, newVal));
-    volumeSlider.value = newVal;
-    volumeSlider.dispatchEvent(new Event('input'));
-    const vol = newVal;
-    for (const midi in activeSources) {
-      const entry = activeSources[midi];
-      if (entry.type === 'sample' || entry.type === 'osc') {
-        if (entry.gain) {
-          const now = audioCtx ? audioCtx.currentTime : 0;
-          entry.gain.gain.cancelScheduledValues(now);
-          entry.gain.gain.setValueAtTime(entry.gain.gain.value, now);
-          entry.gain.gain.linearRampToValueAtTime(vol, now + 0.02);
-        }
-      }
-    }
+  function setSustain(on) {
+    if (sustainOn === on) return;
+    sustainOn = on;
+    const dot = document.getElementById('sustainDot');
+    if (dot) dot.classList.toggle('active', on);
+    if (!on) releaseSustainedNotes();
   }
 
-  window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      const delta = e.key === 'ArrowUp' ? 0.05 : -0.05;
-      adjustVolume(delta);
-      return;
-    }
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-      // No interferir si el usuario está escribiendo en un campo (ej. el BPM)
-      const tag = e.target && e.target.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-      // Solo actuar si hay una partitura MusicXML cargada
-      if (!osmd || !osmd.cursor) return;
-      e.preventDefault();
-      if (e.key === 'ArrowRight') stepForward();
-      else stepBackward();
-      return;
-    }
-    if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
-      const tag = e.target && e.target.tagName;
-      // No interferir con botones/inputs enfocados (que ya usan espacio nativamente)
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
-      if (!osmd || !osmd.cursor) return;
-      e.preventDefault();
-      if (scorePlaying) pausePlayback();
-      else playFromCurrentPosition();
-    }
-  });
-
-  // ---------- noteOn / noteOff ----------
-  function noteOn(n){
-    if(sustainedNotes.has(n.midi)){
-      // La nota estaba sonando por el pedal; se retriggerea limpiamente.
+  // ---------- NOTE ON / OFF (con verificación de rango) ----------
+  function noteOn(n) {
+    if (!isNoteInRange(n.midi)) return;
+    if (sustainedNotes.has(n.midi)) {
       sustainedNotes.delete(n.midi);
       stopSoundNow(n.midi);
     }
-    const ctx=ensureCtx();
-    const now=ctx.currentTime;
+    const ctx = ensureCtx();
+    const now = ctx.currentTime;
     let vol = parseFloat(volumeSlider.value);
     if (isNaN(vol) || vol < 0) vol = 0.5;
 
@@ -1117,12 +1267,13 @@
       }
     }
 
-    const osc=ctx.createOscillator();
-    const gain=ctx.createGain();
-    osc.type=waveformSelect.value;
+    // Fallback: oscilador
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
     osc.frequency.setValueAtTime(n.freq, now);
     gain.gain.setValueAtTime(0, now);
-    gain.gain.linearRampToValueAtTime(vol, now+0.015);
+    gain.gain.linearRampToValueAtTime(vol, now + 0.015);
     osc.connect(gain).connect(masterBus);
     osc.start(now);
     activeSources[n.midi] = { type: 'osc', source: osc, gain };
@@ -1130,265 +1281,339 @@
     setStaffNote(n.midi, true);
   }
 
-  // ---------- Sustain (pedal) ----------
-  let sustainOn = false;
-  const sustainedNotes = new Set(); // midis released while pedal down, still sounding
-
-  function stopSoundNow(midi){
-    const ctx=ensureCtx();
-    const now=ctx.currentTime;
-    const entry = activeSources[midi];
-    if (!entry) return;
-
-    if (entry.type === 'sample') {
-      const { source, gain } = entry;
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setValueAtTime(gain.gain.value, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-      source.stop(now + 0.35);
-    } else if (entry.type === 'sf') {
-      if (entry.note && typeof entry.note.stop === 'function') {
-        entry.note.stop(now);
-      }
-    } else if (entry.type === 'osc') {
-      const { source, gain } = entry;
-      gain.gain.cancelScheduledValues(now);
-      gain.gain.setValueAtTime(gain.gain.value, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
-      source.stop(now + 0.4);
-    }
-    delete activeSources[midi];
-    setKeyActive(midi, false);
-    setStaffNote(midi, false);
-  }
-
-  function releaseSustainedNotes(){
-    sustainedNotes.forEach(midi => stopSoundNow(midi));
-    sustainedNotes.clear();
-  }
-
-  function setSustain(on){
-    if(sustainOn === on) return;
-    sustainOn = on;
-    const dot = document.getElementById('sustainDot');
-    if(dot) dot.classList.toggle('active', on);
-    if(!on) releaseSustainedNotes();
-  }
-
-  function noteOff(n){
-    if(!activeSources[n.midi]) return;
-    if(sustainOn){
-      // El pedal está presionado: la nota sigue sonando hasta que se suelte el pedal.
+  function noteOff(n) {
+    if (!isNoteInRange(n.midi)) return;
+    if (!activeSources[n.midi]) return;
+    if (sustainOn) {
       sustainedNotes.add(n.midi);
       return;
     }
     stopSoundNow(n.midi);
   }
 
-  // ---------- Funciones auxiliares ----------
-  function setKeyActive(midi,on){
-    const el=keyElByMidi[midi];
-    if(el) el.classList.toggle('active',on);
+  // ---------- FUNCIONES AUXILIARES (teclas, staff) ----------
+  function setKeyActive(midi, on) {
+    const el = keyElByMidi[midi];
+    if (el) el.classList.toggle('active', on);
   }
 
-  function attachPointer(el,n){
-    let down=false;
-    const start=(e)=>{ e.preventDefault(); down=true; noteOn(n); };
-    const end=()=>{ if(down){ down=false; noteOff(n);} };
-    el.addEventListener('mousedown',start);
-    el.addEventListener('mouseup',end);
-    el.addEventListener('mouseleave',end);
-    el.addEventListener('touchstart',start,{passive:false});
-    el.addEventListener('touchend',end);
-    el.addEventListener('touchcancel',end);
+  function attachPointer(el, n) {
+    let down = false;
+    const start = (e) => { e.preventDefault(); down = true; noteOn(n); };
+    const end = () => { if (down) { down = false; noteOff(n); } };
+    el.addEventListener('mousedown', start);
+    el.addEventListener('mouseup', end);
+    el.addEventListener('mouseleave', end);
+    el.addEventListener('touchstart', start, { passive: false });
+    el.addEventListener('touchend', end);
+    el.addEventListener('touchcancel', end);
   }
 
-  // ---------- Color personalizado ----------
-  const colorInput=document.getElementById('activeColor');
-  colorInput.addEventListener('input',()=>{
-    document.documentElement.style.setProperty('--active-color', colorInput.value);
-  });
-
-  // ---------- Teclado PC ----------
-  const keyMap = { a:60,w:61,s:62,e:63,d:64,f:65,t:66,g:67,y:68,h:69,u:70,j:71,k:72 };
-  const heldKeys=new Set();
-  window.addEventListener('keydown',(e)=>{
-    const k=e.key.toLowerCase();
-    if(keyMap[k]!==undefined && !heldKeys.has(k)){
-      heldKeys.add(k);
-      noteOn(midiToInfo(keyMap[k]));
-    }
-  });
-  window.addEventListener('keyup',(e)=>{
-    const k=e.key.toLowerCase();
-    if(keyMap[k]!==undefined){
-      heldKeys.delete(k);
-      noteOff(midiToInfo(keyMap[k]));
-    }
-  });
-
-  // ---------- MIDI ----------
-  const midiStatus=document.getElementById('midiStatus');
-  const sustainIndicator=document.getElementById('sustainIndicator');
-  sustainIndicator.addEventListener('click', ()=>{ setSustain(!sustainOn); });
-  function setStatus(text, cls){
-    midiStatus.textContent = text;
-    midiStatus.className = 'midi-status' + (cls ? ' ' + cls : '');
-  }
-
-  if(navigator.requestMIDIAccess){
-    navigator.requestMIDIAccess().then(access=>{
-      const inputs = [...access.inputs.values()];
-      if(inputs.length === 0){
-        setStatus('MIDI: no conectado', '');
-      } else {
-        setStatus('MIDI: conectado', 'ok');
-      }
-      inputs.forEach(input => { input.onmidimessage = handleMIDIMessage; });
-      access.onstatechange = ()=>{
-        const ins = [...access.inputs.values()];
-        if(ins.length === 0) {
-          setStatus('MIDI: no conectado', '');
-        } else {
-          setStatus('MIDI: conectado', 'ok');
-        }
-        ins.forEach(input => { input.onmidimessage = handleMIDIMessage; });
-      };
-    }).catch(()=>{
-      setStatus('MIDI: error', 'err');
-    });
-  } else {
-    setStatus('MIDI: no soportado', 'err');
-  }
-
-  function handleMIDIMessage(msg){
-    const [status,data1,data2] = msg.data;
-    const cmd = status & 0xf0;
-
-    // Pedal de sustain: Control Change, controlador 64 (0x40)
-    if(cmd===0xB0 && data1===64){
-      setSustain(data2 >= 64);
-      return;
-    }
-
-    const note = data1, vel = data2;
-    if(note<MIN_MIDI || note>MAX_MIDI) return;
-    const n = midiToInfo(note);
-    if(cmd===0x90 && vel>0) noteOn(n);
-    else if(cmd===0x80 || (cmd===0x90 && vel===0)) noteOff(n);
-  }
-
-  // ---------- Pentagrama ----------
+  // ---------- PENTAGRAMA (staff) ----------
   const svg = document.getElementById('staffSvg');
-  const SVG_W=2100, SVG_H=450;
-  const Y0=150;
-  const HALF=140;
-  function stepY(step){ return Y0 - step*HALF; }
+  const SVG_W = 2100, SVG_H = 450;
+  const Y0 = 150, HALF = 140;
+  function stepY(step) { return Y0 - step * HALF; }
 
-  const TREBLE_LINES=[2,4,6,8,10];
-  const BASS_LINES=[-10,-8,-6,-4,-2];
-  const STAFF_X1=90;
-  const STAFF_X2=2000;
+  const STAFF_X1 = 90, STAFF_X2 = 2000;
 
-  function svgEl(tag,attrs){
-    const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
-    for(const k in attrs) e.setAttribute(k,attrs[k]);
+  function svgEl(tag, attrs) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
     return e;
   }
 
-  function placeClef(glyph, leftX, topY, bottomY, extraScale = 1.4){
-    const probe = svgEl('text',{x:0,y:0,'font-size':200,'font-family':'serif'});
+  function placeClef(glyph, leftX, topY, bottomY, extraScale = 1.4) {
+    const probe = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif' });
     probe.textContent = glyph;
     svg.appendChild(probe);
     const bbox = probe.getBBox();
     svg.removeChild(probe);
-    if(!bbox.height){ return; }
+    if (!bbox.height) return;
     const targetHeight = bottomY - topY;
     let scale = (targetHeight / bbox.height) * extraScale;
-    const dx = leftX - bbox.x*scale;
-    const dy = topY - bbox.y*scale;
-    const g = svgEl('g',{transform:`translate(${dx},${dy}) scale(${scale})`});
-    const text = svgEl('text',{x:0,y:0,'font-size':200,'font-family':'serif',fill:'#333'});
+    const dx = leftX - bbox.x * scale;
+    const dy = topY - bbox.y * scale;
+    const g = svgEl('g', { transform: `translate(${dx},${dy}) scale(${scale})` });
+    const text = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif', fill: '#333' });
     text.textContent = glyph;
     g.appendChild(text);
     svg.appendChild(g);
   }
 
-  function drawBaseStaff(){
-    svg.innerHTML='';
-    svg.setAttribute('viewBox','0 0 '+SVG_W+' '+SVG_H);
-    [...TREBLE_LINES,...BASS_LINES].forEach(step=>{
-      const y=stepY(step);
-      svg.appendChild(svgEl('line',{x1:STAFF_X1,x2:STAFF_X2,y1:y,y2:y,stroke:'#000','stroke-width':7}));
+  function drawBaseStaff() {
+    svg.innerHTML = '';
+    svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
+    [2,4,6,8,10].forEach(step => {
+      const y = stepY(step);
+      svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
     });
-    placeClef('𝄞', STAFF_X1+5, stepY(14) +40, stepY(3) +40, 1.5);
-    placeClef('𝄢', STAFF_X1+5, stepY(-3) - 450, stepY(-10) - 450, 1.5);
-    svg.appendChild(svgEl('line',{x1:STAFF_X1,x2:STAFF_X1,y1:stepY(10),y2:stepY(-10),stroke:'#000','stroke-width':2.5}));
-    svg.appendChild(svgEl('line',{x1:STAFF_X2,x2:STAFF_X2,y1:stepY(10),y2:stepY(-10),stroke:'#000','stroke-width':2.5}));
+    [-10,-8,-6,-4,-2].forEach(step => {
+      const y = stepY(step);
+      svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
+    });
+    placeClef('𝄞', STAFF_X1+5, stepY(14)+40, stepY(3)+40, 1.5);
+    placeClef('𝄢', STAFF_X1+5, stepY(-3)-450, stepY(-10)-450, 1.5);
+    svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X1, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
+    svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
   }
   drawBaseStaff();
 
-  function ledgerLinesFor(step,clef){
-    const lines=[];
-    if(clef==='treble'){
-      if(step===0) lines.push(0);
-      else if(step>10){ for(let L=12;L<=step;L+=2) lines.push(L); }
+  // ---------- FUNCIÓN PARA LÍNEAS ADICIONALES ----------
+  function ledgerLinesFor(step, clef) {
+    const lines = [];
+    if (clef === 'treble') {
+      if (step < 2) {
+        for (let l = 0; l >= step; l -= 2) {
+          lines.push(l);
+        }
+      } else if (step > 10) {
+        for (let l = 12; l <= step; l += 2) {
+          lines.push(l);
+        }
+      }
     } else {
-      if(step< -10){ for(let L=-12;L>=step;L-=2) lines.push(L); }
+      if (step < -10) {
+        for (let l = -12; l >= step; l -= 2) {
+          lines.push(l);
+        }
+      } else if (step > -2) {
+        for (let l = 0; l <= step; l += 2) {
+          lines.push(l);
+        }
+      }
     }
     return lines;
   }
 
-  const activeStaffNotes={};
-
-  function renderStaffNotes(){
-    svg.querySelectorAll('.note-el').forEach(e=>e.remove());
-    const active = Object.keys(activeStaffNotes).map(m=>midiToInfo(parseInt(m))).sort((a,b)=>a.midi-b.midi);
-    const cx = (STAFF_X1+STAFF_X2)/2;
-    const NOTE_X_OFFSET = 350; // <-- ajusta este valor para mover las cabezas de nota (px del viewBox)
-    let prevStep=null, shiftToggle=false;
-
-    active.forEach(n=>{
-      const step = diatonicStep(n.name, n.octave);
-      const clef = step>=0 ? 'treble':'bass';
-      const y = stepY(step);
-      if(prevStep!==null && Math.abs(step-prevStep)<=1){
-        shiftToggle=!shiftToggle;
-      } else {
-        shiftToggle=false;
-      }
-      prevStep=step;
-      const x = cx + NOTE_X_OFFSET + (shiftToggle? 300:0);
-
-      ledgerLinesFor(step,clef).forEach(L=>{
-        const ly=stepY(L);
-        // Líneas adicionales más largas (35px a cada lado)
-        const led=svgEl('line',{class:'note-el',x1:x-35,x2:x+35,y1:ly,y2:ly,stroke:'#000','stroke-width':2.5});
-        svg.appendChild(led);
-      });
-
-      if(n.name.includes('#')){
-        const sharp=svgEl('text',{class:'note-el',x:x-22,y:y+6,'font-size':18,fill:'var(--active-color)','font-family':'serif'});
-        sharp.textContent='♯';
-        svg.appendChild(sharp);
-      }
-
-      const head=svgEl('ellipse',{class:'note-el',cx:x,cy:y,rx:155,ry:135,fill:'#000',stroke:'#222','stroke-width':0.8});
-      svg.appendChild(head);
-
-      const lbl=svgEl('text',{class:'note-el',x:x,y:y+2,'font-size':200,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-weight':'bold'});
-      lbl.textContent=n.name;
-      svg.appendChild(lbl);
-    });
-  }
-
-  function setStaffNote(midi,on){
-    if(on) activeStaffNotes[midi]=true;
+  const activeStaffNotes = {};
+  function setStaffNote(midi, on) {
+    if (on) activeStaffNotes[midi] = true;
     else delete activeStaffNotes[midi];
     renderStaffNotes();
   }
 
-  // ---------- Partitura: PDF o MusicXML ----------
+  function renderStaffNotes() {
+    svg.querySelectorAll('.note-el').forEach(e => e.remove());
+    const active = Object.keys(activeStaffNotes).map(m => midiToInfo(parseInt(m))).sort((a,b) => a.midi - b.midi);
+    const cx = (STAFF_X1 + STAFF_X2) / 2;
+    const NOTE_X_OFFSET = 350;
+    let prevStep = null, shiftToggle = false;
+    active.forEach(n => {
+      const step = diatonicStep(n.name, n.octave);
+      const clef = step >= 0 ? 'treble' : 'bass';
+      const y = stepY(step);
+      if (prevStep !== null && Math.abs(step - prevStep) <= 1) shiftToggle = !shiftToggle;
+      else shiftToggle = false;
+      prevStep = step;
+      const x = cx + NOTE_X_OFFSET + (shiftToggle ? 300 : 0);
+
+      // Dibujar líneas adicionales con longitud suficiente para sobresalir de la cabeza
+      const ledgerLines = ledgerLinesFor(step, clef);
+      const LEDGER_LENGTH = 200; // mayor que el radio de la cabeza (155)
+      ledgerLines.forEach(L => {
+        const ly = stepY(L);
+        const led = svgEl('line', { class: 'note-el', x1: x - LEDGER_LENGTH, x2: x + LEDGER_LENGTH, y1: ly, y2: ly, stroke: '#000', 'stroke-width': 20 });
+        svg.appendChild(led);
+      });
+
+      if (n.name.includes('#')) {
+        const sharp = svgEl('text', { class: 'note-el', x: x-22, y: y+6, 'font-size': 18, fill: 'var(--active-color)', 'font-family': 'serif' });
+        sharp.textContent = '♯';
+        svg.appendChild(sharp);
+      }
+      const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 155, ry: 135, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
+      svg.appendChild(head);
+      const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 200, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
+      lbl.textContent = n.name;
+      svg.appendChild(lbl);
+    });
+  }
+
+  // ---------- MIDI ----------
+  const midiStatus = document.getElementById('midiStatus');
+  const sustainIndicator = document.getElementById('sustainIndicator');
+  sustainIndicator.addEventListener('click', () => { setSustain(!sustainOn); });
+  function setStatus(text, cls) {
+    midiStatus.textContent = text;
+    midiStatus.className = 'midi-status' + (cls ? ' ' + cls : '');
+  }
+
+  if (navigator.requestMIDIAccess) {
+    navigator.requestMIDIAccess().then(access => {
+      const inputs = [...access.inputs.values()];
+      if (inputs.length === 0) setStatus('MIDI: no conectado', '');
+      else setStatus('MIDI: conectado', 'ok');
+      inputs.forEach(input => { input.onmidimessage = handleMIDIMessage; });
+      access.onstatechange = () => {
+        const ins = [...access.inputs.values()];
+        if (ins.length === 0) setStatus('MIDI: no conectado', '');
+        else setStatus('MIDI: conectado', 'ok');
+        ins.forEach(input => { input.onmidimessage = handleMIDIMessage; });
+      };
+    }).catch(() => setStatus('MIDI: error', 'err'));
+  } else {
+    setStatus('MIDI: no soportado', 'err');
+  }
+
+  function handleMIDIMessage(msg) {
+    const [status, data1, data2] = msg.data;
+    const cmd = status & 0xf0;
+    if (cmd === 0xB0 && data1 === 64) {
+      setSustain(data2 >= 64);
+      return;
+    }
+    const note = data1, vel = data2;
+    if (note < 21 || note > 108) return;
+    if (!isNoteInRange(note)) return;
+    const n = midiToInfo(note);
+    if (cmd === 0x90 && vel > 0) noteOn(n);
+    else if (cmd === 0x80 || (cmd === 0x90 && vel === 0)) noteOff(n);
+  }
+
+  // ---------- TECLADO FÍSICO (con verificación de rango) ----------
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if (keyMap[k] !== undefined && !heldKeys.has(k)) {
+      const midi = keyMap[k];
+      if (isNoteInRange(midi)) {
+        heldKeys.add(k);
+        noteOn(midiToInfo(midi));
+      }
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    const k = e.key.toLowerCase();
+    if (keyMap[k] !== undefined) {
+      heldKeys.delete(k);
+      const midi = keyMap[k];
+      if (isNoteInRange(midi)) {
+        noteOff(midiToInfo(midi));
+      }
+    }
+  });
+
+  // ---------- CONTROL DE VOLUMEN CON TECLAS ----------
+  function adjustVolume(delta) {
+    const maxVol = parseFloat(volumeSlider.max) || 1;
+    const minVol = parseFloat(volumeSlider.min) || 0;
+    let newVal = parseFloat(volumeSlider.value) + delta;
+    newVal = Math.min(maxVol, Math.max(minVol, newVal));
+    volumeSlider.value = newVal;
+    volumeSlider.dispatchEvent(new Event('input'));
+    const vol = newVal;
+    for (const midi in activeSources) {
+      const entry = activeSources[midi];
+      if (entry.type === 'sample' || entry.type === 'osc') {
+        if (entry.gain) {
+          const now = audioCtx ? audioCtx.currentTime : 0;
+          entry.gain.gain.cancelScheduledValues(now);
+          entry.gain.gain.setValueAtTime(entry.gain.gain.value, now);
+          entry.gain.gain.linearRampToValueAtTime(vol, now + 0.02);
+        }
+      }
+    }
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      const delta = e.key === 'ArrowUp' ? 0.05 : -0.05;
+      adjustVolume(delta);
+      return;
+    }
+    // Espacio, flechas izquierda/derecha para partitura (se mantiene)
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (!osmd || !osmd.cursor) return;
+      e.preventDefault();
+      if (e.key === 'ArrowRight') stepForward();
+      else stepBackward();
+      return;
+    }
+    if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+      if (!osmd || !osmd.cursor) return;
+      e.preventDefault();
+      if (scorePlaying) pausePlayback();
+      else playFromCurrentPosition();
+    }
+  });
+
+  // ---------- COLOR PERSONALIZADO ----------
+  const colorInput = document.getElementById('activeColor');
+  colorInput.addEventListener('input', () => {
+    document.documentElement.style.setProperty('--active-color', colorInput.value);
+  });
+
+  // ---------- SAMPLES ----------
+  async function loadSamplesFromFolder(files) {
+    const ctx = ensureCtx();
+    const loaded = [];
+    const pattern = /([A-G])(#?)(\d+)/i;
+    for (const file of files) {
+      const match = file.name.match(pattern);
+      if (!match) continue;
+      const note = match[1].toUpperCase();
+      const hasSharp = match[2] === '#';
+      const octave = parseInt(match[3]);
+      const noteName = note + (hasSharp ? '#' : '');
+      const info = allNotes.find(n => n.name === noteName && n.octave === octave);
+      if (!info) continue;
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+        sampleMap.set(info.midi, audioBuffer);
+        loaded.push(info.midi);
+      } catch(e) {
+        console.warn('Error al cargar sample:', file.name, e);
+      }
+    }
+    updateSampleStatus();
+    if (sampleMap.size > 0) setSourceIndicator('Samples personalizados', 'sample');
+    else if (sfPlayer) setSourceIndicator('SoundFont: acústico', 'sf');
+    else setSourceIndicator('Sintético (fallback)', 'osc');
+    return loaded;
+  }
+
+  function updateSampleStatus() {
+    const statusEl = document.getElementById('sampleStatus');
+    const clearBtn = document.getElementById('sampleClearBtn');
+    if (sampleMap.size === 0) {
+      statusEl.textContent = 'sin samples';
+      statusEl.className = 'sample-status fallback';
+      if (clearBtn) clearBtn.classList.remove('visible');
+    } else {
+      statusEl.textContent = `${sampleMap.size} samples cargados`;
+      statusEl.className = 'sample-status loaded';
+      if (clearBtn) clearBtn.classList.add('visible');
+    }
+  }
+
+  const folderInput = document.getElementById('sampleFolder');
+  folderInput.addEventListener('change', async function(e) {
+    const files = this.files;
+    if (files.length === 0) return;
+    const loaded = await loadSamplesFromFolder(files);
+    if (loaded.length === 0) {
+      alert('No se encontraron archivos de audio con nombres de nota válidos (ej. C4.wav, F#5.mp3).');
+    }
+    this.value = '';
+  });
+
+  const sampleClearBtn = document.getElementById('sampleClearBtn');
+  sampleClearBtn.addEventListener('click', function() {
+    sampleMap.clear();
+    updateSampleStatus();
+    if (sfPlayer) setSourceIndicator('SoundFont: acústico', 'sf');
+    else if (sfLoading) setSourceIndicator('cargando SoundFont...', '');
+    else setSourceIndicator('Sintético (fallback)', 'osc');
+    folderInput.value = '';
+  });
+
+  // ---------- PARTITURA (PDF, MUSICXML, IMAGEN) ----------
   const pdfUpload = document.getElementById('pdfUpload');
   const pdfViewer = document.getElementById('pdfViewer');
   const pdfClearBtn = document.getElementById('pdfClearBtn');
@@ -1399,6 +1624,8 @@
   const webClearBtn = document.getElementById('webClearBtn');
   const webLoadNote = document.getElementById('webLoadNote');
   const osmdContainer = document.getElementById('osmdContainer');
+  const imageContainer = document.getElementById('imageContainer');
+  const imageViewer = document.getElementById('imageViewer');
   const scorePlayControls = document.getElementById('scorePlayControls');
   const scorePlayBtn = document.getElementById('scorePlayBtn');
   const scorePauseBtn = document.getElementById('scorePauseBtn');
@@ -1411,13 +1638,172 @@
   const scoreStatus = document.getElementById('scoreStatus');
 
   let currentPdfUrl = null;
+  let currentImageUrl = null;
   let osmd = null;
 
-  function ensureOSMD(){
-    if (typeof opensheetmusicdisplay === 'undefined') {
-      throw new Error('La librería OpenSheetMusicDisplay no se cargó (revisa tu conexión a internet o si algo bloquea cdn.jsdelivr.net).');
+  // Estado de zoom/pan de imagen
+  let imageScale = 1, imageTranslateX = 0, imageTranslateY = 0;
+  let isImageDragging = false;
+  let dragStartX = 0, dragStartY = 0;
+  let dragStartTranslateX = 0, dragStartTranslateY = 0;
+
+  function updateImageTransform() {
+    imageViewer.style.transform = `translate(${imageTranslateX}px, ${imageTranslateY}px) scale(${imageScale})`;
+  }
+  function resetImageTransform() {
+    imageScale = 1; imageTranslateX = 0; imageTranslateY = 0;
+    updateImageTransform();
+  }
+
+  function setupImageControls() {
+    imageContainer.addEventListener('wheel', function(e) {
+      if (imageContainer.style.display === 'none') return;
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      const rect = imageContainer.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      const newScale = Math.min(5, Math.max(0.2, imageScale + delta));
+      if (newScale === imageScale) return;
+      const ratio = newScale / imageScale;
+      imageTranslateX = mouseX - (mouseX - imageTranslateX) * ratio;
+      imageTranslateY = mouseY - (mouseY - imageTranslateY) * ratio;
+      imageScale = newScale;
+      updateImageTransform();
+    }, { passive: false });
+
+    imageContainer.addEventListener('mousedown', function(e) {
+      if (imageContainer.style.display === 'none') return;
+      if (e.button !== 0) return;
+      isImageDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartTranslateX = imageTranslateX;
+      dragStartTranslateY = imageTranslateY;
+      imageContainer.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!isImageDragging) return;
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+      imageTranslateX = dragStartTranslateX + dx;
+      imageTranslateY = dragStartTranslateY + dy;
+      updateImageTransform();
+    });
+
+    window.addEventListener('mouseup', function(e) {
+      if (isImageDragging) {
+        isImageDragging = false;
+        imageContainer.style.cursor = 'grab';
+      }
+    });
+
+    // Touch
+    let lastTouchDist = 0;
+    let touchStartX = 0, touchStartY = 0;
+    let touchStartTranslateX = 0, touchStartTranslateY = 0;
+    let touchStartScale = 1;
+
+    imageContainer.addEventListener('touchstart', function(e) {
+      if (imageContainer.style.display === 'none') return;
+      const touches = e.touches;
+      if (touches.length === 1) {
+        isImageDragging = true;
+        touchStartX = touches[0].clientX;
+        touchStartY = touches[0].clientY;
+        touchStartTranslateX = imageTranslateX;
+        touchStartTranslateY = imageTranslateY;
+      } else if (touches.length === 2) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        lastTouchDist = Math.sqrt(dx*dx + dy*dy);
+        touchStartScale = imageScale;
+        touchStartTranslateX = imageTranslateX;
+        touchStartTranslateY = imageTranslateY;
+        const midX = (touches[0].clientX + touches[1].clientX) / 2;
+        const midY = (touches[0].clientY + touches[1].clientY) / 2;
+        const rect = imageContainer.getBoundingClientRect();
+        touchStartX = midX - rect.left;
+        touchStartY = midY - rect.top;
+      }
+      e.preventDefault();
+    }, { passive: false });
+
+    imageContainer.addEventListener('touchmove', function(e) {
+      if (imageContainer.style.display === 'none') return;
+      const touches = e.touches;
+      if (touches.length === 1 && isImageDragging) {
+        const dx = touches[0].clientX - touchStartX;
+        const dy = touches[0].clientY - touchStartY;
+        imageTranslateX = touchStartTranslateX + dx;
+        imageTranslateY = touchStartTranslateY + dy;
+        updateImageTransform();
+        e.preventDefault();
+      } else if (touches.length === 2) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const scaleFactor = dist / lastTouchDist;
+        const newScale = Math.min(5, Math.max(0.2, touchStartScale * scaleFactor));
+        const rect = imageContainer.getBoundingClientRect();
+        const midX = (touches[0].clientX + touches[1].clientX) / 2 - rect.left;
+        const midY = (touches[0].clientY + touches[1].clientY) / 2 - rect.top;
+        const ratio = newScale / touchStartScale;
+        imageTranslateX = midX - (midX - touchStartTranslateX) * ratio;
+        imageTranslateY = midY - (midY - touchStartTranslateY) * ratio;
+        imageScale = newScale;
+        updateImageTransform();
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    imageContainer.addEventListener('touchend', function(e) {
+      isImageDragging = false;
+    });
+  }
+  setupImageControls();
+
+  // Atajos de teclado para zoom de imagen
+  window.addEventListener('keydown', function(e) {
+    if (imageContainer.style.display === 'none') return;
+    const tag = e.target && e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    if (e.key === '+' || e.key === '=') {
+      e.preventDefault();
+      const rect = imageContainer.getBoundingClientRect();
+      const cx = rect.width / 2, cy = rect.height / 2;
+      const newScale = Math.min(5, imageScale + 0.1);
+      if (newScale === imageScale) return;
+      const ratio = newScale / imageScale;
+      imageTranslateX = cx - (cx - imageTranslateX) * ratio;
+      imageTranslateY = cy - (cy - imageTranslateY) * ratio;
+      imageScale = newScale;
+      updateImageTransform();
+    } else if (e.key === '-' || e.key === '_') {
+      e.preventDefault();
+      const rect = imageContainer.getBoundingClientRect();
+      const cx = rect.width / 2, cy = rect.height / 2;
+      const newScale = Math.max(0.2, imageScale - 0.1);
+      if (newScale === imageScale) return;
+      const ratio = newScale / imageScale;
+      imageTranslateX = cx - (cx - imageTranslateX) * ratio;
+      imageTranslateY = cy - (cy - imageTranslateY) * ratio;
+      imageScale = newScale;
+      updateImageTransform();
+    } else if (e.key === '0') {
+      e.preventDefault();
+      resetImageTransform();
     }
-    if(!osmd){
+  });
+
+  // ---------- FUNCIONES DE PARTITURA ----------
+  function ensureOSMD() {
+    if (typeof opensheetmusicdisplay === 'undefined') {
+      throw new Error('La librería OpenSheetMusicDisplay no se cargó.');
+    }
+    if (!osmd) {
       osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(osmdContainer, {
         autoResize: true,
         drawTitle: true,
@@ -1427,50 +1813,37 @@
     return osmd;
   }
 
-  function getTempo(){
-    return parseFloat(scoreTempoInput.value) || 100;
-  }
+  function getTempo() { return parseFloat(scoreTempoInput.value) || 100; }
 
-  // ---- Motor de reproducción (usa el mismo noteOn/noteOff que el resto de la app) ----
-  let scorePlaying = false;          // true mientras avanza automáticamente
+  let scorePlaying = false;
   let scorePlaybackTimer = null;
-  let currentStepIndex = -1;         // -1 = cursor no iniciado / al principio
+  let currentStepIndex = -1;
   const scoreActiveMidis = new Set();
 
-  function stopPlaybackAudio(){
+  function stopPlaybackAudio() {
     scorePlaying = false;
     if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
     scoreActiveMidis.forEach(midi => noteOff(midiToInfo(midi)));
     scoreActiveMidis.clear();
   }
-
-  // Pausa: detiene el avance automático y silencia las notas, pero mantiene
-  // la posición del cursor (a diferencia de Stop, que reinicia al principio).
-  function pausePlayback(){
-    stopPlaybackAudio();
-  }
-
-  function fullStop(){
+  function pausePlayback() { stopPlaybackAudio(); }
+  function fullStop() {
     stopPlaybackAudio();
     if (osmd && osmd.cursor) {
-      try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e){}
+      try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e) {}
     }
     currentStepIndex = -1;
-    // El cursor puede haber hecho scroll automático dentro del contenedor
-    // mientras seguía la reproducción; al terminar, restauramos la vista
-    // a su posición original para que nada quede desplazado.
-    try { osmdContainer.scrollLeft = 0; osmdContainer.scrollTop = 0; } catch(e){}
+    try { osmdContainer.scrollLeft = 0; osmdContainer.scrollTop = 0; } catch(e) {}
   }
 
-  // Dispara las notas de la posición ACTUAL del cursor y devuelve su duración en segundos.
-  function triggerCurrentStepNotes(tempo){
+  function triggerCurrentStepNotes(tempo) {
     let stepSeconds = null;
     try {
       const entries = osmd.cursor.Iterator.CurrentVoiceEntries || [];
       entries.forEach(ve => {
         (ve.Notes || []).forEach(note => {
           if (!note || (note.isRest && note.isRest()) || note.Pitch == null) return;
-          const midi = note.Pitch.halfTone + 12; // offset OSMD -> MIDI
+          const midi = note.Pitch.halfTone + 12;
           const lengthFraction = (note.Length && typeof note.Length.RealValue === 'number') ? note.Length.RealValue : 0.25;
           const durSeconds = lengthFraction * 4 * (60 / tempo);
           if (stepSeconds === null || durSeconds < stepSeconds) stepSeconds = durSeconds;
@@ -1482,14 +1855,12 @@
           }, Math.max(30, durSeconds * 1000 - 30));
         });
       });
-    } catch(err) {
-      console.warn('Error leyendo notas de la partitura:', err);
-    }
-    if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo); // compás sin notas: avanzar una corchea
+    } catch(err) { console.warn('Error leyendo notas de la partitura:', err); }
+    if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo);
     return stepSeconds;
   }
 
-  function scheduleScoreStep(){
+  function scheduleScoreStep() {
     if (!scorePlaying || !osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
     if (osmd.cursor.Iterator.EndReached) { fullStop(); return; }
     const durationSeconds = triggerCurrentStepNotes(getTempo());
@@ -1498,8 +1869,7 @@
     scorePlaybackTimer = setTimeout(scheduleScoreStep, durationSeconds * 1000);
   }
 
-  // Reanuda/inicia la reproducción automática desde la posición actual del cursor.
-  function playFromCurrentPosition(){
+  function playFromCurrentPosition() {
     if (!osmd || !osmd.cursor) return;
     stopPlaybackAudio();
     if (currentStepIndex === -1) osmd.cursor.reset();
@@ -1508,12 +1878,11 @@
     scheduleScoreStep();
   }
 
-  function stepForward(){
+  function stepForward() {
     if (!osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
     stopPlaybackAudio();
-    if (currentStepIndex === -1) {
-      osmd.cursor.reset();
-    } else {
+    if (currentStepIndex === -1) osmd.cursor.reset();
+    else {
       if (osmd.cursor.Iterator.EndReached) return;
       osmd.cursor.next();
     }
@@ -1522,7 +1891,7 @@
     triggerCurrentStepNotes(getTempo());
   }
 
-  function stepBackward(){
+  function stepBackward() {
     if (!osmd || !osmd.cursor) return;
     stopPlaybackAudio();
     const target = currentStepIndex - 1;
@@ -1537,14 +1906,10 @@
       currentStepIndex = target;
       osmd.cursor.show();
       triggerCurrentStepNotes(getTempo());
-    } catch(err) {
-      console.warn('Error al retroceder en la partitura:', err);
-    }
+    } catch(err) { console.warn('Error al retroceder:', err); }
   }
 
-  // Mueve el cursor a un paso concreto (usado por el mapa de clics) y lo deja
-  // en pausa ahí, esperando a que el usuario presione Play explícitamente.
-  function seekToStep(targetIndex){
+  function seekToStep(targetIndex) {
     if (!osmd || !osmd.cursor) return;
     stopPlaybackAudio();
     try {
@@ -1556,9 +1921,7 @@
       }
       currentStepIndex = targetIndex;
       osmd.cursor.show();
-    } catch(err) {
-      console.warn('Error al buscar posición en la partitura:', err);
-    }
+    } catch(err) { console.warn('Error al buscar posición:', err); }
   }
 
   scorePlayBtn.addEventListener('click', playFromCurrentPosition);
@@ -1567,35 +1930,25 @@
   scoreNextBtn.addEventListener('click', stepForward);
   scorePrevBtn.addEventListener('click', stepBackward);
 
-  // ---- Zoom (solo aplica a partituras MusicXML; el PDF ya trae sus propios controles) ----
-  function zoomScore(delta){
+  function zoomScore(delta) {
     if (!osmd) return;
     try {
       const current = (typeof osmd.Zoom === 'number') ? osmd.Zoom : 1;
       const newZoom = Math.min(3, Math.max(0.4, +(current + delta).toFixed(2)));
       osmd.Zoom = newZoom;
       osmd.render();
-      requestAnimationFrame(() => {
-        try { buildScoreStepMap(); } catch(e){ /* noop */ }
-      });
-    } catch(err) {
-      console.warn('Error al cambiar el zoom de la partitura:', err);
-    }
+      requestAnimationFrame(() => { try { buildScoreStepMap(); } catch(e) {} });
+    } catch(err) { console.warn('Error al cambiar zoom:', err); }
   }
   scoreZoomInBtn.addEventListener('click', () => zoomScore(0.1));
   scoreZoomOutBtn.addEventListener('click', () => zoomScore(-0.1));
 
-  // ---- Mapa de clic: permite iniciar la reproducción desde donde el usuario haga clic ----
   let scoreSteps = [];
-
-  function buildScoreStepMap(){
+  function buildScoreStepMap() {
     scoreSteps = [];
     if (!osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
     try {
       osmd.cursor.reset();
-      // El cursor empieza oculto por defecto, y mientras está oculto
-      // cursor.update() no hace nada (no reposiciona el elemento).
-      // Hay que mostrarlo para poder medir su posición real en píxeles.
       osmd.cursor.show();
       const containerRect = osmdContainer.getBoundingClientRect();
       let guard = 0;
@@ -1617,16 +1970,13 @@
         osmd.cursor.next();
         guard++;
       }
-    } catch(err) {
-      console.warn('No se pudo generar el mapa de clics de la partitura:', err);
-      scoreSteps = [];
-    }
-    try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e){}
+    } catch(err) { console.warn('No se pudo generar mapa de clics:', err); scoreSteps = []; }
+    try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e) {}
     currentStepIndex = -1;
     renderClickOverlay();
   }
 
-  function renderClickOverlay(){
+  function renderClickOverlay() {
     const old = document.getElementById('scoreClickOverlay');
     if (old) old.remove();
     if (!scoreSteps.length) return;
@@ -1653,8 +2003,7 @@
     osmdContainer.appendChild(overlay);
   }
 
-  // ---- Carga de archivo: detecta PDF vs MusicXML ----
-  function resetScoreView(){
+  function resetScoreView() {
     fullStop();
     pdfViewer.src = '';
     pdfViewer.style.display = 'none';
@@ -1666,20 +2015,25 @@
     osmdContainer.classList.remove('visible');
     osmdContainer.innerHTML = '';
     osmd = null;
+    imageContainer.style.display = 'none';
+    if (currentImageUrl) { URL.revokeObjectURL(currentImageUrl); currentImageUrl = null; }
+    imageViewer.src = '';
+    resetImageTransform();
     scoreSteps = [];
     scorePlayControls.classList.remove('visible');
     scoreStatus.textContent = '';
+    pdfClearBtn.classList.remove('visible');
   }
 
-  pdfUpload.addEventListener('change', async function(e){
+  pdfUpload.addEventListener('change', async function(e) {
     const file = this.files[0];
     if (!file) return;
     const name = file.name.toLowerCase();
     const isPdf = name.endsWith('.pdf') || file.type === 'application/pdf';
     const isMusicXML = name.endsWith('.xml') || name.endsWith('.musicxml') || name.endsWith('.mxl');
+    const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
 
     resetScoreView();
-
     if (isPdf) {
       if (currentPdfUrl) URL.revokeObjectURL(currentPdfUrl);
       currentPdfUrl = URL.createObjectURL(file);
@@ -1688,7 +2042,6 @@
       pdfClearBtn.classList.add('visible');
       return;
     }
-
     if (isMusicXML) {
       pdfViewer.style.display = 'none';
       scoreStatus.textContent = 'Cargando partitura…';
@@ -1697,15 +2050,10 @@
         const ext = name.split('.').pop();
         const content = (ext === 'mxl') ? await file.arrayBuffer() : await file.text();
         await engine.load(content);
-        // Importante: hacer visible el contenedor ANTES de renderizar, o OSMD
-        // mide un ancho/alto de 0px (display:none) y la partitura queda mal dibujada.
         osmdContainer.classList.add('visible');
         engine.render();
         requestAnimationFrame(() => {
-          try {
-            engine.render();
-            buildScoreStepMap(); // construir el mapa de clics tras el layout final
-          } catch(e){ console.warn('Error al finalizar el renderizado:', e); }
+          try { engine.render(); buildScoreStepMap(); } catch(e) { console.warn('Error final render:', e); }
         });
         scorePlayControls.classList.add('visible');
         pdfClearBtn.classList.add('visible');
@@ -1721,73 +2069,60 @@
       }
       return;
     }
-
-    alert('Formato no soportado. Usa PDF, MusicXML (.xml / .musicxml) o .mxl.');
+    if (isImage) {
+      const url = URL.createObjectURL(file);
+      currentImageUrl = url;
+      imageViewer.src = url;
+      imageContainer.style.display = 'block';
+      resetImageTransform();
+      pdfClearBtn.classList.add('visible');
+      scoreStatus.textContent = '';
+      pdfViewer.style.display = 'none';
+      webViewer.classList.remove('visible');
+      osmdContainer.classList.remove('visible');
+      scorePlayControls.classList.remove('visible');
+      return;
+    }
+    alert('Formato no soportado. Usa PDF, MusicXML (.xml / .musicxml), .mxl o imagen (PNG, JPG, GIF, WEBP, BMP, SVG).');
     this.value = '';
   });
 
-  pdfClearBtn.addEventListener('click', function(){
+  pdfClearBtn.addEventListener('click', function() {
     resetScoreView();
     pdfUpload.value = '';
-    if (currentPdfUrl) {
-      URL.revokeObjectURL(currentPdfUrl);
-      currentPdfUrl = null;
-    }
+    if (currentPdfUrl) { URL.revokeObjectURL(currentPdfUrl); currentPdfUrl = null; }
     pdfClearBtn.classList.remove('visible');
   });
 
-  // ---- Cargar una página web (YouTube, Spotify embed, sitios que lo permitan, etc.) ----
-  // Nota: muchos sitios bloquean ser mostrados dentro de un iframe (X-Frame-Options /
-  // Content-Security-Policy: frame-ancestors). En esos casos el iframe queda en blanco;
-  // por eso se ofrece también el botón de "abrir en pestaña nueva" como alternativa segura.
-  function normalizeWebUrl(raw){
+  // ---------- CARGA DE PÁGINA WEB ----------
+  function normalizeWebUrl(raw) {
     let url = (raw || '').trim();
     if (!url) return null;
     if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    try {
-      const parsed = new URL(url);
-      return parsed.href;
-    } catch(e) {
-      return null;
-    }
+    try { return new URL(url).href; } catch(e) { return null; }
   }
 
-  // Detecta enlaces de YouTube / YouTube Music y los convierte al formato "embed"
-  // (youtube.com/embed/ID), que es el único que YouTube permite mostrar dentro
-  // de un iframe. Cualquier otra URL se deja tal cual.
-  function toEmbeddableUrl(url){
-    let u;
-    try { u = new URL(url); } catch(e) { return url; }
+  function toEmbeddableUrl(url) {
+    let u; try { u = new URL(url); } catch(e) { return url; }
     const host = u.hostname.replace(/^www\./, '').replace(/^m\./, '');
-
     let videoId = null;
-
     if (host === 'youtube.com' || host === 'music.youtube.com') {
-      if (u.pathname === '/watch') {
-        videoId = u.searchParams.get('v');
-      } else if (u.pathname.startsWith('/shorts/')) {
-        videoId = u.pathname.split('/')[2];
-      } else if (u.pathname.startsWith('/embed/')) {
-        return url; // ya está en formato embed
-      }
+      if (u.pathname === '/watch') videoId = u.searchParams.get('v');
+      else if (u.pathname.startsWith('/shorts/')) videoId = u.pathname.split('/')[2];
+      else if (u.pathname.startsWith('/embed/')) return url;
     } else if (host === 'youtu.be') {
       videoId = u.pathname.slice(1);
     }
-
     if (videoId) {
       const start = u.searchParams.get('t') || u.searchParams.get('start');
       let embedUrl = `https://www.youtube.com/embed/${videoId}`;
       if (start) embedUrl += `?start=${parseInt(start, 10) || 0}`;
       return embedUrl;
     }
-
     return url;
   }
 
-  // Inverso de toEmbeddableUrl: si el campo ya muestra un enlace embed de YouTube
-  // (porque se cargó antes), esto lo devuelve a la página normal de "watch" para
-  // que "abrir en pestaña nueva" lleve al video completo, no al iframe embed.
-  function toWatchUrlIfEmbed(url){
+  function toWatchUrlIfEmbed(url) {
     try {
       const u = new URL(url);
       const host = u.hostname.replace(/^www\./, '');
@@ -1799,7 +2134,7 @@
     return url;
   }
 
-  function loadWebPage(){
+  function loadWebPage() {
     const url = normalizeWebUrl(webUrlInput.value);
     if (!url) { alert('Introduce un enlace válido (ej. https://ejemplo.com).'); return; }
     resetScoreView();
@@ -1807,18 +2142,12 @@
     if (currentPdfUrl) { URL.revokeObjectURL(currentPdfUrl); currentPdfUrl = null; }
     const finalUrl = toEmbeddableUrl(url);
     webViewer.src = finalUrl;
-    webUrlInput.value = finalUrl; // refleja el enlace realmente cargado (ej. versión embed de YouTube)
+    webUrlInput.value = finalUrl;
     webViewer.classList.add('visible');
     webClearBtn.classList.add('visible');
-
-    // YouTube exige que la página que lo embebe tenga un origen http/https válido.
-    // Si este archivo se abrió haciendo doble clic (protocolo file://), YouTube
-    // suele rechazar la reproducción aunque el enlace esté bien formado. Otras
-    // páginas normales sí funcionan bajo file://, por eso el problema es específico
-    // de YouTube/YouTube Music.
     const isYouTubeEmbed = /^https:\/\/www\.youtube\.com\/embed\//.test(finalUrl);
     if (isYouTubeEmbed && location.protocol === 'file:') {
-      webLoadNote.textContent = '⚠ Este archivo se abrió como archivo local (file://). YouTube suele bloquear la reproducción embebida en ese caso. Si el video no se ve, prueba abrir este HTML desde un servidor web (http/https) en vez de hacer doble clic, o usa el botón ↗ para abrirlo en una pestaña nueva.';
+      webLoadNote.textContent = '⚠ YouTube suele bloquear la reproducción embebida en archivos locales (file://). Si no se ve, usa el botón ↗ para abrirlo en otra pestaña.';
       webLoadNote.style.display = 'block';
     } else {
       webLoadNote.textContent = '';
@@ -1827,15 +2156,15 @@
   }
 
   webLoadBtn.addEventListener('click', loadWebPage);
-  webUrlInput.addEventListener('keydown', function(e){
+  webUrlInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') { e.preventDefault(); loadWebPage(); }
   });
-  webOpenNewTabBtn.addEventListener('click', function(){
+  webOpenNewTabBtn.addEventListener('click', function() {
     const url = normalizeWebUrl(webUrlInput.value);
-    if (!url) { alert('Introduce un enlace válido (ej. https://ejemplo.com).'); return; }
+    if (!url) { alert('Introduce un enlace válido.'); return; }
     window.open(toWatchUrlIfEmbed(url), '_blank', 'noopener');
   });
-  webClearBtn.addEventListener('click', function(){
+  webClearBtn.addEventListener('click', function() {
     webViewer.src = '';
     webViewer.classList.remove('visible');
     webClearBtn.classList.remove('visible');
@@ -1843,19 +2172,47 @@
     webLoadNote.style.display = 'none';
   });
 
-  // Inicializar estado de samples
+  // ---------- CAMBIO DE MODO (Beginners/Pro) ----------
+  modeToggle.addEventListener('change', function() {
+    const isPro = this.checked;
+    currentMode = isPro ? 'pro' : 'beginner';
+    currentMidiRange = RANGES[currentMode];
+    // Actualizar etiquetas de modo
+    modeLabelBeginner.classList.toggle('active', !isPro);
+    modeLabelPro.classList.toggle('active', isPro);
+    // Reconstruir teclado con el nuevo rango
+    buildKeyboard(currentMidiRange.min, currentMidiRange.max);
+    // Actualizar etiquetas según el display actual
+    updateLabels();
+    updateHint();
+  });
+
+  // ---------- CAMBIO DE VISUALIZACIÓN ----------
+  noteDisplaySelect.addEventListener('change', function() {
+    currentDisplay = this.value;
+    updateLabels();
+  });
+
+  // ---------- INICIALIZACIÓN ----------
+  // Iniciar en modo beginners (por defecto) con display 'ocultar'
+  currentMode = 'beginner';
+  currentDisplay = 'ocultar';
+  currentMidiRange = RANGES.beginner;
+  modeToggle.checked = false; // false = beginner
+  modeLabelBeginner.classList.add('active');
+  modeLabelPro.classList.remove('active');
+  noteDisplaySelect.value = 'ocultar';
+  buildKeyboard(currentMidiRange.min, currentMidiRange.max);
   updateSampleStatus();
 
   document.addEventListener('click', () => {
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }, { once: true });
 
 })();
 
-const footerYearEl=document.getElementById('footerYear');
-if(footerYearEl) footerYearEl.textContent=new Date().getFullYear();
+const footerYearEl = document.getElementById('footerYear');
+if (footerYearEl) footerYearEl.textContent = new Date().getFullYear();
 </script>
 
 </body>
