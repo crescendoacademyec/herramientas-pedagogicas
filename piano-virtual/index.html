@@ -1393,40 +1393,69 @@
     renderStaffNotes();
   }
 
+  // ---------- RENDERIZADO DEL PENTAGRAMA CON OCTAVA (8va/8vb) ----------
   function renderStaffNotes() {
     svg.querySelectorAll('.note-el').forEach(e => e.remove());
     const active = Object.keys(activeStaffNotes).map(m => midiToInfo(parseInt(m))).sort((a,b) => a.midi - b.midi);
     const cx = (STAFF_X1 + STAFF_X2) / 2;
     const NOTE_X_OFFSET = 350;
     let prevStep = null, shiftToggle = false;
+    const LEDGER_LENGTH = 200;
+
     active.forEach(n => {
       const step = diatonicStep(n.name, n.octave);
       const clef = step >= 0 ? 'treble' : 'bass';
-      const y = stepY(step);
-      if (prevStep !== null && Math.abs(step - prevStep) <= 1) shiftToggle = !shiftToggle;
+      let stepVisible = step;
+      let octaveShift = null; // '8va' o '8vb' o null
+
+      // Aplicar notación de octava para notas extremas
+      if (step <= -13) {
+        // Grave: D#2 y menores -> dibujar una octava arriba, indicar 8vb
+        stepVisible = step + 7;
+        octaveShift = '8vb';
+      } else if (step >= 13) {
+        // Aguda: D6 y mayores -> dibujar una octava abajo, indicar 8va
+        stepVisible = step - 7;
+        octaveShift = '8va';
+      }
+
+      const y = stepY(stepVisible);
+      if (prevStep !== null && Math.abs(stepVisible - prevStep) <= 1) shiftToggle = !shiftToggle;
       else shiftToggle = false;
-      prevStep = step;
+      prevStep = stepVisible;
       const x = cx + NOTE_X_OFFSET + (shiftToggle ? 300 : 0);
 
-      // Dibujar líneas adicionales con longitud suficiente para sobresalir de la cabeza
-      const ledgerLines = ledgerLinesFor(step, clef);
-      const LEDGER_LENGTH = 200; // mayor que el radio de la cabeza (155)
+      // Dibujar líneas adicionales para stepVisible
+      const ledgerLines = ledgerLinesFor(stepVisible, clef);
       ledgerLines.forEach(L => {
         const ly = stepY(L);
         const led = svgEl('line', { class: 'note-el', x1: x - LEDGER_LENGTH, x2: x + LEDGER_LENGTH, y1: ly, y2: ly, stroke: '#000', 'stroke-width': 20 });
         svg.appendChild(led);
       });
 
+      // Sostenido si la nota original es sostenida
       if (n.name.includes('#')) {
         const sharp = svgEl('text', { class: 'note-el', x: x-22, y: y+6, 'font-size': 18, fill: 'var(--active-color)', 'font-family': 'serif' });
         sharp.textContent = '♯';
         svg.appendChild(sharp);
       }
+
+      // Cabeza de nota (rellena, negra)
       const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 155, ry: 135, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
       svg.appendChild(head);
+
+      // Etiqueta con el nombre de la nota REAL (no la desplazada)
       const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 200, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
       lbl.textContent = n.name;
       svg.appendChild(lbl);
+
+      // Si hay desplazamiento de octava, añadir indicador (8va o 8vb)
+      if (octaveShift) {
+        const offsetY = (octaveShift === '8va') ? -220 : 250; // encima o debajo
+        const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 100, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
+        indicador.textContent = octaveShift;
+        svg.appendChild(indicador);
+      }
     });
   }
 
