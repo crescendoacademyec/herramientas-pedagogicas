@@ -168,7 +168,7 @@
       box-shadow: 0 22px 60px rgba(0, 0, 0, 0.28);
       display: grid;
       gap: 22px 30px;
-      grid-template-columns: repeat(6, minmax(130px, 1fr));
+      grid-template-columns: repeat(7, minmax(110px, 1fr));
       margin-bottom: 20px;
       padding: 18px;
     }
@@ -390,7 +390,8 @@
 
     /* Botones de limpiar – estilo sólido para que se vean claramente presionables */
     #clearSelectionBtn,
-    #clearAllBtn {
+    #clearAllBtn,
+    #muteBtn {
       display: inline-block;
       padding: 7px 16px;
       border-radius: 20px;
@@ -408,12 +409,14 @@
     }
 
     #clearSelectionBtn:hover,
-    #clearAllBtn:hover {
+    #clearAllBtn:hover,
+    #muteBtn:hover {
       filter: brightness(1.1);
     }
 
     #clearSelectionBtn:active,
-    #clearAllBtn:active {
+    #clearAllBtn:active,
+    #muteBtn:active {
       transform: scale(0.96);
     }
 
@@ -423,6 +426,14 @@
       color: var(--text);
     }
 
+    #muteBtn {
+      background: #6a4e3a;
+      color: var(--text);
+      min-width: auto;
+      padding: 7px 14px;
+      font-size: 1rem;
+    }
+
     .fret-control-row {
       display: flex;
       gap: 10px;
@@ -430,15 +441,54 @@
       flex-wrap: wrap;
     }
 
-    /* La fila de Trastes ocupa todo el ancho, siempre en su propia fila */
+    /* La caja de acordes ocupa el espacio flexible para centrarse */
+    .fret-control-row #chordNameBox {
+      flex: 1;
+    }
+
     .field-frets {
       min-width: unset;
       grid-column: 1 / -1;
     }
 
+    /* Controles de sonido (volumen + indicador) */
+    .sound-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sound-controls label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: none;
+      color: var(--muted);
+    }
+    #volume {
+      width: 80px;
+      accent-color: var(--gold);
+      cursor: pointer;
+      background: transparent;
+    }
+    .sound-source-indicator {
+      font-size: 0.65rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .sound-source-indicator.sf { background: rgba(71,99,87,0.3); color: #bfe0cf; }
+    .sound-source-indicator.osc { background: rgba(163,55,42,0.25); color: #f3b3a8; }
+    .sound-source-indicator.loading { background: rgba(212,168,79,0.2); color: #f1e6d2; }
+
     @media (max-width: 1080px) {
       .panel {
-        grid-template-columns: repeat(3, minmax(140px, 1fr));
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
       }
     }
 
@@ -456,6 +506,23 @@
       .school-logo-link {
         margin-left: 0;
       }
+      .panel {
+        grid-template-columns: 1fr 1fr;
+      }
+      .fret-control-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #chordNameBox {
+        min-width: unset;
+        flex: 1;
+      }
+      .sound-controls {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
       .panel {
         grid-template-columns: 1fr;
       }
@@ -553,6 +620,10 @@
         <select id="instrument"></select>
       </div>
       <div class="field">
+        <label id="soundTypeLabel" for="soundType">Timbre</label>
+        <select id="soundType"></select>
+      </div>
+      <div class="field">
         <label for="root">Fundamental</label>
         <select id="root"></select>
       </div>
@@ -572,15 +643,21 @@
         <label>Trastes</label>
         <div class="btnBox"><button id="minus">−</button><span id="fretVal">16</span><button id="plus">＋</button></div>
       </div>
-      <!-- Segunda fila: Limpiar ajustes, caja de acorde, Limpiar trastes -->
+      <!-- Segunda fila: Limpiar ajustes, Limpiar trastes, caja de acordes, controles de sonido -->
       <div class="field-frets">
         <div class="fret-control-row">
           <button id="clearAllBtn" type="button">Limpiar ajustes</button>
+          <button id="clearSelectionBtn" type="button">Limpiar trastes</button>
           <div id="chordNameBox">
             <span id="chordSymbol"></span>
             <span id="chordQualityLabel"></span>
           </div>
-          <button id="clearSelectionBtn" type="button">Limpiar trastes</button>
+          <div class="sound-controls">
+            <label for="volume">Volumen</label>
+            <input type="range" id="volume" min="0" max="7" step="0.1" value="4">
+            <span class="sound-source-indicator" id="soundSourceIndicator">🎸 cargando...</span>
+            <button id="muteBtn" type="button">🔊</button>
+          </div>
         </div>
       </div>
     </section>
@@ -603,6 +680,9 @@
     <p>Desarrollado por Crescendo Academy</p>
     <p>&copy; <span id="footerYear"></span> Crescendo Academy. Todos los derechos reservados.</p>
   </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js">
+</script>
 <script>
 /***************** Constantes *************************/
 const NOTE=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
@@ -612,6 +692,12 @@ const NOTE=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
           label:"Guitarra",
           description:"6 cuerdas",
           pitches:GUITAR_PITCH,
+          nutFret:0
+        },
+        ukulele:{
+          label:"Ukelele",
+          description:"4 cuerdas (G C E A)",
+          pitches:[69,64,60,67], // cuerda1 A4, cuerda2 E4, cuerda3 C4, cuerda4 G4
           nutFret:0
         },
         bass4:{
@@ -650,6 +736,36 @@ const NOTE=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
           pitches:[64,59,55,50],
           nutFret:7
         }
+      },
+      // Mapeo de instrumento a opciones de sonido (SoundFont)
+      SOUND_OPTIONS = {
+        guitar: [
+          { value: 'acoustic_guitar_nylon', label: 'Acústica (nylon)' },
+          { value: 'acoustic_guitar_steel', label: 'Acústica (metal)' },
+          { value: 'electric_guitar_clean', label: 'Eléctrica (limpia)' },
+          { value: 'electric_guitar_jazz', label: 'Eléctrica (jazz)' },
+          { value: 'electric_guitar_muted', label: 'Eléctrica (muted)' },
+          { value: 'overdriven_guitar', label: 'Overdriven' },
+          { value: 'distortion_guitar', label: 'Distorsión' }
+        ],
+        bass4: [
+          { value: 'electric_bass_finger', label: 'Bajo eléctrico (finger)' },
+          { value: 'electric_bass_pick', label: 'Bajo eléctrico (pick)' },
+          { value: 'acoustic_bass', label: 'Bajo acústico' },
+          { value: 'fretless_bass', label: 'Bajo fretless' }
+        ],
+        bass5: [
+          { value: 'electric_bass_finger', label: 'Bajo eléctrico (finger)' },
+          { value: 'electric_bass_pick', label: 'Bajo eléctrico (pick)' },
+          { value: 'acoustic_bass', label: 'Bajo acústico' },
+          { value: 'fretless_bass', label: 'Bajo fretless' }
+        ],
+        ukulele: [
+          // No existe un instrumento 'ukulele' en SoundFont, usamos guitarra nylon
+          // y la etiqueta será "Ukelele (nylon)" para que parezca específico
+          { value: 'acoustic_guitar_nylon', label: 'Ukelele (nylon)' }
+        ]
+        // Para otros instrumentos, se usará la opción por defecto con el nombre del instrumento
       },
       BASE_BOARD_H=160,
       BOARD_PAD_Y=22,
@@ -732,7 +848,7 @@ const CHORD_VOICINGS={
 const nextSlot=slot=>SLOT_CYCLE[(SLOT_CYCLE.indexOf(slot)+1)%4];
 const rotateSlots=(slots,cycle,inv)=>slots.map(slot=>cycle[(cycle.indexOf(slot)+inv)%cycle.length]);
 function consecutiveStringWindows(stringCount){
-  if(stringCount<4)return [];
+  if(stringCount<4)return[];
   const maxStart=stringCount-4,windows=[];
   for(let start=0;start<maxStart;start++)windows.push([start,start+1,start+2,start+3]);
   if(windows.length===0)windows.push([0,1,2,3]);
@@ -794,10 +910,6 @@ function fretCandidatesForSlot(rootPc,def,stringIdx,slot){
   return [base,base+12,base+24].filter(f=>f<=TOTAL_FRETS);
 }
 function pickCompactCombo(optionsList,anchors){
-  // Prueba todas las combinaciones de octava posibles y elige la más compacta
-  // (menor distancia entre el traste más bajo y el más alto), es decir, la que
-  // realmente se puede tocar con una mano. En empate, se prefiere la más cercana
-  // a la posición de referencia original de la plantilla.
   let best=null,bestSpan=Infinity,bestDev=Infinity;
   (function rec(i,current){
     if(i===optionsList.length){
@@ -855,7 +967,7 @@ const TONE_COLORS={root:"#0f0",structural:"#08f",tension:"#f80",unavailable:"#f0
         return "unavailable";
       };
 /***************** DOM refs *************************/
-const $=id=>document.getElementById(id),instrumentSel=$("instrument"),rootSel=$("root"),chordTypeSel=$("chordType"),scaleSel=$("scale"),posSel=$("pos"),minus=$("minus"),plus=$("plus"),fretVal=$("fretVal"),fretLabel=$("fretLabel"),cvs=$("board"),ctx=cvs.getContext("2d"),legendButtons=[...document.querySelectorAll("[data-tone-filter]")],blankHint=$("blankHint"),clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),chordNameBox=$("chordNameBox"),chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),staffBox=$("staffBox"),staffCanvas=$("staff"),staffCtx=staffCanvas.getContext("2d");
+const $=id=>document.getElementById(id),instrumentSel=$("instrument"),rootSel=$("root"),chordTypeSel=$("chordType"),scaleSel=$("scale"),posSel=$("pos"),minus=$("minus"),plus=$("plus"),fretVal=$("fretVal"),fretLabel=$("fretLabel"),cvs=$("board"),ctx=cvs.getContext("2d"),legendButtons=[...document.querySelectorAll("[data-tone-filter]")],blankHint=$("blankHint"),clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),chordNameBox=$("chordNameBox"),chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),staffBox=$("staffBox"),staffCanvas=$("staff"),staffCtx=staffCanvas.getContext("2d"),muteBtn=$("muteBtn"),volumeSlider=$("volume"),soundTypeSel=$("soundType"),soundTypeLabel=$("soundTypeLabel"),soundSourceIndicator=$("soundSourceIndicator");
 Object.entries(INSTRUMENTS).forEach(([key,instrument])=>instrumentSel.add(new Option(instrument.label,key)));
 rootSel.add(new Option("— Ninguna —",""));
 NOTE.forEach(n=>rootSel.add(new Option(n,n)));
@@ -869,6 +981,118 @@ const toneVisibility={root:true,structural:true,tension:true,unavailable:true};
 const blankMode=()=>rootSel.value===""||(chordTypeSel.value===""&&scaleSel.value==="");
 const manualSelections=new Set();
 let hoverCell=null;
+let audioCtx=null;
+let masterBus=null;
+let soundEnabled=true;
+let sfPlayer=null;
+let sfLoading=false;
+
+// ---- Funciones de sonido con SoundFont dinámico ----
+function ensureCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterBus = audioCtx.createGain();
+    masterBus.gain.value = 1;
+    const limiter = audioCtx.createDynamicsCompressor();
+    limiter.threshold.setValueAtTime(-6, audioCtx.currentTime);
+    limiter.knee.setValueAtTime(12, audioCtx.currentTime);
+    limiter.ratio.setValueAtTime(8, audioCtx.currentTime);
+    limiter.attack.setValueAtTime(0.003, audioCtx.currentTime);
+    limiter.release.setValueAtTime(0.15, audioCtx.currentTime);
+    masterBus.connect(limiter);
+    limiter.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function setSourceIndicator(text, cls) {
+  soundSourceIndicator.textContent = text;
+  soundSourceIndicator.className = 'sound-source-indicator' + (cls ? ' ' + cls : '');
+}
+
+function loadSoundFont(instrumentName) {
+  if (sfLoading) return;
+  sfLoading = true;
+  setSourceIndicator('🎸 cargando...', 'loading');
+  const ctx = ensureCtx();
+  Soundfont.instrument(ctx, instrumentName, { destination: masterBus })
+    .then(instrument => {
+      sfPlayer = instrument;
+      sfLoading = false;
+      // Buscar la etiqueta amigable desde las opciones del instrumento actual
+      const options = getSoundOptionsForInstrument(instrumentSel.value);
+      const option = options.find(o => o.value === instrumentName);
+      // Si no se encuentra, usar el nombre del instrumento como etiqueta
+      const label = option ? option.label : instrumentName;
+      setSourceIndicator('🎸 ' + label, 'sf');
+      console.log('SoundFont cargado:', instrumentName);
+    })
+    .catch(err => {
+      sfLoading = false;
+      sfPlayer = null;
+      setSourceIndicator('⚡ Fallback (oscilador)', 'osc');
+      console.warn('Error al cargar SoundFont, usando oscilador:', err);
+    });
+}
+
+// Obtener opciones de sonido para un instrumento
+function getSoundOptionsForInstrument(instrumentKey) {
+  if (SOUND_OPTIONS[instrumentKey]) {
+    return SOUND_OPTIONS[instrumentKey];
+  }
+  // Para instrumentos sin opciones específicas, usar una opción por defecto
+  // con el nombre real del instrumento
+  const instrument = INSTRUMENTS[instrumentKey];
+  const label = instrument ? instrument.label : 'Instrumento';
+  return [{ value: 'acoustic_guitar_nylon', label: label + ' (fallback)' }];
+}
+
+// Actualizar selector de timbre según el instrumento seleccionado
+function updateSoundTypeOptions(instrumentKey) {
+  const options = getSoundOptionsForInstrument(instrumentKey);
+  soundTypeSel.length = 0;
+  options.forEach(opt => {
+    soundTypeSel.add(new Option(opt.label, opt.value));
+  });
+  // Si hay opciones, seleccionar la primera y cargar
+  if (options.length > 0) {
+    soundTypeSel.value = options[0].value;
+    loadSoundFont(options[0].value);
+  }
+  // Actualizar label
+  const instrumentLabels = {
+    guitar: 'Guitarra',
+    bass4: 'Bajo',
+    bass5: 'Bajo',
+    ukulele: 'Ukelele',
+    tiple: 'Tiple',
+    tresEBG: 'Tres cubano',
+    tresECG: 'Tres cubano',
+    cuatroVenezolano: 'Cuatro'
+  };
+  soundTypeLabel.textContent = 'Timbre ' + (instrumentLabels[instrumentKey] || '');
+}
+
+// Cargar el sonido correspondiente al timbre seleccionado
+function loadCurrentSound() {
+  const value = soundTypeSel.value;
+  if (value) loadSoundFont(value);
+}
+
+/***************** Listeners de instrumento y timbre *************************/
+instrumentSel.addEventListener('change', function() {
+  manualSelections.clear();
+  hoverCell = null;
+  const instrumentKey = this.value;
+  updateSoundTypeOptions(instrumentKey);
+  refresh();
+});
+
+soundTypeSel.addEventListener('change', function() {
+  loadCurrentSound();
+});
+
 /***************** Helpers canvas *************************/
 function fitCanvas(){visibleFrets=Math.min(visibleFrets,maxVisibleFrets());const w=(visibleFrets*fretW())+STRING_LABEL_W,h=boardHeight(),dpr=window.devicePixelRatio||1;cvs.style.width=`${w}px`;cvs.style.height=`${h}px`;cvs.width=w*dpr;cvs.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);}
 function buildPositions(){
@@ -903,8 +1127,9 @@ function cellCenter(displayFret,stringIdx,boardX,fw,startY,stringGap){
   };
 }
 function selectedKey(stringIdx,displayFret){return `${stringIdx}-${displayFret}`;}
-/***************** showStaff mejorada con clave de sol al inicio *****************/
-function showStaff(notes){
+
+/***************** showStaff con clave dinámica *****************/
+function showStaff(notes, clef = 'treble') {
   staffBox.style.display = "block";
   const w = staffCanvas.width, h = staffCanvas.height;
   const left = 54, right = w - 28, top = 30, gap = 12;
@@ -913,7 +1138,6 @@ function showStaff(notes){
   staffCtx.fillRect(0, 0, w, h);
   staffCtx.strokeStyle = "#161514";
   staffCtx.lineWidth = 1;
-  // Dibujar pentagrama
   for (let i = 0; i < 5; i++) {
     const y = top + (i * gap);
     staffCtx.beginPath();
@@ -921,21 +1145,19 @@ function showStaff(notes){
     staffCtx.lineTo(right, y);
     staffCtx.stroke();
   }
-  // Clave de sol – ahora justo al inicio del pentagrama
+  // Dibujar clave (sol o fa)
   staffCtx.font = "80px Georgia, serif";
   staffCtx.fillStyle = "#161514";
   staffCtx.textBaseline = "middle";
-  staffCtx.fillText("𝄞", left - 1, top + gap * 2.6);
+  if (clef === 'bass') {
+    staffCtx.fillText("𝄢", left - 1, top + gap * 2.6 + 18); // ajuste para clave de fa
+  } else {
+    staffCtx.fillText("𝄞", left - 1, top + gap * 2.6);
+  }
 
   if(!notes || notes.length===0) return;
-
-  // Transponer todas las notas una octava arriba (sumar 12)
   const notesToDraw = notes.map(n => ({...n, midi: n.midi + 12}));
-
-  // Ordenar por altura
   const sortedNotes = notesToDraw.slice().sort((a,b) => a.midi - b.midi);
-
-  // Función para calcular posición Y
   const stepIndex = {0:0, 2:1, 4:2, 5:3, 7:4, 9:5, 11:6};
   const stepFromMidi = (midi) => {
     const octave = Math.floor(midi / 12) - 1;
@@ -951,17 +1173,12 @@ function showStaff(notes){
   const yFromMidi = (midi) => {
     return top + (gap * 4) - ((stepFromMidi(midi) - 2) * (gap / 2));
   };
-
-  // Espaciado horizontal
   const noteSpacing = Math.min(50, (right - left - 20) / Math.max(1, sortedNotes.length));
   let startX = left + 20;
-
   sortedNotes.forEach((note, idx) => {
     const midi = note.midi;
     const y = yFromMidi(midi);
     const x = startX + idx * noteSpacing;
-
-    // Líneas adicionales (ledger lines)
     const topLine = top;
     const bottomLine = top + 4*gap;
     if (y < topLine || y > bottomLine) {
@@ -975,15 +1192,11 @@ function showStaff(notes){
         staffCtx.stroke();
       }
     }
-
-    // Sostenido si es necesario
     if (NOTE[note.pc % 12].includes("#")) {
       staffCtx.font = "22px Georgia, serif";
       staffCtx.fillStyle = "#161514";
       staffCtx.fillText("#", x + 12, y + 2);
     }
-
-    // Cabeza de nota
     staffCtx.save();
     staffCtx.translate(x + 37, y);
     staffCtx.rotate(-0.13);
@@ -993,6 +1206,7 @@ function showStaff(notes){
     staffCtx.restore();
   });
 }
+
 /***************** updateInfo() *****************/
 function updateInfo() {
   const isBlank = blankMode();
@@ -1016,7 +1230,6 @@ function updateInfo() {
     symbolEl.textContent = `Escala: ${scaleName} · Tónica ${NOTE[rootPc]}`;
     qualityEl.textContent = `Modo ${scaleName}`;
   } else {
-    // Modo exploración
     if (manualSelections.size > 0) {
       const selectedNotes = [];
       const pitches = activePitches();
@@ -1043,7 +1256,7 @@ function updateInfo() {
     }
   }
 }
-/***************** draw() actualizada *****************/
+/***************** draw() *****************/
 function draw(){
 fitCanvas();
 const pitches=activePitches(),stringCount=pitches.length,fw=fretW(),boardX=STRING_LABEL_W,boardW=visibleFrets*fw,width=boardW+boardX,canvasH=boardHeight(),padY=BOARD_PAD_Y,boardH=canvasH-(padY*2),radius=14,stringGap=BASS4_STRING_GAP,startY=padY;
@@ -1155,10 +1368,14 @@ legendButtons.forEach(b=>{b.closest('.legend').style.opacity=isBlank?"0.35":"1";
 
 ctx.font=`900 ${RAD*.9}px Inter, sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
 
+// Determinar clave para el pentagrama
+const instrumentKey = instrumentSel.value;
+const clef = (instrumentKey === 'bass4' || instrumentKey === 'bass5') ? 'bass' : 'treble';
+
 if(chordMode){
   const chord=parseChordValue(),rootPc=NOTE.indexOf(rootSel.value),def=chord.def;
   const selectedInv=posSel.value.startsWith("inv")?parseInt(posSel.value.replace("inv","")):null;
-  showStaff(def.intervals.map(iv=>({pc:(rootPc+iv)%12,midi:60+rootPc+iv})));
+  showStaff(def.intervals.map(iv=>({pc:(rootPc+iv)%12,midi:60+rootPc+iv})), clef);
   const drawCell=(s,displayFret,role,pc)=>{
     if(!toneVisibility[role])return;
     const point=cellCenter(displayFret,s,boardX,fw,startY,stringGap);
@@ -1184,7 +1401,7 @@ if(chordMode){
     });
   });
 }else if(!isBlank){
-  showStaff([]);
+  showStaff([], clef);
   const rootPc=NOTE.indexOf(rootSel.value),ints=SCALE[scaleSel.value],pcs=pcPattern(rootPc,ints),spec=SPECIAL.includes(scaleSel.value);
   for(let s=0;s<stringCount;s++){
     const startFret=offset===0?0:offset+1,endFret=offset+visibleFrets;
@@ -1216,7 +1433,7 @@ if(chordMode){
     const midi=pitches[s]+physicalFret(displayFret);
     selectedNotes.push({pc:midi%12,midi});
   });
-  showStaff(selectedNotes);
+  showStaff(selectedNotes, clef);
   for(let s=0;s<stringCount;s++){
     const startFret=offset===0?0:offset+1,endFret=offset+visibleFrets;
     for(let displayFret=startFret;displayFret<=endFret;displayFret++){
@@ -1247,11 +1464,60 @@ fretLabel.textContent=roman(offset+1);
 updateInfo();
 }
 function refresh(){visibleFrets=Math.min(visibleFrets,maxVisibleFrets());buildPositions();fretVal.textContent=visibleFrets;if(!posSel.value)posSel.selectedIndex=0;offset=rootSel.value&&chordTypeSel.value?0:parseInt(posSel.value||1)-1;draw();}
-/***************** Listeners *************************/
+
+/***************** Control de volumen *************************/
+function playNote(midi, duration = 1.5) {
+  if (!soundEnabled) return;
+  const ctx = ensureCtx();
+  if (!ctx) return;
+  const vol = parseFloat(volumeSlider.value) / 10;
+  if (isNaN(vol) || vol <= 0) return;
+
+  if (sfPlayer) {
+    try {
+      const sfNote = sfPlayer.play(midi, ctx.currentTime, { gain: vol });
+      if (sfNote) {
+        setTimeout(() => {
+          try {
+            if (sfNote && typeof sfNote.stop === 'function') {
+              sfNote.stop(ctx.currentTime);
+            }
+          } catch(e) {}
+        }, duration * 1000);
+        return;
+      }
+    } catch(e) {
+      console.warn('Error al tocar nota con SoundFont:', e);
+    }
+  }
+
+  // Fallback oscilador
+  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(vol * 0.3, ctx.currentTime + 0.02);
+  gain.gain.linearRampToValueAtTime(vol * 0.3, ctx.currentTime + duration - 0.08);
+  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + duration);
+  osc.connect(gain);
+  gain.connect(masterBus);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + duration);
+}
+
+// Control de silencio
+muteBtn.textContent = "🔊";
+muteBtn.onclick = function() {
+  soundEnabled = !soundEnabled;
+  this.textContent = soundEnabled ? "🔊" : "🔇";
+};
+
+/***************** Listeners de controles *************************/
 minus.onclick=()=>{if(visibleFrets>4){visibleFrets--;refresh();}};
 plus.onclick=()=>{if(visibleFrets<maxVisibleFrets()){visibleFrets++;refresh();}};
 posSel.onchange=()=>{offset=rootSel.value&&chordTypeSel.value?0:parseInt(posSel.value)-1;draw();};
-instrumentSel.onchange=()=>{manualSelections.clear();hoverCell=null;refresh();};
 rootSel.onchange=()=>{populateChordOptions(chordTypeSel.value);manualSelections.clear();hoverCell=null;refresh();};
 chordTypeSel.onchange=()=>{if(chordTypeSel.value!=="")scaleSel.value="";manualSelections.clear();hoverCell=null;refresh();};
 scaleSel.onchange=()=>{if(scaleSel.value!=="")chordTypeSel.value="";manualSelections.clear();hoverCell=null;refresh();};
@@ -1288,8 +1554,15 @@ cvs.addEventListener('click',evt=>{
   const cell=cellFromEvent(evt);
   if(!cell)return;
   const key=selectedKey(cell.s,cell.displayFret);
-  if(manualSelections.has(key))manualSelections.delete(key);
-  else manualSelections.add(key);
+  const wasSelected = manualSelections.has(key);
+  if(wasSelected) {
+    manualSelections.delete(key);
+  } else {
+    manualSelections.add(key);
+    const pitches = activePitches();
+    const midi = pitches[cell.s] + physicalFret(cell.displayFret);
+    playNote(midi, 1.8);
+  }
   draw();
 });
 clearSelectionBtn.onclick=()=>{manualSelections.clear();hoverCell=null;draw();};
@@ -1309,7 +1582,14 @@ legendButtons.forEach(button=>{
     draw();
   };
 });
-window.addEventListener('load',refresh);
+
+// Inicialización: cargar guitarra por defecto y su sonido
+window.addEventListener('load', function() {
+  instrumentSel.value = 'guitar';
+  updateSoundTypeOptions('guitar');
+  refresh();
+});
+
 const footerYearEl=document.getElementById('footerYear');
 if(footerYearEl)footerYearEl.textContent=new Date().getFullYear();
 </script>
