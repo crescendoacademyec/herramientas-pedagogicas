@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Metronomo: herramienta web para estudiar pulso, subdivisiones, swing, clave, polirritmia y polimetria.">
+    <base href="/metronomo/">
+    <title>Metrónomo</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <style>
+        /* ===== VARIABLES GLOBALES (unificadas) ===== */
+        :root {
+            --ink: #161514;
+            --charcoal: #24201d;
+            --charcoal2: #1c1916;
+            --paper: #fbf7f0;
+            --cream: #f1e6d2;
+            --gold: #d4a84f;
+            --gold-dim: rgba(212,168,79,0.35);
+            --moss: #476357;
+            --wine: #7a3b3b;
+            --line: rgba(255,255,255,0.14);
+            --text: #fffaf0;
+            --muted: rgba(255,250,240,0.68);
+            --bg: #161514;
+            --panel: rgba(255, 250, 240, 0.09);
+            --panel-light: rgba(255, 250, 240, 0.13);
+            --accent: #d4a84f;
+            --accent-hover: #e5bd67;
+            --danger: #b66543;
+            --beat-1: var(--accent);
+            --beat-other: rgba(255, 250, 240, 0.68);
+            --beat-sub: rgba(255, 250, 240, 0.28);
+            --text-dim: rgba(255, 250, 240, 0.7);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background:
+                linear-gradient(120deg, rgba(22, 21, 20, 0.94), rgba(22, 21, 20, 0.74)),
+                url('fondo_metronomo.jpg') center / cover fixed no-repeat;
+            color: var(--text);
+            display: block;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        body::before {
+            background: radial-gradient(circle at 74% 18%, rgba(212, 168, 79, 0.22), transparent 34%);
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        /* ===== HEADER (unificado) ===== */
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px clamp(20px, 5vw, 64px);
+            border-bottom: 1px solid var(--line);
+            background: rgba(22, 21, 20, 0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            position: relative;
+            z-index: 2;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.02em;
+            color: var(--cream);
+        }
+        .brand-mark {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--gold);
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Georgia, serif;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .site-header .tag {
+            font-size: 0.72rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+            flex-wrap: wrap;
+        }
+        .social-bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .social-bar a {
+            color: var(--muted);
+            display: inline-flex;
+            transition: color 0.15s ease, transform 0.15s ease;
+        }
+        .social-bar a:hover {
+            color: var(--gold);
+            transform: scale(1.1);
+        }
+        .social-bar svg { display: block; width: 19px; height: 19px; }
+        .school-logo-link { display: inline-block; line-height: 0; }
+        .school-logo {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--gold-dim);
+        }
+        .school-logo:hover { transform: scale(1.05); }
+
+        @media (max-width: 640px) {
+            .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+            .header-right { width: 100%; justify-content: space-between; }
+            .site-header .tag { display: none; }
+        }
+
+        /* ===== CONTENIDO PRINCIPAL ===== */
+        .app-shell {
+            margin: 0 auto;
+            max-width: 1180px;
+            padding: clamp(28px, 5vw, 62px) clamp(18px, 4vw, 56px) 64px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tool-hero {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+            max-width: 860px;
+        }
+        .eyebrow {
+            color: #9ab8aa;
+            font-size: 0.78rem;
+            font-weight: 1000;
+            letter-spacing: 0.16em;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .tool-hero h1 {
+            color: var(--text);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(3rem, 7vw, 6.5rem);
+            letter-spacing: 0;
+            line-height: 0.88;
+            margin: 0;
+        }
+        .tool-hero p {
+            color: var(--text-dim);
+            font-size: 1.08rem;
+            line-height: 1.7;
+            margin: 0;
+            max-width: 760px;
+        }
+
+        /* ===== METRÓNOMO (estilos originales adaptados) ===== */
+        .metronome-container {
+            background: rgba(255, 250, 240, 0.09);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+            padding: clamp(18px, 3vw, 30px);
+            max-width: none;
+        }
+
+        .header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.13);
+            margin-bottom: 18px;
+            padding-bottom: 16px;
+            text-align: left;
+        }
+        .header h1 {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(2.2rem, 4vw, 4rem);
+            margin: 0;
+            color: var(--text);
+        }
+
+        .stage {
+            width: 100%; height: 180px; display: flex; justify-content: center; align-items: center;
+            position: relative; transition: all 0.3s ease; overflow: hidden; margin-bottom: 15px;
+            background: rgba(0,0,0,0.3); border-radius: 8px;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.13);
+        }
+        .stage.hidden { height: 0; margin-bottom: 0; opacity: 0; pointer-events: none; border: none; }
+
+        .pendulum {
+            width: 12px; height: 160px; background: var(--accent);
+            position: absolute; top: 0; transform-origin: top center; z-index: 5;
+            border-radius: 0 0 10px 10px; box-shadow: 0 0 15px var(--accent);
+            transition: background 0.1s, box-shadow 0.1s;
+        }
+        .pendulum.accent-flash { background: #fff !important; box-shadow: 0 0 40px #fff, 0 0 60px #fff; }
+
+        .bulb {
+            width: 6px; height: 6px; border-radius: 50%;
+            position: absolute; opacity: 0;
+            transition: opacity 0.05s; z-index: 10; pointer-events: none;
+        }
+        .bulb-swing { top: 20px; left: 30px; background: #fff; box-shadow: 0 0 10px 3px rgba(255,255,255,0.7); }
+        .bulb-clave { top: 20px; right: 30px; background: #f59e0b; box-shadow: 0 0 10px 3px rgba(245,158,11,0.7); }
+        .bulb-poly  { bottom: 20px; left: 30px; background: #c084fc; box-shadow: 0 0 10px 3px rgba(192,132,252,0.7); }
+        .bulb-pm    { bottom: 20px; right: 30px; background: #34d399; box-shadow: 0 0 10px 3px rgba(52,211,153,0.7); }
+
+        .bpm-section { text-align: center; position: relative; margin-bottom: 20px; }
+        .bpm-display {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: 6rem; font-weight: 900; color: var(--accent);
+            line-height: 1; font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 30px rgba(212, 168, 79, 0.28);
+        }
+
+        .quick-bpm-row { display: flex; gap: 6px; padding: 5px 0; margin: 10px 0; width: 100%; }
+        .quick-bpm-btn {
+            background: rgba(255,255,255,0.1); border: none; color: var(--text-dim);
+            padding: 8px 0; border-radius: 999px; font-size: 0.65rem; font-weight: bold;
+            cursor: pointer; flex-grow: 1; flex-shrink: 1; min-width: 0; transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+        .quick-bpm-btn:hover { background: var(--accent); color: var(--ink); }
+        .quick-bpm-btn:active { transform: scale(0.9); }
+
+        .bpm-controls { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 10px; }
+        .btn-circle {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16);
+            color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem;
+            cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center;
+        }
+        .btn-circle:hover { background: var(--accent); color: var(--ink); }
+        input[type=range] { flex-grow: 1; accent-color: var(--accent); height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; outline: none; cursor: pointer; }
+
+        .extra-indicators { display: flex; justify-content: space-around; font-size: 0.7rem; color: rgba(255,255,255,0.6); font-weight: bold; height: 15px; margin-top: 20px; }
+        .ind { transition: 0.1s; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .ind.flash { color: #fff; text-shadow: 0 0 10px #fff; }
+
+        .visualizer { display: flex; justify-content: center; gap: 10px; margin: 15px 0 30px 0; min-height: 25px; flex-wrap: wrap; }
+        .dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.05s ease-out; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .dot.active-downbeat { background: var(--beat-1); box-shadow: 0 0 15px var(--beat-1); transform: scale(1.3); }
+        .dot.active-beat { background: var(--text); box-shadow: 0 0 10px var(--text); transform: scale(1.15); }
+        .dot.active-sub { background: rgba(255,255,255,0.3); width: 10px; height: 10px; margin-top: 3px; }
+        .dot.sub-dot { width: 10px; height: 10px; margin-top: 3px; }
+
+        .controls-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-bottom: 25px; align-items: start; }
+        .control-group { background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+
+        .group-header {
+            padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase; font-weight: bold;
+            background: rgba(255, 250, 240, 0.07); transition: background 0.2s;
+        }
+        .group-header:hover { background: rgba(212, 168, 79, 0.18); color: var(--accent); }
+        .group-header .arr { transition: transform 0.3s ease; font-size: 0.7rem; }
+
+        .group-basic { padding: 0 15px 15px 15px; display: flex; flex-direction: column; gap: 8px; }
+        .group-advanced {
+            max-height: 0; opacity: 0; overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0 15px; background: rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .control-group.expanded .group-advanced { max-height: 800px; opacity: 1; padding: 15px; margin-bottom: 5px; }
+        .control-group.expanded .group-header .arr { transform: rotate(180deg); color: var(--accent); }
+
+        select, input[type=number], input[type=text] {
+            background: rgba(22, 21, 20, 0.72) !important;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 8px;
+            color: var(--text);
+            padding: 7px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            outline: none;
+            width: 100%;
+            min-height: 40px;
+        }
+        select:focus, input[type=number]:focus, input[type=text]:focus { border-color: var(--accent); background: rgba(0,0,0,0.5); }
+
+        .flex-row { display: flex; gap: 10px; align-items: center; width: 100%; justify-content: space-between; }
+        .flex-row label { font-size: 0.75rem; color: var(--text); white-space: nowrap; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+
+        .toggle-switch { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text); text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .toggle-switch input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+        .btn-primary {
+            background: var(--accent);
+            border: none;
+            border-radius: 999px;
+            box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
+            color: var(--ink);
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex-grow: 2;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-primary:hover { background: var(--accent-hover); box-shadow: 0 0 25px rgba(212, 168, 79, 0.36); }
+
+        .btn-tap {
+            background: rgba(0,0,0,0.4); color: var(--text); border: 1px solid rgba(255,255,255,0.2);
+            padding: 20px; border-radius: 999px; font-size: 1.2rem; font-weight: bold;
+            cursor: pointer; flex-grow: 1; transition: 0.2s; backdrop-filter: blur(5px);
+        }
+        .btn-tap:hover { border-color: var(--accent); background: rgba(0,0,0,0.6); }
+
+        .visually-disabled { opacity: 0.4; pointer-events: none; }
+        .adv-label { font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-top: 5px; border-bottom: 1px solid rgba(212,168,79,0.3); padding-bottom: 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .pitch-label { font-size: 0.65rem; color: #aaa; margin-left: -5px; }
+
+        .action-row { display: grid; gap: 14px; grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr); }
+
+        #timer-display { font-size: 0.9rem; color: var(--accent); font-weight: bold; display: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+        @media (max-width: 820px) {
+            .site-header { align-items: flex-start; flex-direction: column; }
+            .controls-grid, .action-row { grid-template-columns: 1fr; }
+            .quick-bpm-row { overflow-x: auto; padding-bottom: 8px; }
+            .quick-bpm-btn { flex: 0 0 54px; }
+        }
+
+        /* ===== FOOTER (unificado) ===== */
+        .site-footer {
+            padding: 26px clamp(20px, 6vw, 64px) 40px;
+            border-top: 1px solid var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            color: var(--muted);
+            font-size: 0.78rem;
+            background: rgba(22, 21, 20, 0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand">
+        Crescendo Academy
+    </div>
+    <div class="header-right">
+        <div class="tag">Herramientas para clases de música</div>
+        <div class="social-bar">
+            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </a>
+            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+            </a>
+            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 7V2h12v5"/>
+                    <path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+                    <path d="M8 12h8"/>
+                </svg>
+            </a>
+            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+            </a>
+        </div>
+        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
+            <img
+                src="https://scontent.fuio5-1.fna.fbcdn.net/v/t39.30808-6/689316806_122177479256856020_7927560189686558059_n.jpg?stp=dst-jpg_tt6&cstp=mx1250x1250&ctp=s1250x1250&_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHwErWI6u9y5L-wE7NjduHb6G6w8ifhyg3obrDyJ-HKDcBBw8k1qqU-ODJCCVDHFh8ceCJHGUwNCw10BBI0n5Ce&_nc_ohc=X8RhpuaGUrgQ7kNvwFpElgR&_nc_oc=AdrFznvTH9MWAhjT4fD8E7nkA0QkTD45JPEETiEVnAOONf0GvBzlP4tN5dNZ6e8CqNA&_nc_zt=23&_nc_ht=scontent.fuio5-1.fna&_nc_gid=Vzip9GK7fUHINjzHpxub_g&_nc_ss=7b2a8&oh=00_AQCdmqpSaqdqkNRTrh1z9JA6CmzZrebvJvwQH8g7PkUWBQ&oe=6A558001"
+                alt="Logo Crescendo Academy"
+                class="school-logo"
+            />
+        </a>
+    </div>
+</header>
+
+<main class="app-shell">
+    <section class="tool-hero">
+        <p class="eyebrow">Aplicación musical</p>
+        <h1>Metrónomo</h1>
+        <p>Una herramienta para estudiar pulso, subdivisiones, swing, claves, polirritmias, polimetrías y rutinas de práctica con control fino.</p>
+    </section>
+
+    <section class="metronome-container" aria-label="Controles del metronomo">
+        <div class="header"><h1>Panel de práctica</h1></div>
+
+        <div class="stage hidden" id="stageArea">
+            <div class="bulb bulb-swing" id="light-swing"></div>
+            <div class="bulb bulb-clave" id="light-clave"></div>
+            <div class="bulb bulb-poly" id="light-poly"></div>
+            <div class="bulb bulb-pm" id="light-pm"></div>
+            <div id="pendulum" class="pendulum"></div>
+        </div>
+
+        <div class="bpm-section">
+            <div class="bpm-display" id="bpm-display">80</div>
+            <div class="quick-bpm-row" id="quick-bpm-row"></div>
+            <div class="bpm-controls">
+                <button class="btn-circle" onclick="adjustBpm(-1)">-</button>
+                <input type="range" id="bpm-slider" min="20" max="320" value="80">
+                <button class="btn-circle" onclick="adjustBpm(1)">+</button>
+            </div>
+        </div>
+
+        <div class="extra-indicators">
+            <span class="ind" id="ind-poly">POLIRRITMIA</span>
+            <span class="ind" id="ind-clave">CLAVE</span>
+            <span class="ind" id="ind-pm">POLIMETRÍA</span>
+        </div>
+        <div class="visualizer" id="visualizer"></div>
+
+        <div class="controls-grid">
+            <div class="control-group" id="drawer-ritmo">
+                <div class="group-header" onclick="toggleDrawer('drawer-ritmo')">Ritmo & Sonidos Base <span class="arr">▼</span></div>
+                <div class="group-advanced">
+                    <div class="flex-row">
+                        <select id="beats-per-measure">
+                            <option value="1">1/4</option><option value="2">2/4</option><option value="3">3/4</option>
+                            <option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option>
+                        </select>
+                        <select id="subdivision">
+                            <option value="1" selected>Negras</option><option value="2">Corcheas</option><option value="3">Tresillos</option>
+                            <option value="4">Semicorch.</option><option value="6">Seisillos</option>
+                        </select>
+                    </div>
+                    <input type="text" id="custom-amalgam" placeholder="Amalgama Custom (Ej: 3+2+2)">
+                    <div class="flex-row">
+                        <label style="flex:1;">Swing % <span id="swingVal" style="color: var(--accent);">50</span></label>
+                        <input type="range" id="swing-slider" min="50" max="75" value="50" style="flex:2;">
+                    </div>
+                    <div class="adv-label">ASIGNACIÓN Y PITCH (↕)</div>
+                    <div class="flex-row"><label style="width: 45px;">Acento</label><select id="snd-accent" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-accent" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <div class="flex-row"><label style="width: 45px;">Pulso</label><select id="snd-beat" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-beat" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <div class="flex-row"><label style="width: 45px;">Subdiv.</label><select id="snd-sub" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-sub" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <div class="flex-row"><label style="width: 45px;">Swing</label><select id="snd-swing" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-swing" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                </div>
+            </div>
+
+            <div class="control-group" id="drawer-mixer">
+                <div class="group-header" onclick="toggleDrawer('drawer-mixer')">Mixer & Péndulo <span class="arr">▼</span></div>
+                <div class="group-basic">
+                    <div class="flex-row"><label style="color:var(--accent); font-weight:bold; width:60px;">Master</label><input type="range" id="vol-master" min="0" max="1" step="0.01" value="0.8"></div>
+                </div>
+                <div class="group-advanced">
+                    <div class="flex-row"><label style="width:60px;">Acento</label><input type="range" id="vol-accent" min="0" max="1" step="0.01" value="1"></div>
+                    <div class="flex-row"><label style="width:60px;">Pulso</label><input type="range" id="vol-normal" min="0" max="1" step="0.01" value="0.7"></div>
+                    <div class="flex-row"><label style="width:60px;">Subdiv.</label><input type="range" id="vol-sub" min="0" max="1" step="0.01" value="0.3"></div>
+                    <div class="flex-row"><label style="width:60px;">Extras</label><input type="range" id="vol-extra" min="0" max="1" step="0.01" value="0.9" title="Clave y Polirritmias"></div>
+                    <div class="adv-label">VISUAL</div>
+                    <label class="toggle-switch"><input type="checkbox" id="pendulumToggle"> Mostrar Péndulo y Luces</label>
+                    <label class="toggle-switch"><input type="checkbox" id="accent-toggle" checked> Acentuar (Audio y Visual)</label>
+                </div>
+            </div>
+
+            <div class="control-group" id="drawer-poly">
+                <div class="group-header" onclick="toggleDrawer('drawer-poly')">Clave & Polirritmia <span class="arr">▼</span></div>
+                <div class="group-advanced">
+                    <select id="clave-select">
+                        <option value="off" selected>Clave: Apagada</option>
+                        <option value="son32">Son 3-2</option><option value="son23">Son 2-3</option>
+                        <option value="rumba32">Rumba 3-2</option><option value="rumba23">Rumba 2-3</option>
+                    </select>
+                    <div class="flex-row">
+                        <label class="toggle-switch"><input type="checkbox" id="poly-toggle"> Polirr. X:Y</label>
+                        <input type="number" id="poly-x" value="3" min="1" style="width: 50px; background: rgba(0,0,0,0.5);"> : <input type="number" id="poly-y" value="2" min="1" style="width: 50px; background: rgba(0,0,0,0.5);">
+                    </div>
+                    <div class="flex-row">
+                        <label class="toggle-switch"><input type="checkbox" id="pm-toggle"> Polimetría</label>
+                        <input type="number" id="pm-val" value="5" min="1" style="width: 50px; background: rgba(0,0,0,0.5);"> <label>pulsos</label>
+                    </div>
+                    <div class="adv-label">ASIGNACIÓN Y PITCH (↕)</div>
+                    <div class="flex-row"><label style="width: 45px;">Clave</label><select id="snd-clave" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-clave" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <div class="flex-row"><label style="width: 45px;">Polirr.</label><select id="snd-poly" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-poly" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <div class="flex-row"><label style="width: 45px;">Polimet.</label><select id="snd-pm" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-pm" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                </div>
+            </div>
+
+            <div class="control-group" id="drawer-train">
+                <div class="group-header" onclick="toggleDrawer('drawer-train')">Trainers & Timer <span class="arr">▼</span></div>
+                <div class="group-advanced">
+                    <label class="toggle-switch"><input type="checkbox" id="trainer-toggle"> Speed Trainer Pro</label>
+                    <div class="flex-row visually-disabled" id="trainer-settings" style="margin-top:5px; flex-wrap: wrap;">
+                        <div class="flex-row"><label>De</label><input type="number" id="train-start" value="60" style="background: rgba(0,0,0,0.5);"> <label>A</label><input type="number" id="train-end" value="100" style="background: rgba(0,0,0,0.5);"></div>
+                        <div class="flex-row"><label>+ BPM</label><input type="number" id="train-step" value="5" style="background: rgba(0,0,0,0.5);"> <label>c/Comp</label><input type="number" id="train-bars" value="2" style="background: rgba(0,0,0,0.5);"></div>
+                        <div class="flex-row"><label>Suma progre.</label><input type="number" id="train-inc" value="2" style="background: rgba(0,0,0,0.5);"></div>
+                        <select id="train-mode"><option value="bounce" selected>Al llegar: Ida y Vuelta</option><option value="loop">Al llegar: Reiniciar</option></select>
+                    </div>
+
+                    <div class="adv-label" style="margin-top: 15px;">PIRÁMIDE & DROPOUTS</div>
+                    <label class="toggle-switch"><input type="checkbox" id="pyramid-toggle"> Pirámide Rítmica</label>
+                    <div class="flex-row visually-disabled" id="pyramid-settings" style="margin: 5px 0;">
+                        <label>Duración paso:</label><input type="number" id="pyr-bars" value="1" min="1" style="width: 60px; background: rgba(0,0,0,0.5);"> <label>comp</label>
+                    </div>
+                    <label class="toggle-switch"><input type="checkbox" id="dropout-toggle"> Mute / Dropouts</label>
+                    <div class="flex-row visually-disabled" id="dropout-settings" style="margin-top: 5px;">
+                        <label>Suena:</label><input type="number" id="drop-on" value="3" min="1" style="background: rgba(0,0,0,0.5);">
+                        <label>Mudo:</label><input type="number" id="drop-off" value="1" min="1" style="background: rgba(0,0,0,0.5);">
+                    </div>
+
+                    <div class="adv-label" style="margin-top: 15px;">TIMER</div>
+                    <div class="flex-row">
+                        <input type="number" id="timer-minutes" value="0" min="0" max="120" style="background: rgba(0,0,0,0.5);"> <label style="flex-grow:1">Minutos (0=Off)</label>
+                    </div>
+                    <div id="timer-display" style="font-size: 0.9rem; color: var(--accent); font-weight: bold; display: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">Faltan: <span id="time-left">00:00</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-row">
+            <button class="btn-primary" id="play-btn">INICIAR</button>
+            <button class="btn-tap" id="tap-btn">TAP</button>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <span>Crescendo Academy</span>
+    <span id="footerYear"></span>
+</footer>
+
+<script>
+    // --- Lógica de Acordeón ---
+    function toggleDrawer(id) {
+        document.getElementById(id).classList.toggle('expanded');
+    }
+
+    // --- Poblar Selectores de Sonido ---
+    const soundOptions = [
+        {val: 'woodblock1', text: 'Madera Aguda'}, {val: 'woodblock2', text: 'Madera Media'}, {val: 'woodblock3', text: 'Madera Grave'},
+        {val: 'clave', text: 'Clave'}, {val: 'bongo', text: 'Bongó'}, {val: 'tom', text: 'Tom Grave'},
+        {val: 'click', text: 'Clic Mecánico'}, {val: 'beep', text: 'Beep Digital'}
+    ];
+    
+    document.querySelectorAll('.sound-selector').forEach(sel => {
+        soundOptions.forEach(opt => {
+            let o = document.createElement('option'); o.value = opt.val; o.innerText = opt.text; sel.appendChild(o);
+        });
+    });
+
+    // Asignaciones por defecto
+    document.getElementById('snd-accent').value = 'woodblock1';
+    document.getElementById('snd-beat').value = 'woodblock2';
+    document.getElementById('snd-sub').value = 'click';
+    document.getElementById('snd-swing').value = 'click';
+    document.getElementById('snd-clave').value = 'clave';
+    document.getElementById('snd-poly').value = 'tom';
+    document.getElementById('snd-pm').value = 'bongo';
+
+    // --- Variables de Motor y Estado ---
+    let audioContext = null; let masterGainNode = null; let isPlaying = false; let tempo = 80.0;
+    let lookahead = 25.0; let scheduleAheadTime = 0.1; let timerID; let notesInQueue = []; let pendulumSide = 1;
+
+    let nextMainTime = 0.0; let mainSubNote = 0; let mainBeatInBar = 0; let mainMeasureCount = 0;
+    let totalBeats = 4; let accentPulses = [0]; 
+    let nextClaveTime = 0.0; let claveStep = 0;
+    const clavePatterns = { 'son32': [1,0,0,1,0,0,1,0, 0,0,1,0,1,0,0,0], 'son23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,1,0], 'rumba32': [1,0,0,1,0,0,0,1, 0,0,1,0,1,0,0,0], 'rumba23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,0,1] };
+    let nextPolyTime = 0.0; let nextPmTime = 0.0; let pmCount = 0;
+
+    let barCount = 0; let practiceIntervalId = null; let secondsLeft = 0;
+    const pyramidArray = [1, 2, 3, 4, 6, 4, 3, 2]; let pyramidIndex = 0; let pyramidBarCount = 0;
+    let trainDir = 1; let currentTrainBars = 2;
+
+    // --- DOM Elements ---
+    const UI = {
+        bpmDisp: document.getElementById('bpm-display'), bpmSld: document.getElementById('bpm-slider'),
+        playBtn: document.getElementById('play-btn'), tapBtn: document.getElementById('tap-btn'), vis: document.getElementById('visualizer'),
+        beatsSel: document.getElementById('beats-per-measure'), subSel: document.getElementById('subdivision'), amalgamInp: document.getElementById('custom-amalgam'),
+        swingSld: document.getElementById('swing-slider'), swingVal: document.getElementById('swingVal'), accentTgl: document.getElementById('accent-toggle'),
+        volMaster: document.getElementById('vol-master'), volAccent: document.getElementById('vol-accent'), volNormal: document.getElementById('vol-normal'), volSub: document.getElementById('vol-sub'), volExtra: document.getElementById('vol-extra'),
+        pendTgl: document.getElementById('pendulumToggle'), stage: document.getElementById('stageArea'), pendulum: document.getElementById('pendulum'),
+        
+        lightSwing: document.getElementById('light-swing'), lightClave: document.getElementById('light-clave'), lightPoly: document.getElementById('light-poly'), lightPm: document.getElementById('light-pm'),
+
+        trainTgl: document.getElementById('trainer-toggle'), trainSet: document.getElementById('trainer-settings'), trainStart: document.getElementById('train-start'), trainEnd: document.getElementById('train-end'), trainStep: document.getElementById('train-step'), trainBars: document.getElementById('train-bars'), trainInc: document.getElementById('train-inc'), trainMode: document.getElementById('train-mode'),
+        timeMin: document.getElementById('timer-minutes'), timeDisp: document.getElementById('timer-display'), timeLeft: document.getElementById('time-left'),
+        pyrTgl: document.getElementById('pyramid-toggle'), pyrSet: document.getElementById('pyramid-settings'), pyrBars: document.getElementById('pyr-bars'),
+        dropTgl: document.getElementById('dropout-toggle'), dropSet: document.getElementById('dropout-settings'), dropOn: document.getElementById('drop-on'), dropOff: document.getElementById('drop-off'),
+        claveSel: document.getElementById('clave-select'), polyTgl: document.getElementById('poly-toggle'), polyX: document.getElementById('poly-x'), polyY: document.getElementById('poly-y'), pmTgl: document.getElementById('pm-toggle'), pmVal: document.getElementById('pm-val'),
+        indPoly: document.getElementById('ind-poly'), indClave: document.getElementById('ind-clave'), indPm: document.getElementById('ind-pm')
+    };
+
+    const quickBpmRow = document.getElementById('quick-bpm-row');
+    for (let i = 40; i <= 320; i += 20) {
+        let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
+        btn.onclick = () => { tempo = i; updateBpmUI(); }; quickBpmRow.appendChild(btn);
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (document.activeElement.tagName === 'INPUT') return; 
+        switch(e.code) {
+            case 'Space': e.preventDefault(); toggleMetronome(); break;
+            case 'ArrowRight': e.preventDefault(); adjustBpm(5); break;
+            case 'ArrowLeft': e.preventDefault(); adjustBpm(-5); break;
+            case 'ArrowUp': e.preventDefault(); adjustMasterVol(0.05); break;
+            case 'ArrowDown': e.preventDefault(); adjustMasterVol(-0.05); break;
+        }
+    });
+
+    function adjustMasterVol(amount) {
+        let newVal = Math.max(0, Math.min(1, parseFloat(UI.volMaster.value) + amount));
+        UI.volMaster.value = newVal; if (masterGainNode) masterGainNode.gain.value = newVal;
+    }
+    UI.volMaster.addEventListener('input', (e) => { if(masterGainNode) masterGainNode.gain.value = e.target.value; });
+
+    function updateBpmUI() { UI.bpmDisp.innerText = Math.round(tempo); UI.bpmSld.value = Math.round(tempo); }
+    function adjustBpm(amount) { tempo = Math.max(20, Math.min(320, tempo + amount)); updateBpmUI(); }
+    UI.bpmSld.addEventListener('input', (e) => { tempo = parseInt(e.target.value); updateBpmUI(); });
+    
+    UI.pendTgl.addEventListener('change', (e) => UI.stage.classList.toggle('hidden', !e.target.checked));
+    UI.swingSld.addEventListener('input', (e) => UI.swingVal.innerText = e.target.value);
+    UI.trainTgl.addEventListener('change', (e) => { UI.trainSet.classList.toggle('visually-disabled', !e.target.checked); });
+    UI.dropTgl.addEventListener('change', (e) => { UI.dropSet.classList.toggle('visually-disabled', !e.target.checked); });
+    UI.pyrTgl.addEventListener('change', (e) => {
+        UI.subSel.disabled = e.target.checked; UI.pyrSet.classList.toggle('visually-disabled', !e.target.checked);
+        if(e.target.checked) { pyramidIndex = 0; pyramidBarCount = 0; UI.subSel.value = pyramidArray[0]; renderVisualizer(); }
+    });
+
+    let tapTimes = [];
+    UI.tapBtn.addEventListener('click', () => {
+        const now = performance.now(); tapTimes.push(now); if (tapTimes.length > 4) tapTimes.shift();
+        if (tapTimes.length > 1) {
+            let iv = []; for (let i = 1; i < tapTimes.length; i++) iv.push(tapTimes[i] - tapTimes[i-1]);
+            tempo = Math.max(20, Math.min(320, Math.round(60000 / (iv.reduce((a, b) => a + b) / iv.length)))); updateBpmUI();
+        }
+        UI.tapBtn.blur();
+    });
+
+    function parsePattern() {
+        const customVal = UI.amalgamInp.value.replace(/\s+/g, '');
+        if (/^\d+(\+\d+)*$/.test(customVal)) {
+            const parts = customVal.split('+').map(Number);
+            let currentPulse = 0; accentPulses = [];
+            parts.forEach(p => { if(p > 0) { accentPulses.push(currentPulse); currentPulse += p; } });
+            totalBeats = currentPulse || 1; UI.beatsSel.style.opacity = "0.3"; 
+        } else {
+            totalBeats = parseInt(UI.beatsSel.value); accentPulses = [0]; UI.beatsSel.style.opacity = "1";
+        }
+        renderVisualizer();
+    }
+    UI.beatsSel.addEventListener('change', parsePattern);
+    UI.amalgamInp.addEventListener('input', () => { parsePattern(); if(isPlaying) { mainSubNote = 0; mainBeatInBar = 0; barCount = 0; }});
+
+    function renderVisualizer() {
+        UI.vis.innerHTML = ''; const sub = parseInt(UI.subSel.value);
+        for (let i = 0; i < totalBeats * sub; i++) {
+            const dot = document.createElement('div'); dot.className = 'dot';
+            if (i % sub !== 0) dot.classList.add('sub-dot');
+            dot.id = `dot-${i}`; UI.vis.appendChild(dot);
+        }
+    }
+    UI.subSel.addEventListener('change', renderVisualizer);
+
+    function updateTimerDisplay() {
+        let mins = Math.floor(secondsLeft / 60); let secs = secondsLeft % 60;
+        UI.timeLeft.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        if (secondsLeft <= 0) toggleMetronome();
+        secondsLeft--;
+    }
+
+    // --- Motor Audio Sintetizador ---
+    function playSynthSound(time, synthType, vol, isMuted = false, pitchMult = 1.0) {
+        if (isMuted || vol <= 0) return; 
+        
+        const osc = audioContext.createOscillator();
+        const env = audioContext.createGain();
+        osc.connect(env); env.connect(masterGainNode);
+        
+        env.gain.setValueAtTime(vol, time);
+
+        switch(synthType) {
+            case 'woodblock1':
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(800 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.05); break;
+            case 'woodblock2':
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(500 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.05); break;
+            case 'woodblock3':
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(350 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.06); break;
+            case 'clave':
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(1200 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.04); break;
+            case 'bongo':
+                osc.type = 'sine'; osc.frequency.setValueAtTime(500 * pitchMult, time);
+                osc.frequency.exponentialRampToValueAtTime(300 * pitchMult, time + 0.1);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.1); break;
+            case 'tom':
+                osc.type = 'sine'; osc.frequency.setValueAtTime(180 * pitchMult, time); osc.frequency.exponentialRampToValueAtTime(40, time + 0.15);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.15); break;
+            case 'click':
+                osc.type = 'square'; osc.frequency.setValueAtTime(1200 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.015); break;
+            case 'beep':
+                osc.type = 'sine'; osc.frequency.setValueAtTime(800 * pitchMult, time);
+                env.gain.exponentialRampToValueAtTime(0.001, time + 0.06); break;
+        }
+        osc.start(time); osc.stop(time + 0.2);
+    }
+
+    // --- Controladores de Pitch ---
+    function setupPitchControl(type) {
+        const pSld = document.getElementById(`pitch-${type}`);
+        const sSel = document.getElementById(`snd-${type}`);
+        
+        const triggerPreview = () => {
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') audioContext.resume();
+            if (!masterGainNode) { 
+                masterGainNode = audioContext.createGain(); 
+                masterGainNode.connect(audioContext.destination); 
+                masterGainNode.gain.value = UI.volMaster.value; 
+            }
+            playSynthSound(audioContext.currentTime, sSel.value, 1.0, false, parseFloat(pSld.value));
+        };
+
+        pSld.addEventListener('mousedown', triggerPreview);
+        pSld.addEventListener('touchstart', triggerPreview, {passive: true});
+        pSld.addEventListener('change', triggerPreview);
+    }
+    ['accent', 'beat', 'sub', 'swing', 'clave', 'poly', 'pm'].forEach(setupPitchControl);
+
+    // --- Scheduler Entrelazado (CLAVE LIBRE SIN LÍMITES) ---
+    function scheduler() {
+        if(!audioContext) return;
+        let limit = audioContext.currentTime + scheduleAheadTime;
+        let vExt = parseFloat(UI.volExtra.value);
+
+        while (true) {
+            let times = [{ engine: 'main', time: nextMainTime }];
+            if (UI.claveSel.value !== 'off') times.push({ engine: 'clave', time: nextClaveTime });
+            if (UI.polyTgl.checked) times.push({ engine: 'poly', time: nextPolyTime });
+            if (UI.pmTgl.checked) times.push({ engine: 'pm', time: nextPmTime });
+
+            times.sort((a, b) => (Math.abs(a.time - b.time) < 0.001) ? (a.engine === 'main' ? -1 : (b.engine === 'main' ? 1 : 0)) : a.time - b.time);
+            let nEv = times[0];
+
+            if (nEv.time >= limit) break; 
+
+            if (nEv.engine === 'main') {
+                let sub = parseInt(UI.subSel.value); let isBeat = (mainSubNote === 0);
+                let isAcc = isBeat && accentPulses.includes(mainBeatInBar) && UI.accentTgl.checked;
+                let swing = parseInt(UI.swingSld.value); let isSwingNote = (sub === 2 && swing !== 50 && mainSubNote === 1);
+                
+                let isMuted = false;
+                if (UI.dropTgl.checked) {
+                    let cBars = parseInt(UI.dropOn.value) + parseInt(UI.dropOff.value);
+                    if ((mainMeasureCount % cBars) >= parseInt(UI.dropOn.value)) isMuted = true;
+                }
+
+                notesInQueue.push({ engine: 'main', time: nextMainTime, noteIdx: (mainBeatInBar * sub) + mainSubNote, isAcc: isAcc, isBeat: isBeat, isMuted: isMuted, sub: sub });
+
+                let sMode, mainVol, pMult;
+                if (isAcc) { sMode = document.getElementById('snd-accent').value; mainVol = parseFloat(UI.volAccent.value); pMult = parseFloat(document.getElementById('pitch-accent').value); }
+                else if (isBeat) { sMode = document.getElementById('snd-beat').value; mainVol = parseFloat(UI.volNormal.value); pMult = parseFloat(document.getElementById('pitch-beat').value); }
+                else if (isSwingNote) { sMode = document.getElementById('snd-swing').value; mainVol = parseFloat(UI.volSub.value); pMult = parseFloat(document.getElementById('pitch-swing').value); }
+                else { sMode = document.getElementById('snd-sub').value; mainVol = parseFloat(UI.volSub.value); pMult = parseFloat(document.getElementById('pitch-sub').value); }
+
+                playSynthSound(nextMainTime, sMode, mainVol, isMuted, pMult);
+
+                let secPerBeat = 60.0 / tempo;
+                if (isSwingNote || (sub === 2 && swing !== 50 && mainSubNote === 0)) {
+                    let sf = swing / 100; nextMainTime += secPerBeat * (mainSubNote === 0 ? sf : (1 - sf));
+                } else { nextMainTime += secPerBeat / sub; }
+
+                mainSubNote++;
+                if (mainSubNote >= sub) {
+                    mainSubNote = 0; mainBeatInBar++;
+                    if (mainBeatInBar >= totalBeats) {
+                        mainBeatInBar = 0; mainMeasureCount++;
+                        
+                        // ANCLAJE CORREGIDO: Resetea la clave CADA 2 COMPASES del metrónomo principal
+                        if (mainMeasureCount % 2 === 0) {
+                            if (UI.claveSel.value !== 'off') {
+                                claveStep = 0;
+                                nextClaveTime = nextMainTime;
+                            }
+                        }
+                        
+                        if (UI.trainTgl.checked) {
+                            barCount++;
+                            if (barCount >= currentTrainBars) {
+                                let step = parseInt(UI.trainStep.value) * trainDir;
+                                let target = parseInt(UI.trainEnd.value); let start = parseInt(UI.trainStart.value); let inc = parseInt(UI.trainInc.value);
+                                tempo += step; currentTrainBars += inc; 
+                                if (trainDir === 1 && tempo > target) {
+                                    if (UI.trainMode.value === 'loop') { tempo = start; currentTrainBars = parseInt(UI.trainBars.value); } 
+                                    else { trainDir = -1; tempo = target - parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value); }
+                                } else if (trainDir === -1 && tempo < start) {
+                                    trainDir = 1; tempo = start + parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value);
+                                }
+                                tempo = Math.max(20, Math.min(320, tempo)); updateBpmUI(); barCount = 0; 
+                            }
+                        }
+                        if (UI.pyrTgl.checked) {
+                            pyramidBarCount++;
+                            if (pyramidBarCount >= parseInt(UI.pyrBars.value)) {
+                                pyramidIndex = (pyramidIndex + 1) % pyramidArray.length;
+                                UI.subSel.value = pyramidArray[pyramidIndex]; renderVisualizer(); pyramidBarCount = 0;
+                            }
+                        }
+                    }
+                }
+            } 
+            else if (nEv.engine === 'clave') {
+                if (UI.claveSel.value !== 'off') {
+                    if (clavePatterns[UI.claveSel.value][claveStep % 16] === 1) {
+                        playSynthSound(nextClaveTime, document.getElementById('snd-clave').value, vExt, false, parseFloat(document.getElementById('pitch-clave').value));
+                        notesInQueue.push({ engine: 'clave', time: nextClaveTime });
+                    }
+                }
+                nextClaveTime += (60.0 / tempo) * 0.5; claveStep++;
+            } 
+            else if (nEv.engine === 'poly') {
+                if (UI.polyTgl.checked) {
+                    playSynthSound(nextPolyTime, document.getElementById('snd-poly').value, vExt, false, parseFloat(document.getElementById('pitch-poly').value));
+                    notesInQueue.push({ engine: 'poly', time: nextPolyTime });
+                }
+                let px = parseInt(UI.polyX.value) || 1; let py = parseInt(UI.polyY.value) || 1;
+                nextPolyTime += ((60.0 / tempo) * py) / px;
+            } 
+            else if (nEv.engine === 'pm') {
+                if (UI.pmTgl.checked && pmCount === 0) {
+                    playSynthSound(nextPmTime, document.getElementById('snd-pm').value, vExt, false, parseFloat(document.getElementById('pitch-pm').value));
+                    notesInQueue.push({ engine: 'pm', time: nextPmTime });
+                }
+                nextPmTime += 60.0 / tempo;
+                if (UI.pmTgl.checked) pmCount = (pmCount + 1) % (parseInt(UI.pmVal.value) || 1);
+            }
+        }
+        timerID = setTimeout(scheduler, lookahead);
+    }
+
+    let lastMainIdx = -1;
+    function draw() {
+        let evs = []; while (notesInQueue.length && notesInQueue[0].time < audioContext.currentTime) evs.push(notesInQueue.shift());
+
+        evs.forEach(ev => {
+            if (ev.engine === 'main' && ev.noteIdx !== lastMainIdx) {
+                UI.vis.style.opacity = ev.isMuted ? "0.2" : "1"; UI.pendulum.style.opacity = ev.isMuted ? "0.2" : "1";
+
+                if (UI.pendTgl.checked && ev.isBeat) {
+                    pendulumSide *= -1; UI.pendulum.style.transition = `transform ${60/tempo}s ease-in-out`; UI.pendulum.style.transform = `rotate(${25 * pendulumSide}deg)`;
+                    if (ev.isAcc && !ev.isMuted) { UI.pendulum.classList.add('accent-flash'); setTimeout(() => UI.pendulum.classList.remove('accent-flash'), 100); }
+                }
+                if (UI.pendTgl.checked && ev.sub === 2 && parseInt(UI.swingSld.value) !== 50 && !ev.isBeat && !ev.isMuted) {
+                    UI.lightSwing.style.opacity = "1"; setTimeout(() => UI.lightSwing.style.opacity = "0", 60);
+                }
+
+                Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (!d.id.endsWith('-0') && d.id.split('-')[1]%ev.sub!==0 ? ' sub-dot' : ''));
+                const aDot = document.getElementById(`dot-${ev.noteIdx}`);
+                if (aDot && !ev.isMuted) {
+                    if (ev.isAcc) aDot.classList.add('active-downbeat'); else if (ev.isBeat) aDot.classList.add('active-beat'); else aDot.classList.add('active-sub');
+                }
+                lastMainIdx = ev.noteIdx;
+            }
+            if ((ev.engine === 'poly' || ev.engine === 'clave' || ev.engine === 'pm') && !ev.isMuted) {
+                if (UI.pendTgl.checked) {
+                    let tgtLight = ev.engine === 'clave' ? UI.lightClave : (ev.engine === 'poly' ? UI.lightPoly : UI.lightPm);
+                    tgtLight.style.opacity = "1"; setTimeout(() => tgtLight.style.opacity = "0", 60);
+                }
+                if (ev.engine === 'poly') { UI.indPoly.classList.add('flash'); setTimeout(()=>UI.indPoly.classList.remove('flash'), 100); }
+                if (ev.engine === 'clave') { UI.indClave.classList.add('flash'); setTimeout(()=>UI.indClave.classList.remove('flash'), 100); }
+                if (ev.engine === 'pm') { UI.indPm.classList.add('flash'); setTimeout(()=>UI.indPm.classList.remove('flash'), 100); }
+            }
+        });
+        if (isPlaying) requestAnimationFrame(draw);
+    }
+
+    function toggleMetronome() {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            masterGainNode = audioContext.createGain(); masterGainNode.connect(audioContext.destination); masterGainNode.gain.value = UI.volMaster.value;
+        }
+
+        if (!isPlaying) {
+            parsePattern(); isPlaying = true;
+            if (audioContext.state === 'suspended') audioContext.resume();
+            
+            let startTime = audioContext.currentTime + 0.05;
+            nextMainTime = startTime; mainSubNote = 0; mainBeatInBar = 0; mainMeasureCount = 0;
+            nextClaveTime = startTime; claveStep = 0; nextPolyTime = startTime; nextPmTime = startTime; pmCount = 0;
+            
+            if (UI.trainTgl.checked) { tempo = parseInt(UI.trainStart.value); trainDir = 1; currentTrainBars = parseInt(UI.trainBars.value); updateBpmUI(); }
+            if(UI.pyrTgl.checked) { pyramidIndex = 0; pyramidBarCount = 0; UI.subSel.value = pyramidArray[0]; renderVisualizer(); }
+
+            scheduler(); requestAnimationFrame(draw);
+            
+            UI.playBtn.innerText = "DETENER"; UI.playBtn.style.background = "var(--danger)"; UI.playBtn.style.color = "#fff";
+            UI.playBtn.style.boxShadow = "0 0 20px rgba(239, 68, 68, 0.4)";
+
+            const mins = parseFloat(UI.timeMin.value);
+            if (mins > 0) {
+                secondsLeft = Math.floor(mins * 60); UI.timeDisp.style.display = "block";
+                updateTimerDisplay(); practiceIntervalId = setInterval(updateTimerDisplay, 1000);
+            }
+        } else {
+            isPlaying = false; clearTimeout(timerID); clearInterval(practiceIntervalId);
+            UI.playBtn.innerText = "INICIAR"; UI.playBtn.style.background = "var(--accent)"; UI.playBtn.style.color = "white"; UI.playBtn.style.boxShadow = "none"; UI.timeDisp.style.display = "none";
+            UI.pendulum.style.transition = "transform 0.3s ease-out"; UI.pendulum.style.transform = `rotate(0deg)`; UI.vis.style.opacity = "1"; UI.pendulum.style.opacity = "1";
+            Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (!d.id.endsWith('-0') && d.id.split('-')[1]%parseInt(UI.subSel.value)!==0 ? ' sub-dot' : ''));
+        }
+        UI.playBtn.blur(); 
+    }
+
+    UI.playBtn.addEventListener('click', toggleMetronome);
+    parsePattern(); 
+
+    // Año del footer
+    document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();
+</script>
+
+</body>
+</html>
