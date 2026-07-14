@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ear Training</title>
+<style>
+  :root{
+    --teal-950:#070808;
+    --teal-900:#111213;
+    --teal-800:#1a1c1e;
+    --teal-700:#2c2f32;
+    --gold:#d98a3d;
+    --gold-light:#f0b876;
+    --cream:#f4ecdd;
+    --cream-dim:#cdbfa4;
+    --ok:#7fb88a;
+    --err:#c9695f;
+    --ink: #161514;
+    --charcoal: #24201d;
+    --paper: #fbf7f0;
+    --moss: #476357;
+    --line: rgba(255, 255, 255, 0.14);
+    --text: #fffaf0;
+    --muted: rgba(255, 250, 240, 0.68);
+    --gold-empresa: #d4a84f;
+    --gold-dim: rgba(212,168,79,0.35);
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(circle at 20% -10%, #171a1a 0%, var(--teal-950) 55%);
+    color:var(--cream);
+    font-family:Georgia,'Iowan Old Style','Palatino Linotype',serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:inherit; text-decoration:none; }
+
+  .topbar {
+    align-items: center;
+    background: rgba(22, 21, 20, 0.82);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    justify-content: space-between;
+    min-height: 76px;
+    padding: 16px clamp(18px, 4vw, 56px);
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .brand { align-items: center; display: flex; gap: 12px; font-weight: 900; }
+  .brand-mark {
+    align-items: center; background: var(--gold-empresa); border-radius: 50%;
+    color: var(--ink); display: inline-flex; font-size: 0.82rem;
+    height: 38px; justify-content: center; width: 38px;
+  }
+  .social-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .school-logo-link { display: inline-block; line-height: 0; margin-left: auto; }
+  .school-logo { height: 40px; width: auto; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15); transition: transform 0.2s; }
+  .school-logo:hover { transform: scale(1.05); }
+  .social-bar a { display: inline-flex; align-items: center; justify-content: center; color: rgba(255, 250, 240, 0.8); transition: color 0.2s, transform 0.1s; }
+  .social-bar a:hover { color: var(--gold-empresa); transform: scale(1.1); }
+  .social-bar svg { display: block; width: 24px; height: 24px; }
+
+  @media (max-width: 860px) {
+    .topbar { flex-direction: column; align-items: stretch; }
+    .brand { justify-content: center; }
+    .social-bar { justify-content: center; }
+    .school-logo-link { margin-left: 0; }
+  }
+
+  .wrap{max-width:760px;margin:0 auto;padding:28px 20px 60px;}
+  .rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:0 0 24px;}
+
+  .app-description {
+    background: rgba(255,255,255,0.04);
+    border-left: 3px solid var(--gold);
+    padding: 10px 16px;
+    margin: 0 0 20px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 0.85rem;
+    color: var(--cream-dim);
+    line-height: 1.5;
+  }
+  .app-description p {
+    margin: 0;
+  }
+
+  .levels{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:26px;}
+  .lvl-btn{
+    flex:0 0 auto;
+    font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;
+    font-size:.72rem;letter-spacing:.05em;
+    background:transparent;border:1px solid var(--teal-700);color:var(--cream-dim);
+    padding:10px 14px;border-radius:3px;cursor:pointer;text-align:left;
+    transition:border-color .15s, color .15s;
+    min-width:150px;
+    position:relative;
+  }
+  .lvl-btn .n{color:var(--gold);font-weight:700;margin-right:6px;}
+  .lvl-btn.active{border-color:var(--gold);color:var(--cream);background:rgba(217,138,61,.08);}
+  .lvl-btn:hover{border-color:var(--gold-light);}
+
+  .card{
+    background:var(--teal-900);
+    border:1px solid var(--teal-700);
+    border-radius:6px;
+    padding:34px 28px;
+  }
+
+  .quiz-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:22px;flex-wrap:wrap;gap:8px;}
+  .quiz-top h2{
+    font-family:Futura,'Century Gothic','Trebuchet MS',sans-serif;
+    text-transform:uppercase;letter-spacing:.08em;font-size:1rem;color:var(--gold-light);margin:0;
+  }
+  .stats{
+    font-family:Futura,'Century Gothic',sans-serif;font-size:.72rem;letter-spacing:.05em;
+    color:var(--cream-dim);
+  }
+  .stats b{color:var(--gold);}
+  .stats .pct{color:var(--gold-light);}
+
+  .stage{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:36px 10px 30px;
+    border:1px dashed var(--teal-700);
+    border-radius:6px;
+    margin-bottom:26px;
+  }
+  .play-btn{
+    width:92px;height:92px;border-radius:50%;
+    background:var(--gold);border:none;cursor:pointer;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    box-shadow:0 6px 18px rgba(217,138,61,.35);
+    transition:transform .12s;
+    color:var(--teal-950);
+    font-weight:bold;
+    font-size:0.75rem;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+  }
+  .play-btn:hover:not(:disabled){transform:scale(1.05);}
+  .play-btn:active:not(:disabled){transform:scale(.96);}
+  .play-btn:disabled{
+    opacity:0.5;
+    cursor:wait;
+    box-shadow:none;
+  }
+  .play-btn svg{width:32px;height:32px;fill:var(--teal-950);margin-left:4px;}
+  .play-btn .btn-label{display:block;margin-top:2px;font-size:0.6rem;}
+
+  .stage-label{
+    margin-top:14px;font-family:Futura,'Century Gothic',sans-serif;font-size:.7rem;
+    letter-spacing:.1em;text-transform:uppercase;color:var(--cream-dim);
+  }
+  .replay-btn{
+    margin-top:12px;background:none;border:1px solid var(--teal-700);color:var(--cream-dim);
+    font-family:Futura,'Century Gothic',sans-serif;font-size:.68rem;letter-spacing:.08em;
+    text-transform:uppercase;padding:7px 16px;border-radius:20px;cursor:pointer;
+  }
+  .replay-btn:hover{border-color:var(--gold-light);color:var(--cream);}
+
+  .volume-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+    width: 100%;
+    max-width: 260px;
+    justify-content: center;
+  }
+  .volume-control label {
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+  }
+  .volume-control input[type="range"] {
+    flex: 1;
+    accent-color: var(--gold);
+    height: 4px;
+    background: var(--teal-700);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    min-width: 100px;
+  }
+  .volume-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px rgba(217, 138, 61, 0.3);
+  }
+  .volume-control input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    border: none;
+  }
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+  .opt-btn{
+    font-family:'Cambria','Georgia',serif;font-size:1.02rem;
+    background:var(--teal-800);border:1px solid var(--teal-700);color:var(--cream);
+    padding:16px 10px;border-radius:5px;cursor:pointer;text-align:center;
+    transition:border-color .12s, background .12s;
+  }
+  .opt-btn:hover:not(:disabled){border-color:var(--gold-light);}
+  .opt-btn.correct{background:rgba(127,184,138,.18);border-color:var(--ok);color:var(--ok);}
+  .opt-btn.wrong{background:rgba(201,105,95,.18);border-color:var(--err);color:var(--err);}
+  .opt-btn:disabled{cursor:default;}
+
+  .feedback{
+    min-height:26px;font-family:Futura,'Century Gothic',sans-serif;font-size:.8rem;
+    letter-spacing:.03em;color:var(--cream-dim);text-align:center;margin-bottom:14px;
+  }
+  .feedback b{color:var(--gold-light);}
+
+  .next-btn{
+    display:block;margin:0 auto;background:var(--gold);border:none;color:var(--teal-950);
+    font-family:Futura,'Century Gothic',sans-serif;font-weight:700;font-size:.78rem;
+    letter-spacing:.1em;text-transform:uppercase;padding:12px 30px;border-radius:26px;
+    cursor:pointer;visibility:hidden;
+  }
+  .next-btn.show{visibility:visible;}
+
+  .reset-stats-btn {
+    display: block;
+    margin: 12px auto 0;
+    background: rgba(201,105,95,0.12);
+    border: 1px solid var(--err);
+    color: var(--err);
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .reset-stats-btn:hover {
+    background: rgba(201,105,95,0.25);
+    color: #f3b3a8;
+    border-color: #f3b3a8;
+  }
+
+  .chord-picker {
+    margin-top: 16px;
+    width: 100%;
+    max-width: 480px;
+    text-align: left;
+  }
+  .chord-picker .picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .chord-picker .picker-header label {
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--cream-dim);
+  }
+  .chord-picker .picker-buttons {
+    display: flex;
+    gap: 6px;
+  }
+  .chord-picker .picker-buttons button {
+    background: var(--teal-800);
+    border: 1px solid var(--teal-700);
+    color: var(--cream-dim);
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.6rem;
+    padding: 2px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .chord-picker .picker-buttons button:hover {
+    border-color: var(--gold-light);
+    color: var(--cream);
+  }
+  .chord-picker .picker-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px 12px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 6px 4px;
+    border: 1px solid var(--teal-700);
+    border-radius: 4px;
+    background: rgba(0,0,0,0.25);
+  }
+  .chord-picker .picker-grid label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Cambria','Georgia',serif;
+    font-size: 0.78rem;
+    color: var(--cream-dim);
+    cursor: pointer;
+    transition: color .15s;
+  }
+  .chord-picker .picker-grid label:hover {
+    color: var(--cream);
+  }
+  .chord-picker .picker-grid input[type="checkbox"] {
+    accent-color: var(--gold);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+  .chord-picker .picker-grid .count {
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .auto-play-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: Futura,'Century Gothic',sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--cream-dim);
+    cursor: pointer;
+  }
+  .auto-play-toggle input[type="checkbox"] {
+    accent-color: var(--gold);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 40px;
+    padding: 22px clamp(18px, 4vw, 56px) 30px;
+    text-align: center;
+    background: rgba(22, 21, 20, 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  .site-footer p { margin: 2px 0; }
+
+  @media (max-width: 860px) {
+    .site-footer { margin-top: 30px; }
+    .chord-picker .picker-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 500px) {
+    .chord-picker .picker-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <h1 class="brand" href="../../">
+    Ear Training
+  </h1>
+  <div class="social-bar">
+    <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+    </a>
+    <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" aria-label="WhatsApp">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+      </svg>
+    </a>
+    <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" aria-label="Facebook">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+    </a>
+    <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </a>
+    <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" aria-label="Hotmart">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 7V2h12v5"/>
+        <path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+        <path d="M8 12h8"/>
+      </svg>
+    </a>
+    <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" aria-label="YouTube">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+    </a>
+    <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" class="school-logo-link">
+      <img
+        src="https://scontent.fuio5-1.fna.fbcdn.net/v/t39.30808-6/689316806_122177479256856020_7927560189686558059_n.jpg?stp=dst-jpg_tt6&cstp=mx1250x1250&ctp=s1250x1250&_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHwErWI6u9y5L-wE7NjduHb6G6w8ifhyg3obrDyJ-HKDcBBw8k1qqU-ODJCCVDHFh8ceCJHGUwNCw10BBI0n5Ce&_nc_ohc=X8RhpuaGUrgQ7kNvwFpElgR&_nc_oc=AdrFznvTH9MWAhjT4fD8E7nkA0QkTD45JPEETiEVnAOONf0GvBzlP4tN5dNZ6e8CqNA&_nc_zt=23&_nc_ht=scontent.fuio5-1.fna&_nc_gid=Vzip9GK7fUHINjzHpxub_g&_nc_ss=7b2a8&oh=00_AQCdmqpSaqdqkNRTrh1z9JA6CmzZrebvJvwQH8g7PkUWBQ&oe=6A558001"
+        alt="Logo Crescendo Academy"
+        class="school-logo"
+      />
+    </a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="rule"></div>
+  <div class="app-description">
+    <p>🎵 Entrenamiento auditivo para músicos. Practica intervalos, acordes, progresiones armónicas y más en 8 niveles progresivos. Selecciona un nivel y comienza a entrenar tu oído.</p>
+  </div>
+  <nav class="levels" id="levels"></nav>
+  <div class="card" id="card"></div>
+</div>
+
+<footer class="site-footer">
+  <p>Desarrollado por Crescendo Academy</p>
+  <p>&copy; <span id="footerYear"></span> Crescendo Academy. Todos los derechos reservados.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js">
+</script>
+
+<script>
+/* ---------------------------------------------------------
+   DATA: niveles (todos disponibles desde el inicio)
+--------------------------------------------------------- */
+const LEVELS = [
+  { id:1, title:'Intervalos', short:'Intervalos',
+    instr:'Escucha el intervalo y selecciona su nombre.' },
+  { id:2, title:'Acordes Básicos', short:'Acordes',
+    instr:'Escucha el acorde y selecciona su tipo.' },
+  { id:3, title:'Acordes Diatónicos', short:'7mas diatónicas',
+    instr:'Tónica → acorde diatónico. ¿Qué grado sonó?' },
+  { id:4, title:'Dominantes Secundarios', short:'V7/II, V7/V...',
+    instr:'Tónica → dominante secundario → resolución. ¿A qué grado resolvió?' },
+  { id:5, title:'Disminuidos Secundarios', short:'viiº7 secundarios',
+    instr:'Tónica → disminuido secundario → resolución. ¿A qué grado resolvió?' },
+  { id:6, title:'Sustitución Tritonal', short:'bII7 por V7',
+    instr:'Tónica → acorde previo → resolución. ¿Dominante secundario o sustitución tritonal?' },
+  { id:7, title:'Cambios de Centro Tonal', short:'Modulaciones',
+    instr:'Tónica de referencia → ii–V–I en una nueva tonalidad. ¿Hacia dónde se movió el centro tonal?' },
+  { id:8, title:'Acordes Major6 / 6-9', short:'Sustitutos de IΔ7',
+    instr:'Tónica → acorde de tónica. ¿Δ7, 6 o 6/9?' },
+];
+
+const PITCH_NAMES = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const MAJOR_SCALE = [0,2,4,5,7,9,11];
+
+const CHORD = {
+  MAJ7:  [0,4,7,11],
+  MIN7:  [0,3,7,10],
+  DOM7:  [0,4,7,10],
+  DIM7:  [0,3,6,9],
+  MIN7B5:[0,3,6,10],
+  MAJ6:  [0,4,7,9],
+  MAJ69: [0,4,7,9,14],
+};
+function chordMidis(rootPc, formula, base=60){
+  return formula.map(iv=> base+rootPc+iv);
+}
+
+function prettyLabel(d){
+  const map = ['I Δ7','ii m7','iii m7','IV Δ7','V7','vi m7','vii ø7'];
+  return map[d];
+}
+function pick(arr,n){ return [...arr].sort(()=>Math.random()-0.5).slice(0,n); }
+function randInt(n){ return Math.floor(Math.random()*n); }
+
+function diatonicChordMidis(rootPc, degree, baseOctaveMidi=60){
+  const root = baseOctaveMidi + rootPc;
+  const tones = [];
+  [0,2,4,6].forEach(k=>{
+    const idx = (degree + k) % 7;
+    const octShift = Math.floor((degree + k)/7);
+    tones.push(root + 12*octShift + MAJOR_SCALE[idx]);
+  });
+  return tones;
+}
+
+/* ---------------------------------------------------------
+   TRANSPOSICIÓN AL RANGO C3–C6 (MIDI 48–84)
+--------------------------------------------------------- */
+function transposeMidiToRange(notes, minMidi = 48, maxMidi = 84) {
+  if (notes.length === 0) return notes;
+  let sorted = [...notes].sort((a,b) => a - b);
+  let lowest = sorted[0];
+  let highest = sorted[sorted.length - 1];
+  if (lowest >= minMidi && highest <= maxMidi) return notes;
+  let bestShift = 0;
+  let bestScore = Infinity;
+  for (let shift = -2; shift <= 2; shift++) {
+    let transposed = notes.map(n => n + shift * 12);
+    let newLow = Math.min(...transposed);
+    let newHigh = Math.max(...transposed);
+    if (newLow >= minMidi && newHigh <= maxMidi) {
+      return transposed;
+    }
+    let dist = 0;
+    if (newLow < minMidi) dist += (minMidi - newLow);
+    if (newHigh > maxMidi) dist += (newHigh - maxMidi);
+    if (dist < bestScore) {
+      bestScore = dist;
+      bestShift = shift;
+    }
+  }
+  return notes.map(n => n + bestShift * 12);
+}
+
+/* ---------------------------------------------------------
+   AUDIO ENGINE
+--------------------------------------------------------- */
+let audioCtx = null;
+let masterBus = null;
+let sfPlayer = null;
+let sfLoading = false;
+let sfLoaded = false;
+let sfLoadError = false;
+let playQueue = [];
+
+let playBtn = null;
+let playBtnLabel = null;
+
+function ensureCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterBus = audioCtx.createGain();
+    masterBus.gain.value = 1;
+    const limiter = audioCtx.createDynamicsCompressor();
+    limiter.threshold.setValueAtTime(-6, audioCtx.currentTime);
+    limiter.knee.setValueAtTime(12, audioCtx.currentTime);
+    limiter.ratio.setValueAtTime(8, audioCtx.currentTime);
+    limiter.attack.setValueAtTime(0.003, audioCtx.currentTime);
+    limiter.release.setValueAtTime(0.15, audioCtx.currentTime);
+    masterBus.connect(limiter);
+    limiter.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function initSoundFont() {
+  if (sfPlayer || sfLoading) return;
+  sfLoading = true;
+  const ctx = ensureCtx();
+  Soundfont.instrument(ctx, 'acoustic_grand_piano', { destination: masterBus })
+    .then(instrument => {
+      sfPlayer = instrument;
+      sfLoading = false;
+      sfLoaded = true;
+      sfLoadError = false;
+      enablePlayButton(true);
+      processQueue();
+    })
+    .catch(err => {
+      sfLoading = false;
+      sfLoaded = false;
+      sfLoadError = true;
+      enablePlayButton(true);
+      processQueue();
+    });
+}
+
+function enablePlayButton(enabled) {
+  if (!playBtn) {
+    playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+      playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
+    }
+  }
+  if (playBtn) {
+    playBtn.disabled = !enabled;
+    if (enabled) {
+      if (sfLoadError) {
+        playBtn.innerHTML = '<span>▶</span><span class="btn-label">Fallback</span>';
+        playBtn.style.background = '#b66543';
+      } else if (sfLoaded) {
+        playBtn.innerHTML = '<span>▶</span><span class="btn-label">Escuchar</span>';
+        playBtn.style.background = 'var(--gold)';
+      } else {
+        playBtn.innerHTML = '<span>⏳</span><span class="btn-label">Cargando...</span>';
+        playBtn.style.background = 'var(--gold-dim)';
+      }
+    } else {
+      playBtn.innerHTML = '<span>⏳</span><span class="btn-label">Cargando...</span>';
+      playBtn.style.background = 'var(--gold-dim)';
+    }
+  }
+}
+
+function processQueue() {
+  while (playQueue.length > 0) {
+    const req = playQueue.shift();
+    playChordInternal(req.midiArr, req.startTime, req.dur, req.velocity);
+  }
+}
+
+function playChordInternal(midiArr, startTime, dur, velocity) {
+  const transposed = transposeMidiToRange(midiArr);
+  const ctx = ensureCtx();
+  const slider = document.getElementById('volumeSlider');
+  const vol = parseFloat(slider ? slider.value : 4);
+  if (sfPlayer && sfLoaded) {
+    try {
+      transposed.forEach(midi => {
+        const note = sfPlayer.play(midi, startTime, { gain: vol });
+        if (note) {
+          try {
+            note.stop(startTime + dur + 0.1);
+          } catch(e) {}
+        }
+      });
+      return;
+    } catch(e) {
+      console.warn('⚠️ Error con SoundFont, usando fallback:', e);
+    }
+  }
+  transposed.forEach(midi => playFallbackNote(midi, startTime, dur, vol));
+}
+
+function playFallbackNote(midi, startTime, dur, vol) {
+  const ctx = ensureCtx();
+  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(vol * 0.45, startTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(vol * 0.45, startTime + dur - 0.06);
+  gain.gain.linearRampToValueAtTime(0, startTime + dur + 0.04);
+  osc.connect(gain);
+  gain.connect(masterBus);
+  osc.start(startTime);
+  osc.stop(startTime + dur + 0.1);
+}
+
+function playChord(midiArr, startTime, dur, velocity) {
+  if (sfLoaded && sfPlayer) {
+    playChordInternal(midiArr, startTime, dur, velocity);
+    return;
+  }
+  if (!sfLoadError) {
+    playQueue.push({ midiArr, startTime, dur, velocity });
+    if (!sfLoading && !sfLoaded) {
+      initSoundFont();
+    }
+    return;
+  }
+  const transposed = transposeMidiToRange(midiArr);
+  const slider = document.getElementById('volumeSlider');
+  const vol = parseFloat(slider ? slider.value : 4);
+  transposed.forEach(midi => playFallbackNote(midi, startTime, dur, vol));
+}
+
+function setupVolumeControl() {
+  const slider = document.getElementById('volumeSlider');
+  if (!slider) return;
+  slider.addEventListener('input', function() {});
+}
+
+/* ---------------------------------------------------------
+   LOCAL STORAGE: estadísticas y selección de acordes
+--------------------------------------------------------- */
+const STORAGE_KEY_STATS = 'earTraining_stats';
+const STORAGE_KEY_CHORDS = 'earTraining_chords';
+
+function getLevelStats(levelId) {
+  const all = JSON.parse(localStorage.getItem(STORAGE_KEY_STATS) || '{}');
+  return all[levelId] || { correct:0, total:0, streakMax:0 };
+}
+
+function saveLevelStats(levelId, correct, total, streakMax) {
+  const all = JSON.parse(localStorage.getItem(STORAGE_KEY_STATS) || '{}');
+  all[levelId] = { correct, total, streakMax };
+  localStorage.setItem(STORAGE_KEY_STATS, JSON.stringify(all));
+}
+
+function updateStats(levelId, isCorrect) {
+  const stats = getLevelStats(levelId);
+  stats.total++;
+  if (isCorrect) stats.correct++;
+  // la racha máxima se actualiza desde selectAnswer
+  saveLevelStats(levelId, stats.correct, stats.total, stats.streakMax);
+}
+
+function saveChordSelection(ids) {
+  localStorage.setItem(STORAGE_KEY_CHORDS, JSON.stringify(ids));
+}
+
+function loadChordSelection() {
+  const data = localStorage.getItem(STORAGE_KEY_CHORDS);
+  if (data) {
+    try { return JSON.parse(data); } catch(e) { return null; }
+  }
+  return null;
+}
+
+function resetAllStats() {
+  localStorage.removeItem(STORAGE_KEY_STATS);
+  localStorage.removeItem(STORAGE_KEY_CHORDS);
+  location.reload();
+}
+
+/* ---------------------------------------------------------
+   TODOS LOS TIPOS DE ACORDES (orden exacto de la imagen)
+--------------------------------------------------------- */
+const ALL_CHORD_TYPES = [
+  { id: 'c5', display: '5', intervals: [0,7] },
+  { id: 'cmaj', display: 'Mayor', intervals: [0,4,7] },
+  { id: 'cmin', display: 'Menor', intervals: [0,3,7] },
+  { id: 'caug', display: 'Aumentado', intervals: [0,4,8] },
+  { id: 'cdim', display: 'Disminuido', intervals: [0,3,6] },
+  { id: 'csus2', display: 'sus2', intervals: [0,2,7] },
+  { id: 'csus4', display: 'sus4', intervals: [0,5,7] },
+  { id: 'cadd2', display: 'add2', intervals: [0,2,4,7] },
+  { id: 'cmadd2', display: 'm(add2)', intervals: [0,2,3,7] },
+  { id: 'cadd4', display: 'add4', intervals: [0,4,5,7] },
+  { id: 'cmadd4', display: 'm(add4)', intervals: [0,3,5,7] },
+  { id: 'c6', display: '6', intervals: [0,4,7,9] },
+  { id: 'cm6', display: 'm6', intervals: [0,3,7,9] },
+  { id: 'cmi7', display: 'm7 (mi7)', intervals: [0,3,7,10] },
+  { id: 'cmi7b', display: 'm7 (c-7)', intervals: [0,3,7,10] },
+  { id: 'c7', display: '7', intervals: [0,4,7,10] },
+  { id: 'cm7', display: 'm7', intervals: [0,3,7,10] },
+  { id: 'c7sus4', display: '7sus4', intervals: [0,5,7,10] },
+  { id: 'cm7add4', display: 'm7add4', intervals: [0,3,5,7,10] },
+  { id: 'c7sharp5', display: '7#5', intervals: [0,4,8,10] },
+  { id: 'c7flat5', display: '7b5', intervals: [0,4,6,10] },
+  { id: 'cm7flat5', display: 'm7b5', intervals: [0,3,6,10] },
+  { id: 'cdim7', display: 'dim7', intervals: [0,3,6,9] },
+  { id: 'cmi7sharp5', display: 'm7#5', intervals: [0,3,8,10] },
+  { id: 'cadd9', display: 'add9', intervals: [0,4,7,14] },
+  { id: 'cmadd9', display: 'm(add9)', intervals: [0,3,7,14] },
+  { id: 'cmi9', display: 'm9', intervals: [0,3,7,10,14] },
+  { id: 'c9', display: '9', intervals: [0,4,7,10,14] },
+  { id: 'c7b9', display: '7b9', intervals: [0,4,7,10,13] },
+  { id: 'c7sharp9', display: '7#9', intervals: [0,4,7,10,15] },
+  { id: 'cm9', display: 'm9', intervals: [0,3,7,10,14] },
+  { id: 'c9sharp5', display: '9#5', intervals: [0,4,8,10,14] },
+  { id: 'c9flat5', display: '9b5', intervals: [0,4,6,10,14] },
+  { id: 'c9_99', display: '9 (9/9)', intervals: [0,4,7,10,14] },
+  { id: 'cm9_99', display: 'm9 (9/9)', intervals: [0,3,7,10,14] },
+  { id: 'c9sus4', display: '9sus4', intervals: [0,5,7,10,14] },
+  { id: 'c11', display: '11', intervals: [0,4,7,10,14,17] },
+  { id: 'cm11', display: 'm11', intervals: [0,3,7,10,14,17] },
+  { id: 'c13', display: '13', intervals: [0,4,7,10,14,17,21] },
+  { id: 'c13sus4', display: '13sus4', intervals: [0,5,7,10,14,17,21] },
+  { id: 'cmi13', display: 'm13', intervals: [0,3,7,10,14,17,21] },
+  { id: 'c13b9', display: '13b9', intervals: [0,4,7,10,13,17,21] },
+  { id: 'c13sharp9', display: '13#9', intervals: [0,4,7,10,15,17,21] },
+  { id: 'c7sharp11', display: '7#11', intervals: [0,4,7,10,18] },
+  { id: 'cmi7sharp11', display: 'm7#11', intervals: [0,3,7,10,18] },
+  { id: 'c9sharp11', display: '9#11', intervals: [0,4,7,10,14,18] },
+  { id: 'cmi9sharp11', display: 'm9#11', intervals: [0,3,7,10,14,18] },
+  { id: 'c13sharp11', display: '13#11', intervals: [0,4,7,10,14,18,21] },
+  { id: 'c7_6sharp5', display: '7(6#5)', intervals: [0,4,8,9,10] }
+];
+
+// Por defecto: solo Mayor y Menor, se cargan desde localStorage
+const defaultSelected = ['cmaj', 'cmin'];
+let selectedChordIds = [];
+
+function initChordSelection() {
+  const saved = loadChordSelection();
+  if (saved && saved.length > 0) {
+    const valid = saved.filter(id => ALL_CHORD_TYPES.some(c => c.id === id));
+    if (valid.length > 0) {
+      selectedChordIds = valid;
+      return;
+    }
+  }
+  selectedChordIds = defaultSelected.slice();
+  saveChordSelection(selectedChordIds);
+}
+initChordSelection();
+
+/* ---------------------------------------------------------
+   GENERADORES
+--------------------------------------------------------- */
+let BASE = 60;
+
+// Nivel 1: Intervalos
+const INTERVAL_NAMES = [
+  { semitones:0, name:'Unísono' },
+  { semitones:1, name:'2ª menor' },
+  { semitones:2, name:'2ª mayor' },
+  { semitones:3, name:'3ª menor' },
+  { semitones:4, name:'3ª mayor' },
+  { semitones:5, name:'4ª justa' },
+  { semitones:6, name:'4ª aumentada' },
+  { semitones:7, name:'5ª justa' },
+  { semitones:8, name:'6ª menor' },
+  { semitones:9, name:'6ª mayor' },
+  { semitones:10, name:'7ª menor' },
+  { semitones:11, name:'7ª mayor' },
+  { semitones:12, name:'Octava' }
+];
+
+function genLevelInterval(){
+  const correct = INTERVAL_NAMES[randInt(INTERVAL_NAMES.length)];
+  let base = BASE;
+  if (base + correct.semitones > 72) base = 72 - correct.semitones;
+  if (base < 48) base = 48;
+  let candidates = pick(INTERVAL_NAMES, 4);
+  if (!candidates.some(c => c.semitones === correct.semitones)) {
+    candidates[0] = correct;
+  }
+  candidates = candidates.sort(() => Math.random() - 0.5);
+  const options = candidates.map(c => c.name);
+  const correctIdx = candidates.findIndex(c => c.semitones === correct.semitones);
+  const seq = [
+    { notes:[base], start:0.05, dur:0.6, vel:0.7 },
+    { notes:[base + correct.semitones], start:1.0, dur:1.5, vel:0.8 }
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — el intervalo es <b>${correct.name}</b> (${correct.semitones} semitonos).`;
+  return { options, correctIdx, seq, feedback };
+}
+
+// Nivel 2: Acordes
+function genLevelChord(){
+  const activeTypes = ALL_CHORD_TYPES.filter(c => selectedChordIds.includes(c.id));
+  if (activeTypes.length === 0) {
+    return {
+      options: ['Selecciona al menos un tipo de acorde'],
+      correctIdx: 0,
+      seq: [],
+      feedback: () => 'Por favor, selecciona al menos un tipo de acorde en el panel de abajo.'
+    };
+  }
+  const correct = activeTypes[randInt(activeTypes.length)];
+  const base = BASE;
+  const chordNotes = correct.intervals.map(iv => base + iv);
+  let opts = activeTypes.map(c => c.display).sort(() => Math.random() - 0.5);
+  const correctIdx = opts.indexOf(correct.display);
+  const seq = [
+    { notes:chordNotes, start:0.2, dur:3.0, vel:0.85 }
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — el acorde es <b>${correct.display}</b> (sobre ${PITCH_NAMES[base % 12]}).`;
+  return { options: opts, correctIdx, seq, feedback };
+}
+
+// Niveles 3–8 (originales)
+function genLevel3(){
+  const keyPc = randInt(12);
+  const degree = randInt(7);
+  const degs = pick([0,1,2,3,4,5,6],4);
+  if(!degs.includes(degree)) degs[0] = degree;
+  const options = pick(degs,4).map(d=>({d,label:prettyLabel(d)}));
+  const correctIdx = options.findIndex(o=>o.d===degree);
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.55, vel:0.7 },
+    { notes:diatonicChordMidis(keyPc,degree,BASE), start:0.9, dur:3.0, vel:0.85 },
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — <b>${prettyLabel(degree)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b>.`;
+  return { options: options.map(o=>o.label), correctIdx, seq, feedback };
+}
+
+function genLevel4(){
+  const keyPc = randInt(12);
+  const TARGETS = [1,2,3,4,5];
+  const targets = pick(TARGETS,4);
+  const degree = targets[randInt(targets.length)];
+  const targetRootPc = (keyPc + MAJOR_SCALE[degree]) % 12;
+  const domRootPc = (targetRootPc + 7) % 12;
+  const options = targets.map(d=>`V7/${['','ii','iii','IV','V','vi'][d]}`);
+  const correctIdx = targets.indexOf(degree);
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.5, vel:0.65 },
+    { notes:chordMidis(domRootPc, CHORD.DOM7, BASE), start:0.85, dur:1.8, vel:0.85 },
+    { notes:diatonicChordMidis(keyPc,degree,BASE), start:2.75, dur:3.0, vel:1.0 },
+  ];
+  const romanTarget = ['','ii','iii','IV','V','vi'][degree];
+  const feedback = ok => `${ok?'Correcto':'Era'} — <b>V7/${romanTarget}</b> resolviendo a <b>${romanTarget}</b> (tonalidad de ${PITCH_NAMES[keyPc]}).`;
+  return { options, correctIdx, seq, feedback };
+}
+
+function genLevel5(){
+  const keyPc = randInt(12);
+  const TARGETS = [1,2,3,4,5,6];
+  const targets = pick(TARGETS,4);
+  const degree = targets[randInt(targets.length)];
+  const targetRootPc = (keyPc + MAJOR_SCALE[degree]) % 12;
+  const dimRootPc = (targetRootPc + 11) % 12;
+  const romanNames = ['','ii','iii','IV','V','vi','vii'];
+  const options = targets.map(d=>`º7/${romanNames[d]}`);
+  const correctIdx = targets.indexOf(degree);
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.5, vel:0.65 },
+    { notes:chordMidis(dimRootPc, CHORD.DIM7, BASE), start:0.85, dur:1.6, vel:0.8 },
+    { notes:diatonicChordMidis(keyPc,degree,BASE), start:2.55, dur:3.0, vel:1.0 },
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — <b>º7/${romanNames[degree]}</b> resolviendo a <b>${romanNames[degree]}</b> (tonalidad de ${PITCH_NAMES[keyPc]}).`;
+  return { options, correctIdx, seq, feedback };
+}
+
+function genLevel6(){
+  const keyPc = randInt(12);
+  const TARGETS = [1,2,3,4,5];
+  const degree = TARGETS[randInt(TARGETS.length)];
+  const targetRootPc = (keyPc + MAJOR_SCALE[degree]) % 12;
+  const isSub = Math.random() < 0.5;
+  const preRootPc = isSub ? (targetRootPc + 1) % 12 : (targetRootPc + 7) % 12;
+  const options = ['Dominante secundario (V7)', 'Sustitución tritonal (subV7)'];
+  const correctIdx = isSub ? 1 : 0;
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.5, vel:0.65 },
+    { notes:chordMidis(preRootPc, CHORD.DOM7, BASE), start:0.85, dur:1.8, vel:0.85 },
+    { notes:diatonicChordMidis(keyPc,degree,BASE), start:2.75, dur:3.0, vel:1.0 },
+  ];
+  const romanTarget = ['','ii','iii','IV','V','vi'][degree];
+  const feedback = ok => `${ok?'Correcto':'Era'} — <b>${options[correctIdx]}</b> resolviendo a ${romanTarget} (tonalidad de ${PITCH_NAMES[keyPc]}).`;
+  return { options, correctIdx, seq, feedback };
+}
+
+function genLevel7(){
+  const keyPc = randInt(12);
+  const INTERVALS = [
+    {iv:1,  label:'medio tono arriba'},
+    {iv:-1, label:'medio tono abajo'},
+    {iv:2,  label:'un tono arriba'},
+    {iv:-2, label:'un tono abajo'},
+    {iv:3,  label:'3ra menor arriba'},
+    {iv:-3, label:'3ra menor abajo'},
+    {iv:5,  label:'4ta justa arriba'},
+    {iv:-5, label:'4ta justa abajo'},
+  ];
+  const choices = pick(INTERVALS,4);
+  const chosen = choices[randInt(4)];
+  const newKeyPc = ((keyPc + chosen.iv) % 12 + 12) % 12;
+  const options = choices.map(c=>c.label);
+  const correctIdx = choices.indexOf(chosen);
+  const ii = chordMidis((newKeyPc+2)%12, CHORD.MIN7, BASE);
+  const V  = chordMidis((newKeyPc+7)%12, CHORD.DOM7, BASE);
+  const I  = chordMidis(newKeyPc, CHORD.MAJ7, BASE);
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.6, vel:0.65 },
+    { notes:ii, start:0.9,  dur:2.2, vel:0.75 },
+    { notes:V,  start:3.3,  dur:2.5, vel:0.9 },
+    { notes:I,  start:6.0,  dur:3.8, vel:1.0 },
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — el centro tonal se movió <b>${chosen.label}</b> (de ${PITCH_NAMES[keyPc]} a ${PITCH_NAMES[newKeyPc]}).`;
+  return { options, correctIdx, seq, feedback };
+}
+
+function genLevel8(){
+  const keyPc = randInt(12);
+  const TYPES = [
+    {f:CHORD.MAJ7, label:'Δ7'},
+    {f:CHORD.MAJ6, label:'6'},
+    {f:CHORD.MAJ69, label:'6/9'},
+  ];
+  const chosen = TYPES[randInt(3)];
+  const options = TYPES.map(t=>t.label);
+  const correctIdx = TYPES.indexOf(chosen);
+  const seq = [
+    { notes:[BASE+keyPc], start:0.05, dur:0.5, vel:0.65 },
+    { notes:chordMidis(keyPc, chosen.f, BASE), start:0.8, dur:3.0, vel:0.85 },
+  ];
+  const feedback = ok => `${ok?'Correcto':'Era'} — acorde <b>${PITCH_NAMES[keyPc]}${chosen.label}</b>.`;
+  return { options, correctIdx, seq, feedback };
+}
+
+const GENERATORS = {
+  1: genLevelInterval,
+  2: genLevelChord,
+  3: genLevel3,
+  4: genLevel4,
+  5: genLevel5,
+  6: genLevel6,
+  7: genLevel7,
+  8: genLevel8
+};
+
+/* ---------------------------------------------------------
+   ESTADO Y RENDER
+--------------------------------------------------------- */
+let round = null;
+let score = { correct:0, total:0, streak:0, streakMax:0 };
+let activeLevel = 1;
+let autoPlay = true;
+
+function newRound(){
+  BASE = 48 + Math.floor(Math.random() * 25);
+  const gen = GENERATORS[activeLevel];
+  if (!gen) return;
+  round = gen();
+  round.answered = false;
+  renderQuiz();
+}
+
+function playRound(){
+  const ctx = ensureCtx();
+  const t0 = ctx.currentTime;
+  if (round && round.seq && round.seq.length > 0) {
+    round.seq.forEach(step=>{
+      playChord(step.notes, t0+step.start, step.dur, 1.0);
+    });
+  }
+}
+
+function selectAnswer(i, btnEls){
+  if(round.answered) return;
+  round.answered = true;
+  score.total++;
+  const correct = (i === round.correctIdx);
+  if(correct){ score.correct++; score.streak++; }
+  else { score.streak = 0; }
+  if (score.streak > score.streakMax) score.streakMax = score.streak;
+
+  const stats = getLevelStats(activeLevel);
+  stats.total++;
+  if (correct) stats.correct++;
+  if (score.streakMax > stats.streakMax) stats.streakMax = score.streakMax;
+  saveLevelStats(activeLevel, stats.correct, stats.total, stats.streakMax);
+
+  btnEls.forEach((b,idx)=>{
+    b.disabled = true;
+    if(idx === round.correctIdx) b.classList.add('correct');
+    else if(idx === i) b.classList.add('wrong');
+  });
+  document.getElementById('feedback').innerHTML = round.feedback(correct);
+  document.getElementById('nextBtn').classList.add('show');
+  updateStatsDisplay();
+}
+
+function updateStatsDisplay() {
+  const stats = getLevelStats(activeLevel);
+  const pct = stats.total > 0 ? Math.round(100 * stats.correct / stats.total) : 0;
+  document.getElementById('statsTxt').innerHTML =
+    `<b>${stats.correct}</b>/${stats.total} · racha actual <b>${score.streak}</b> · racha máx <b>${stats.streakMax}</b> · <span class="pct">${pct}%</span>`;
+}
+
+function renderLevels(){
+  const nav = document.getElementById('levels');
+  nav.innerHTML = '';
+  LEVELS.forEach(lv=>{
+    const b = document.createElement('button');
+    b.className = 'lvl-btn' + (lv.id===activeLevel?' active':'');
+    b.innerHTML = `<span class="n">${lv.id}</span>${lv.short}`;
+    b.onclick = ()=>{
+      activeLevel = lv.id;
+      const stats = getLevelStats(activeLevel);
+      score.correct = stats.correct;
+      score.total = stats.total;
+      score.streak = 0;
+      score.streakMax = stats.streakMax || 0;
+      if (activeLevel === 2) {
+        const saved = loadChordSelection();
+        if (saved && saved.length > 0) {
+          const valid = saved.filter(id => ALL_CHORD_TYPES.some(c => c.id === id));
+          if (valid.length > 0) selectedChordIds = valid;
+        } else {
+          selectedChordIds = defaultSelected.slice();
+          saveChordSelection(selectedChordIds);
+        }
+      }
+      renderLevels();
+      renderCard();
+    };
+    nav.appendChild(b);
+  });
+}
+
+function renderCard(){
+  const lv = LEVELS.find(l=>l.id===activeLevel);
+  const card = document.getElementById('card');
+  let extraControls = '';
+  if (activeLevel === 2) {
+    extraControls = `
+      <div class="chord-picker">
+        <div class="picker-header">
+          <label>Selecciona los acordes a practicar</label>
+          <div class="picker-buttons">
+            <button type="button" id="selectAllChords">Todos</button>
+            <button type="button" id="deselectAllChords">Ninguno</button>
+          </div>
+        </div>
+        <div class="picker-grid" id="chordPickerGrid">
+          ${ALL_CHORD_TYPES.map(c => `
+            <label>
+              <input type="checkbox" value="${c.id}" ${selectedChordIds.includes(c.id) ? 'checked' : ''}>
+              ${c.display}
+              <span class="count">${c.intervals.length}</span>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  card.innerHTML = `
+    <div class="quiz-top">
+      <h2>Nivel ${lv.id} · ${lv.title}</h2>
+      <div class="stats" id="statsTxt"><b>0</b>/0 · racha actual <b>0</b> · racha máx <b>0</b> · <span class="pct">0%</span></div>
+    </div>
+    <div class="stage">
+      <button class="play-btn" id="playBtn" aria-label="Reproducir" disabled>
+        <span>⏳</span><span class="btn-label">Cargando...</span>
+      </button>
+      <div class="stage-label">${lv.instr}</div>
+      <label class="auto-play-toggle">
+        <input type="checkbox" id="autoPlayToggle" ${autoPlay?'checked':''}>
+        Auto-play
+      </label>
+      ${extraControls}
+      <button class="replay-btn" id="replayBtn">Repetir</button>
+      <div class="volume-control">
+        <label for="volumeSlider">Volumen</label>
+        <input type="range" id="volumeSlider" min="0" max="7" step="0.1" value="4">
+      </div>
+    </div>
+    <div class="options" id="options"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn">Siguiente →</button>
+    <button class="reset-stats-btn" id="resetStatsBtn">🔄 Reiniciar estadísticas</button>
+  `;
+  playBtn = document.getElementById('playBtn');
+  playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
+  document.getElementById('playBtn').onclick = playRound;
+  document.getElementById('replayBtn').onclick = playRound;
+  document.getElementById('nextBtn').onclick = newRound;
+  setupVolumeControl();
+
+  // Reiniciar estadísticas
+  document.getElementById('resetStatsBtn').addEventListener('click', function() {
+    if (confirm('¿Estás seguro de que quieres reiniciar todas las estadísticas y la selección de acordes?')) {
+      resetAllStats();
+    }
+  });
+
+  const autoToggle = document.getElementById('autoPlayToggle');
+  if (autoToggle) {
+    autoToggle.addEventListener('change', function() {
+      autoPlay = this.checked;
+    });
+  }
+
+  const pickerGrid = document.getElementById('chordPickerGrid');
+  if (pickerGrid) {
+    const checkboxes = pickerGrid.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', function() {
+        if (this.checked) {
+          if (!selectedChordIds.includes(this.value)) selectedChordIds.push(this.value);
+        } else {
+          selectedChordIds = selectedChordIds.filter(id => id !== this.value);
+        }
+        saveChordSelection(selectedChordIds);
+        newRound();
+      });
+    });
+    const selectAll = document.getElementById('selectAllChords');
+    const deselectAll = document.getElementById('deselectAllChords');
+    if (selectAll) {
+      selectAll.addEventListener('click', function() {
+        checkboxes.forEach(cb => { cb.checked = true; if (!selectedChordIds.includes(cb.value)) selectedChordIds.push(cb.value); });
+        saveChordSelection(selectedChordIds);
+        newRound();
+      });
+    }
+    if (deselectAll) {
+      deselectAll.addEventListener('click', function() {
+        checkboxes.forEach(cb => { cb.checked = false; });
+        selectedChordIds = [];
+        saveChordSelection(selectedChordIds);
+        newRound();
+      });
+    }
+  }
+
+  if (!sfLoading && !sfLoaded && !sfLoadError) {
+    initSoundFont();
+  } else {
+    enablePlayButton(sfLoaded || sfLoadError);
+  }
+  newRound();
+  updateStatsDisplay();
+}
+
+function renderQuiz(){
+  const opts = document.getElementById('options');
+  if(!opts) return;
+  opts.innerHTML = '';
+  const numOpts = round.options.length;
+  if (numOpts <= 2) opts.style.gridTemplateColumns = '1fr';
+  else if (numOpts === 3) opts.style.gridTemplateColumns = '1fr 1fr 1fr';
+  else opts.style.gridTemplateColumns = '1fr 1fr';
+  const btnEls = [];
+  round.options.forEach((label,i)=>{
+    const b = document.createElement('button');
+    b.className = 'opt-btn';
+    b.textContent = label;
+    b.onclick = ()=> selectAnswer(i, btnEls);
+    opts.appendChild(b);
+    btnEls.push(b);
+  });
+  document.getElementById('feedback').innerHTML = '';
+  document.getElementById('nextBtn').classList.remove('show');
+
+  if (autoPlay && sfLoaded) {
+    playRound();
+  } else if (autoPlay && !sfLoaded && !sfLoadError) {
+    // se encola, se reproducirá cuando cargue
+  }
+}
+
+/* ---------------------------------------------------------
+   INICIALIZACIÓN
+--------------------------------------------------------- */
+renderLevels();
+renderCard();
+document.getElementById('footerYear').textContent = new Date().getFullYear();
+
+document.addEventListener('click', () => {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}, { once: true });
+
+</script>
+</body>
+</html>
