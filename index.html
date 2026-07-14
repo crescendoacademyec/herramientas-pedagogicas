@@ -7,174 +7,221 @@
 <meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Diapasón Virtual, Cuerdas Virtual, Editor de partituras, Metrónomo y Entrenamiento auditivo.">
 <style>
   :root{
-    --ink: #161514;
-    --charcoal: #24201d;
-    --charcoal2: #1c1916;
-    --paper: #fbf7f0;
-    --cream: #f1e6d2;
-    --gold: #d4a84f;
-    --gold-dim: rgba(212,168,79,0.35);
-    --moss: #476357;
-    --wine: #7a3b3b;
-    --line: rgba(255,255,255,0.14);
-    --text: #fffaf0;
-    --muted: rgba(255,250,240,0.68);
+    --ink: #0c0b09;
+    --ink-soft: #131110;
+    --panel: #16130f;
+    --panel-2: #1c1812;
+    --paper: #fcf9f2;
+    --brass: #c9a05a;
+    --brass-bright: #ddb772;
+    --brass-dim: rgba(201,160,90,0.32);
+    --brass-faint: rgba(201,160,90,0.14);
+    --moss: #5e7267;
+    --wine: #8a4a45;
+    --line: rgba(12,11,9,0.08);
+    --text: #0c0b09;
+    --muted: rgba(12,11,9,0.65);
+    --muted-2: rgba(12,11,9,0.45);
     --whatsapp: #25D366;
+
+    /* Cards claras */
+    --card-bg: #ffffff;
+    --card-bg-2: #fbf9f4;
+    --card-text: #0c0b09;
+    --card-muted: rgba(12,11,9,0.70);
+    --card-accent: #b38b3a;
+    --card-icon-bg: rgba(201,160,90,0.12);
+    --card-icon-border: rgba(201,160,90,0.50);
+    --card-moss-text: #3d5347;
+    --card-moss-bg: rgba(94,114,103,0.10);
+    --card-moss-border: rgba(94,114,103,0.30);
   }
 
   *{ box-sizing:border-box; }
 
   html,body{
     margin:0; padding:0;
-    background: var(--ink);
+    background: var(--paper);
     color: var(--text);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     -webkit-font-smoothing: antialiased;
+  }
+
+  body{
+    background-color: var(--paper);
   }
 
   a{ color: inherit; }
 
-  /* ---------- Header ---------- */
+  ::selection{ background: var(--brass-dim); color: var(--text); }
+
+  /* ---------- Header (oscuro) ---------- */
   .site-header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding: 22px clamp(20px, 5vw, 64px);
-    border-bottom: 1px solid var(--line);
+    padding: 20px clamp(20px, 5vw, 64px) 18px;
+    background: var(--ink);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .brand{
     display:flex;
     align-items:center;
-    gap:10px;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 1.05rem;
-    letter-spacing: 0.02em;
-    color: var(--cream);
+    gap:12px;
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 480;
+    font-size: 1.08rem;
+    letter-spacing: 0.01em;
+    color: var(--paper);
   }
   .brand-mark{
-    width: 30px; height:30px;
+    width: 32px; height:32px;
     border-radius: 50%;
-    background: var(--gold);
-    color: var(--ink);
+    border: 1px solid var(--brass);
+    color: var(--brass-bright);
     display:flex; align-items:center; justify-content:center;
-    font-family: Georgia, serif;
-    font-weight:700;
-    font-size: 1rem;
+    font-family: "Fraunces", serif;
+    font-weight: 480;
+    font-size: 0.92rem;
+    letter-spacing: 0.02em;
   }
   .site-header .tag{
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--muted);
+    color: rgba(255,255,255,0.40);
   }
 
   .header-right{
     display:flex;
     align-items:center;
-    gap: 22px;
+    gap: 24px;
     flex-wrap: wrap;
   }
 
   .social-bar{
     display:flex;
     align-items:center;
-    gap: 14px;
+    gap: 15px;
   }
   .social-bar a{
-    color: var(--muted);
+    color: rgba(255,255,255,0.55);
     display:inline-flex;
-    transition: color 0.15s ease, transform 0.15s ease;
+    transition: color 0.18s ease, transform 0.18s ease;
   }
   .social-bar a:hover{
-    color: var(--gold);
-    transform: scale(1.1);
+    color: var(--brass-bright);
+    transform: translateY(-2px);
   }
-  .social-bar svg{ display:block; width:19px; height:19px; }
+  .social-bar svg{ display:block; width:18px; height:18px; }
 
   .school-logo-link{ display:inline-block; line-height:0; }
   .school-logo{
     width: 34px; height:34px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--gold-dim);
+    border: 1px solid rgba(255,255,255,0.20);
+    transition: border-color 0.18s ease, transform 0.18s ease;
   }
-  .school-logo:hover{ transform: scale(1.05); }
+  .school-logo:hover{ transform: scale(1.06); border-color: var(--brass); }
 
   @media (max-width: 640px){
-    .site-header{ flex-direction: column; align-items:flex-start; gap: 14px; }
+    .site-header{ flex-direction: column; align-items:flex-start; gap: 16px; }
     .header-right{ width:100%; justify-content: space-between; }
     .site-header .tag{ display:none; }
   }
 
-  /* ---------- Hero ---------- */
+  /* ---------- Hero (fondo blanco, pentagrama abajo y ancho completo) ---------- */
   .hero{
     position: relative;
-    padding: clamp(56px, 10vw, 110px) clamp(20px, 6vw, 64px) clamp(70px, 9vw, 100px);
+    padding: clamp(32px, 5vw, 64px) clamp(20px, 6vw, 64px) clamp(48px, 7vw, 72px);
     overflow: hidden;
-    background:
-      radial-gradient(ellipse 900px 420px at 18% -10%, rgba(212,168,79,0.10), transparent 60%),
-      radial-gradient(ellipse 700px 380px at 85% 0%, rgba(71,99,87,0.14), transparent 60%),
-      var(--ink);
+    background: var(--paper);
   }
 
-  .staff{
-    position:absolute;
-    left:0; right:0;
-    top: 50%;
-    height: 108px;
+  .hero-inner{
+    position: relative;
+    max-width: 760px;
+    z-index: 1;
+  }
+
+  /* Pentagrama ocupando todo el ancho del hero */
+  .hero .staff{
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 78%;
+    height: 150px;
     transform: translateY(-50%);
+    pointer-events: none;
     opacity: 0.55;
-    pointer-events:none;
+    z-index: 0;
   }
-  .staff svg{ width:100%; height:100%; display:block; }
-  .staff line{ stroke: var(--gold); stroke-width: 1; opacity: 0.4; }
-
-  .hero-inner{ position:relative; max-width: 980px; }
+  .hero .staff svg{
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .hero .staff line{
+    stroke: var(--brass);
+    stroke-width: 2.5;
+    opacity: 0.5;
+  }
 
   .eyebrow{
     display:inline-flex;
     align-items:center;
-    gap:8px;
-    font-size: 0.72rem;
-    letter-spacing: 0.16em;
+    gap:10px;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 22px;
+    color: var(--brass);
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 1;
   }
   .eyebrow::before{
     content:"";
-    width: 22px; height:1px;
-    background: var(--gold);
+    width: 26px; height:1px;
+    background: var(--brass);
     display:inline-block;
   }
 
   .hero h1{
-    font-family: Georgia, "Times New Roman", serif;
-    font-weight: 400;
-    font-size: clamp(2.4rem, 6vw, 4.1rem);
-    line-height: 1.08;
-    margin: 0 0 22px;
-    color: var(--paper);
-    max-width: 14ch;
+    font-family: "Fraunces", "Times New Roman", serif;
+    font-optical-sizing: auto;
+    font-weight: 480;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.06;
+    margin: 0 0 18px;
+    color: var(--text);
+    max-width: 13ch;
+    position: relative;
+    z-index: 1;
   }
   .hero h1 em{
     font-style: italic;
-    color: var(--gold);
+    font-weight: 420;
+    color: var(--brass);
   }
 
   .hero p{
     color: var(--muted);
-    font-size: 1.08rem;
+    font-size: 1.05rem;
     line-height: 1.7;
-    max-width: 52ch;
+    max-width: 50ch;
     margin: 0;
+    position: relative;
+    z-index: 1;
   }
 
-  /* ---------- Tools grid ---------- */
+  /* ---------- Tools grid (fondo blanco, tarjetas blancas) ---------- */
   .tools{
-    padding: 0 clamp(20px, 6vw, 64px) clamp(70px, 9vw, 110px);
-    max-width: 1180px;
+    padding: 0 clamp(20px, 6vw, 64px) clamp(60px, 8vw, 96px);
+    max-width: 1200px;
     margin: 0 auto;
+    background: var(--paper);
   }
 
   .tools-head{
@@ -188,69 +235,75 @@
     flex-wrap: wrap;
   }
   .tools-head h2{
-    font-family: Georgia, serif;
-    font-weight: 400;
-    font-size: 1.3rem;
-    color: var(--paper);
+    font-family: "Fraunces", serif;
+    font-optical-sizing: auto;
+    font-weight: 460;
+    font-size: 1.34rem;
+    color: var(--text);
     margin: 0;
   }
   .tools-head span{
-    font-size: 0.78rem;
-    color: var(--muted);
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    color: var(--muted-2);
   }
 
   .grid{
     display:grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 26px;
+    gap: 24px;
   }
   @media (max-width: 900px){
     .grid{ grid-template-columns: 1fr; }
   }
 
+  /* Tarjetas blancas con borde dorado */
   .card{
     position: relative;
     display:flex;
     flex-direction: column;
     gap: 18px;
     padding: 30px 26px 26px;
-    background: linear-gradient(160deg, var(--charcoal), var(--charcoal2));
-    border: 1px solid var(--line);
+    background: linear-gradient(168deg, var(--card-bg), var(--card-bg-2));
+    border: 1px solid var(--brass-dim);
     border-radius: 10px;
     text-decoration: none;
-    transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+    transition: transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s ease, box-shadow 0.25s ease;
+    color: var(--card-text);
+    box-shadow: 0 8px 24px -12px rgba(0,0,0,0.12);
   }
   .card:hover, .card:focus-visible{
-    transform: translateY(-4px);
-    border-color: var(--gold-dim);
-    box-shadow: 0 18px 40px -20px rgba(0,0,0,0.6);
+    transform: translateY(-5px);
+    border-color: var(--brass);
+    box-shadow: 0 18px 36px -14px rgba(0,0,0,0.18);
     outline: none;
   }
   .card:focus-visible{
-    box-shadow: 0 0 0 2px var(--gold), 0 18px 40px -20px rgba(0,0,0,0.6);
+    box-shadow: 0 0 0 2px var(--brass), 0 18px 36px -14px rgba(0,0,0,0.18);
   }
 
   .card-icon{
-    width: 46px; height:46px;
+    width: 44px; height:44px;
     border-radius: 50%;
     display:flex; align-items:center; justify-content:center;
-    background: rgba(212,168,79,0.10);
-    border: 1px solid var(--gold-dim);
-    color: var(--gold);
+    background: var(--card-icon-bg);
+    border: 1px solid var(--card-icon-border);
+    color: var(--card-accent);
   }
-  .card-icon svg{ width:22px; height:22px; }
+  .card-icon svg{ width:21px; height:21px; }
 
   .card h3{
-    font-family: Georgia, serif;
-    font-weight: 400;
-    font-size: 1.28rem;
-    color: var(--paper);
+    font-family: "Fraunces", serif;
+    font-optical-sizing: auto;
+    font-weight: 460;
+    font-size: 1.26rem;
+    color: var(--card-text);
     margin: 0;
   }
   .card p{
-    color: var(--muted);
+    color: var(--card-muted);
     font-size: 0.92rem;
-    line-height: 1.6;
+    line-height: 1.65;
     margin: 0;
     flex-grow: 1;
   }
@@ -258,27 +311,29 @@
   .card .cta{
     display:inline-flex;
     align-items:center;
-    gap: 6px;
-    font-size: 0.82rem;
-    color: var(--gold);
-    margin-top: 4px;
+    gap: 7px;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    color: var(--card-accent);
+    margin-top: 2px;
+    font-weight: 500;
   }
   .card .cta svg{
     width: 14px; height:14px;
     transition: transform 0.2s ease;
   }
-  .card:hover .cta svg{ transform: translateX(3px); }
+  .card:hover .cta svg{ transform: translateX(4px); }
 
   .card .tag-pill{
     position:absolute;
     top: 22px; right: 22px;
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--moss);
-    background: rgba(71,99,87,0.18);
-    border: 1px solid rgba(71,99,87,0.4);
-    padding: 3px 9px;
+    color: var(--card-moss-text);
+    background: var(--card-moss-bg);
+    border: 1px solid var(--card-moss-border);
+    padding: 4px 10px;
     border-radius: 999px;
   }
 
@@ -287,26 +342,26 @@
     position: fixed;
     bottom: 28px;
     right: 28px;
-    width: 58px;
-    height: 58px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: var(--whatsapp);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 8px 26px rgba(0,0,0,0.45);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     z-index: 999;
     text-decoration: none;
     color: white;
   }
   .whatsapp-float:hover {
-    transform: scale(1.08);
-    box-shadow: 0 8px 32px rgba(37, 211, 102, 0.55);
+    transform: scale(1.07);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.55);
   }
   .whatsapp-float svg {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 30px;
     fill: white;
   }
 
@@ -318,26 +373,32 @@
       height: 50px;
     }
     .whatsapp-float svg {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
     }
   }
 
-  /* ---------- Footer ---------- */
+  /* ---------- Footer (oscuro) ---------- */
   .site-footer{
-    padding: 26px clamp(20px, 6vw, 64px) 40px;
-    border-top: 1px solid var(--line);
+    padding: 22px clamp(20px, 6vw, 64px) 32px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    background: var(--ink);
     display:flex;
     justify-content: space-between;
     align-items:center;
     flex-wrap: wrap;
     gap: 10px;
-    color: var(--muted);
+    color: rgba(255,255,255,0.40);
     font-size: 0.78rem;
+  }
+  .site-footer .brand-line{
+    font-family: "Fraunces", serif;
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 0.01em;
   }
 
   @media (prefers-reduced-motion: reduce){
-    .card{ transition: none; }
+    .card, .social-bar a, .school-logo, .whatsapp-float{ transition: none; }
   }
 </style>
 </head>
@@ -398,16 +459,18 @@
   </header>
 
   <section class="hero">
-    <div class="staff" aria-hidden="true">
-      <svg viewBox="0 0 1000 108" preserveAspectRatio="none">
-        <line x1="0" y1="6"  x2="1000" y2="6" />
-        <line x1="0" y1="33" x2="1000" y2="33" />
-        <line x1="0" y1="60" x2="1000" y2="60" />
-        <line x1="0" y1="87" x2="1000" y2="87" />
-        <line x1="0" y1="102" x2="1000" y2="102" />
-      </svg>
-    </div>
     <div class="hero-inner">
+      <!-- Pentagrama con líneas que ocupan el 100% del ancho -->
+      <div class="staff" aria-hidden="true">
+        <svg width="100%" height="100%" viewBox="0 0 100 150" preserveAspectRatio="none">
+          <line x1="0%" y1="10%" x2="100%" y2="10%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
+          <line x1="0%" y1="30%" x2="100%" y2="30%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
+          <line x1="0%" y1="50%" x2="100%" y2="50%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
+          <line x1="0%" y1="70%" x2="100%" y2="70%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
+          <line x1="0%" y1="90%" x2="100%" y2="90%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
+        </svg>
+      </div>
+
       <div class="eyebrow">Recursos interactivos</div>
       <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
       <p>Piano, diapasón de trastes, diapasón de cuerdas frotadas, editor de partituras, metrónomo y entrenamiento auditivo — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
@@ -443,7 +506,7 @@
 
       <!-- Diapasón Virtual -->
       <a class="card" href="diapason-virtual/">
-        <span class="tag-pill">Trastes</span>
+        <span class="tag-pill">Cuerdas Percutidas</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <line x1="3" y1="12" x2="21" y2="12"/>
@@ -461,8 +524,8 @@
       </a>
 
       <!-- Cuerdas Virtual -->
-      <a class="card" href="cuerdas-frotadas/">
-        <span class="tag-pill">Frotadas</span>
+      <a class="card" href="cuerdas-virtual/">
+        <span class="tag-pill">Cuerdas Frotadas</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path d="M6 4c4 3 8 3 12 0"/>
@@ -513,7 +576,7 @@
         </span>
       </a>
 
-      <!-- Entrenamiento auditivo (NUEVO) -->
+      <!-- Entrenamiento auditivo -->
       <a class="card" href="ear-training/">
         <span class="tag-pill">Audición</span>
         <div class="card-icon">
@@ -534,8 +597,8 @@
   </section>
 
   <footer class="site-footer">
-    <span>Crescendo Academy</span>
-    <span id="footerYear"></span>
+    <span class="brand">Crescendo Academy</span>
+    <span class="brand" id="footerYear"></span>
   </footer>
 
   <!-- WhatsApp Float Button -->
