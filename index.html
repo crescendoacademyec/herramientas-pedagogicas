@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,34 +9,41 @@
 <meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Diapasón Virtual, Cuerdas Virtual, Editor de partituras, Metrónomo y Entrenamiento auditivo.">
 <style>
   :root{
-    --ink: #0c0b09;
-    --ink-soft: #131110;
-    --panel: #16130f;
-    --panel-2: #1c1812;
-    --paper: #fcf9f2;
-    --brass: #c9a05a;
-    --brass-bright: #ddb772;
-    --brass-dim: rgba(201,160,90,0.32);
-    --brass-faint: rgba(201,160,90,0.14);
-    --moss: #5e7267;
-    --wine: #8a4a45;
-    --line: rgba(12,11,9,0.08);
-    --text: #0c0b09;
-    --muted: rgba(12,11,9,0.65);
-    --muted-2: rgba(12,11,9,0.45);
+    --ink: #0a0a0a;
+    --ink-soft: #161616;
+    --panel: #141414;
+    --panel-2: #1c1c1c;
+    --paper: #ffffff;
+    --brass: #f5a623;
+    --brass-bright: #ffcc33;
+    --brass-dim: rgba(245,166,35,0.32);
+    --brass-faint: rgba(245,166,35,0.14);
+    --gold-gradient: linear-gradient(135deg, #ffd166 0%, #f5a623 55%, #f47920 100%);
+    --moss: #157a7a;
+    --wine: #ef7d1a;
+    --line: rgba(10,10,10,0.08);
+    --text: #0a0a0a;
+    --muted: rgba(10,10,10,0.65);
+    --muted-2: rgba(10,10,10,0.45);
     --whatsapp: #25D366;
 
     /* Cards claras */
     --card-bg: #ffffff;
-    --card-bg-2: #fbf9f4;
-    --card-text: #0c0b09;
-    --card-muted: rgba(12,11,9,0.70);
-    --card-accent: #b38b3a;
-    --card-icon-bg: rgba(201,160,90,0.12);
-    --card-icon-border: rgba(201,160,90,0.50);
-    --card-moss-text: #3d5347;
-    --card-moss-bg: rgba(94,114,103,0.10);
-    --card-moss-border: rgba(94,114,103,0.30);
+    --card-bg-2: #fff8ec;
+    --card-text: #0a0a0a;
+    --card-muted: rgba(10,10,10,0.70);
+    --card-accent: #ef8e0f;
+    --card-icon-bg: rgba(245,166,35,0.14);
+    --card-icon-border: rgba(245,166,35,0.55);
+    --card-moss-text: #0e6e6e;
+    --card-moss-bg: rgba(21,122,122,0.10);
+    --card-moss-border: rgba(21,122,122,0.30);
+
+    /* Colores de acento por tarjeta (paleta del flyer) */
+    --c-blue: #4fb9de;
+    --c-gold: #f3b02e;
+    --c-orange: #f0791a;
+    --c-teal: #157a7a;
   }
 
   *{ box-sizing:border-box; }
@@ -79,10 +88,11 @@
     width: 32px; height:32px;
     border-radius: 50%;
     border: 1px solid var(--brass);
-    color: var(--brass-bright);
+    background: var(--gold-gradient);
+    color: #0a0a0a;
     display:flex; align-items:center; justify-content:center;
     font-family: "Fraunces", serif;
-    font-weight: 480;
+    font-weight: 600;
     font-size: 0.92rem;
     letter-spacing: 0.02em;
   }
@@ -257,7 +267,7 @@
     .grid{ grid-template-columns: 1fr; }
   }
 
-  /* Tarjetas blancas con borde dorado */
+  /* Tarjetas blancas con borde superior de color, estilo flyer */
   .card{
     position: relative;
     display:flex;
@@ -265,7 +275,8 @@
     gap: 18px;
     padding: 30px 26px 26px;
     background: linear-gradient(168deg, var(--card-bg), var(--card-bg-2));
-    border: 1px solid var(--brass-dim);
+    border: 1px solid var(--line);
+    border-top: 5px solid var(--card-color, var(--brass));
     border-radius: 10px;
     text-decoration: none;
     transition: transform 0.25s cubic-bezier(.2,.7,.3,1), border-color 0.25s ease, box-shadow 0.25s ease;
@@ -274,23 +285,26 @@
   }
   .card:hover, .card:focus-visible{
     transform: translateY(-5px);
-    border-color: var(--brass);
     box-shadow: 0 18px 36px -14px rgba(0,0,0,0.18);
     outline: none;
   }
   .card:focus-visible{
-    box-shadow: 0 0 0 2px var(--brass), 0 18px 36px -14px rgba(0,0,0,0.18);
+    box-shadow: 0 0 0 2px var(--card-color, var(--brass)), 0 18px 36px -14px rgba(0,0,0,0.18);
   }
+
+  .card--blue{ --card-color: var(--c-blue); }
+  .card--gold{ --card-color: var(--c-gold); }
+  .card--orange{ --card-color: var(--c-orange); }
+  .card--teal{ --card-color: var(--c-teal); }
 
   .card-icon{
     width: 44px; height:44px;
     border-radius: 50%;
     display:flex; align-items:center; justify-content:center;
-    background: var(--card-icon-bg);
-    border: 1px solid var(--card-icon-border);
-    color: var(--card-accent);
+    background: var(--card-color, var(--brass));
+    color: #0a0a0a;
   }
-  .card-icon svg{ width:21px; height:21px; }
+  .card-icon svg{ width:21px; height:21px; stroke-width: 2; }
 
   .card h3{
     font-family: "Fraunces", serif;
@@ -314,9 +328,9 @@
     gap: 7px;
     font-size: 0.8rem;
     letter-spacing: 0.02em;
-    color: var(--card-accent);
+    color: var(--card-color, var(--card-accent));
     margin-top: 2px;
-    font-weight: 500;
+    font-weight: 600;
   }
   .card .cta svg{
     width: 14px; height:14px;
@@ -330,9 +344,9 @@
     font-size: 0.6rem;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--card-moss-text);
-    background: var(--card-moss-bg);
-    border: 1px solid var(--card-moss-border);
+    color: #0a0a0a;
+    background: color-mix(in srgb, var(--card-color, var(--brass)) 22%, white);
+    border: 1px solid var(--card-color, var(--brass));
     padding: 4px 10px;
     border-radius: 999px;
   }
@@ -486,7 +500,7 @@
     <div class="grid">
 
       <!-- Piano Virtual -->
-      <a class="card" href="piano-virtual/">
+      <a class="card card--teal" href="piano-virtual/">
         <span class="tag-pill">Teclado</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -505,7 +519,7 @@
       </a>
 
       <!-- Diapasón Virtual -->
-      <a class="card" href="diapason-virtual/">
+      <a class="card card--orange" href="diapason-virtual/">
         <span class="tag-pill">Cuerdas Percutidas</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -524,9 +538,9 @@
       </a>
 
       <!-- Cuerdas Virtual -->
-      <a class="card" href="cuerdas-frotadas/">
+      <a class="card card--gold" href="cuerdas-frotadas/">
         <span class="tag-pill">Cuerdas Frotadas</span>
-        <div class="cta">Abrir herramienta
+        <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
             <path d="M6 4c4 3 8 3 12 0"/>
             <path d="M6 20c4-3 8-3 12 0"/>
@@ -542,7 +556,7 @@
       </a>
 
       <!-- Editor de partituras -->
-      <a class="card" href="editor-partituras/">
+      <a class="card card--blue" href="editor-partituras/">
         <span class="tag-pill">Editor</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -561,7 +575,7 @@
       </a>
 
       <!-- Metrónomo -->
-      <a class="card" href="metronomo/">
+      <a class="card card--orange" href="metronomo/">
         <span class="tag-pill">Ritmo</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
@@ -577,7 +591,7 @@
       </a>
 
       <!-- Entrenamiento auditivo -->
-      <a class="card" href="ear-training/">
+      <a class="card card--teal" href="ear-training/">
         <span class="tag-pill">Audición</span>
         <div class="card-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
