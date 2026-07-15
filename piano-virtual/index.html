@@ -659,6 +659,14 @@
     height: 100%;
   }
 
+  /* ===== NUEVO: Tamaño grande para etiquetas en modo Beginners ===== */
+  .beginners-mode .white-key .label {
+    font-size: 1rem;      /* antes 0.6rem */
+  }
+  .beginners-mode .black-key .label {
+    font-size: 0.7rem;    /* antes 0.4rem */
+  }
+
   .hint{
     flex:0 0 auto;
     text-align:center;
@@ -896,7 +904,7 @@
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
-          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="14" y2="14"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
         </button>
       </div>
 
@@ -992,6 +1000,9 @@
 
   // ---------- DOM REFS ----------
   const keyboardEl = document.getElementById('keyboard');
+  // Agregar clase para Beginners por defecto (tamaño grande)
+  keyboardEl.classList.add('beginners-mode');
+
   const modeToggle = document.getElementById('modeToggle');
   const modeLabelBeginner = document.getElementById('modeLabelBeginner');
   const modeLabelPro = document.getElementById('modeLabelPro');
@@ -1623,7 +1634,10 @@
     currentMidiRange = RANGES[currentMode];
     modeLabelBeginner.classList.toggle('active', !isPro);
     modeLabelPro.classList.toggle('active', isPro);
-    // Forzar redibujo con requestAnimationFrame para asegurar que el contenedor tenga tamaño
+
+    // Añadir/remover clase para agrandar textos en Beginners
+    keyboardEl.classList.toggle('beginners-mode', !isPro);
+
     requestAnimationFrame(() => {
       buildKeyboard(currentMidiRange.min, currentMidiRange.max);
     });
