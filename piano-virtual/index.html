@@ -945,6 +945,13 @@
 
 <script>
 (function(){
+  // ---------- DETECCIÓN DE SISTEMA OPERATIVO ----------
+  const ua = navigator.userAgent.toLowerCase();
+  const isMac = /macintosh|mac os x/.test(ua);
+  // Parámetros para la clave de sol según el SO
+  const clefOffsetY = isMac ? 40 : 150;
+  const clefScale = isMac ? 1.5 : 1.2;
+
   // ---------- CONSTANTES Y UTILIDADES ----------
   const NOTE_NAMES_EN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   const NOTE_NAMES_ES = ["Do","Do#","Re","Re#","Mi","Fa","Fa#","Sol","Sol#","La","La#","Si"];
@@ -1385,7 +1392,9 @@
       const y = stepY(step);
       svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
     });
-    placeClef('𝄞', STAFF_X1+5, stepY(14)+40, stepY(3)+40, 1.5);
+    // Clave de sol con parámetros según SO
+    placeClef('𝄞', STAFF_X1+5, stepY(14) + clefOffsetY, stepY(3) + clefOffsetY, clefScale);
+    // Clave de fa (sin cambios, pero puedes ajustar si quieres)
     placeClef('𝄢', STAFF_X1+5, stepY(-3)-450, stepY(-10)-450, 1.5);
     svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X1, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
     svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
