@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -25,6 +26,10 @@
             --muted: rgba(255, 250, 240, 0.68);
             --gold-empresa: #d4a84f;
             --gold-dim: rgba(212, 168, 79, 0.35);
+            --c-teal: #157a7a;
+            --c-orange: #f0791a;
+            --c-gold: #f3b02e;
+            --c-blue: #4fb9de;
             font-size: 16px;
         }
         * {
@@ -157,40 +162,42 @@
         }
 
         .levels {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 6px;
             margin-bottom: 26px;
         }
         .lvl-btn {
-            flex: 0 0 auto;
             font-family: Futura, 'Century Gothic', 'Trebuchet MS', sans-serif;
             font-size: .72rem;
             letter-spacing: .05em;
             background: transparent;
-            border: 1px solid var(--teal-700);
+            border: 1.5px solid var(--btn-color, var(--teal-700));
             color: var(--cream-dim);
-            padding: 10px 14px;
+            padding: 10px 10px;
             border-radius: 3px;
             cursor: pointer;
             text-align: left;
-            transition: border-color .15s, color .15s;
-            min-width: 150px;
+            transition: border-color .15s, color .15s, background .15s;
             position: relative;
         }
+        .lvl-btn:nth-child(4n+1) { --btn-color: var(--c-teal); }
+        .lvl-btn:nth-child(4n+2) { --btn-color: var(--c-orange); }
+        .lvl-btn:nth-child(4n+3) { --btn-color: var(--c-gold); }
+        .lvl-btn:nth-child(4n+4) { --btn-color: var(--c-blue); }
         .lvl-btn .n {
-            color: var(--gold);
+            color: var(--btn-color, var(--gold));
             font-weight: 700;
             margin-right: 6px;
         }
         .lvl-btn.active {
-            border-color: var(--gold);
+            border-color: var(--btn-color, var(--gold));
             color: var(--cream);
-            background: rgba(217, 138, 61, .08);
+            background: color-mix(in srgb, var(--btn-color, var(--gold)) 16%, transparent);
         }
         .lvl-btn:hover {
-            border-color: var(--gold-light);
+            border-color: var(--btn-color, var(--gold-light));
+            color: var(--cream);
         }
 
         .card {
@@ -363,7 +370,7 @@
             font-family: 'Cambria', 'Georgia', serif;
             font-size: 1.02rem;
             background: var(--teal-800);
-            border: 1px solid var(--teal-700);
+            border: 1.5px solid var(--btn-color, var(--teal-700));
             color: var(--cream);
             padding: 16px 10px;
             border-radius: 5px;
@@ -371,8 +378,13 @@
             text-align: center;
             transition: border-color .12s, background .12s;
         }
+        .opt-btn:nth-child(4n+1) { --btn-color: var(--c-teal); }
+        .opt-btn:nth-child(4n+2) { --btn-color: var(--c-orange); }
+        .opt-btn:nth-child(4n+3) { --btn-color: var(--c-gold); }
+        .opt-btn:nth-child(4n+4) { --btn-color: var(--c-blue); }
         .opt-btn:hover:not(:disabled) {
-            border-color: var(--gold-light);
+            border-color: var(--btn-color, var(--gold-light));
+            background: color-mix(in srgb, var(--btn-color, var(--gold-light)) 14%, var(--teal-800));
         }
         .opt-btn.correct {
             background: rgba(127, 184, 138, .18);
@@ -559,9 +571,15 @@
             .chord-picker .picker-grid {
                 grid-template-columns: 1fr 1fr;
             }
+            .levels {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         @media (max-width: 500px) {
             .chord-picker .picker-grid {
+                grid-template-columns: 1fr;
+            }
+            .levels {
                 grid-template-columns: 1fr;
             }
         }
