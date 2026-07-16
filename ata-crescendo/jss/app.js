@@ -1422,9 +1422,9 @@ function bindToolbar() {
   els.newBtn.addEventListener("click", openBlankSongDialog);
   els.blankSongApplyBtn?.addEventListener("click", createBlankSongFromDialog);
 
-	  els.undoBtn?.addEventListener("click", undo);
-	  els.redoBtn?.addEventListener("click", redo);
-	  els.globalRespaceBtn?.addEventListener("click", respaceWholeSong);
+    els.undoBtn?.addEventListener("click", undo);
+    els.redoBtn?.addEventListener("click", redo);
+    els.globalRespaceBtn?.addEventListener("click", respaceWholeSong);
 
   els.saveBtn.addEventListener("click", saveCurrentDocument);
   els.duplicateSongBtn?.addEventListener("click", openCopySaveDialog);
@@ -1613,19 +1613,19 @@ function bindToolbar() {
       undo();
       return;
     }
-	    if (((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "z") || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y")) {
-	      event.preventDefault();
-	      redo();
-	      return;
-	    }
-	    if ((event.metaKey || event.ctrlKey) && event.altKey && event.key.toLowerCase() === "r") {
-	      event.preventDefault();
-	      respaceWholeSong();
-	      return;
-	    }
-	    if (event.key === "Escape") {
-	      hideReharmonizationMenu();
-	      hideInlineEditor(true);
+      if (((event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === "z") || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "y")) {
+        event.preventDefault();
+        redo();
+        return;
+      }
+      if ((event.metaKey || event.ctrlKey) && event.altKey && event.key.toLowerCase() === "r") {
+        event.preventDefault();
+        respaceWholeSong();
+        return;
+      }
+      if (event.key === "Escape") {
+        hideReharmonizationMenu();
+        hideInlineEditor(true);
       els.measurePanel.classList.add("hidden");
     }
   });
@@ -2748,22 +2748,22 @@ function bindCategoryDrag() {
     }
   });
 
-	  document.addEventListener("pointerdown", event => {
-	    const target = event.target.closest?.("[data-kind]");
-	    if (!target) return;
+    document.addEventListener("pointerdown", event => {
+      const target = event.target.closest?.("[data-kind]");
+      if (!target) return;
 
-	    if (target.dataset.kind === "connectorHandle") {
-	      beginConnectorHandleDrag(event, target);
-	      return;
-	    }
+      if (target.dataset.kind === "connectorHandle") {
+        beginConnectorHandleDrag(event, target);
+        return;
+      }
 
-	    if (target.dataset.kind === "systemDragControl") {
-	      beginSystemDrag(event, target);
-	      return;
-	    }
+      if (target.dataset.kind === "systemDragControl") {
+        beginSystemDrag(event, target);
+        return;
+      }
 
-	    const isGlobalDrag = event.ctrlKey || event.metaKey;
-	    const isSingleDrag = event.altKey && !isGlobalDrag;
+      const isGlobalDrag = event.ctrlKey || event.metaKey;
+      const isSingleDrag = event.altKey && !isGlobalDrag;
 
     if (!isGlobalDrag && !isSingleDrag) return;
 
@@ -2809,27 +2809,27 @@ function bindCategoryDrag() {
     const dx = event.clientX - categoryDrag.startClientX;
     const dy = event.clientY - categoryDrag.startClientY;
 
-	    if (categoryDrag.mode === "single") {
-	      setOffsetForSingleDragConfig(
+      if (categoryDrag.mode === "single") {
+        setOffsetForSingleDragConfig(
         categoryDrag.config,
         categoryDrag.startValues.x + dx,
         categoryDrag.startValues.y + dy
       );
       renderAll(false);
-	      return;
-	    }
+        return;
+      }
 
-	    if (categoryDrag.mode === "connectorHandle") {
-	      updateConnectorHandleDrag(event, false);
-	      renderAll(false);
-	      return;
-	    }
+      if (categoryDrag.mode === "connectorHandle") {
+        updateConnectorHandleDrag(event, false);
+        renderAll(false);
+        return;
+      }
 
-	    if (categoryDrag.mode === "systemDrag") {
-	      updateSystemDrag(event);
-	      renderAll(false);
-	      return;
-	    }
+      if (categoryDrag.mode === "systemDrag") {
+        updateSystemDrag(event);
+        renderAll(false);
+        return;
+      }
 
     const pageW = Number(song.settings.pageWidth || 1100);
     const usableW = Math.max(1, pageW - Number(song.settings.marginLeft || 0) - Number(song.settings.marginRight || 0));
@@ -2847,19 +2847,19 @@ function bindCategoryDrag() {
     renderAll(false);
   }, true);
 
-	  document.addEventListener("pointerup", event => {
-	    if (!categoryDrag) return;
-	    event.preventDefault();
-	    if (categoryDrag.mode === "connectorHandle") {
-	      updateConnectorHandleDrag(event, true);
-	    }
-	    categoryDrag = null;
+    document.addEventListener("pointerup", event => {
+      if (!categoryDrag) return;
+      event.preventDefault();
+      if (categoryDrag.mode === "connectorHandle") {
+        updateConnectorHandleDrag(event, true);
+      }
+      categoryDrag = null;
     suppressFollowingClick(0);
     document.body.classList.remove("categoryDragging");
     setDirty(true);
     renderAll();
-	  }, true);
-	}
+    }, true);
+  }
 
 function svgPointerMetrics(svg) {
   const rect = svg.getBoundingClientRect();
@@ -4079,8 +4079,8 @@ function m(form, ending, jump, leftBar, rightBar, slotTuples) {
   measure.rightBar = rightBar;
   slotTuples.forEach((slot, i) => {
     if (i < 4) {
-	      measure.slots[i] = {
-	        chord: normalizeChordSymbolInput(slot[0] || ""),
+        measure.slots[i] = {
+          chord: normalizeChordSymbolInput(slot[0] || ""),
         mode: normalizeTextSymbols(slot[1] || ""),
         degree: normalizeDegreeInput(slot[2] || ""),
         sectionLabel: "",
@@ -4156,12 +4156,12 @@ function normalizeWholeDocumentContent(targetSong = song) {
         slot.originScale = normalizeOriginScaleInput(slot.originScale || slot.origin || slot.sourceScale || "", targetSong.settings);
         slot.manualAnalysisFields = sanitizeManualAnalysisFields(slot.manualAnalysisFields, ["degree", "mode", "sectionLabel", "originScale"]);
         if (!Object.keys(slot.manualAnalysisFields).length) delete slot.manualAnalysisFields;
-	        slot.arrow = normalizeTextSymbols(slot.arrow || "", targetSong.settings);
-	        slot.arrowSpan = slot.arrow ? connectorSpanValue(slot.arrowSpan) : 1;
-	        slot.pulse = normalizeSlotPulse(slot.pulse);
-	        slot.connectorShape = compactConnectorShape(slot.connectorShape);
-	        if (!Object.keys(slot.connectorShape).length) delete slot.connectorShape;
-	      });
+          slot.arrow = normalizeTextSymbols(slot.arrow || "", targetSong.settings);
+          slot.arrowSpan = slot.arrow ? connectorSpanValue(slot.arrowSpan) : 1;
+          slot.pulse = normalizeSlotPulse(slot.pulse);
+          slot.connectorShape = compactConnectorShape(slot.connectorShape);
+          if (!Object.keys(slot.connectorShape).length) delete slot.connectorShape;
+        });
     });
   });
   return targetSong;
@@ -4223,11 +4223,11 @@ function normalizeMeasure(raw) {
           mode: ch.mode || "",
           degree: ch.degree || "",
           originScale: ch.originScale || ch.origin || ch.sourceScale || "",
-	          arrow: ch.arrow || "",
-	          arrowSpan: ch.arrowSpan || 1,
-	          offsets: ch.offsets || {},
-	          connectorShape: ch.connectorShape || {}
-	        }))
+            arrow: ch.arrow || "",
+            arrowSpan: ch.arrowSpan || 1,
+            offsets: ch.offsets || {},
+            connectorShape: ch.connectorShape || {}
+          }))
       : [];
 
   const slotCount = Math.max(4, sourceSlots.length);
@@ -8146,11 +8146,11 @@ function addDegreeSuggestion(suggestions, seen, value, detail = "", sectionLabel
     value: cleanedValue,
     detail: String(detail || "").trim(),
     sectionLabel: cleanedSectionLabel,
-	    degree: String(analysis.degree || "").trim(),
-	    mode: String(analysis.mode || "").trim(),
-	    originScale: String(analysis.originScale || "").trim()
-	  });
-	}
+      degree: String(analysis.degree || "").trim(),
+      mode: String(analysis.mode || "").trim(),
+      originScale: String(analysis.originScale || "").trim()
+    });
+  }
 
 function addModeSuggestion(suggestions, seen, mode, detail = "", sectionLabel = "", analysis = {}) {
   const cleanedValue = String(mode || "").trim();
@@ -9019,14 +9019,14 @@ function normalizeQualityAliasesForComparison(value) {
     .replace(/m7b5/gi, "ø")
     .replace(/-7b5/gi, "ø")
     .replace(/ø7/gi, "ø")
-	    .replace(/dim7|o7|°7/gi, "°7")
-	    .replace(/dim|°|o(?=\d|\/|$)/gi, "°");
-	  if (normalized === "#5") normalized = "+";
-	  if (normalized === "79") normalized = "9";
-	  normalized = normalized.replace(/∆79/g, "∆9");
-	  if (normalized === "913" || normalized === "139") normalized = "13";
-	  return normalized;
-	}
+      .replace(/dim7|o7|°7/gi, "°7")
+      .replace(/dim|°|o(?=\d|\/|$)/gi, "°");
+    if (normalized === "#5") normalized = "+";
+    if (normalized === "79") normalized = "9";
+    normalized = normalized.replace(/∆79/g, "∆9");
+    if (normalized === "913" || normalized === "139") normalized = "13";
+    return normalized;
+  }
 
 function normalizeDegreeForComparison(value) {
   return normalizeQualityAliasesForComparison(value)
@@ -10285,12 +10285,12 @@ function getValueFromTarget(target) {
 }
 
 function setValueFromContext(context, value) {
-	  let cleanedValue = context.kind === "song" || context.field === "note"
-	    ? String(value || "")
-	    : normalizeTextSymbols(value);
-	  if (context.kind === "slot" && context.field === "chord") {
-	    cleanedValue = normalizeChordSymbolInput(value);
-	  }
+    let cleanedValue = context.kind === "song" || context.field === "note"
+      ? String(value || "")
+      : normalizeTextSymbols(value);
+    if (context.kind === "slot" && context.field === "chord") {
+      cleanedValue = normalizeChordSymbolInput(value);
+    }
   if (context.kind === "slot" && context.field === "degree") {
     cleanedValue = normalizeDegreeInput(value);
   } else if (context.field === "sectionLabel") {
@@ -10318,8 +10318,8 @@ function setValueFromContext(context, value) {
     } else if (context.field === "rightBar") {
       maybeAutoDetectFormFromBar(cleanedValue);
     }
-	    return;
-	  }
+      return;
+    }
 
   if (context.kind === "slot") {
     if (context.field === "chord") {
@@ -10347,11 +10347,11 @@ function setValueFromContext(context, value) {
     slot[context.field] = cleanedValue;
     markHiddenAnalysisFieldEdit(slot, context.field, cleanedValue);
     markManualAnalysisField(slot, context.field);
-	    if (assistanceMode === "assisted" && ["degree", "mode"].includes(context.field)) {
-	      synchronizeAnalysisBoxesFromEdit(context, context.field, cleanedValue);
-	    }
-	  }
-	}
+      if (assistanceMode === "assisted" && ["degree", "mode"].includes(context.field)) {
+        synchronizeAnalysisBoxesFromEdit(context, context.field, cleanedValue);
+      }
+    }
+  }
 
 function setChordValueFromContext(measure, startSlot, value, options = {}) {
   const chords = String(value || "").trim().split(/\s+/).filter(Boolean).map(normalizeChordSymbolInput).slice(0, 4 - startSlot);
@@ -11381,7 +11381,38 @@ async function saveCurrentAsAdminTheme() {
     updateStandardSaveControls();
     setDirty(false);
     resetHistory();
-    await refreshStandards();
+async function refreshStandards() {
+  if (!els.standardsList) return;
+  try {
+    // Cargar el índice general
+    const res = await fetch('/library/index.json');
+    if (!res.ok) throw new Error();
+    const all = await res.json();
+    // Filtrar los que están en la carpeta ATA-Standards
+    const standards = all.filter(item => item.path && item.path.includes('ATA-Standards/'));
+    // También agregar los blues precargados
+    const bluesItems = BLUES_STANDARD_ITEMS.map(item => ({
+      ...item,
+      kind: 'blues',
+      filename: bluesStandardFilename(item.id),
+      title: item.title,
+      composer: item.composer
+    }));
+    standardsIndex = [...bluesItems, ...standards];
+    renderStandards(standardsIndex, els.standardSearchInput?.value || "");
+  } catch (_) {
+    // Fallback al endpoint original
+    try {
+      const res = await fetch("/api/standards");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      standardsIndex = Array.isArray(data.standards) ? data.standards : [];
+      renderStandards(standardsIndex, els.standardSearchInput?.value || "");
+    } catch (__) {
+      els.standardsList.innerHTML = `<p class="libraryHint">No se pudo leer la biblioteca de standards.</p>`;
+    }
+  }
+}
     alert(`Standard curado guardado.\n\nArchivo: ${data.filename}\n\nQueda disponible en Biblioteca > Standards.`);
   } catch (error) {
     console.warn(error);
@@ -12038,7 +12069,29 @@ async function saveSong() {
   // la sesión actual por un JSON normalizado vacío si el servidor fallaba.
   setDirty(false);
   resetHistory();
-  await refreshLibrary();
+  async function refreshLibrary() {
+  if (!els.libraryList) return;
+  try {
+    // Cargar el índice generado en library/index.json
+    const res = await fetch('/library/index.json');
+    if (!res.ok) throw new Error('No se encontró el índice');
+    const data = await res.json();
+    savedLibraryIndex = Array.isArray(data) ? data : [];
+    renderLibrary(savedLibraryIndex, els.librarySearchInput?.value || "");
+  } catch (error) {
+    // Fallback: intentar el endpoint original /api/songs (para compatibilidad)
+    try {
+      const res = await fetch("/api/songs");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      savedLibraryIndex = Array.isArray(data.songs) ? data.songs : [];
+      renderLibrary(savedLibraryIndex, els.librarySearchInput?.value || "");
+    } catch (_) {
+      if (els.libraryCount) els.libraryCount.textContent = "";
+      if (els.libraryList) els.libraryList.innerHTML = `<p class="libraryHint">No se pudo leer la biblioteca. Revisa que el servidor esté corriendo o que el índice exista.</p>`;
+    }
+  }
+}
 
   if (isFirstSave) {
     alert(`Analisis guardado en biblioteca.\n\nArchivo: ${data.filename}\n\nLo encuentras en Archivo > Biblioteca... > Guardados.`);
@@ -12754,18 +12807,39 @@ function appendStandardLibraryButton(container, item, favorite = false) {
     container.appendChild(btn);
 }
 
-async function loadFromLibrary(filename) {
-  if (dirty && !confirm("Hay cambios sin guardar. ¿Cargar otro análisis?")) return;
-  const res = await fetch(`/api/songs/${encodeURIComponent(filename)}`);
-  if (!res.ok) {
-    alert("No se pudo cargar el archivo.");
+async function loadFromLibrary(item) {
+  // item puede ser un objeto del índice o un string con el nombre
+  const fileItem = typeof item === 'string' 
+    ? savedLibraryIndex.find(i => i.filename === item) 
+    : item;
+
+  if (!fileItem) {
+    alert('No se encontró el archivo en el índice.');
     return;
   }
+
+  if (dirty && !confirm("Hay cambios sin guardar. ¿Cargar otro análisis?")) return;
+
+  // Usar la ruta almacenada en el índice (ej. "library/ATA-Standards/bird-blues.json")
+  const filePath = fileItem.path || `library/${fileItem.filename}`;
+  let res;
+  try {
+    res = await fetch(filePath);
+  } catch (error) {
+    alert('No se pudo cargar el archivo. Revisa que exista.');
+    return;
+  }
+
+  if (!res.ok) {
+    alert('No se pudo cargar el archivo. Revisa la ruta.');
+    return;
+  }
+
   const data = await res.json();
   await applyAppState(data, false);
-  currentFilename = filename;
+  currentFilename = fileItem.filename;
   clearCurrentStandardSource();
-  rememberLastOpenDocument({ source: "library", filename, state: data });
+  rememberLastOpenDocument({ source: "library", filename: fileItem.filename, state: data });
   updateStandardSaveControls();
   resetHistory();
   els.libraryDialog.close();
@@ -12773,16 +12847,50 @@ async function loadFromLibrary(filename) {
 
 async function loadStandardFromLibrary(itemOrFilename) {
   if (dirty && !confirm("Hay cambios sin guardar. ¿Cargar este standard?")) return;
-  const item = typeof itemOrFilename === "string"
-    ? { filename: itemOrFilename }
-    : (itemOrFilename || {});
-  const filename = item.filename;
+  
+  const item = typeof itemOrFilename === 'string'
+    ? savedLibraryIndex.find(i => i.filename === itemOrFilename) || { filename: itemOrFilename }
+    : itemOrFilename;
+
+  const filename = item.filename || itemOrFilename;
 
   if (item.kind === "blues") {
     await loadBluesStudyFromLibrary(item.id);
     els.libraryDialog.close();
     return;
   }
+
+  if (item.kind === "admin-theme") {
+    await loadAdminThemeFromLibrary(filename);
+    els.libraryDialog.close();
+    return;
+  }
+
+  // Si es un standard curado (con path)
+  const filePath = item.path || `library/ATA-Standards/${filename}`;
+  let res;
+  try {
+    res = await fetch(filePath);
+  } catch (error) {
+    alert('No se pudo cargar el standard.');
+    return;
+  }
+
+  if (!res.ok) {
+    alert('No se pudo cargar el standard. Revisa la ruta.');
+    return;
+  }
+
+  const data = await res.json();
+  await applyAppState(data, false);
+  currentFilename = null;
+  currentStandardFilename = filename;
+  currentStandardSource = null;
+  rememberLastOpenDocument({ source: "curated", filename, state: data });
+  updateStandardSaveControls();
+  resetHistory();
+  els.libraryDialog.close();
+}
 
   if (item.kind === "admin-theme") {
     await loadAdminThemeFromLibrary(filename);
@@ -13206,10 +13314,10 @@ function parseChordTextMeasures(rawText) {
     for (let start = 0; start < chordTokens.length; start += 4) {
       const chunk = chordTokens.slice(start, start + 4);
       if (!chunk.length) continue;
-	      const measure = makeMeasure();
-	      chunk.forEach((chord, index) => {
-	        measure.slots[index].chord = normalizeChordSymbolInput(chord);
-	      });
+        const measure = makeMeasure();
+        chunk.forEach((chord, index) => {
+          measure.slots[index].chord = normalizeChordSymbolInput(chord);
+        });
       generated.push(measure);
     }
 
@@ -13589,7 +13697,7 @@ async function exportSelectedPagePng() {
 
       canvas.toBlob(blob => {
         if (blob) {
-	          downloadBlob(blob, `${exportFilenameBase()} - pag ${selected.page + 1}.png`);
+            downloadBlob(blob, `${exportFilenameBase()} - pag ${selected.page + 1}.png`);
           return;
         }
 
