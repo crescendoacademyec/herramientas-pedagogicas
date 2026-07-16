@@ -480,5 +480,139 @@
   <script src="jss/reharmonization.js"></script>
   <script src="jss/app.js"></script>
 
+<script>
+// ============================================================
+//  CARGA DE BIBLIOTECA DESDE library Y library2 (vía API GitHub)
+// ============================================================
+(function() {
+    // Detectar owner y repo desde la URL de GitHub Pages
+    const hostParts = window.location.hostname.split('.');
+    const owner = hostParts[0] || '';
+    const pathParts = window.location.pathname.split('/');
+    const repo = pathParts[1] || '';
+
+    if (!owner || !repo) {
+        console.warn('ATA: No se pudo determinar el repositorio. Asegúrate de ejecutar en GitHub Pages.');
+        return;
+    }
+
+    let loaded = false;
+
+    // Obtener archivos de un directorio vía API
+    async function fetchDirectory(dir) {
+        const url = `https://api.github.com/repos/${owner}/${repo}/contents/${dir}`;
+        try {
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            return data.filter(item => item.type === 'file' && item.name.endsWith('.json'));
+        } catch (e) {
+            console.warn(`ATA: Error al obtener ${dir}:`, e);
+            return [];
+        }
+    }
+
+    // Cargar y mezclar ambas carpetas en la lista
+    async function loadLibrary() {
+        if (loaded) return;
+
+        const list = document.getElementById('standardsList');
+        if (!list) return;
+
+        // Mostrar estado de carga
+        list.innerHTML = '<li>Cargando biblioteca...</li>';
+
+        const [files1, files2] = await Promise.all([
+            fetchDirectory('library'),
+            fetchDirectory('library2')
+        ]);
+
+        const allFiles = [...files1, ...files2];
+        allFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+        list.innerHTML = '';
+        if (allFiles.length === 0) {
+            list.innerHTML = '<li>No se encontraron archivos .json en library o library2</li>';
+            loaded = true;
+            return;
+        }
+
+        allFiles.forEach(file => {
+            const li = document.createElement('li');
+            li.textContent = file.name.replace(/\.json$/, '');
+            li.dataset.url = file.download_url;
+            list.appendChild(li);
+        });
+
+        loaded = true;
+    }
+
+    // Función de carga por defecto (fallback)
+    if (typeof window.loadSongFromData !== 'function') {
+        // Intentar encontrar la función de carga en la aplicación
+        const possibleNames = ['loadSong', 'loadChart', 'loadFromJSON', 'openSong', 'loadData'];
+        let found = null;
+        for (const name of possibleNames) {
+            if (typeof window[name] === 'function') {
+                found = window[name];
+                break;
+            }
+        }
+        if (found) {
+            window.loadSongFromData = found;
+            console.log('ATA: Función de carga asignada automáticamente:', found.name);
+        } else {
+            window.loadSongFromData = function(data) {
+                console.warn('ATA: No se encontró una función de carga. Define window.loadSongFromData.', data);
+                alert(
+                    'Para cargar la canción, define window.loadSongFromData en el script.\n' +
+                    'Ejemplo: window.loadSongFromData = window.tuFuncionDeCarga;\n\n' +
+                    'Datos recibidos (primeras líneas):\n' + JSON.stringify(data, null, 2).slice(0, 300)
+                );
+            };
+        }
+    }
+
+    // Manejar clic en un ítem de la lista
+    document.getElementById('standardsList').addEventListener('click', async function(e) {
+        const li = e.target.closest('li');
+        if (!li || !li.dataset.url) return;
+
+        try {
+            li.textContent = 'Cargando...';
+            const res = await fetch(li.dataset.url);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            window.loadSongFromData(data);
+            // Restaurar nombre después de cargar
+            li.textContent = li.dataset.originalName || li.textContent;
+        } catch (error) {
+            console.error('ATA: Error al cargar el archivo:', error);
+            alert('Error al cargar el archivo: ' + error.message);
+            li.textContent = li.dataset.originalName || 'Error';
+        }
+    });
+
+    // Observar el diálogo de biblioteca para cargar cuando se abra
+    const dialog = document.getElementById('libraryDialog');
+    if (dialog) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                if (mutation.attributeName === 'open' && dialog.open) {
+                    loadLibrary();
+                }
+            });
+        });
+        observer.observe(dialog, { attributes: true });
+
+        if (dialog.open) {
+            loadLibrary();
+        }
+    }
+})();
+</script>
+</body>
+</html>
+  
 </body>
 </html>
