@@ -511,7 +511,7 @@
             cursor: pointer;
         }
 
-        /* --- Modo Challenge --- */
+        /* Modo Challenge */
         .challenge-controls {
             display: flex;
             flex-wrap: wrap;
@@ -597,7 +597,7 @@
             font-weight: 700;
         }
 
-        /* --- Modo Aprender (nivel 1) --- */
+        /* Modo Aprender */
         .mode-tabs {
             display: flex;
             gap: 4px;
@@ -647,14 +647,14 @@
             align-items: center;
             gap: 10px 16px;
         }
-        .learn-item .interval-name {
+        .learn-item .item-title {
             font-family: 'Cambria', 'Georgia', serif;
             font-size: 1rem;
             font-weight: 700;
             color: var(--cream);
             min-width: 100px;
         }
-        .learn-item .interval-sem {
+        .learn-item .item-desc {
             font-family: Futura, 'Century Gothic', sans-serif;
             font-size: 0.7rem;
             color: var(--cream-dim);
@@ -677,13 +677,13 @@
             transition: transform .1s;
         }
         .learn-item .play-sample:hover { transform: scale(1.1); }
-        .learn-item .songs {
+        .learn-item .reference {
             font-size: 0.8rem;
             color: var(--cream-dim);
             flex: 1;
             min-width: 140px;
         }
-        .learn-item .songs strong { color: var(--gold-light); }
+        .learn-item .reference strong { color: var(--gold-light); }
 
         .site-footer {
             border-top: 1px solid var(--line);
@@ -702,7 +702,7 @@
             .chord-picker .picker-grid { grid-template-columns: 1fr 1fr; }
             .levels { grid-template-columns: repeat(2, 1fr); }
             .learn-item { flex-direction: column; align-items: stretch; }
-            .learn-item .songs { text-align: center; }
+            .learn-item .reference { text-align: center; }
         }
         @media (max-width: 500px) {
             .chord-picker .picker-grid { grid-template-columns: 1fr; }
@@ -755,9 +755,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
 <script>
-    /* ---------------------------------------------------------
-       DATA: niveles
-    --------------------------------------------------------- */
+    // ============================================================
+    //  DATOS DE LOS NIVELES
+    // ============================================================
     const LEVELS = [
         { id: 1, title: 'Intervalos', short: 'Intervalos',
           instr: 'Escucha el intervalo y selecciona su nombre.' },
@@ -836,9 +836,9 @@
         return notes.map(n => n + bestShift * 12);
     }
 
-    /* ---------------------------------------------------------
-       AUDIO ENGINE
-    --------------------------------------------------------- */
+    // ============================================================
+    //  AUDIO ENGINE
+    // ============================================================
     let audioCtx = null, masterBus = null, sfPlayer = null, sfLoading = false, sfLoaded = false, sfLoadError = false;
     let playQueue = [];
     let playBtn = null, playBtnLabel = null;
@@ -967,9 +967,9 @@
         slider.addEventListener('input', function() {});
     }
 
-    /* ---------------------------------------------------------
-       LOCAL STORAGE
-    --------------------------------------------------------- */
+    // ============================================================
+    //  LOCAL STORAGE
+    // ============================================================
     const STORAGE_KEY_STATS = 'earTraining_stats';
     const STORAGE_KEY_CHORDS = 'earTraining_chords';
     const STORAGE_KEY_INTERVALS = 'earTraining_intervals';
@@ -1062,7 +1062,7 @@
         localStorage.setItem(STORAGE_KEY_CHORDS, JSON.stringify(ids));
     }
 
-    // ---- Intervalos con ejemplos de referencia ----
+    // ---- Intervalos con referencias ----
     const ALL_INTERVALS = [
         { semitones: 0, name: 'Unísono', ref: 'Misma nota' },
         { semitones: 1, name: '2ª menor', ref: 'Tema de Tiburón (Jaws) | Tema de Tiburón' },
@@ -1105,12 +1105,136 @@
         location.reload();
     }
 
-    /* ---------------------------------------------------------
-       GENERADORES
-    --------------------------------------------------------- */
+    // ============================================================
+    //  CONTENIDO DE APRENDIZAJE PARA CADA NIVEL
+    // ============================================================
+    const LEARN_CONTENT = {
+        2: [
+            { title: 'Mayor', desc: '1-3-5', steps: [{notes:[60,64,67], start:0, dur:2}], ref: '"Let It Be" - The Beatles' },
+            { title: 'Menor', desc: '1-♭3-5', steps: [{notes:[60,63,67], start:0, dur:2}], ref: '"Stairway to Heaven" - Led Zeppelin' },
+            { title: 'Aumentado', desc: '1-3-♯5', steps: [{notes:[60,64,68], start:0, dur:2}], ref: '"Oh! Darling" - The Beatles' },
+            { title: 'Disminuido', desc: '1-♭3-♭5', steps: [{notes:[60,63,66], start:0, dur:2}], ref: '"Maria" (West Side Story)' },
+            { title: 'sus2', desc: '1-2-5', steps: [{notes:[60,62,67], start:0, dur:2}], ref: '"The Sound of Silence" - Simon & Garfunkel' },
+            { title: 'sus4', desc: '1-4-5', steps: [{notes:[60,65,67], start:0, dur:2}], ref: '"Oye Como Va" - Santana' },
+        ],
+        3: [
+            { title: 'IΔ7 (Cmaj7)', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'ii7 (Dm7)', desc: '1-♭3-5-♭7', steps: [{notes:[62,65,69,72], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'iii7 (Em7)', desc: '1-♭3-5-♭7', steps: [{notes:[64,67,71,74], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'IVΔ7 (Fmaj7)', desc: '1-3-5-7', steps: [{notes:[65,69,72,76], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'V7 (G7)', desc: '1-3-5-♭7', steps: [{notes:[67,71,74,77], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'vi7 (Am7)', desc: '1-♭3-5-♭7', steps: [{notes:[69,72,76,79], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'viiø7 (Bm7b5)', desc: '1-♭3-♭5-♭7', steps: [{notes:[71,74,78,81], start:0, dur:2}], ref: '"Time After Time"' },
+        ],
+        4: [
+            { title: 'V7/ii (A7) → ii (Dm7)',
+              desc: 'Dominante de Re menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[69,73,76,79], start:0.8, dur:1.5}, {notes:[62,65,69,72], start:2.6, dur:2}],
+              ref: '"There Will Never Be Another You"' },
+            { title: 'V7/iii (B7) → iii (Em7)',
+              desc: 'Dominante de Mi menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[71,75,78,82], start:0.8, dur:1.5}, {notes:[64,67,71,74], start:2.6, dur:2}],
+              ref: '"There Will Never Be Another You"' },
+            { title: 'V7/IV (C7) → IV (Fmaj7)',
+              desc: 'Dominante de Fa mayor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[72,76,79,82], start:0.8, dur:1.5}, {notes:[65,69,72,76], start:2.6, dur:2}],
+              ref: '"There Will Never Be Another You"' },
+            { title: 'V7/V (D7) → V (G7)',
+              desc: 'Dominante de Sol mayor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[74,78,81,85], start:0.8, dur:1.5}, {notes:[67,71,74,77], start:2.6, dur:2}],
+              ref: '"There Will Never Be Another You"' },
+            { title: 'V7/vi (E7) → vi (Am7)',
+              desc: 'Dominante de La menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[76,80,83,87], start:0.8, dur:1.5}, {notes:[69,72,76,79], start:2.6, dur:2}],
+              ref: '"There Will Never Be Another You"' },
+        ],
+        5: [
+            { title: 'viiº7/ii (C#º7) → ii (Dm7)',
+              desc: 'Disminuido de Re menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[61,64,67,70], start:0.8, dur:1.5}, {notes:[62,65,69,72], start:2.6, dur:2}],
+              ref: '"Bewitched, Bothered, and Bewildered"' },
+            { title: 'viiº7/iii (D#º7) → iii (Em7)',
+              desc: 'Disminuido de Mi menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[63,66,69,72], start:0.8, dur:1.5}, {notes:[64,67,71,74], start:2.6, dur:2}],
+              ref: '"Bewitched, Bothered, and Bewildered"' },
+            { title: 'viiº7/IV (Eº7) → IV (Fmaj7)',
+              desc: 'Disminuido de Fa mayor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[64,67,70,73], start:0.8, dur:1.5}, {notes:[65,69,72,76], start:2.6, dur:2}],
+              ref: '"All The Things You Are"' },
+            { title: 'viiº7/V (F#º7) → V (G7)',
+              desc: 'Disminuido de Sol mayor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[66,69,72,75], start:0.8, dur:1.5}, {notes:[67,71,74,77], start:2.6, dur:2}],
+              ref: '"All The Things You Are"' },
+            { title: 'viiº7/vi (G#º7) → vi (Am7)',
+              desc: 'Disminuido de La menor',
+              steps: [{notes:[60], start:0, dur:0.5}, {notes:[68,71,74,77], start:0.8, dur:1.5}, {notes:[69,72,76,79], start:2.6, dur:2}],
+              ref: '"All The Things You Are"' },
+        ],
+        6: [
+            { title: 'V7/ii (A7) vs bII7/ii (Ab7)',
+              desc: 'Dominante secundario vs Sustitución tritonal',
+              steps: [{notes:[60], start:0, dur:0.4}, {notes:[69,73,76,79], start:0.7, dur:1.4}, {notes:[62,65,69,72], start:2.3, dur:1.8},
+                      {notes:[60], start:4.5, dur:0.4}, {notes:[68,72,75,78], start:5.2, dur:1.4}, {notes:[62,65,69,72], start:6.8, dur:1.8}],
+              ref: 'Estándares de jazz' },
+            { title: 'V7/iii (B7) vs bII7/iii (Bb7)',
+              desc: 'Dominante secundario vs Sustitución tritonal',
+              steps: [{notes:[60], start:0, dur:0.4}, {notes:[71,75,78,82], start:0.7, dur:1.4}, {notes:[64,67,71,74], start:2.3, dur:1.8},
+                      {notes:[60], start:4.5, dur:0.4}, {notes:[70,74,77,81], start:5.2, dur:1.4}, {notes:[64,67,71,74], start:6.8, dur:1.8}],
+              ref: 'Estándares de jazz' },
+            { title: 'V7/IV (C7) vs bII7/IV (B7)',
+              desc: 'Dominante secundario vs Sustitución tritonal',
+              steps: [{notes:[60], start:0, dur:0.4}, {notes:[72,76,79,82], start:0.7, dur:1.4}, {notes:[65,69,72,76], start:2.3, dur:1.8},
+                      {notes:[60], start:4.5, dur:0.4}, {notes:[71,75,78,82], start:5.2, dur:1.4}, {notes:[65,69,72,76], start:6.8, dur:1.8}],
+              ref: 'Estándares de jazz' },
+            { title: 'V7/V (D7) vs bII7/V (Db7)',
+              desc: 'Dominante secundario vs Sustitución tritonal',
+              steps: [{notes:[60], start:0, dur:0.4}, {notes:[74,78,81,85], start:0.7, dur:1.4}, {notes:[67,71,74,77], start:2.3, dur:1.8},
+                      {notes:[60], start:4.5, dur:0.4}, {notes:[73,77,80,84], start:5.2, dur:1.4}, {notes:[67,71,74,77], start:6.8, dur:1.8}],
+              ref: 'Estándares de jazz' },
+            { title: 'V7/vi (E7) vs bII7/vi (Eb7)',
+              desc: 'Dominante secundario vs Sustitución tritonal',
+              steps: [{notes:[60], start:0, dur:0.4}, {notes:[76,80,83,87], start:0.7, dur:1.4}, {notes:[69,72,76,79], start:2.3, dur:1.8},
+                      {notes:[60], start:4.5, dur:0.4}, {notes:[75,79,82,86], start:5.2, dur:1.4}, {notes:[69,72,76,79], start:6.8, dur:1.8}],
+              ref: 'Estándares de jazz' },
+        ],
+        7: [
+            { title: 'Medio tono arriba', desc: 'Do → Do♯',
+              steps: (() => { const k=0, nk=1; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"On Green Dolphin Street"' },
+            { title: 'Medio tono abajo', desc: 'Do → B',
+              steps: (() => { const k=0, nk=11; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"On Green Dolphin Street"' },
+            { title: 'Un tono arriba', desc: 'Do → D',
+              steps: (() => { const k=0, nk=2; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"The Christmas Song"' },
+            { title: 'Un tono abajo', desc: 'Do → B♭',
+              steps: (() => { const k=0, nk=10; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"The Christmas Song"' },
+            { title: '3ra menor arriba', desc: 'Do → E♭',
+              steps: (() => { const k=0, nk=3; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"On Green Dolphin Street"' },
+            { title: '3ra menor abajo', desc: 'Do → A',
+              steps: (() => { const k=0, nk=9; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"On Green Dolphin Street"' },
+            { title: '4ta justa arriba', desc: 'Do → F',
+              steps: (() => { const k=0, nk=5; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"The Christmas Song"' },
+            { title: '4ta justa abajo', desc: 'Do → G',
+              steps: (() => { const k=0, nk=7; const ii=chordMidis((nk+2)%12, CHORD.MIN7, 60), V=chordMidis((nk+7)%12, CHORD.DOM7, 60), I=chordMidis(nk, CHORD.MAJ7, 60); return [{notes:[60], start:0, dur:0.5}, {notes:ii, start:0.8, dur:1.8}, {notes:V, start:2.8, dur:1.8}, {notes:I, start:4.8, dur:2.5}]; })(),
+              ref: '"The Christmas Song"' },
+        ],
+        8: [
+            { title: 'Δ7', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Body and Soul"' },
+            { title: '6', desc: '1-3-5-6', steps: [{notes:[60,64,67,69], start:0, dur:2}], ref: '"Body and Soul"' },
+            { title: '6/9', desc: '1-3-5-6-9', steps: [{notes:[60,64,67,69,74], start:0, dur:2}], ref: '"Body and Soul"' },
+        ]
+    };
+
+    // ============================================================
+    //  GENERADORES DE PREGUNTAS (práctica)
+    // ============================================================
     let BASE = 60;
 
-    // Nivel 1: Intervalos
     function genLevelInterval() {
         const available = ALL_INTERVALS.filter(inter => selectedIntervalIds.includes(inter.semitones));
         if (available.length === 0) {
@@ -1141,7 +1265,6 @@
         return { options, correctIdx, seq, feedback };
     }
 
-    // Nivel 2: Acordes
     function genLevelChord() {
         const activeTypes = ALL_CHORD_TYPES.filter(c => selectedChordIds.includes(c.id));
         if (activeTypes.length === 0) {
@@ -1165,7 +1288,6 @@
         return { options: opts, correctIdx, seq, feedback };
     }
 
-    // Niveles 3-8 (igual que antes)
     function genLevel3() {
         const keyPc = randInt(12);
         const degree = randInt(7);
@@ -1181,6 +1303,7 @@
             `${ok?'Correcto':'Era'} — <b>${prettyLabel(degree)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b>.`;
         return { options: options.map(o => o.label), correctIdx, seq, feedback };
     }
+
     function genLevel4() {
         const keyPc = randInt(12);
         const TARGETS = [1,2,3,4,5];
@@ -1200,6 +1323,7 @@
             `${ok?'Correcto':'Era'} — <b>V7/${romanTarget}</b> resolviendo a <b>${romanTarget}</b> (tonalidad de ${PITCH_NAMES[keyPc]}).`;
         return { options, correctIdx, seq, feedback };
     }
+
     function genLevel5() {
         const keyPc = randInt(12);
         const TARGETS = [1,2,3,4,5,6];
@@ -1219,6 +1343,7 @@
             `${ok?'Correcto':'Era'} — <b>º7/${romanNames[degree]}</b> resolviendo a <b>${romanNames[degree]}</b> (tonalidad de ${PITCH_NAMES[keyPc]}).`;
         return { options, correctIdx, seq, feedback };
     }
+
     function genLevel6() {
         const keyPc = randInt(12);
         const TARGETS = [1,2,3,4,5];
@@ -1238,6 +1363,7 @@
             `${ok?'Correcto':'Era'} — <b>${options[correctIdx]}</b> resolviendo a ${romanTarget} (tonalidad de ${PITCH_NAMES[keyPc]}).`;
         return { options, correctIdx, seq, feedback };
     }
+
     function genLevel7() {
         const keyPc = randInt(12);
         const INTERVALS = [
@@ -1268,6 +1394,7 @@
             `${ok?'Correcto':'Era'} — el centro tonal se movió <b>${chosen.label}</b> (de ${PITCH_NAMES[keyPc]} a ${PITCH_NAMES[newKeyPc]}).`;
         return { options, correctIdx, seq, feedback };
     }
+
     function genLevel8() {
         const keyPc = randInt(12);
         const TYPES = [
@@ -1298,22 +1425,25 @@
         8: genLevel8
     };
 
-    /* ---------------------------------------------------------
-       ESTADO Y RENDER
-    --------------------------------------------------------- */
+    // ============================================================
+    //  ESTADO GLOBAL
+    // ============================================================
     let round = null;
     let score = { correct: 0, total: 0, streak: 0, streakMax: 0 };
     let activeLevel = 1;
     let autoPlay = true;
+    let learnMode = false;  // false = práctica, true = aprender
 
-    // --- Modo Challenge ---
+    // Challenge
     let challengeActive = false;
-    let challengeTime = 5; // minutos
-    let challengeRemaining = 0; // segundos
+    let challengeTime = 5;
+    let challengeRemaining = 0;
     let challengeTimerInterval = null;
     let challengeStats = { correct: 0, total: 0, streak: 0, streakMax: 0 };
-    let challengePaused = false;
 
+    // ============================================================
+    //  FUNCIONES DE CHALLENGE
+    // ============================================================
     function startChallenge() {
         const input = document.getElementById('challengeMinutes');
         if (input) {
@@ -1329,20 +1459,14 @@
         document.getElementById('challengeBtn').textContent = 'En curso...';
         document.getElementById('challengeCancelBtn').style.display = 'inline-block';
         document.getElementById('challengeTimer').textContent = formatTime(challengeRemaining);
-        // Ocultar resumen anterior
         document.getElementById('challengeSummary').classList.remove('show');
-        // Desactivar auto-play? mejor mantenerlo, pero aseguramos que funcione
-        // Empezamos con una pregunta
         newRound();
-        // Iniciar temporizador
         if (challengeTimerInterval) clearInterval(challengeTimerInterval);
         challengeTimerInterval = setInterval(() => {
             if (!challengeActive) return;
             challengeRemaining--;
             document.getElementById('challengeTimer').textContent = formatTime(challengeRemaining);
-            if (challengeRemaining <= 0) {
-                endChallenge();
-            }
+            if (challengeRemaining <= 0) endChallenge();
         }, 1000);
     }
 
@@ -1355,7 +1479,6 @@
         document.getElementById('challengeBtn').disabled = false;
         document.getElementById('challengeBtn').textContent = 'Iniciar Challenge';
         document.getElementById('challengeCancelBtn').style.display = 'none';
-        // Mostrar resumen
         const summary = document.getElementById('challengeSummary');
         const pct = challengeStats.total > 0 ? Math.round(100 * challengeStats.correct / challengeStats.total) : 0;
         document.getElementById('challengeCorrect').textContent = challengeStats.correct;
@@ -1363,9 +1486,7 @@
         document.getElementById('challengePct').textContent = pct + '%';
         document.getElementById('challengeStreak').textContent = challengeStats.streakMax;
         summary.classList.add('show');
-        // Asegurar que no se siga generando automáticamente
-        if (round) round.answered = true; // para evitar respuestas posteriores
-        // Restablecer botón siguiente
+        if (round) round.answered = true;
         const nextBtn = document.getElementById('nextBtn');
         if (nextBtn) nextBtn.classList.remove('show');
     }
@@ -1381,16 +1502,11 @@
             document.getElementById('challengeBtn').textContent = 'Iniciar Challenge';
             document.getElementById('challengeCancelBtn').style.display = 'none';
             document.getElementById('challengeTimer').textContent = formatTime(challengeTime * 60);
-            // Ocultar resumen
             document.getElementById('challengeSummary').classList.remove('show');
-            // Si hay una pregunta en curso, permitir continuar normal
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) {
-                if (round && !round.answered) {
-                    // No hacer nada, el usuario puede seguir
-                } else {
-                    newRound();
-                }
+                if (round && !round.answered) { /* no hacer nada */ }
+                else newRound();
             }
         }
     }
@@ -1401,19 +1517,13 @@
         return `${m}:${s.toString().padStart(2,'0')}`;
     }
 
-    // --- Modo Aprender (nivel 1) ---
-    let learnMode = false; // por defecto práctica
-
-    function toggleLearnMode(mode) {
-        learnMode = (mode === 'learn');
-        renderCard();
-    }
-
-    /* ---------------------------------------------------------
-       NUEVA PREGUNTA
-    --------------------------------------------------------- */
+    // ============================================================
+    //  FUNCIONES DE RENDER Y LÓGICA DEL QUIZ
+    // ============================================================
     function newRound() {
-        if (activeLevel === 1 && learnMode) {
+        // Si estamos en modo aprender, no generamos pregunta
+        if (learnMode) {
+            // Si es nivel 1, mostramos contenido de intervalos; si otros niveles, mostramos su contenido
             renderCard();
             return;
         }
@@ -1423,7 +1533,6 @@
         round = gen();
         round.answered = false;
         renderQuiz();
-
         if (challengeActive && autoPlay && sfLoaded) {
             setTimeout(() => { if (round && !round.answered) playRound(); }, 200);
         }
@@ -1470,9 +1579,7 @@
 
         if (challengeActive) {
             setTimeout(() => {
-                if (challengeActive) {
-                    newRound();
-                }
+                if (challengeActive) newRound();
             }, 1200);
         }
     }
@@ -1480,10 +1587,15 @@
     function updateStatsDisplay() {
         const stats = getLevelStats(activeLevel);
         const pct = stats.total > 0 ? Math.round(100 * stats.correct / stats.total) : 0;
-        document.getElementById('statsTxt').innerHTML =
-            `<b>${stats.correct}</b>/${stats.total} · racha actual <b>${score.streak}</b> · racha máx <b>${stats.streakMax}</b> · <span class="pct">${pct}%</span>`;
+        const el = document.getElementById('statsTxt');
+        if (el) {
+            el.innerHTML = `<b>${stats.correct}</b>/${stats.total} · racha actual <b>${score.streak}</b> · racha máx <b>${stats.streakMax}</b> · <span class="pct">${pct}%</span>`;
+        }
     }
 
+    // ============================================================
+    //  RENDER PRINCIPAL
+    // ============================================================
     function renderLevels() {
         const nav = document.getElementById('levels');
         nav.innerHTML = '';
@@ -1493,10 +1605,11 @@
             b.innerHTML = `<span class="n">${lv.id}</span>${lv.short}`;
             b.onclick = () => {
                 activeLevel = lv.id;
-                if (activeLevel === 1) {
-                    learnMode = false;
-                } else {
-                    learnMode = false;
+                // Si el nivel no tiene contenido de aprendizaje, forzar modo práctica
+                if (activeLevel !== 1 && !LEARN_CONTENT[activeLevel]) learnMode = false;
+                // Si es nivel 1, permitir aprender siempre
+                if (activeLevel === 1 && learnMode) {
+                    // se mantiene
                 }
                 const stats = getLevelStats(activeLevel);
                 score.correct = stats.correct;
@@ -1544,20 +1657,21 @@
     function renderCard() {
         const lv = LEVELS.find(l => l.id === activeLevel);
         const card = document.getElementById('card');
+        // Nivel 1 siempre tiene contenido de aprendizaje (intervalos)
+        const hasLearnContent = (activeLevel === 1) || !!LEARN_CONTENT[activeLevel];
 
-        let extraControls = '';
+        // Si learnMode está activo pero no hay contenido, forzar práctica
+        if (learnMode && !hasLearnContent) learnMode = false;
 
-        // Modo Aprender/Practicar para nivel 1 - PRIMERO PRÁCTICA
-        let modeTabs = '';
-        if (activeLevel === 1) {
-            modeTabs = `
-                <div class="mode-tabs">
-                    <button class="${!learnMode ? 'active' : ''}" data-mode="practice">🎯 Practicar</button>
-                    <button class="${learnMode ? 'active' : ''}" data-mode="learn">🎓 Aprender</button>
-                </div>
-            `;
-        }
+        // Tabs siempre visibles
+        const modeTabs = `
+            <div class="mode-tabs">
+                <button class="${!learnMode ? 'active' : ''}" data-mode="practice">🎯 Practicar</button>
+                <button class="${learnMode ? 'active' : ''}" data-mode="learn" ${!hasLearnContent ? 'disabled style="opacity:0.4;cursor:not-allowed;"' : ''}>🎓 Aprender</button>
+            </div>
+        `;
 
+        // Selector de intervalos (nivel 1)
         let intervalPicker = '';
         if (activeLevel === 1) {
             intervalPicker = `
@@ -1581,6 +1695,7 @@
             `;
         }
 
+        // Selector de acordes (nivel 2)
         let chordPicker = '';
         if (activeLevel === 2) {
             chordPicker = `
@@ -1606,27 +1721,96 @@
         }
 
         let mainContent = '';
-        if (activeLevel === 1 && learnMode) {
-            const filtered = ALL_INTERVALS.filter(inter => selectedIntervalIds.includes(inter.semitones));
-            if (filtered.length === 0) {
-                mainContent = `<p style="text-align:center;color:var(--cream-dim);">Selecciona al menos un intervalo arriba para ver su información.</p>`;
-            } else {
-                mainContent = `
-                    <div class="learn-container">
-                        ${filtered.map(inter => `
-                            <div class="learn-item">
-                                <span class="interval-name">${inter.name}</span>
-                                <span class="interval-sem">${inter.semitones} semitonos</span>
-                                <button class="play-sample" data-sem="${inter.semitones}" title="Escuchar intervalo ascendente">▶</button>
-                                <div class="songs">
-                                    <strong>🎵 Referencia:</strong> ${inter.ref}
+
+        // --- MODO APRENDER ---
+        if (learnMode && hasLearnContent) {
+            // Nivel 1: contenido especial de intervalos
+            if (activeLevel === 1) {
+                const filtered = ALL_INTERVALS.filter(inter => selectedIntervalIds.includes(inter.semitones));
+                if (filtered.length === 0) {
+                    mainContent = `
+                        <div class="stage">
+                            <div class="stage-label">${lv.instr}</div>
+                            ${intervalPicker}
+                            <p style="text-align:center;color:var(--cream-dim);margin-top:12px;">Selecciona al menos un intervalo arriba para ver su información.</p>
+                        </div>
+                    `;
+                } else {
+                    mainContent = `
+                        <div class="stage">
+                            <div class="stage-label">${lv.instr}</div>
+                            ${intervalPicker}
+                        </div>
+                        <div class="learn-container">
+                            ${filtered.map(inter => `
+                                <div class="learn-item">
+                                    <span class="item-title">${inter.name}</span>
+                                    <span class="item-desc">${inter.semitones} semitonos</span>
+                                    <button class="play-sample" data-sem="${inter.semitones}" title="Escuchar intervalo ascendente">▶</button>
+                                    <div class="reference"><strong>🎵 Referencia:</strong> ${inter.ref}</div>
                                 </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                // Eventos para los botones de reproducción de intervalos
+                setTimeout(() => {
+                    const samples = card.querySelectorAll('.play-sample[data-sem]');
+                    samples.forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const sem = parseInt(this.dataset.sem, 10);
+                            const base = 60;
+                            const notes = [base, base + sem];
+                            const ctx = ensureCtx();
+                            const t0 = ctx.currentTime;
+                            playChord([notes[0]], t0, 0.5, 0.7);
+                            playChord([notes[1]], t0 + 0.7, 1.2, 0.8);
+                        });
+                    });
+                }, 0);
+            } else {
+                // Otros niveles: usar LEARN_CONTENT
+                const items = LEARN_CONTENT[activeLevel];
+                if (!items) {
+                    mainContent = `<p style="text-align:center;color:var(--cream-dim);">No hay contenido de aprendizaje para este nivel.</p>`;
+                } else {
+                    mainContent = `
+                        <div class="stage">
+                            <div class="stage-label">${lv.instr}</div>
+                            ${intervalPicker}
+                            ${chordPicker}
+                        </div>
+                        <div class="learn-container">
+                            ${items.map((item, idx) => `
+                                <div class="learn-item">
+                                    <span class="item-title">${item.title}</span>
+                                    ${item.desc ? `<span class="item-desc">${item.desc}</span>` : ''}
+                                    <button class="play-sample" data-idx="${idx}" title="Escuchar ejemplo">▶</button>
+                                    <div class="reference"><strong>🎵 Referencia:</strong> ${item.ref}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const samples = card.querySelectorAll('.play-sample[data-idx]');
+                        samples.forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const idx = parseInt(this.dataset.idx, 10);
+                                const item = items[idx];
+                                if (item && item.steps) {
+                                    const ctx = ensureCtx();
+                                    const t0 = ctx.currentTime;
+                                    item.steps.forEach(step => {
+                                        playChord(step.notes, t0 + step.start, step.dur, 1.0);
+                                    });
+                                }
+                            });
+                        });
+                    }, 0);
+                }
             }
         } else {
+            // --- MODO PRÁCTICA (quiz) ---
             mainContent = `
                 <div class="stage">
                     <button class="play-btn" id="playBtn" aria-label="Reproducir" disabled>
@@ -1676,148 +1860,127 @@
             ${mainContent}
         `;
 
-        // --- Event listeners ---
-        if (activeLevel === 1) {
-            const tabs = card.querySelectorAll('.mode-tabs button');
-            tabs.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const mode = this.dataset.mode;
-                    if (mode === 'learn') {
-                        learnMode = true;
-                    } else {
-                        learnMode = false;
-                    }
-                    if (challengeActive) cancelChallenge();
-                    renderCard();
-                });
+        // --- Event listeners de los tabs ---
+        const tabs = card.querySelectorAll('.mode-tabs button');
+        tabs.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const mode = this.dataset.mode;
+                // Si es "learn" y no hay contenido, ignorar
+                if (mode === 'learn' && !hasLearnContent) return;
+                learnMode = (mode === 'learn');
+                if (challengeActive) cancelChallenge();
+                renderCard();
             });
-        }
-
-        playBtn = document.getElementById('playBtn');
-        if (playBtn) {
-            playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
-            playBtn.onclick = playRound;
-        }
-
-        const replayBtn = document.getElementById('replayBtn');
-        if (replayBtn) replayBtn.onclick = playRound;
-
-        const nextBtn = document.getElementById('nextBtn');
-        if (nextBtn) nextBtn.onclick = newRound;
-
-        const autoToggle = document.getElementById('autoPlayToggle');
-        if (autoToggle) {
-            autoToggle.checked = autoPlay;
-            autoToggle.addEventListener('change', function() {
-                autoPlay = this.checked;
-            });
-        }
-
-        setupVolumeControl();
-
-        document.getElementById('resetStatsBtn')?.addEventListener('click', function() {
-            if (confirm('¿Estás seguro de que quieres reiniciar todas las estadísticas y la selección de acordes/intervalos?')) {
-                resetAllStats();
-            }
         });
 
-        const challengeBtn = document.getElementById('challengeBtn');
-        const challengeCancelBtn = document.getElementById('challengeCancelBtn');
-        if (challengeBtn) {
-            challengeBtn.addEventListener('click', startChallenge);
-        }
-        if (challengeCancelBtn) {
-            challengeCancelBtn.addEventListener('click', cancelChallenge);
-        }
+        // --- Event listeners para modo práctica ---
+        if (!learnMode) {
+            playBtn = document.getElementById('playBtn');
+            if (playBtn) {
+                playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
+                playBtn.onclick = playRound;
+            }
 
-        // --- Interval picker (nivel 1) ---
-        const intervalGrid = document.getElementById('intervalPickerGrid');
-        if (intervalGrid) {
-            const checkboxes = intervalGrid.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
-                    const semitone = parseInt(this.value, 10);
-                    if (this.checked) {
-                        if (!selectedIntervalIds.includes(semitone)) selectedIntervalIds.push(semitone);
-                    } else {
-                        selectedIntervalIds = selectedIntervalIds.filter(id => id !== semitone);
-                    }
-                    saveIntervalSelection(selectedIntervalIds);
-                    if (activeLevel === 1 && learnMode) {
-                        renderCard();
-                    } else {
-                        newRound();
-                    }
+            const replayBtn = document.getElementById('replayBtn');
+            if (replayBtn) replayBtn.onclick = playRound;
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) nextBtn.onclick = newRound;
+
+            const autoToggle = document.getElementById('autoPlayToggle');
+            if (autoToggle) {
+                autoToggle.checked = autoPlay;
+                autoToggle.addEventListener('change', function() {
+                    autoPlay = this.checked;
                 });
-            });
-            document.getElementById('selectAllIntervals')?.addEventListener('click', function() {
-                checkboxes.forEach(cb => cb.checked = true);
-                selectedIntervalIds = ALL_INTERVALS.map(inter => inter.semitones);
-                saveIntervalSelection(selectedIntervalIds);
-                if (activeLevel === 1 && learnMode) renderCard(); else newRound();
-            });
-            document.getElementById('deselectAllIntervals')?.addEventListener('click', function() {
-                checkboxes.forEach(cb => cb.checked = false);
-                selectedIntervalIds = [];
-                saveIntervalSelection(selectedIntervalIds);
-                if (activeLevel === 1 && learnMode) renderCard(); else newRound();
-            });
-        }
+            }
 
-        // --- Chord picker (nivel 2) ---
-        const chordGrid = document.getElementById('chordPickerGrid');
-        if (chordGrid) {
-            const checkboxes = chordGrid.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
-                    if (this.checked) {
-                        if (!selectedChordIds.includes(this.value)) selectedChordIds.push(this.value);
-                    } else {
-                        selectedChordIds = selectedChordIds.filter(id => id !== this.value);
-                    }
+            setupVolumeControl();
+
+            document.getElementById('resetStatsBtn')?.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que quieres reiniciar todas las estadísticas y la selección de acordes/intervalos?')) {
+                    resetAllStats();
+                }
+            });
+
+            const challengeBtn = document.getElementById('challengeBtn');
+            const challengeCancelBtn = document.getElementById('challengeCancelBtn');
+            if (challengeBtn) challengeBtn.addEventListener('click', startChallenge);
+            if (challengeCancelBtn) challengeCancelBtn.addEventListener('click', cancelChallenge);
+
+            // Picker de intervalos (nivel 1)
+            const intervalGrid = document.getElementById('intervalPickerGrid');
+            if (intervalGrid) {
+                const checkboxes = intervalGrid.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        const semitone = parseInt(this.value, 10);
+                        if (this.checked) {
+                            if (!selectedIntervalIds.includes(semitone)) selectedIntervalIds.push(semitone);
+                        } else {
+                            selectedIntervalIds = selectedIntervalIds.filter(id => id !== semitone);
+                        }
+                        saveIntervalSelection(selectedIntervalIds);
+                        newRound();
+                    });
+                });
+                document.getElementById('selectAllIntervals')?.addEventListener('click', function() {
+                    checkboxes.forEach(cb => cb.checked = true);
+                    selectedIntervalIds = ALL_INTERVALS.map(inter => inter.semitones);
+                    saveIntervalSelection(selectedIntervalIds);
+                    newRound();
+                });
+                document.getElementById('deselectAllIntervals')?.addEventListener('click', function() {
+                    checkboxes.forEach(cb => cb.checked = false);
+                    selectedIntervalIds = [];
+                    saveIntervalSelection(selectedIntervalIds);
+                    newRound();
+                });
+            }
+
+            // Picker de acordes (nivel 2)
+            const chordGrid = document.getElementById('chordPickerGrid');
+            if (chordGrid) {
+                const checkboxes = chordGrid.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (this.checked) {
+                            if (!selectedChordIds.includes(this.value)) selectedChordIds.push(this.value);
+                        } else {
+                            selectedChordIds = selectedChordIds.filter(id => id !== this.value);
+                        }
+                        saveChordSelection(selectedChordIds);
+                        newRound();
+                    });
+                });
+                document.getElementById('selectAllChords')?.addEventListener('click', function() {
+                    checkboxes.forEach(cb => cb.checked = true);
+                    selectedChordIds = ALL_CHORD_TYPES.map(c => c.id);
                     saveChordSelection(selectedChordIds);
                     newRound();
                 });
-            });
-            document.getElementById('selectAllChords')?.addEventListener('click', function() {
-                checkboxes.forEach(cb => cb.checked = true);
-                selectedChordIds = ALL_CHORD_TYPES.map(c => c.id);
-                saveChordSelection(selectedChordIds);
-                newRound();
-            });
-            document.getElementById('deselectAllChords')?.addEventListener('click', function() {
-                checkboxes.forEach(cb => cb.checked = false);
-                selectedChordIds = [];
-                saveChordSelection(selectedChordIds);
-                newRound();
-            });
-        }
-
-        // --- Play samples en modo aprender ---
-        if (activeLevel === 1 && learnMode) {
-            const samples = card.querySelectorAll('.play-sample');
-            samples.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const sem = parseInt(this.dataset.sem, 10);
-                    const base = 60;
-                    const notes = [base, base + sem];
-                    const ctx = ensureCtx();
-                    const t0 = ctx.currentTime;
-                    playChord([notes[0]], t0, 0.5, 0.7);
-                    playChord([notes[1]], t0 + 0.7, 1.2, 0.8);
+                document.getElementById('deselectAllChords')?.addEventListener('click', function() {
+                    checkboxes.forEach(cb => cb.checked = false);
+                    selectedChordIds = [];
+                    saveChordSelection(selectedChordIds);
+                    newRound();
                 });
-            });
-        }
+            }
 
-        if (!sfLoading && !sfLoaded && !sfLoadError) {
-            initSoundFont();
-        } else {
-            enablePlayButton(sfLoaded || sfLoadError);
-        }
+            // Inicializar SoundFont
+            if (!sfLoading && !sfLoaded && !sfLoadError) {
+                initSoundFont();
+            } else {
+                enablePlayButton(sfLoaded || sfLoadError);
+            }
 
-        if (!(activeLevel === 1 && learnMode)) {
+            // Generar pregunta
             newRound();
             updateStatsDisplay();
+        } else {
+            // Modo aprender: actualizar estadísticas (no hay quiz)
+            updateStatsDisplay();
+            if (!sfLoading && !sfLoaded && !sfLoadError) initSoundFont();
         }
     }
 
@@ -1848,12 +2011,13 @@
         }
     }
 
-    /* ---------------------------------------------------------
-       INICIALIZACIÓN
-    --------------------------------------------------------- */
+    // ============================================================
+    //  INICIALIZACIÓN
+    // ============================================================
     initChordSelection();
     initIntervalSelection();
 
+    // Por defecto, nivel 1 en modo práctica
     learnMode = false;
 
     renderLevels();
@@ -1863,7 +2027,6 @@
     document.addEventListener('click', () => {
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
     }, { once: true });
-
 </script>
 </body>
 </html>
