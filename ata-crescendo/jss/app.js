@@ -1748,7 +1748,7 @@ function runAdminMenuAction(action) {
     try {
       await action();
     } catch (error) {
-      console.warn("Accion administrativa fallida", error);
+      console.warn(error);
       const detail = error?.message ? `\n\nDetalle tecnico: ${error.message}` : "";
       alert(`No se pudo ejecutar la accion administrativa.${detail}\n\nAvísame con este mensaje y lo rastreamos.`);
     }
@@ -8163,12 +8163,12 @@ function addModeSuggestion(suggestions, seen, mode, detail = "", sectionLabel = 
   suggestions.push({
     value: cleanedValue,
     detail: String(detail || "").trim(),
-	    sectionLabel: cleanedSectionLabel,
-	    degree,
-	    mode: cleanedValue,
-	    originScale: String(analysis.originScale || "").trim()
-	  });
-	}
+    sectionLabel: cleanedSectionLabel,
+    degree,
+    mode: cleanedValue,
+    originScale: String(analysis.originScale || "").trim()
+  });
+}
 
 function normalizeModeForComparison(value) {
   return normalizeAnalysisSymbolForComparison(value)
@@ -8571,7 +8571,7 @@ function alignAnalysisToVisibleSectionLabels(overwrite = false) {
     const analysis = analysisForEntryInSectionContext(entry, sectionContext);
     if (!analysis) return;
 
-    if (!isManualAnalysisFieldLocked(entry.slot, "degree") && analysis.degree && (overwrite || !entry.slot.degree)) {
+    if (!isManualAnalysisFieldLocked(entry.slot, "degree") && analysis.degree && (overwrite || isRepeat || !entry.slot.degree)) {
       if (entry.slot.degree !== analysis.degree) {
         entry.slot.degree = analysis.degree;
         changed = true;
