@@ -481,8 +481,10 @@
   <script src="jss/app.js"></script>
 
 <script>
+<script>
 // ============================================================
 //  CARGA DE BIBLIOTECA DESDE library Y library2 (vía API GitHub)
+//  Versión mejorada: muestra todos los archivos, no solo .json
 // ============================================================
 (function() {
     // Detectar owner y repo desde la URL de GitHub Pages
@@ -498,14 +500,29 @@
 
     let loaded = false;
 
-    // Obtener archivos de un directorio vía API
+    // Obtener archivos de un directorio vía API (con mejor manejo de errores)
     async function fetchDirectory(dir) {
         const url = `https://api.github.com/repos/${owner}/${repo}/contents/${dir}`;
         try {
             const res = await fetch(url);
-            if (!res.ok) return [];
+            if (!res.ok) {
+                // Si la respuesta es 404, la carpeta no existe
+                if (res.status === 404) {
+                    console.warn(`ATA: La carpeta "${dir}" no existe en la raíz del repositorio.`);
+                    return [];
+                }
+                // Otro error (403, 401, etc.)
+                console.warn(`ATA: Error ${res.status} al obtener ${dir}:`, res.statusText);
+                return [];
+            }
             const data = await res.json();
-            return data.filter(item => item.type === 'file' && item.name.endsWith('.json'));
+            // Si data es un objeto (no array), probablemente es un archivo individual, no un directorio
+            if (!Array.isArray(data)) {
+                console.warn(`ATA: "${dir}" no es un directorio o no contiene archivos.`);
+                return [];
+            }
+            // Devolvemos todos los archivos, sin filtrar por extensión
+            return data.filter(item => item.type === 'file');
         } catch (e) {
             console.warn(`ATA: Error al obtener ${dir}:`, e);
             return [];
@@ -517,40 +534,71 @@
         if (loaded) return;
 
         const list = document.getElementById('standardsList');
-        if (!list) return;
+        if (!list) {
+            console.warn('ATA: No se encontró el elemento #standardsList');
+            return;
+        }
 
         // Mostrar estado de carga
         list.innerHTML = '<li>Cargando biblioteca...</li>';
 
+        // Obtener archivos de ambas carpetas en paralelo
         const [files1, files2] = await Promise.all([
             fetchDirectory('library'),
             fetchDirectory('library2')
         ]);
 
+        // Combinar y eliminar duplicados (por nombre)
         const allFiles = [...files1, ...files2];
-        allFiles.sort((a, b) => a.name.localeCompare(b.name));
+        const uniqueFiles = [];
+        const seen = new Set();
+        for (const file of allFiles) {
+            if (!seen.has(file.name)) {
+                seen.add(file.name);
+                uniqueFiles.push(file);
+            }
+        }
+
+        // Ordenar alfabéticamente por nombre
+        uniqueFiles.sort((a, b) => a.name.localeCompare(b.name));
 
         list.innerHTML = '';
-        if (allFiles.length === 0) {
-            list.innerHTML = '<li>No se encontraron archivos .json en library o library2</li>';
+
+        if (uniqueFiles.length === 0) {
+            // Mensaje más informativo
+            let msg = 'No se encontraron archivos en library o library2. ';
+            if (files1.length === 0 && files2.length === 0) {
+                msg += 'Ambas carpetas están vacías o no existen. ';
+            } else {
+                msg += `(library: ${files1.length} archivos, library2: ${files2.length} archivos)`;
+            }
+            msg += ' Asegúrate de que las carpetas existan en la raíz del repositorio y contengan archivos.';
+            list.innerHTML = `<li>${msg}</li>`;
             loaded = true;
             return;
         }
 
-        allFiles.forEach(file => {
+        // Mostrar todos los archivos (sin importar extensión)
+        uniqueFiles.forEach(file => {
             const li = document.createElement('li');
-            li.textContent = file.name.replace(/\.json$/, '');
+            // Mostrar nombre del archivo sin extensión (opcional)
+            const nameWithoutExt = file.name.replace(/\.[^.]+$/, '');
+            li.textContent = nameWithoutExt;
             li.dataset.url = file.download_url;
+            li.dataset.originalName = nameWithoutExt;
+            // Añadir extensión como tooltip
+            li.title = `Archivo: ${file.name}`;
             list.appendChild(li);
         });
 
         loaded = true;
+        console.log(`ATA: Cargados ${uniqueFiles.length} archivos de library y library2`);
     }
 
-    // Función de carga por defecto (fallback)
+    // Función de carga por defecto (fallback mejorado)
     if (typeof window.loadSongFromData !== 'function') {
         // Intentar encontrar la función de carga en la aplicación
-        const possibleNames = ['loadSong', 'loadChart', 'loadFromJSON', 'openSong', 'loadData'];
+        const possibleNames = ['loadSong', 'loadChart', 'loadFromJSON', 'openSong', 'loadData', 'loadSongFromData'];
         let found = null;
         for (const name of possibleNames) {
             if (typeof window[name] === 'function') {
@@ -578,18 +626,33 @@
         const li = e.target.closest('li');
         if (!li || !li.dataset.url) return;
 
+        // Guardar nombre original para restaurar después
+        const originalText = li.textContent;
+
         try {
             li.textContent = 'Cargando...';
             const res = await fetch(li.dataset.url);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
+            
+            // Intentar parsear JSON
+            let data;
+            try {
+                data = await res.json();
+            } catch (parseError) {
+                // Si no es JSON, intentar leer como texto
+                const text = await res.text();
+                console.warn('ATA: El archivo no es JSON, se carga como texto:', text);
+                alert('El archivo no es un JSON válido. Si es un archivo de texto, contacta al administrador.');
+                li.textContent = originalText;
+                return;
+            }
+            
             window.loadSongFromData(data);
-            // Restaurar nombre después de cargar
-            li.textContent = li.dataset.originalName || li.textContent;
+            li.textContent = originalText;
         } catch (error) {
             console.error('ATA: Error al cargar el archivo:', error);
             alert('Error al cargar el archivo: ' + error.message);
-            li.textContent = li.dataset.originalName || 'Error';
+            li.textContent = originalText;
         }
     });
 
@@ -611,8 +674,6 @@
     }
 })();
 </script>
-</body>
-</html>
   
 </body>
 </html>
