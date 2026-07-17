@@ -1,12 +1,10 @@
-
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herramientas — Crescendo Academy</title>
-<meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Diapasón Virtual, Cuerdas Virtual, Editor de partituras, Metrónomo y Entrenamiento auditivo.">
+<meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Diapasón Virtual, Cuerdas Virtual, Requinto Virtual, Editor de partituras, Metrónomo, Entrenamiento auditivo y ATA Analizador Tonal.">
 <style>
   :root{
     --ink: #0a0a0a;
@@ -44,6 +42,8 @@
     --c-gold: #f3b02e;
     --c-orange: #f0791a;
     --c-teal: #157a7a;
+    --c-purple: #9b6b9b;
+    --c-rose: #d9696b;
   }
 
   *{ box-sizing:border-box; }
@@ -296,6 +296,8 @@
   .card--gold{ --card-color: var(--c-gold); }
   .card--orange{ --card-color: var(--c-orange); }
   .card--teal{ --card-color: var(--c-teal); }
+  .card--purple{ --card-color: var(--c-purple); }
+  .card--rose{ --card-color: var(--c-rose); }
 
   .card-icon{
     width: 44px; height:44px;
@@ -414,6 +416,14 @@
   @media (prefers-reduced-motion: reduce){
     .card, .social-bar a, .school-logo, .whatsapp-float{ transition: none; }
   }
+
+  /* Ajuste para 8 tarjetas: la última fila con 2 elementos se centra con grid automático */
+  .grid .card:nth-child(7) { grid-column: 1 / 2; }
+  .grid .card:nth-child(8) { grid-column: 2 / 3; }
+  @media (max-width: 900px) {
+    .grid .card:nth-child(7),
+    .grid .card:nth-child(8) { grid-column: auto; }
+  }
 </style>
 </head>
 <body>
@@ -487,14 +497,14 @@
 
       <div class="eyebrow">Recursos interactivos</div>
       <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
-      <p>Piano, diapasón de trastes, diapasón de cuerdas frotadas, editor de partituras, metrónomo y entrenamiento auditivo — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
+      <p>Piano, diapasón de trastes, diapasón de cuerdas frotadas, requinto, editor de partituras, metrónomo, entrenamiento auditivo y analizador armónico — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
     </div>
   </section>
 
   <section class="tools">
     <div class="tools-head">
       <h2>Herramientas disponibles</h2>
-      <span>6 herramientas</span>
+      <span>8 herramientas</span>
     </div>
 
     <div class="grid">
@@ -531,13 +541,13 @@
           </svg>
         </div>
         <h3>Diapasón Virtual</h3>
-        <p>Herramienta visual para estudiar escalas, modos y posiciones en instrumentos de cuerda con trastes: guitarra, bajo, ukelele y más.</p>
+        <p>Herramienta visual para estudiar escalas, modos y posiciones en instrumentos de cuerda con trastes: guitarra, bajo, ukelele, tiple, tres y más.</p>
         <span class="cta">Abrir herramienta
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
       </a>
 
-      <!-- Cuerdas Virtual -->
+      <!-- Cuerdas Frotadas -->
       <a class="card card--gold" href="cuerdas-frotadas/">
         <span class="tag-pill">Cuerdas Frotadas</span>
         <div class="card-icon">
@@ -548,8 +558,28 @@
             <line x1="15" y1="4" x2="15" y2="20"/>
           </svg>
         </div>
-        <h3>Cuerdas Virtual</h3>
+        <h3>Cuerdas Frotadas</h3>
         <p>Diapasón de cuerdas frotadas — violín, viola, violonchelo y contrabajo — con líneas guía y posiciones para practicar afinación y digitación.</p>
+        <span class="cta">Abrir herramienta
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <!-- Requinto Virtual -->
+      <a class="card card--purple" href="requinto-virtual/">
+        <span class="tag-pill">Requinto</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <line x1="4" y1="10" x2="20" y2="10"/>
+            <line x1="4" y1="14" x2="20" y2="14"/>
+            <line x1="7" y1="6" x2="7" y2="18"/>
+            <line x1="11" y1="6" x2="11" y2="18"/>
+            <line x1="15" y1="6" x2="15" y2="18"/>
+            <line x1="19" y1="6" x2="19" y2="18"/>
+          </svg>
+        </div>
+        <h3>Requinto Virtual</h3>
+        <p>Diapasón específico para requinto, con afinación A-D-G-C-E-A. Estudia escalas, acordes y posiciones con la misma interfaz del Diapasón Virtual.</p>
         <span class="cta">Abrir herramienta
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
@@ -607,12 +637,29 @@
         </span>
       </a>
 
+      <!-- ATA Crescendo -->
+      <a class="card card--rose" href="ata-crescendo/">
+        <span class="tag-pill">Análisis</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <h3>ATA Crescendo</h3>
+        <p>Analizador Tonal Avanzado para análisis armónico, rearmonización y edición pedagógica de partituras. Ideal para teoría tonal aplicada y jazz.</p>
+        <span class="cta">Abrir herramienta
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
     </div>
   </section>
 
   <footer class="site-footer">
-    <span class="brand">Crescendo Academy</span>
-    <span class="brand" id="footerYear"></span>
+    <span class="brand-line">Crescendo Academy</span>
+    <span id="footerYear"></span>
   </footer>
 
   <!-- WhatsApp Float Button -->
