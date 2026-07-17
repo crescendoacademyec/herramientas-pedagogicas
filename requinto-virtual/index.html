@@ -1916,21 +1916,12 @@
       }
 
       function yFromStep(step) {
-        // La línea INFERIOR del pentagrama (E4, step 4) está dibujada en
-        // STAFF_Y0 + 4*STAFF_LINE_SPACING (es la última línea, la más abajo
-        // en pantalla, ya que en SVG "y" crece hacia abajo).
-        // A mayor "step" (nota más aguda) le corresponde una "y" MENOR
-        // (más arriba en pantalla), y a menor "step" (nota más grave) le
-        // corresponde una "y" MAYOR (más abajo en pantalla).
-        // step = 4 -> E4 -> primera línea del pentagrama (línea inferior)
-        // step = 2 -> C4 -> primera línea adicional inferior
-        // step = 0 -> A3 -> segunda línea adicional inferior
         const STAFF_Y_BOTTOM = STAFF_Y0 + 4 * STAFF_LINE_SPACING;
         return STAFF_Y_BOTTOM - (step - 4) * (STAFF_LINE_SPACING / 2);
       }
 
       const cx = (STAFF_X1 + STAFF_X2) / 2;
-      const NOTE_X_OFFSET = 350; // desplazamiento a la derecha de la clave
+      const NOTE_X_OFFSET = -100; // desplazamiento a la derecha de la clave
       let prevStep = null, shiftToggle = false;
       const LEDGER_LENGTH = 240;
 
@@ -1944,7 +1935,7 @@
         if (prevStep !== null && Math.abs(step - prevStep) <= 1) shiftToggle = !shiftToggle;
         else shiftToggle = false;
         prevStep = step;
-        const x = cx + NOTE_X_OFFSET + (shiftToggle ? 100 : 0);
+        const x = cx + NOTE_X_OFFSET + (shiftToggle ? 250 : 0);
 
         // Líneas adicionales (ledger)
         // Las líneas adicionales siempre caen en posiciones PARES (2, 0, -2...
