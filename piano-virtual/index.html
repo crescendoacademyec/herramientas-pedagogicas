@@ -557,6 +557,24 @@
   .score-play-btn.secondary:hover{
     background: rgba(255,255,255,0.22);
   }
+  .score-play-btn.marked{
+    background: rgba(255,196,64,0.55);
+    color:#2b1d00;
+  }
+  .score-play-btn.marked:hover{
+    background: rgba(255,196,64,0.75);
+  }
+  .score-play-btn.active{
+    background: rgba(255,110,90,0.85);
+    color:#fff;
+  }
+  .score-play-btn.active:hover{
+    background: rgba(255,110,90,1);
+  }
+  .score-play-btn:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
   .score-play-btn svg{
     width: 13px;
     height: 13px;
@@ -788,7 +806,7 @@
     </a>
     <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" class="school-logo-link">
       <img
-        src="https://scontent.fuio5-1.fna.fbcdn.net/v/t39.30808-6/689316806_122177479256856020_7927560189686558059_n.jpg?stp=dst-jpg_tt6&cstp=mx1250x1250&ctp=s1250x1250&_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHwErWI6u9y5L-wE7NjduHb6G6w8ifhyg3obrDyJ-HKDcBBw8k1qqU-ODJCCVDHFh8ceCJHGUwNCw10BBI0n5Ce&_nc_ohc=X8RhpuaGUrgQ7kNvwFpElgR&_nc_oc=AdrFznvTH9MWAhjT4fD8E7nkA0QkTD45JPEETiEVnAOONf0GvBzlP4tN5dNZ6e8CqNA&_nc_zt=23&_nc_ht=scontent.fuio5-1.fna&_nc_gid=Vzip9GK7fUHINjzHpxub_g&_nc_ss=7b2a8&oh=00_AQCdmqpSaqdqkNRTrh1z9JA6CmzZrebvJvwQH8g7PkUWBQ&oe=6A558001"
+        src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png"
         alt="Logo Crescendo Academy"
         class="school-logo"
       />
@@ -905,6 +923,16 @@
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <span style="width:1px;align-self:stretch;background:rgba(255,255,255,0.25);margin:0 2px;"></span>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopStartBtn" title="Marcar inicio del tramo a repetir (en la posición actual)">A</button>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)">B</button>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" disabled>
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          Loop
+        </button>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
@@ -1666,6 +1694,10 @@
   const scoreTempoInput = document.getElementById('scoreTempo');
   const scoreZoomInBtn = document.getElementById('scoreZoomInBtn');
   const scoreZoomOutBtn = document.getElementById('scoreZoomOutBtn');
+  const scoreLoopStartBtn = document.getElementById('scoreLoopStartBtn');
+  const scoreLoopEndBtn = document.getElementById('scoreLoopEndBtn');
+  const scoreLoopBtn = document.getElementById('scoreLoopBtn');
+  const scoreLoopClearBtn = document.getElementById('scoreLoopClearBtn');
   const scoreStatus = document.getElementById('scoreStatus');
 
   let currentPdfUrl = null;
@@ -1851,6 +1883,67 @@
   let currentStepIndex = -1;
   const scoreActiveMidis = new Set();
 
+  // ---------- LOOP / REPETICIÓN DE UN TRAMO ----------
+  let loopStart = null;
+  let loopEnd = null;
+  let loopEnabled = false;
+
+  function updateLoopUI() {
+    scoreLoopStartBtn.classList.toggle('marked', loopStart !== null);
+    scoreLoopEndBtn.classList.toggle('marked', loopEnd !== null);
+    scoreLoopBtn.disabled = !(loopStart !== null && loopEnd !== null);
+    scoreLoopBtn.classList.toggle('active', loopEnabled);
+  }
+
+  function markLoopStart() {
+    if (!osmd || !osmd.cursor || currentStepIndex < 0) {
+      alert('Primero posiciónate sobre una nota: usa Play, avanza/retrocede, o haz clic sobre una nota de la partitura.');
+      return;
+    }
+    loopStart = currentStepIndex;
+    if (loopEnd !== null && loopEnd < loopStart) loopEnd = null;
+    updateLoopUI();
+  }
+
+  function markLoopEnd() {
+    if (!osmd || !osmd.cursor || currentStepIndex < 0) {
+      alert('Primero posiciónate sobre una nota: usa Play, avanza/retrocede, o haz clic sobre una nota de la partitura.');
+      return;
+    }
+    if (loopStart === null) {
+      loopStart = currentStepIndex;
+    } else if (currentStepIndex < loopStart) {
+      loopEnd = loopStart;
+      loopStart = currentStepIndex;
+    } else {
+      loopEnd = currentStepIndex;
+    }
+    updateLoopUI();
+  }
+
+  function clearLoopMarks() {
+    loopStart = null;
+    loopEnd = null;
+    loopEnabled = false;
+    updateLoopUI();
+  }
+
+  function toggleLoop() {
+    if (loopStart === null || loopEnd === null) return;
+    if (loopEnabled) {
+      loopEnabled = false;
+      stopPlaybackAudio();
+      updateLoopUI();
+    } else {
+      loopEnabled = true;
+      stopPlaybackAudio();
+      jumpToStep(loopStart);
+      scorePlaying = true;
+      updateLoopUI();
+      scheduleScoreStep();
+    }
+  }
+
   function stopPlaybackAudio() {
     scorePlaying = false;
     if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
@@ -1860,11 +1953,13 @@
   function pausePlayback() { stopPlaybackAudio(); }
   function fullStop() {
     stopPlaybackAudio();
+    loopEnabled = false;
     if (osmd && osmd.cursor) {
       try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e) {}
     }
     currentStepIndex = -1;
     try { osmdContainer.scrollLeft = 0; osmdContainer.scrollTop = 0; } catch(e) {}
+    updateLoopUI();
   }
 
   function triggerCurrentStepNotes(tempo, hold) {
@@ -1895,8 +1990,24 @@
 
   function scheduleScoreStep() {
     if (!scorePlaying || !osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
-    if (osmd.cursor.Iterator.EndReached) { fullStop(); return; }
+    if (osmd.cursor.Iterator.EndReached) {
+      if (loopEnabled && loopStart !== null) {
+        jumpToStep(loopStart);
+        scorePlaybackTimer = setTimeout(scheduleScoreStep, 0);
+        return;
+      }
+      fullStop();
+      return;
+    }
     const durationSeconds = triggerCurrentStepNotes(getTempo());
+    if (loopEnabled && loopEnd !== null && currentStepIndex >= loopEnd) {
+      scorePlaybackTimer = setTimeout(() => {
+        if (!scorePlaying) return;
+        jumpToStep(loopStart);
+        scheduleScoreStep();
+      }, durationSeconds * 1000);
+      return;
+    }
     osmd.cursor.next();
     currentStepIndex++;
     scorePlaybackTimer = setTimeout(scheduleScoreStep, durationSeconds * 1000);
@@ -1942,9 +2053,7 @@
     } catch(err) { console.warn('Error al retroceder:', err); }
   }
 
-  function seekToStep(targetIndex) {
-    if (!osmd || !osmd.cursor) return;
-    stopPlaybackAudio();
+  function jumpToStep(targetIndex) {
     try {
       osmd.cursor.reset();
       let guard = 0;
@@ -1954,7 +2063,13 @@
       }
       currentStepIndex = targetIndex;
       osmd.cursor.show();
-    } catch(err) { console.warn('Error al buscar posición:', err); }
+    } catch(err) { console.warn('Error al saltar de posición:', err); }
+  }
+
+  function seekToStep(targetIndex) {
+    if (!osmd || !osmd.cursor) return;
+    stopPlaybackAudio();
+    jumpToStep(targetIndex);
   }
 
   scorePlayBtn.addEventListener('click', playFromCurrentPosition);
@@ -1962,6 +2077,10 @@
   scoreStopBtn.addEventListener('click', fullStop);
   scoreNextBtn.addEventListener('click', stepForward);
   scorePrevBtn.addEventListener('click', stepBackward);
+  scoreLoopStartBtn.addEventListener('click', markLoopStart);
+  scoreLoopEndBtn.addEventListener('click', markLoopEnd);
+  scoreLoopBtn.addEventListener('click', toggleLoop);
+  scoreLoopClearBtn.addEventListener('click', clearLoopMarks);
 
   function zoomScore(delta) {
     if (!osmd) return;
@@ -2038,6 +2157,9 @@
 
   function resetScoreView() {
     fullStop();
+    loopStart = null;
+    loopEnd = null;
+    updateLoopUI();
     pdfViewer.src = '';
     pdfViewer.style.display = 'none';
     webViewer.src = '';
