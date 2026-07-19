@@ -122,6 +122,7 @@
       width: 100%;
       padding: clamp(16px, 3vw, 32px) clamp(18px, 4vw, 56px) 16px;
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
     }
@@ -315,6 +316,8 @@
       flex: 1;
       width: 100%;
       height: 100%;
+      min-height: 0;
+      overflow: hidden;
       background: #f0ede6;
       display: flex;
       flex-direction: column;
@@ -371,6 +374,8 @@
       color: #f3b3a8;
       font-size: 0.65rem;
       cursor: pointer;
+      min-height: 0;
+      width: auto;
     }
     .pdf-clear-btn.visible { display: inline-flex; }
     .pdf-clear-btn:hover { background: rgba(163,55,42,0.55); }
@@ -418,6 +423,8 @@
       color: #eee;
       font-size: 0.65rem;
       cursor: pointer;
+      min-height: 0;
+      width: auto;
     }
     .web-controls button:hover { background: rgba(255,255,255,0.22); }
     .web-controls .pdf-clear-btn { display: none; }
@@ -483,6 +490,8 @@
       color: #bfe0cf;
       font-size: 0.65rem;
       cursor: pointer;
+      min-height: 0;
+      width: auto;
     }
     .score-play-btn:hover { background: rgba(71,99,87,0.75); }
     .score-play-btn.secondary {
@@ -490,21 +499,62 @@
       color: #eee;
     }
     .score-play-btn.secondary:hover { background: rgba(255,255,255,0.22); }
+    .score-play-btn.marked { background: rgba(255,196,64,0.55); color: #2b1d00; }
+    .score-play-btn.marked:hover { background: rgba(255,196,64,0.75); }
+    .score-play-btn.active { background: rgba(255,110,90,0.85); color: #fff; }
+    .score-play-btn.active:hover { background: rgba(255,110,90,1); }
+    .score-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
     .score-play-btn svg { width: 12px; height: 12px; }
 
     .score-tempo {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      padding: 3px 5px;
     }
+    .score-tempo-label {
+      font-size: 0.62rem;
+      font-weight: 900;
+      color: #eee;
+      letter-spacing: 0.02em;
+    }
+    .score-tempo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      min-height: 0;
+      flex: 0 0 auto;
+      border-radius: 4px;
+      border: none;
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+    }
+    .score-tempo-btn:hover { background: rgba(255,255,255,0.3); }
+    .score-tempo-btn:active { transform: scale(0.92); }
     .score-tempo input {
-      width: 38px;
+      width: 32px;
       font-size: 0.65rem;
-      padding: 2px 4px;
+      padding: 1px 2px;
       border-radius: 4px;
       border: 1px solid rgba(255,255,255,0.3);
       background: transparent;
       color: #eee;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    .score-tempo input::-webkit-outer-spin-button,
+    .score-tempo input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     .score-status {
@@ -771,7 +821,7 @@
       <!-- Logo escuela -->
       <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" class="school-logo-link">
         <img
-          src="https://scontent.fuio5-1.fna.fbcdn.net/v/t39.30808-6/689316806_122177479256856020_7927560189686558059_n.jpg?stp=dst-jpg_tt6&cstp=mx1250x1250&ctp=s1250x1250&_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHwErWI6u9y5L-wE7NjduHb6G6w8ifhyg3obrDyJ-HKDcBBw8k1qqU-ODJCCVDHFh8ceCJHGUwNCw10BBI0n5Ce&_nc_ohc=X8RhpuaGUrgQ7kNvwFpElgR&_nc_oc=AdrFznvTH9MWAhjT4fD8E7nkA0QkTD45JPEETiEVnAOONf0GvBzlP4tN5dNZ6e8CqNA&_nc_zt=23&_nc_ht=scontent.fuio5-1.fna&_nc_gid=Vzip9GK7fUHINjzHpxub_g&_nc_ss=7b2a8&oh=00_AQCdmqpSaqdqkNRTrh1z9JA6CmzZrebvJvwQH8g7PkUWBQ&oe=6A558001"
+          src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png"
           alt="Logo Crescendo Academy"
           class="school-logo"
         />
@@ -875,28 +925,41 @@
 
         <div class="score-play-controls" id="scorePlayControls">
           <button type="button" class="score-play-btn secondary" id="scorePrevBtn" title="Retroceder una nota">
-            <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
           </button>
           <button type="button" class="score-play-btn" id="scorePlayBtn" title="Reproducir partitura (o barra espaciadora)">
-            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
           </button>
           <button type="button" class="score-play-btn" id="scorePauseBtn" title="Pausar (o barra espaciadora)">
-            <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg> Pausa
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg> Pausa
           </button>
           <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener">
-            <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></svg> Stop
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14"/></svg> Stop
           </button>
           <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota">
-            <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
           </button>
-          <label class="score-tempo" title="Tempo de reproducción">
-            BPM <input type="number" id="scoreTempo" min="20" max="300" value="100">
-          </label>
+          <div class="score-tempo" title="Tempo de reproducción">
+            <span class="score-tempo-label">BPM</span>
+            <button type="button" class="score-tempo-btn" id="scoreTempoDown" aria-label="Disminuir velocidad" title="Disminuir velocidad">−</button>
+            <input type="number" id="scoreTempo" min="20" max="300" value="100" step="5" inputmode="numeric">
+            <button type="button" class="score-tempo-btn" id="scoreTempoUp" aria-label="Aumentar velocidad" title="Aumentar velocidad">+</button>
+          </div>
           <button type="button" class="score-play-btn secondary" id="scoreZoomOutBtn" title="Alejar partitura">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
           </button>
           <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
-            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="14" y2="8"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="14" y2="8"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span style="width:1px;align-self:stretch;background:rgba(255,255,255,0.25);margin:0 2px;"></span>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopStartBtn" title="Marcar inicio del tramo a repetir (en la posición actual)">A</button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)">B</button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" disabled>
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Loop
+          </button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
 
@@ -1236,7 +1299,9 @@
       }
       const clefY = STAFF_Y0 - 3.2 * STAFF_LINE_SPACING;
       if(clef === 'bass') {
-        placeClef('𝄢', STAFF_X1 - 5, clefY - 1, clefY + 1, 1100);
+        const bassOffset = 470;
+        const bassClefY = clefY + bassOffset;
+        placeClef('𝄢', STAFF_X1 - 5, bassClefY - 1, bassClefY + 1, 600);
       } else {
         placeClef('𝄞', STAFF_X1 - 5, clefY - 1, clefY + 1, 1100);
       }
@@ -1267,16 +1332,29 @@
       const NOTE_X_OFFSET = -100;
       let prevStep = null, shiftToggle = false;
       const LEDGER_LENGTH = 240;
+
+      const instrumentKey = instrumentSel.value;
+      const shift = INSTRUMENTS[instrumentKey]?.clefShift || 0;
+      const clef = activeInstrument().clef || 'treble';
+
       sorted.forEach((n) => {
-        let step = diatonicStep(n.midi);
+        const displayMidi = n.midi + shift;
+        let step = diatonicStep(displayMidi);
+
+        // Ajuste para clave de fa: sumamos 8 para que la primera línea sea G (sol)
+        if (clef === 'bass') {
+          step += 5;
+        }
+
         let octaveShift = null;
-        if(step <= -13) { step += 7; octaveShift = '8vb'; }
+        if(step <= -2) { step += 7; octaveShift = '8vb'; }
         else if(step >= 17) { step -= 7; octaveShift = '8va'; }
         const y = yFromStep(step);
         if(prevStep !== null && Math.abs(step - prevStep) <= 1) shiftToggle = !shiftToggle;
         else shiftToggle = false;
         prevStep = step;
         const x = cx + NOTE_X_OFFSET + (shiftToggle ? 250 : 0);
+
         const ledgerLines = [];
         if(step < 4) {
           for(let l=2; l>=step; l-=2) ledgerLines.push(l);
@@ -1288,7 +1366,9 @@
           const led = svgEl('line', { class: 'note-el', x1: x - LEDGER_LENGTH, x2: x + LEDGER_LENGTH, y1: ly, y2: ly, stroke: '#000', 'stroke-width': 5 });
           svg.appendChild(led);
         });
-        if(NOTE[n.pc % 12].includes('#')) {
+
+        const displayPc = ((displayMidi % 12) + 12) % 12;
+        if(NOTE[displayPc].includes('#')) {
           const sharp = svgEl('text', { class: 'note-el', x: x - 48, y: y + 14, 'font-size': 42, fill: 'var(--active-color)', 'font-family': 'serif' });
           sharp.textContent = '♯';
           svg.appendChild(sharp);
@@ -1296,11 +1376,12 @@
         const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 110, ry: 100, fill: '#000', stroke: '#222', 'stroke-width': 1.5 });
         svg.appendChild(head);
         const lbl = svgEl('text', { class: 'note-el', x: x, y: y + 3, 'font-size': 110, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
-        lbl.textContent = NOTE[n.pc % 12];
+        lbl.textContent = NOTE[displayPc];
         svg.appendChild(lbl);
+
         if(octaveShift) {
-          const offsetY = (octaveShift === '8va') ? -80 : 80;
-          const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 30, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
+          const textY = STAFF_Y0 - 60;
+          const indicador = svgEl('text', { class: 'note-el', x: x, y: textY, 'font-size': 100, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
           indicador.textContent = octaveShift;
           svg.appendChild(indicador);
         }
@@ -1328,214 +1409,730 @@
     const scorePrevBtn = document.getElementById('scorePrevBtn');
     const scoreNextBtn = document.getElementById('scoreNextBtn');
     const scoreTempo = document.getElementById('scoreTempo');
+    const scoreTempoDown = document.getElementById('scoreTempoDown');
+    const scoreTempoUp = document.getElementById('scoreTempoUp');
     const scoreZoomOutBtn = document.getElementById('scoreZoomOutBtn');
     const scoreZoomInBtn = document.getElementById('scoreZoomInBtn');
+    const scoreLoopStartBtn = document.getElementById('scoreLoopStartBtn');
+    const scoreLoopEndBtn = document.getElementById('scoreLoopEndBtn');
+    const scoreLoopBtn = document.getElementById('scoreLoopBtn');
+    const scoreLoopClearBtn = document.getElementById('scoreLoopClearBtn');
 
     let osmd = null;
-    let currentScore = null;
+    let currentPdfUrl = null;
+    let currentImageUrl = null;
 
-    function clearAllScoreViews() {
-      if(window._pdfObjectUrl) {
-        URL.revokeObjectURL(window._pdfObjectUrl);
-        window._pdfObjectUrl = null;
+    // Estado de zoom/pan de imagen
+    let imageScale = 1, imageTranslateX = 0, imageTranslateY = 0;
+    let isImageDragging = false;
+    let dragStartX = 0, dragStartY = 0;
+    let dragStartTranslateX = 0, dragStartTranslateY = 0;
+
+    function updateImageTransform() {
+      imageViewer.style.transform = `translate(${imageTranslateX}px, ${imageTranslateY}px) scale(${imageScale})`;
+    }
+    function resetImageTransform() {
+      imageScale = 1; imageTranslateX = 0; imageTranslateY = 0;
+      updateImageTransform();
+    }
+
+    function setupImageControls() {
+      imageContainer.addEventListener('wheel', function(e) {
+        if (imageContainer.style.display === 'none') return;
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        const rect = imageContainer.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+        const newScale = Math.min(5, Math.max(0.2, imageScale + delta));
+        if (newScale === imageScale) return;
+        const ratio = newScale / imageScale;
+        imageTranslateX = mouseX - (mouseX - imageTranslateX) * ratio;
+        imageTranslateY = mouseY - (mouseY - imageTranslateY) * ratio;
+        imageScale = newScale;
+        updateImageTransform();
+      }, { passive: false });
+
+      imageContainer.addEventListener('mousedown', function(e) {
+        if (imageContainer.style.display === 'none') return;
+        if (e.button !== 0) return;
+        isImageDragging = true;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        dragStartTranslateX = imageTranslateX;
+        dragStartTranslateY = imageTranslateY;
+        imageContainer.style.cursor = 'grabbing';
+        e.preventDefault();
+      });
+
+      window.addEventListener('mousemove', function(e) {
+        if (!isImageDragging) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        imageTranslateX = dragStartTranslateX + dx;
+        imageTranslateY = dragStartTranslateY + dy;
+        updateImageTransform();
+      });
+
+      window.addEventListener('mouseup', function(e) {
+        if (isImageDragging) {
+          isImageDragging = false;
+          imageContainer.style.cursor = 'grab';
+        }
+      });
+
+      // Touch
+      let lastTouchDist = 0;
+      let touchStartX = 0, touchStartY = 0;
+      let touchStartTranslateX = 0, touchStartTranslateY = 0;
+      let touchStartScale = 1;
+
+      imageContainer.addEventListener('touchstart', function(e) {
+        if (imageContainer.style.display === 'none') return;
+        const touches = e.touches;
+        if (touches.length === 1) {
+          isImageDragging = true;
+          touchStartX = touches[0].clientX;
+          touchStartY = touches[0].clientY;
+          touchStartTranslateX = imageTranslateX;
+          touchStartTranslateY = imageTranslateY;
+        } else if (touches.length === 2) {
+          const dx = touches[0].clientX - touches[1].clientX;
+          const dy = touches[0].clientY - touches[1].clientY;
+          lastTouchDist = Math.sqrt(dx*dx + dy*dy);
+          touchStartScale = imageScale;
+          touchStartTranslateX = imageTranslateX;
+          touchStartTranslateY = imageTranslateY;
+          const midX = (touches[0].clientX + touches[1].clientX) / 2;
+          const midY = (touches[0].clientY + touches[1].clientY) / 2;
+          const rect = imageContainer.getBoundingClientRect();
+          touchStartX = midX - rect.left;
+          touchStartY = midY - rect.top;
+        }
+        e.preventDefault();
+      }, { passive: false });
+
+      imageContainer.addEventListener('touchmove', function(e) {
+        if (imageContainer.style.display === 'none') return;
+        const touches = e.touches;
+        if (touches.length === 1 && isImageDragging) {
+          const dx = touches[0].clientX - touchStartX;
+          const dy = touches[0].clientY - touchStartY;
+          imageTranslateX = touchStartTranslateX + dx;
+          imageTranslateY = touchStartTranslateY + dy;
+          updateImageTransform();
+          e.preventDefault();
+        } else if (touches.length === 2) {
+          const dx = touches[0].clientX - touches[1].clientX;
+          const dy = touches[0].clientY - touches[1].clientY;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const scaleFactor = dist / lastTouchDist;
+          const newScale = Math.min(5, Math.max(0.2, touchStartScale * scaleFactor));
+          const rect = imageContainer.getBoundingClientRect();
+          const midX = (touches[0].clientX + touches[1].clientX) / 2 - rect.left;
+          const midY = (touches[0].clientY + touches[1].clientY) / 2 - rect.top;
+          const ratio = newScale / touchStartScale;
+          imageTranslateX = midX - (midX - touchStartTranslateX) * ratio;
+          imageTranslateY = midY - (midY - touchStartTranslateY) * ratio;
+          imageScale = newScale;
+          updateImageTransform();
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      imageContainer.addEventListener('touchend', function(e) {
+        isImageDragging = false;
+      });
+    }
+    setupImageControls();
+
+    // Atajos de teclado para zoom de imagen
+    window.addEventListener('keydown', function(e) {
+      if (imageContainer.style.display === 'none') return;
+      const tag = e.target && e.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+      if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        const rect = imageContainer.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const newScale = Math.min(5, imageScale + 0.1);
+        if (newScale === imageScale) return;
+        const ratio = newScale / imageScale;
+        imageTranslateX = cx - (cx - imageTranslateX) * ratio;
+        imageTranslateY = cy - (cy - imageTranslateY) * ratio;
+        imageScale = newScale;
+        updateImageTransform();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        const rect = imageContainer.getBoundingClientRect();
+        const cx = rect.width / 2, cy = rect.height / 2;
+        const newScale = Math.max(0.2, imageScale - 0.1);
+        if (newScale === imageScale) return;
+        const ratio = newScale / imageScale;
+        imageTranslateX = cx - (cx - imageTranslateX) * ratio;
+        imageTranslateY = cy - (cy - imageTranslateY) * ratio;
+        imageScale = newScale;
+        updateImageTransform();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        resetImageTransform();
       }
+    });
+
+    // ---------- SONIDO PARA LA PRÁCTICA DE PARTITURAS (sostenido hasta apagarlo) ----------
+    const scoreActiveNotes = new Map(); // midi -> nodo de audio activo
+
+    function scoreNoteOn(midi) {
+      if (!soundEnabled) return;
+      const ctx = ensureCtx();
+      if (!ctx) return;
+      const vol = parseFloat(volumeSlider.value) / 10;
+      if (isNaN(vol) || vol <= 0) return;
+      scoreNoteOff(midi);
+      if (sfPlayer) {
+        try {
+          const sfNote = sfPlayer.play(midi, ctx.currentTime, { gain: vol });
+          if (sfNote) {
+            scoreActiveNotes.set(midi, { type: 'sf', node: sfNote });
+            return;
+          }
+        } catch(e) { console.warn('Error al tocar nota de la partitura:', e); }
+      }
+      // Fallback oscilador, sostenido hasta llamar a scoreNoteOff
+      const freq = 440 * Math.pow(2, (midi - 69) / 12);
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(vol * 0.3, ctx.currentTime + 0.02);
+      osc.connect(gain);
+      gain.connect(masterBus);
+      osc.start(ctx.currentTime);
+      scoreActiveNotes.set(midi, { type: 'osc', osc, gain });
+    }
+
+    function scoreNoteOff(midi) {
+      const entry = scoreActiveNotes.get(midi);
+      if (!entry) return;
+      const ctx = audioCtx;
+      try {
+        if (entry.type === 'sf') {
+          if (entry.node && typeof entry.node.stop === 'function') entry.node.stop(ctx.currentTime);
+        } else {
+          entry.gain.gain.cancelScheduledValues(ctx.currentTime);
+          entry.gain.gain.setValueAtTime(entry.gain.gain.value, ctx.currentTime);
+          entry.gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.05);
+          entry.osc.stop(ctx.currentTime + 0.06);
+        }
+      } catch(e) {}
+      scoreActiveNotes.delete(midi);
+    }
+
+    // ---------- FUNCIONES DE PARTITURA ----------
+    function ensureOSMD() {
+      if (typeof opensheetmusicdisplay === 'undefined') {
+        throw new Error('La librería OpenSheetMusicDisplay no se cargó.');
+      }
+      if (!osmd) {
+        osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(osmdContainer, {
+          autoResize: true,
+          drawTitle: true,
+          followCursor: true
+        });
+      }
+      return osmd;
+    }
+
+    function getTempo() { return parseFloat(scoreTempo.value) || 100; }
+
+    let scorePlaying = false;
+    let scorePlaybackTimer = null;
+    let currentStepIndex = -1;
+    const scoreActiveMidis = new Set();
+
+    // ---------- LOOP / REPETICIÓN DE UN TRAMO ----------
+    let loopStart = null;
+    let loopEnd = null;
+    let loopEnabled = false;
+
+    function updateLoopUI() {
+      scoreLoopStartBtn.classList.toggle('marked', loopStart !== null);
+      scoreLoopEndBtn.classList.toggle('marked', loopEnd !== null);
+      scoreLoopBtn.disabled = !(loopStart !== null && loopEnd !== null);
+      scoreLoopBtn.classList.toggle('active', loopEnabled);
+    }
+
+    function markLoopStart() {
+      if (!osmd || !osmd.cursor || currentStepIndex < 0) {
+        alert('Primero posiciónate sobre una nota: usa Play, avanza/retrocede, o haz clic sobre una nota de la partitura.');
+        return;
+      }
+      loopStart = currentStepIndex;
+      if (loopEnd !== null && loopEnd < loopStart) loopEnd = null;
+      updateLoopUI();
+    }
+
+    function markLoopEnd() {
+      if (!osmd || !osmd.cursor || currentStepIndex < 0) {
+        alert('Primero posiciónate sobre una nota: usa Play, avanza/retrocede, o haz clic sobre una nota de la partitura.');
+        return;
+      }
+      if (loopStart === null) {
+        loopStart = currentStepIndex;
+      } else if (currentStepIndex < loopStart) {
+        loopEnd = loopStart;
+        loopStart = currentStepIndex;
+      } else {
+        loopEnd = currentStepIndex;
+      }
+      updateLoopUI();
+    }
+
+    function clearLoopMarks() {
+      loopStart = null;
+      loopEnd = null;
+      loopEnabled = false;
+      updateLoopUI();
+    }
+
+    function toggleLoop() {
+      if (loopStart === null || loopEnd === null) return;
+      if (loopEnabled) {
+        loopEnabled = false;
+        stopPlaybackAudio();
+        updateLoopUI();
+      } else {
+        loopEnabled = true;
+        stopPlaybackAudio();
+        jumpToStep(loopStart);
+        scorePlaying = true;
+        updateLoopUI();
+        scheduleScoreStep();
+      }
+    }
+
+    function stopPlaybackAudio() {
+      scorePlaying = false;
+      if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
+      scoreActiveMidis.forEach(midi => scoreNoteOff(midi));
+      scoreActiveMidis.clear();
+    }
+    function pausePlayback() { stopPlaybackAudio(); }
+    function fullStop() {
+      stopPlaybackAudio();
+      loopEnabled = false;
+      if (osmd && osmd.cursor) {
+        try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e) {}
+      }
+      currentStepIndex = -1;
+      try { osmdContainer.scrollLeft = 0; osmdContainer.scrollTop = 0; } catch(e) {}
+      updateLoopUI();
+    }
+
+    function triggerCurrentStepNotes(tempo, hold) {
+      let stepSeconds = null;
+      try {
+        const entries = osmd.cursor.Iterator.CurrentVoiceEntries || [];
+        entries.forEach(ve => {
+          (ve.Notes || []).forEach(note => {
+            if (!note || (note.isRest && note.isRest()) || note.Pitch == null) return;
+            const midi = note.Pitch.halfTone + 12;
+            const lengthFraction = (note.Length && typeof note.Length.RealValue === 'number') ? note.Length.RealValue : 0.25;
+            const durSeconds = lengthFraction * 4 * (60 / tempo);
+            if (stepSeconds === null || durSeconds < stepSeconds) stepSeconds = durSeconds;
+            scoreNoteOn(midi);
+            scoreActiveMidis.add(midi);
+            if (!hold) {
+              setTimeout(() => {
+                scoreNoteOff(midi);
+                scoreActiveMidis.delete(midi);
+              }, Math.max(30, durSeconds * 1000 - 30));
+            }
+          });
+        });
+      } catch(err) { console.warn('Error leyendo notas de la partitura:', err); }
+      if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo);
+      return stepSeconds;
+    }
+
+    function scheduleScoreStep() {
+      if (!scorePlaying || !osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
+      if (osmd.cursor.Iterator.EndReached) {
+        if (loopEnabled && loopStart !== null) {
+          jumpToStep(loopStart);
+          scorePlaybackTimer = setTimeout(scheduleScoreStep, 0);
+          return;
+        }
+        fullStop();
+        return;
+      }
+      const durationSeconds = triggerCurrentStepNotes(getTempo());
+      if (loopEnabled && loopEnd !== null && currentStepIndex >= loopEnd) {
+        scorePlaybackTimer = setTimeout(() => {
+          if (!scorePlaying) return;
+          jumpToStep(loopStart);
+          scheduleScoreStep();
+        }, durationSeconds * 1000);
+        return;
+      }
+      osmd.cursor.next();
+      currentStepIndex++;
+      scorePlaybackTimer = setTimeout(scheduleScoreStep, durationSeconds * 1000);
+    }
+
+    function playFromCurrentPosition() {
+      if (!osmd || !osmd.cursor) return;
+      stopPlaybackAudio();
+      if (currentStepIndex === -1) osmd.cursor.reset();
+      osmd.cursor.show();
+      scorePlaying = true;
+      scheduleScoreStep();
+    }
+
+    function stepForward() {
+      if (!osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
+      stopPlaybackAudio();
+      if (currentStepIndex === -1) osmd.cursor.reset();
+      else {
+        if (osmd.cursor.Iterator.EndReached) return;
+        osmd.cursor.next();
+      }
+      currentStepIndex++;
+      osmd.cursor.show();
+      triggerCurrentStepNotes(getTempo(), true);
+    }
+
+    function stepBackward() {
+      if (!osmd || !osmd.cursor) return;
+      stopPlaybackAudio();
+      const target = currentStepIndex - 1;
+      if (target < 0) { fullStop(); return; }
+      try {
+        osmd.cursor.reset();
+        let guard = 0;
+        while (guard < target && osmd.cursor.Iterator && !osmd.cursor.Iterator.EndReached) {
+          osmd.cursor.next();
+          guard++;
+        }
+        currentStepIndex = target;
+        osmd.cursor.show();
+        triggerCurrentStepNotes(getTempo(), true);
+      } catch(err) { console.warn('Error al retroceder:', err); }
+    }
+
+    function jumpToStep(targetIndex) {
+      try {
+        osmd.cursor.reset();
+        let guard = 0;
+        while (guard < targetIndex && osmd.cursor.Iterator && !osmd.cursor.Iterator.EndReached) {
+          osmd.cursor.next();
+          guard++;
+        }
+        currentStepIndex = targetIndex;
+        osmd.cursor.show();
+      } catch(err) { console.warn('Error al saltar de posición:', err); }
+    }
+
+    function seekToStep(targetIndex) {
+      if (!osmd || !osmd.cursor) return;
+      stopPlaybackAudio();
+      jumpToStep(targetIndex);
+    }
+
+    scorePlayBtn.addEventListener('click', playFromCurrentPosition);
+    scorePauseBtn.addEventListener('click', pausePlayback);
+    scoreStopBtn.addEventListener('click', fullStop);
+    scoreNextBtn.addEventListener('click', stepForward);
+    scorePrevBtn.addEventListener('click', stepBackward);
+    scoreLoopStartBtn.addEventListener('click', markLoopStart);
+    scoreLoopEndBtn.addEventListener('click', markLoopEnd);
+    scoreLoopBtn.addEventListener('click', toggleLoop);
+    scoreLoopClearBtn.addEventListener('click', clearLoopMarks);
+
+    function zoomScore(delta) {
+      if (!osmd) return;
+      try {
+        const current = (typeof osmd.Zoom === 'number') ? osmd.Zoom : 1;
+        const newZoom = Math.min(3, Math.max(0.4, +(current + delta).toFixed(2)));
+        osmd.Zoom = newZoom;
+        osmd.render();
+        requestAnimationFrame(() => { try { buildScoreStepMap(); } catch(e) {} });
+      } catch(err) { console.warn('Error al cambiar zoom:', err); }
+    }
+    scoreZoomInBtn.addEventListener('click', () => zoomScore(0.1));
+    scoreZoomOutBtn.addEventListener('click', () => zoomScore(-0.1));
+
+    let scoreSteps = [];
+    function buildScoreStepMap() {
+      scoreSteps = [];
+      if (!osmd || !osmd.cursor || !osmd.cursor.Iterator) return;
+      try {
+        osmd.cursor.reset();
+        osmd.cursor.show();
+        const containerRect = osmdContainer.getBoundingClientRect();
+        let guard = 0;
+        while (!osmd.cursor.Iterator.EndReached && guard < 4000) {
+          osmd.cursor.update();
+          const cursorEl = osmd.cursor.cursorElement;
+          if (cursorEl) {
+            const r = cursorEl.getBoundingClientRect();
+            if (r.width > 0 && r.height > 0) {
+              scoreSteps.push({
+                index: scoreSteps.length,
+                left: r.left - containerRect.left + osmdContainer.scrollLeft,
+                top: r.top - containerRect.top + osmdContainer.scrollTop,
+                width: Math.max(r.width, 10),
+                height: Math.max(r.height, 20)
+              });
+            }
+          }
+          osmd.cursor.next();
+          guard++;
+        }
+      } catch(err) { console.warn('No se pudo generar mapa de clics:', err); scoreSteps = []; }
+      try { osmd.cursor.reset(); osmd.cursor.hide(); } catch(e) {}
+      currentStepIndex = -1;
+      renderClickOverlay();
+    }
+
+    function renderClickOverlay() {
+      const old = document.getElementById('scoreClickOverlay');
+      if (old) old.remove();
+      if (!scoreSteps.length) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'scoreClickOverlay';
+      overlay.style.position = 'absolute';
+      overlay.style.left = '0';
+      overlay.style.top = '0';
+      overlay.style.width = osmdContainer.scrollWidth + 'px';
+      overlay.style.height = osmdContainer.scrollHeight + 'px';
+      overlay.style.pointerEvents = 'none';
+      scoreSteps.forEach(step => {
+        const hit = document.createElement('div');
+        hit.className = 'score-click-hit';
+        hit.style.left = (step.left - 4) + 'px';
+        hit.style.top = (step.top - 4) + 'px';
+        hit.style.width = (step.width + 8) + 'px';
+        hit.style.height = (step.height + 8) + 'px';
+        hit.style.pointerEvents = 'auto';
+        hit.title = 'Comenzar aquí';
+        hit.addEventListener('click', () => seekToStep(step.index));
+        overlay.appendChild(hit);
+      });
+      osmdContainer.appendChild(overlay);
+    }
+
+    function resetScoreView() {
+      fullStop();
+      loopStart = null;
+      loopEnd = null;
+      updateLoopUI();
       pdfViewer.src = '';
+      pdfViewer.style.display = 'none';
       webViewer.src = '';
       webViewer.classList.remove('visible');
+      webClearBtn.classList.remove('visible');
+      webLoadNote.textContent = '';
+      webLoadNote.style.display = 'none';
       osmdContainer.classList.remove('visible');
       osmdContainer.innerHTML = '';
+      osmd = null;
       imageContainer.style.display = 'none';
+      if (currentImageUrl) { URL.revokeObjectURL(currentImageUrl); currentImageUrl = null; }
       imageViewer.src = '';
+      resetImageTransform();
+      scoreSteps = [];
       scorePlayControls.classList.remove('visible');
-      pdfClearBtn.classList.remove('visible');
-      webClearBtn.classList.remove('visible');
       scoreStatus.textContent = '';
-      currentScore = null;
+      pdfClearBtn.classList.remove('visible');
       const clef = activeInstrument().clef || 'treble';
       drawBaseStaff(clef);
       renderStaffNotes([]);
     }
 
-    function showScorePlayControls(show) {
-      scorePlayControls.classList.toggle('visible', show);
-    }
-
-    pdfUpload.addEventListener('change', function(e) {
+    pdfUpload.addEventListener('change', async function(e) {
       const file = this.files[0];
-      if(!file) return;
-      const fileType = file.type;
-      const ext = file.name.split('.').pop().toLowerCase();
-      if(fileType === 'application/pdf' || ext === 'pdf') {
-        if(window._pdfObjectUrl) {
-          URL.revokeObjectURL(window._pdfObjectUrl);
-          window._pdfObjectUrl = null;
-        }
-        clearAllScoreViews();
-        const url = URL.createObjectURL(file);
-        window._pdfObjectUrl = url;
-        pdfViewer.src = url;
-        document.querySelector('.staff-right .pdf-viewer').style.display = 'block';
-        document.querySelector('.staff-right .osmd-container').style.display = 'none';
-        document.querySelector('.staff-right .web-viewer').style.display = 'none';
-        document.querySelector('.staff-right #imageContainer').style.display = 'none';
+      if (!file) return;
+      const name = file.name.toLowerCase();
+      const isPdf = name.endsWith('.pdf') || file.type === 'application/pdf';
+      const isMusicXML = name.endsWith('.xml') || name.endsWith('.musicxml') || name.endsWith('.mxl');
+      const isImage = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(name);
+
+      resetScoreView();
+      if (isPdf) {
+        if (currentPdfUrl) URL.revokeObjectURL(currentPdfUrl);
+        currentPdfUrl = URL.createObjectURL(file);
+        pdfViewer.src = currentPdfUrl;
+        pdfViewer.style.display = 'block';
         pdfClearBtn.classList.add('visible');
-        scoreStatus.textContent = 'PDF cargado';
-        showScorePlayControls(false);
         return;
       }
-      if(ext === 'xml' || ext === 'musicxml' || ext === 'mxl') {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-          const xmlString = ev.target.result;
-          if(!osmd) {
-            osmd = new opensheetmusicdisplay.OpenSheetMusicDisplay(osmdContainer, {
-              drawFromMeasureNumber: 1,
-              drawUpToMeasureNumber: Number.MAX_SAFE_INTEGER,
-              backend: 'svg',
-            });
-          }
-          osmd.load(xmlString).then(() => {
-            osmd.render();
-            clearAllScoreViews();
-            document.querySelector('.staff-right .pdf-viewer').style.display = 'none';
-            document.querySelector('.staff-right .osmd-container').style.display = 'block';
-            document.querySelector('.staff-right .web-viewer').style.display = 'none';
-            document.querySelector('.staff-right #imageContainer').style.display = 'none';
-            pdfClearBtn.classList.add('visible');
-            scoreStatus.textContent = 'Partitura cargada';
-            showScorePlayControls(true);
-            currentScore = osmd;
-          }).catch(err => {
-            scoreStatus.textContent = 'Error al cargar MusicXML: ' + err.message;
+      if (isMusicXML) {
+        pdfViewer.style.display = 'none';
+        scoreStatus.textContent = 'Cargando partitura…';
+        try {
+          const engine = ensureOSMD();
+          const ext = name.split('.').pop();
+          const content = (ext === 'mxl') ? await file.arrayBuffer() : await file.text();
+          await engine.load(content);
+          osmdContainer.classList.add('visible');
+          engine.render();
+          requestAnimationFrame(() => {
+            try { engine.render(); buildScoreStepMap(); } catch(e) { console.warn('Error final render:', e); }
           });
-        };
-        reader.readAsText(file);
-        return;
-      }
-      if(fileType.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-          imageViewer.src = ev.target.result;
-          clearAllScoreViews();
-          document.querySelector('.staff-right .pdf-viewer').style.display = 'none';
-          document.querySelector('.staff-right .osmd-container').style.display = 'none';
-          document.querySelector('.staff-right .web-viewer').style.display = 'none';
-          document.querySelector('.staff-right #imageContainer').style.display = 'block';
+          scorePlayControls.classList.add('visible');
           pdfClearBtn.classList.add('visible');
-          scoreStatus.textContent = 'Imagen cargada';
-          showScorePlayControls(false);
-        };
-        reader.readAsDataURL(file);
+          scoreStatus.textContent = '';
+          const bpm = engine.Sheet && engine.Sheet.DefaultStartTempoInBpm;
+          if (bpm && bpm > 0) scoreTempo.value = Math.round(bpm);
+        } catch(err) {
+          console.error('Error cargando MusicXML:', err);
+          const detail = (err && err.message) ? err.message : String(err);
+          scoreStatus.textContent = 'No se pudo leer el archivo: ' + detail;
+          osmdContainer.classList.remove('visible');
+          scorePlayControls.classList.remove('visible');
+        }
         return;
       }
-      alert('Formato de archivo no soportado. Usa PDF, MusicXML, MXL o imagen.');
+      if (isImage) {
+        const url = URL.createObjectURL(file);
+        currentImageUrl = url;
+        imageViewer.src = url;
+        imageContainer.style.display = 'block';
+        resetImageTransform();
+        pdfClearBtn.classList.add('visible');
+        scoreStatus.textContent = '';
+        pdfViewer.style.display = 'none';
+        webViewer.classList.remove('visible');
+        osmdContainer.classList.remove('visible');
+        scorePlayControls.classList.remove('visible');
+        return;
+      }
+      alert('Formato no soportado. Usa PDF, MusicXML (.xml / .musicxml), .mxl o imagen (PNG, JPG, GIF, WEBP, BMP, SVG).');
       this.value = '';
     });
 
     pdfClearBtn.addEventListener('click', function() {
-      clearAllScoreViews();
-      document.querySelector('.staff-right .pdf-viewer').style.display = 'block';
-      document.querySelector('.staff-right .osmd-container').style.display = 'none';
-      document.querySelector('.staff-right .web-viewer').style.display = 'none';
-      document.querySelector('.staff-right #imageContainer').style.display = 'none';
+      resetScoreView();
       pdfUpload.value = '';
+      if (currentPdfUrl) { URL.revokeObjectURL(currentPdfUrl); currentPdfUrl = null; }
       pdfClearBtn.classList.remove('visible');
-      if(osmd) { osmd = null; }
-      const clef = activeInstrument().clef || 'treble';
-      drawBaseStaff(clef);
-      renderStaffNotes([]);
     });
 
-    webLoadBtn.addEventListener('click', function() {
-      let url = webUrlInput.value.trim();
-      if(!url) return;
-      if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      try { new URL(url); } catch(e) {
-        webLoadNote.textContent = 'URL inválida.';
-        webLoadNote.style.display = 'block';
-        return;
+    // ---------- CARGA DE PÁGINA WEB ----------
+    function normalizeWebUrl(raw) {
+      let url = (raw || '').trim();
+      if (!url) return null;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      try { return new URL(url).href; } catch(e) { return null; }
+    }
+
+    function toEmbeddableUrl(url) {
+      let u; try { u = new URL(url); } catch(e) { return url; }
+      const host = u.hostname.replace(/^www\./, '').replace(/^m\./, '');
+      let videoId = null;
+      if (host === 'youtube.com' || host === 'music.youtube.com') {
+        if (u.pathname === '/watch') videoId = u.searchParams.get('v');
+        else if (u.pathname.startsWith('/shorts/')) videoId = u.pathname.split('/')[2];
+        else if (u.pathname.startsWith('/embed/')) return url;
+      } else if (host === 'youtu.be') {
+        videoId = u.pathname.slice(1);
       }
-      webLoadNote.style.display = 'none';
-      clearAllScoreViews();
-      document.querySelector('.staff-right .pdf-viewer').style.display = 'none';
-      document.querySelector('.staff-right .osmd-container').style.display = 'none';
-      document.querySelector('.staff-right .web-viewer').style.display = 'block';
-      document.querySelector('.staff-right #imageContainer').style.display = 'none';
-      webViewer.src = url;
+      if (videoId) {
+        const start = u.searchParams.get('t') || u.searchParams.get('start');
+        let embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        if (start) embedUrl += `?start=${parseInt(start, 10) || 0}`;
+        return embedUrl;
+      }
+      return url;
+    }
+
+    function toWatchUrlIfEmbed(url) {
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        if (host === 'youtube.com' && u.pathname.startsWith('/embed/')) {
+          const id = u.pathname.split('/')[2];
+          if (id) return `https://www.youtube.com/watch?v=${id}`;
+        }
+      } catch(e) {}
+      return url;
+    }
+
+    function loadWebPage() {
+      const url = normalizeWebUrl(webUrlInput.value);
+      if (!url) { alert('Introduce un enlace válido (ej. https://ejemplo.com).'); return; }
+      resetScoreView();
+      pdfUpload.value = '';
+      if (currentPdfUrl) { URL.revokeObjectURL(currentPdfUrl); currentPdfUrl = null; }
+      const finalUrl = toEmbeddableUrl(url);
+      webViewer.src = finalUrl;
+      webUrlInput.value = finalUrl;
       webViewer.classList.add('visible');
       webClearBtn.classList.add('visible');
-      scoreStatus.textContent = 'Página cargada';
-      showScorePlayControls(false);
-    });
+      const isYouTubeEmbed = /^https:\/\/www\.youtube\.com\/embed\//.test(finalUrl);
+      if (isYouTubeEmbed && location.protocol === 'file:') {
+        webLoadNote.textContent = '⚠ YouTube suele bloquear la reproducción embebida en archivos locales (file://). Si no se ve, usa el botón ↗ para abrirlo en otra pestaña.';
+        webLoadNote.style.display = 'block';
+      } else {
+        webLoadNote.textContent = '';
+        webLoadNote.style.display = 'none';
+      }
+    }
 
+    webLoadBtn.addEventListener('click', loadWebPage);
+    webUrlInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); loadWebPage(); }
+    });
     webOpenNewTabBtn.addEventListener('click', function() {
-      let url = webUrlInput.value.trim();
-      if(!url) return;
-      if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
-      window.open(url, '_blank');
+      const url = normalizeWebUrl(webUrlInput.value);
+      if (!url) { alert('Introduce un enlace válido.'); return; }
+      window.open(toWatchUrlIfEmbed(url), '_blank', 'noopener');
     });
-
     webClearBtn.addEventListener('click', function() {
-      clearAllScoreViews();
-      document.querySelector('.staff-right .pdf-viewer').style.display = 'block';
-      document.querySelector('.staff-right .osmd-container').style.display = 'none';
-      document.querySelector('.staff-right .web-viewer').style.display = 'none';
-      document.querySelector('.staff-right #imageContainer').style.display = 'none';
       webViewer.src = '';
       webViewer.classList.remove('visible');
       webClearBtn.classList.remove('visible');
-      webUrlInput.value = '';
+      webLoadNote.textContent = '';
       webLoadNote.style.display = 'none';
-      const clef = activeInstrument().clef || 'treble';
-      drawBaseStaff(clef);
-      renderStaffNotes([]);
     });
 
-    // Controles de reproducción simples
-    let isPlaying = false;
-    scorePlayBtn.addEventListener('click', function() {
-      if(!currentScore) return;
-      if(isPlaying) {
-        isPlaying = false;
-        this.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play';
-        scoreStatus.textContent = 'Pausado';
-      } else {
-        isPlaying = true;
-        this.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg> Play';
-        scoreStatus.textContent = 'Reproduciendo...';
-        setTimeout(() => {
-          if(isPlaying) {
-            isPlaying = false;
-            scoreStatus.textContent = 'Reproducción finalizada';
-            this.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play';
-          }
-        }, 5000);
+    // ---------- ATAJOS DE TECLADO PARA LA PARTITURA ----------
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const tag = e.target && e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (!osmd || !osmd.cursor) return;
+        e.preventDefault();
+        if (e.key === 'ArrowRight') stepForward();
+        else stepBackward();
+        return;
+      }
+      if (e.code === 'Space' || e.key === ' ' || e.key === 'Spacebar') {
+        const tag = e.target && e.target.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'BUTTON') return;
+        if (!osmd || !osmd.cursor) return;
+        e.preventDefault();
+        if (scorePlaying) pausePlayback();
+        else playFromCurrentPosition();
       }
     });
-    scorePauseBtn.addEventListener('click', function() {
-      if(isPlaying) {
-        isPlaying = false;
-        scoreStatus.textContent = 'Pausado';
-        scorePlayBtn.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play';
-      }
-    });
-    scoreStopBtn.addEventListener('click', function() {
-      isPlaying = false;
-      scoreStatus.textContent = 'Detenido';
-      scorePlayBtn.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play';
-    });
-    scorePrevBtn.addEventListener('click', function() { scoreStatus.textContent = 'Retroceder'; });
-    scoreNextBtn.addEventListener('click', function() { scoreStatus.textContent = 'Avanzar'; });
-    scoreZoomOutBtn.addEventListener('click', function() {
-      if(currentScore && currentScore.zoom) { currentScore.zoom -= 0.1; currentScore.render(); }
-    });
-    scoreZoomInBtn.addEventListener('click', function() {
-      if(currentScore && currentScore.zoom) { currentScore.zoom += 0.1; currentScore.render(); }
-    });
+
     scoreTempo.addEventListener('change', function() {
       const bpm = parseInt(this.value) || 100;
-      scoreStatus.textContent = 'Tempo: ' + bpm + ' BPM';
     });
+
+    function adjustScoreTempo(delta) {
+      const min = parseInt(scoreTempo.min) || 20;
+      const max = parseInt(scoreTempo.max) || 300;
+      const current = parseInt(scoreTempo.value) || 100;
+      const next = Math.min(max, Math.max(min, current + delta));
+      scoreTempo.value = next;
+      scoreTempo.dispatchEvent(new Event('change'));
+    }
+    scoreTempoDown.addEventListener('click', () => adjustScoreTempo(-1));
+    scoreTempoUp.addEventListener('click', () => adjustScoreTempo(1));
 
     /***************** Dibujado principal *************************/
     function draw(){
@@ -1585,11 +2182,13 @@
         ctx.stroke();
       }
 
-      // nombres de cuerdas al aire
-      ctx.font="900 0.8rem Inter, sans-serif"; ctx.textAlign="right"; ctx.textBaseline="middle";
+      // números de cuerda
+      ctx.font="900 0.8rem Inter, sans-serif";
+      ctx.textAlign="right";
+      ctx.textBaseline="middle";
       ctx.fillStyle="rgba(255,250,240,0.75)";
-      for(let s=0;s<stringCount;s++){
-        ctx.fillText(activeInstrument().names[s], BOARD_X-10, stringY(s,0,stringCount,centerY));
+      for(let s=0; s<stringCount; s++){
+        ctx.fillText(String(s + 1), BOARD_X - 30, stringY(s, 0, stringCount, centerY));
       }
 
       const isBlank=blankMode(), isChord=!isBlank&&chordTypeSel.value!=="";
@@ -1715,7 +2314,6 @@
         manualSelections.delete(key);
       } else {
         manualSelections.add(key);
-        // Reproducir sonido
         const pitches = activePitches();
         const rows = rowsList();
         const midi = pitches[cell.s] + rows[cell.i].semi;
