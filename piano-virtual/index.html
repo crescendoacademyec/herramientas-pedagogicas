@@ -585,15 +585,51 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    padding: 3px 5px;
   }
+  .score-tempo-label{
+    font-size: 0.62rem;
+    font-weight: 900;
+    color: #eee;
+    letter-spacing: 0.02em;
+  }
+  .score-tempo-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    min-height: 0;
+    flex: 0 0 auto;
+    border-radius: 4px;
+    border: none;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 900;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+  }
+  .score-tempo-btn:hover{ background: rgba(255,255,255,0.3); }
+  .score-tempo-btn:active{ transform: scale(0.92); }
   .score-tempo input{
-    width: 46px;
-    font-size: 0.7rem;
-    padding: 2px 4px;
+    width: 32px;
+    font-size: 0.65rem;
+    padding: 1px 2px;
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.3);
     background: transparent;
     color: #eee;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .score-tempo input::-webkit-outer-spin-button,
+  .score-tempo input::-webkit-inner-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
   }
   .score-status{
     font-size: 0.65rem;
@@ -915,9 +951,12 @@
         <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota">
           <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
         </button>
-        <label class="score-tempo" title="Tempo de reproducción">
-          BPM <input type="number" id="scoreTempo" min="20" max="300" value="100">
-        </label>
+        <div class="score-tempo" title="Tempo de reproducción">
+          <span class="score-tempo-label">BPM</span>
+          <button type="button" class="score-tempo-btn" id="scoreTempoDown" aria-label="Disminuir velocidad" title="Disminuir velocidad">−</button>
+          <input type="number" id="scoreTempo" min="20" max="300" value="100" step="5" inputmode="numeric">
+          <button type="button" class="score-tempo-btn" id="scoreTempoUp" aria-label="Aumentar velocidad" title="Aumentar velocidad">+</button>
+        </div>
         <button type="button" class="score-play-btn secondary" id="scoreZoomOutBtn" title="Alejar partitura">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         </button>
@@ -1692,6 +1731,18 @@
   const scorePrevBtn = document.getElementById('scorePrevBtn');
   const scoreNextBtn = document.getElementById('scoreNextBtn');
   const scoreTempoInput = document.getElementById('scoreTempo');
+  const scoreTempoDown = document.getElementById('scoreTempoDown');
+  const scoreTempoUp = document.getElementById('scoreTempoUp');
+  function adjustScoreTempo(delta) {
+    const min = parseInt(scoreTempoInput.min) || 20;
+    const max = parseInt(scoreTempoInput.max) || 300;
+    const current = parseInt(scoreTempoInput.value) || 100;
+    const next = Math.min(max, Math.max(min, current + delta));
+    scoreTempoInput.value = next;
+    scoreTempoInput.dispatchEvent(new Event('change'));
+  }
+  scoreTempoDown.addEventListener('click', () => adjustScoreTempo(-1));
+  scoreTempoUp.addEventListener('click', () => adjustScoreTempo(1));
   const scoreZoomInBtn = document.getElementById('scoreZoomInBtn');
   const scoreZoomOutBtn = document.getElementById('scoreZoomOutBtn');
   const scoreLoopStartBtn = document.getElementById('scoreLoopStartBtn');
