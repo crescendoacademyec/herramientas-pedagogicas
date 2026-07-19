@@ -461,19 +461,19 @@
 
     .score-play-controls {
       position: absolute;
-      top: 10px;
-      right: 30px;
+      top: 14px;
+      right: 40px;
       max-width: calc(100% - 80px);
       background: rgba(0,0,0,0.5);
       backdrop-filter: blur(4px);
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 14px;
       display: none;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 6px;
       align-items: center;
       justify-content: flex-end;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #eee;
       z-index: 10;
     }
@@ -482,17 +482,20 @@
     .score-play-btn {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
       background: rgba(71,99,87,0.5);
       border: none;
       border-radius: 4px;
-      padding: 3px 6px;
+      padding: 4px 8px;
       color: #bfe0cf;
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       cursor: pointer;
       min-height: 0;
+      min-width: 0;
       width: auto;
+      transition: background .15s ease;
     }
+    .score-play-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
     .score-play-btn:hover { background: rgba(71,99,87,0.75); }
     .score-play-btn.secondary {
       background: rgba(255,255,255,0.12);
@@ -504,7 +507,6 @@
     .score-play-btn.active { background: rgba(255,110,90,0.85); color: #fff; }
     .score-play-btn.active:hover { background: rgba(255,110,90,1); }
     .score-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .score-play-btn svg { width: 12px; height: 12px; }
 
     .score-tempo {
       display: inline-flex;
@@ -527,6 +529,7 @@
       width: 16px;
       height: 16px;
       min-height: 0;
+      min-width: 0;
       flex: 0 0 auto;
       border-radius: 4px;
       border: none;
@@ -558,9 +561,9 @@
     }
 
     .score-status {
-      font-size: 0.6rem;
+      font-size: 0.65rem;
       color: #f3b3a8;
-      padding: 2px 6px;
+      padding: 2px 8px;
     }
 
     .file-input-hidden {
@@ -1581,6 +1584,7 @@
 
     // ---------- SONIDO PARA LA PRÁCTICA DE PARTITURAS (sostenido hasta apagarlo) ----------
     const scoreActiveNotes = new Map(); // midi -> nodo de audio activo
+    const scoreHighlightMidis = new Set(); // midis actualmente resaltados en diapasón/pentagrama
 
     function scoreNoteOn(midi) {
       if (!soundEnabled) return;
@@ -1589,6 +1593,8 @@
       const vol = parseFloat(volumeSlider.value) / 10;
       if (isNaN(vol) || vol <= 0) return;
       scoreNoteOff(midi);
+      scoreHighlightMidis.add(midi);
+      draw();
       if (sfPlayer) {
         try {
           const sfNote = sfPlayer.play(midi, ctx.currentTime, { gain: vol });
@@ -1614,6 +1620,8 @@
 
     function scoreNoteOff(midi) {
       const entry = scoreActiveNotes.get(midi);
+      scoreHighlightMidis.delete(midi);
+      draw();
       if (!entry) return;
       const ctx = audioCtx;
       try {
@@ -2250,6 +2258,26 @@
             ctx.fillStyle="#161514"; ctx.fillText(NOTE[pc],x,y+0.5);
           });
         }
+      }
+
+      // Resaltado de la(s) nota(s) que suenan actualmente desde la partitura MusicXML
+      if (typeof scoreHighlightMidis !== 'undefined' && scoreHighlightMidis.size) {
+        scoreHighlightMidis.forEach(midi => {
+          const pc = ((midi % 12) + 12) % 12;
+          for (let s = 0; s < stringCount; s++) {
+            rows.forEach((row, i) => {
+              if (pitches[s] + row.semi !== midi) return;
+              const {x, y} = cellCenter(i, s);
+              ctx.save();
+              ctx.shadowColor='rgba(0,0,0,0.42)'; ctx.shadowBlur=8; ctx.shadowOffsetY=3;
+              ctx.fillStyle="#d4a84f";
+              ctx.beginPath(); ctx.arc(x,y,RAD,0,Math.PI*2); ctx.fill();
+              ctx.restore();
+              ctx.fillStyle="#161514"; ctx.fillText(NOTE[pc],x,y+0.5);
+            });
+          }
+          if (!staffNotes.some(n => n.midi === midi)) staffNotes.push({ pc, midi });
+        });
       }
 
       updateInfo();
