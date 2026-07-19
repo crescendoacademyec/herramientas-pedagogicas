@@ -1008,12 +1008,6 @@
     const NOTE = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 
     const INSTRUMENTS = {
-      requinto: {
-        label: "Requinto",
-        description: "6 cuerdas (A-D-G-C-E-A)",
-        pitches: [81, 76, 72, 67, 62, 57],
-        nutFret: 0
-      },
       guitar: {
         label: "Guitarra",
         description: "6 cuerdas (E-A-D-G-B-E)",
@@ -1024,6 +1018,12 @@
         label: "Ukelele",
         description: "4 cuerdas (G C E A)",
         pitches: [69, 64, 60, 67],
+        nutFret: 0
+      },
+      requinto: {
+        label: "Requinto",
+        description: "6 cuerdas (A-D-G-C-E-A)",
+        pitches: [81, 76, 72, 67, 62, 57],
         nutFret: 0
       }
     };
@@ -2812,8 +2812,8 @@
 
     // Inicialización
     window.addEventListener('load', function() {
-      instrumentSel.value = 'requinto';
-      updateSoundTypeOptions('requinto');
+      instrumentSel.value = 'guitar';
+      updateSoundTypeOptions('guitar');
       refresh();
       drawBaseStaff();
       renderStaffNotes([]);
