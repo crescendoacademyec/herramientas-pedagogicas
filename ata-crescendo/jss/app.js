@@ -4938,7 +4938,7 @@ function renderTimeSignature(svg, pageIndex, geoms) {
 
 function renderAtaCredit(svg) {
   const s = scoreSettings();
-  const text = "ATA (Analizador Tonal Avanzado) - Jaime Jaramillo Arias";
+  const text = "AAC (Analizador Armónico Crescendo)";
   svg.appendChild(textEl(text, {
     x: Number(s.pageWidth || 1100) - Number(s.marginRight || 48),
     y: 22,
@@ -12371,7 +12371,7 @@ function theoryCardHtml(card) {
       ${keyPoints}
       ${sections}
       ${avoid}
-      <div class="theoryFooter">ATA (Analizador Tonal Avanzado) - Jaime Jaramillo Arias</div>
+      <div class="theoryFooter">AAC (Analizador Armónico Crescendo)</div>
     </div>
   `;
 }
