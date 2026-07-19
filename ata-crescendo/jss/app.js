@@ -54,8 +54,8 @@ const DEFAULT_SETTINGS = {
   "composerFont": "Georgia, 'Times New Roman', serif",
   "chordFont": "\"Ink Free\"",
   "modeFont": "\"Ink Free\"",
-  "degreeFont": "\"ATA Condensed\", \"Arial Narrow\", \"Avenir Next Condensed\", sans-serif",
-  "sectionLabelFont": "\"ATA Condensed\", \"Arial Narrow\", \"Avenir Next Condensed\", sans-serif",
+  "degreeFont": "\"AAC Condensed\", \"Arial Narrow\", \"Avenir Next Condensed\", sans-serif",
+  "sectionLabelFont": "\"AAC Condensed\", \"Arial Narrow\", \"Avenir Next Condensed\", sans-serif",
   "formFont": "'Gill Sans', 'Gill Sans MT', Calibri, sans-serif",
   "noteFont": "\"Ink Free\"",
   "pageNumberFont": "\"Ink Free\"",
@@ -456,7 +456,7 @@ function localFontCss() {
 function packagedFontCss() {
   return [
     '@font-face { font-family: "Ink Free"; src: url("./assets/fonts/Inkfree.ttf") format("truetype"); font-display: swap; }',
-    '@font-face { font-family: "ATA Condensed"; src: local("Avenir Next Condensed"), local("Arial Narrow"), url("./assets/fonts/Avenir-Next-Condensed.ttc"); font-display: swap; }',
+    '@font-face { font-family: "AAC Condensed"; src: local("Avenir Next Condensed"), local("Arial Narrow"), url("./assets/fonts/Avenir-Next-Condensed.ttc"); font-display: swap; }',
     '@font-face { font-family: "MTF Improviso"; src: url("./assets/fonts/MTF-Improviso.otf") format("opentype"); font-display: swap; }'
   ].join("\n");
 }
@@ -802,7 +802,7 @@ let randomReharmProposals = [];
 let randomReharmPreviewTimer = null;
 let randomReharmSessionSeed = "";
 let selectedTheoryCardId = "";
-const ADMIN_ACCESS_KEY = "ATA";
+const ADMIN_ACCESS_KEY = "AAC";
 const LAST_OPEN_DOCUMENT_KEY = "analizador-armonico:last-open-document";
 
 function normalizeTextForSearch(value) {
@@ -814,10 +814,10 @@ function normalizeTextForSearch(value) {
 }
 
 const BLUES_STANDARD_ITEMS = [
-  { kind: "blues", id: "blues-simple", title: "Blues simple", composer: "ATA", rhythm: "Estudio / Blues", timeSignature: "4/4" },
-  { kind: "blues", id: "jazz-blues", title: "Jazz blues", composer: "ATA", rhythm: "Estudio / Blues", timeSignature: "4/4" },
-  { kind: "blues", id: "bird-blues", title: "Bird blues", composer: "ATA", rhythm: "Estudio / Blues", timeSignature: "4/4" },
-  { kind: "blues", id: "minor-blues", title: "Minor blues", composer: "ATA", rhythm: "Estudio / Blues", timeSignature: "4/4" }
+  { kind: "blues", id: "blues-simple", title: "Blues simple", composer: "AAC", rhythm: "Estudio / Blues", timeSignature: "4/4" },
+  { kind: "blues", id: "jazz-blues", title: "Jazz blues", composer: "AAC", rhythm: "Estudio / Blues", timeSignature: "4/4" },
+  { kind: "blues", id: "bird-blues", title: "Bird blues", composer: "AAC", rhythm: "Estudio / Blues", timeSignature: "4/4" },
+  { kind: "blues", id: "minor-blues", title: "Minor blues", composer: "AAC", rhythm: "Estudio / Blues", timeSignature: "4/4" }
 ];
 const BLUES_STANDARD_BY_TITLE = new Map(BLUES_STANDARD_ITEMS.map(item => [
   normalizeTextForSearch(item.title),
@@ -897,13 +897,13 @@ const THEORY_CARDS = [
   {
     id: "escalas-tonales",
     title: "Las cuatro escalas tonales",
-    category: "Sistema ATA",
+    category: "Sistema AAC",
     summary: "Acordes básicos y extendidos de las escalas tonales.",
     sections: [
       {
         heading: "Idea central",
         body: [
-          "El ATA organiza el análisis tonal a partir de cuatro escalas tonales: mayor, mayor armónica, menor armónica y menor melódica. Cada escala produce grados, cualidades, extensiones y nombres modales específicos."
+          "El AAC organiza el análisis tonal a partir de cuatro escalas tonales: mayor, mayor armónica, menor armónica y menor melódica. Cada escala produce grados, cualidades, extensiones y nombres modales específicos."
         ]
       },
       {
@@ -1074,7 +1074,7 @@ const THEORY_CARDS = [
         ]
       },
       {
-        heading: "Notación ATA",
+        heading: "Notación AAC",
         examples: [
           ["C:[ Fm7 Bb7 C∆", "IIm7bck.dr V7bck.dr I∆"],
           ["G:[ Cm7 F7 G∆", "IIm7bck.dr V7bck.dr I∆"]
@@ -1388,7 +1388,7 @@ function applyStudentModeUi() {
   document.body.classList.add("studentMode");
   const title = document.querySelector(".appMenuTitle span:last-child");
   if (title) title.textContent = "Aula";
-  document.title = "ATA Aula";
+  document.title = "AAC Aula";
   assistanceMode = "assisted";
   analysisVisibility = "hidden";
   updateAssistanceModeControls();
@@ -1602,7 +1602,7 @@ function bindToolbar() {
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
       event.preventDefault();
       if (IS_STUDENT_MODE) {
-        updateStatus("ATA Aula no guarda archivos. Usa PDF para entregar o imprimir.");
+        updateStatus("AAC Aula no guarda archivos. Usa PDF para entregar o imprimir.");
         return;
       }
       saveCurrentDocument();
@@ -1875,7 +1875,7 @@ async function saveAppearanceFromAdminPanel() {
   }
 }
 
-function askTextInput({ title = "ATA", message = "", defaultValue = "", password = false, confirmText = "Aceptar" } = {}) {
+function askTextInput({ title = "AAC", message = "", defaultValue = "", password = false, confirmText = "Aceptar" } = {}) {
   return new Promise(resolve => {
     const dialog = document.createElement("dialog");
     dialog.className = "textPromptDialog";
@@ -1914,7 +1914,7 @@ function askTextInput({ title = "ATA", message = "", defaultValue = "", password
   });
 }
 
-function askConfirmation({ title = "ATA", message = "", confirmText = "Continuar", cancelText = "Cancelar" } = {}) {
+function askConfirmation({ title = "AAC", message = "", confirmText = "Continuar", cancelText = "Cancelar" } = {}) {
   return new Promise(resolve => {
     const dialog = document.createElement("dialog");
     dialog.className = "textPromptDialog";
@@ -11349,7 +11349,7 @@ function renderAdminThemeOptions(themes) {
 }
 
 async function saveCurrentAsAdminTheme() {
-  if (!(await confirmAdminAction("Se grabara el analisis actual como standard curado ATA, disponible en la Biblioteca junto a los standards."))) return;
+  if (!(await confirmAdminAction("Se grabara el analisis actual como standard curado AAC, disponible en la Biblioteca junto a los standards."))) return;
 
   const defaultName = song.title || "standard-curado";
   const requestedName = await askTextInput({
@@ -12186,7 +12186,7 @@ function printAboutCredits() {
     <html lang="es">
     <head>
       <meta charset="utf-8">
-      <title>Créditos ATA</title>
+      <title>Créditos AAC</title>
       <style>
         @page { size: letter portrait; margin: 0.55in; }
         * { box-sizing: border-box; }
@@ -12277,7 +12277,7 @@ function theoryTableHtml(table, className = "theoryTable") {
 function theoryExamplesHtml(examples) {
   if (!Array.isArray(examples) || !examples.length) return "";
   return theoryTableHtml({
-    headers: ["Cifrado", "Lectura ATA"],
+    headers: ["Cifrado", "Lectura AAC"],
     rows: examples
   }, "theoryExamples");
 }
@@ -12387,7 +12387,7 @@ function renderSelectedTheoryCard() {
 function printSelectedTheoryCard() {
   const card = selectedTheoryCard();
   if (!card) return;
-  const printTitle = `${card.title} - ATA`;
+  const printTitle = `${card.title} - AAC`;
 
   printHtmlDocument(`<!doctype html>
     <html lang="es">
@@ -12744,7 +12744,7 @@ function appendStandardLibraryButton(container, item, favorite = false) {
       <span>${escapeHtml([
         item.kind === "blues" ? "Blues precargado" : "",
         item.kind === "admin-theme" ? "Admin" : "",
-        item.curated ? "Curado ATA" : "",
+        item.curated ? "Curado AAC" : "",
         item.key,
         item.rhythm,
         item.timeSignature
@@ -12793,7 +12793,7 @@ async function loadStandardFromLibrary(itemOrFilename) {
   if (item.curatedFilename) {
     const curatedRes = await fetch(`/api/curated-standards/${encodeURIComponent(item.curatedFilename)}`);
     if (!curatedRes.ok) {
-      alert("No se pudo cargar la versión curada de ese standard.\n\nRevisa que la carpeta ATA-Standards esté disponible.");
+      alert("No se pudo cargar la versión curada de ese standard.\n\nRevisa que la carpeta AAC-Standards esté disponible.");
       return;
     }
 
@@ -12844,7 +12844,7 @@ async function loadStandardFromLibrary(itemOrFilename) {
 
 async function saveCurrentStandardCorrection() {
   if (!currentStandardFilename) {
-    alert("Primero carga un tema desde la biblioteca de Standards.\n\nEste botón guarda una versión curada completa en ATA-Standards.");
+    alert("Primero carga un tema desde la biblioteca de Standards.\n\nEste botón guarda una versión curada completa en AAC-Standards.");
     return;
   }
 
@@ -13669,7 +13669,7 @@ function exportFilenameBase() {
     .replace(/[\\/:*?"<>|]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  return `${readable || "analisis"} - ATA`;
+  return `${readable || "analisis"} - AAC`;
 }
 
 function slugify(value) {
