@@ -424,24 +424,59 @@
             max-width: 480px;
             text-align: left;
         }
-        .chord-picker .picker-header {
+        .chord-picker .picker-dropdown {
+            border: 1px solid var(--teal-700);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+        .chord-picker .picker-dropdown summary {
+            list-style: none;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
             gap: 8px;
-            margin-bottom: 6px;
+            padding: 9px 12px;
+            user-select: none;
         }
-        .chord-picker .picker-header label {
+        .chord-picker .picker-dropdown summary::-webkit-details-marker { display: none; }
+        .chord-picker .picker-dropdown summary::marker { content: ''; }
+        .chord-picker .picker-summary-label {
             font-family: Futura, 'Century Gothic', sans-serif;
             font-size: 0.7rem;
             letter-spacing: 0.06em;
             text-transform: uppercase;
             color: var(--cream-dim);
+            transition: color .15s;
+        }
+        .chord-picker .picker-dropdown summary:hover .picker-summary-label { color: var(--cream); }
+        .chord-picker .picker-summary-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .chord-picker .picker-summary-count {
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.65rem;
+            color: var(--gold-light);
+            white-space: nowrap;
+        }
+        .chord-picker .picker-summary-arrow {
+            font-size: 1.1rem;
+            color: var(--muted);
+            transition: transform .15s;
+        }
+        .chord-picker .picker-dropdown[open] .picker-summary-arrow { transform: rotate(180deg); }
+        .chord-picker .picker-panel {
+            padding: 8px 10px 10px;
+            border-top: 1px solid var(--teal-700);
         }
         .chord-picker .picker-buttons {
             display: flex;
+            justify-content: flex-end;
             gap: 6px;
+            margin-bottom: 6px;
         }
         .chord-picker .picker-buttons button {
             background: var(--teal-800);
@@ -465,9 +500,6 @@
             max-height: 200px;
             overflow-y: auto;
             padding: 6px 4px;
-            border: 1px solid var(--teal-700);
-            border-radius: 4px;
-            background: rgba(0, 0, 0, 0.25);
         }
         .chord-picker .picker-grid label {
             display: flex;
@@ -1678,21 +1710,29 @@
         if (activeLevel === 1) {
             intervalPicker = `
                 <div class="chord-picker">
-                    <div class="picker-header">
-                        <label>Selecciona los intervalos a practicar / aprender</label>
-                        <div class="picker-buttons">
-                            <button type="button" id="selectAllIntervals">Todos</button>
-                            <button type="button" id="deselectAllIntervals">Ninguno</button>
+                    <details class="picker-dropdown">
+                        <summary>
+                            <span class="picker-summary-label">Intervalos a practicar / aprender</span>
+                            <span class="picker-summary-right">
+                                <span class="picker-summary-count" id="intervalPickerCount">${selectedIntervalIds.length}/${ALL_INTERVALS.length}</span>
+                                <span class="picker-summary-arrow">▾</span>
+                            </span>
+                        </summary>
+                        <div class="picker-panel">
+                            <div class="picker-buttons">
+                                <button type="button" id="selectAllIntervals">Todos</button>
+                                <button type="button" id="deselectAllIntervals">Ninguno</button>
+                            </div>
+                            <div class="picker-grid" id="intervalPickerGrid">
+                                ${ALL_INTERVALS.map(inter => `
+                                    <label>
+                                        <input type="checkbox" value="${inter.semitones}" ${selectedIntervalIds.includes(inter.semitones) ? 'checked' : ''}>
+                                        ${inter.name}
+                                    </label>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                    <div class="picker-grid" id="intervalPickerGrid">
-                        ${ALL_INTERVALS.map(inter => `
-                            <label>
-                                <input type="checkbox" value="${inter.semitones}" ${selectedIntervalIds.includes(inter.semitones) ? 'checked' : ''}>
-                                ${inter.name}
-                            </label>
-                        `).join('')}
-                    </div>
+                    </details>
                 </div>
             `;
         }
@@ -1702,22 +1742,30 @@
         if (activeLevel === 2) {
             chordPicker = `
                 <div class="chord-picker">
-                    <div class="picker-header">
-                        <label>Selecciona los acordes a practicar</label>
-                        <div class="picker-buttons">
-                            <button type="button" id="selectAllChords">Todos</button>
-                            <button type="button" id="deselectAllChords">Ninguno</button>
+                    <details class="picker-dropdown">
+                        <summary>
+                            <span class="picker-summary-label">Acordes a practicar</span>
+                            <span class="picker-summary-right">
+                                <span class="picker-summary-count" id="chordPickerCount">${selectedChordIds.length}/${ALL_CHORD_TYPES.length}</span>
+                                <span class="picker-summary-arrow">▾</span>
+                            </span>
+                        </summary>
+                        <div class="picker-panel">
+                            <div class="picker-buttons">
+                                <button type="button" id="selectAllChords">Todos</button>
+                                <button type="button" id="deselectAllChords">Ninguno</button>
+                            </div>
+                            <div class="picker-grid" id="chordPickerGrid">
+                                ${ALL_CHORD_TYPES.map(c => `
+                                    <label>
+                                        <input type="checkbox" value="${c.id}" ${selectedChordIds.includes(c.id) ? 'checked' : ''}>
+                                        ${c.display}
+                                        <span class="count">${c.intervals.length}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
                         </div>
-                    </div>
-                    <div class="picker-grid" id="chordPickerGrid">
-                        ${ALL_CHORD_TYPES.map(c => `
-                            <label>
-                                <input type="checkbox" value="${c.id}" ${selectedChordIds.includes(c.id) ? 'checked' : ''}>
-                                ${c.display}
-                                <span class="count">${c.intervals.length}</span>
-                            </label>
-                        `).join('')}
-                    </div>
+                    </details>
                 </div>
             `;
         }
@@ -1845,11 +1893,11 @@
                         <div class="stat-item">Porcentaje <span id="challengePct">0%</span></div>
                         <div class="stat-item">Racha máx <span id="challengeStreak">0</span></div>
                     </div>
+                    <button class="reset-stats-btn" id="resetStatsBtn">🔄 Reiniciar estadísticas</button>
                 </div>
                 <div class="options" id="options"></div>
                 <div class="feedback" id="feedback"></div>
                 <button class="next-btn" id="nextBtn">Siguiente →</button>
-                <button class="reset-stats-btn" id="resetStatsBtn">🔄 Reiniciar estadísticas</button>
             `;
         }
 
@@ -1912,6 +1960,8 @@
 
             // Picker de intervalos (nivel 1)
             const intervalGrid = document.getElementById('intervalPickerGrid');
+            const intervalCountEl = document.getElementById('intervalPickerCount');
+            const updateIntervalCount = () => { if (intervalCountEl) intervalCountEl.textContent = `${selectedIntervalIds.length}/${ALL_INTERVALS.length}`; };
             if (intervalGrid) {
                 const checkboxes = intervalGrid.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => {
@@ -1923,6 +1973,7 @@
                             selectedIntervalIds = selectedIntervalIds.filter(id => id !== semitone);
                         }
                         saveIntervalSelection(selectedIntervalIds);
+                        updateIntervalCount();
                         newRound();
                     });
                 });
@@ -1930,18 +1981,22 @@
                     checkboxes.forEach(cb => cb.checked = true);
                     selectedIntervalIds = ALL_INTERVALS.map(inter => inter.semitones);
                     saveIntervalSelection(selectedIntervalIds);
+                    updateIntervalCount();
                     newRound();
                 });
                 document.getElementById('deselectAllIntervals')?.addEventListener('click', function() {
                     checkboxes.forEach(cb => cb.checked = false);
                     selectedIntervalIds = [];
                     saveIntervalSelection(selectedIntervalIds);
+                    updateIntervalCount();
                     newRound();
                 });
             }
 
             // Picker de acordes (nivel 2)
             const chordGrid = document.getElementById('chordPickerGrid');
+            const chordCountEl = document.getElementById('chordPickerCount');
+            const updateChordCount = () => { if (chordCountEl) chordCountEl.textContent = `${selectedChordIds.length}/${ALL_CHORD_TYPES.length}`; };
             if (chordGrid) {
                 const checkboxes = chordGrid.querySelectorAll('input[type="checkbox"]');
                 checkboxes.forEach(cb => {
@@ -1952,6 +2007,7 @@
                             selectedChordIds = selectedChordIds.filter(id => id !== this.value);
                         }
                         saveChordSelection(selectedChordIds);
+                        updateChordCount();
                         newRound();
                     });
                 });
@@ -1959,12 +2015,14 @@
                     checkboxes.forEach(cb => cb.checked = true);
                     selectedChordIds = ALL_CHORD_TYPES.map(c => c.id);
                     saveChordSelection(selectedChordIds);
+                    updateChordCount();
                     newRound();
                 });
                 document.getElementById('deselectAllChords')?.addEventListener('click', function() {
                     checkboxes.forEach(cb => cb.checked = false);
                     selectedChordIds = [];
                     saveChordSelection(selectedChordIds);
+                    updateChordCount();
                     newRound();
                 });
             }
