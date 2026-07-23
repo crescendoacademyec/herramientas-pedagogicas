@@ -25,7 +25,7 @@
   .app{display:flex;min-height:100vh;}
 
   .sidebar{
-    width:300px;flex-shrink:0;
+    width:400px;flex-shrink:0;
     background:linear-gradient(180deg,var(--teal-deep),var(--teal));
     color:var(--cream-text);
     padding:22px 20px 30px;
@@ -40,21 +40,7 @@
   .panel-group h3{margin:0 0 2px;font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--gold);font-weight:600;}
 
   .field label{display:block;font-size:12.5px;margin-bottom:5px;color:rgba(244,236,216,.85);}
-  .logo-row{display:flex;align-items:center;gap:10px;}
-  .logo-preview{
-    width:44px;height:44px;border-radius:6px;border:1.5px dashed rgba(244,236,216,.4);
-    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;background:rgba(244,236,216,.06);
-  }
-  .logo-preview img{width:100%;height:100%;object-fit:contain;}
-  .logo-preview span{font-size:9px;color:rgba(244,236,216,.5);text-align:center;}
-  .file-btn{
-    font-size:12.5px;padding:8px 10px;border-radius:6px;border:1px solid rgba(244,236,216,.3);
-    background:rgba(244,236,216,.08);color:var(--cream-text);cursor:pointer;flex:1;text-align:center;
-  }
-  .file-btn:hover{background:rgba(244,236,216,.16);}
-  input[type=file]{display:none;}
-  .link-btn{background:none;border:none;color:var(--gold);font-size:11.5px;cursor:pointer;padding:0;text-decoration:underline;text-underline-offset:2px;}
-
+  
   .num-input{
     width:70px;font-family:'Space Mono',monospace;font-size:14px;padding:8px 6px;text-align:center;
     border-radius:6px;border:1px solid rgba(244,236,216,.3);background:rgba(244,236,216,.08);color:var(--cream-text);
@@ -164,10 +150,21 @@
   .card-grid{flex:1;display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);min-height:0;}
   .cell{display:flex;align-items:center;justify-content:center;border:0.5px solid #8f8768;font-family:'Space Mono',monospace;font-weight:700;font-size:16px;color:var(--ink);}
   .cell.blank{background:var(--paper);}
-  .cell.free{background:repeating-linear-gradient(135deg,rgba(201,146,46,.08) 0 6px,transparent 6px 12px);flex-direction:column;gap:2px;}
-  .logo-img{max-width:70%;max-height:60%;object-fit:contain;}
-  .logo-placeholder{font-family:'Fredoka',sans-serif;font-size:9px;letter-spacing:1px;color:var(--gold-deep);border:1px dashed var(--gold-deep);border-radius:4px;padding:4px 7px;opacity:.75;}
-  .sub-id{font-family:'Space Mono',monospace;font-size:6.5px;color:var(--ink-soft);opacity:.7;}
+  .cell.free{
+    background:repeating-linear-gradient(135deg,rgba(201,146,46,.08) 0 6px,transparent 6px 12px);
+    flex-direction:column;gap:2px;
+  }
+  .center-text{
+    font-family:'Fredoka',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    color:var(--gold-deep);
+    text-align:center;
+    line-height:1.2;
+    max-width:90%;
+    word-wrap:break-word;
+  }
+  .sub-id{font-family:'Space Mono',monospace;font-size:8px;color:var(--ink-soft);opacity:.7;}
 
   @media (max-width:980px){
     .app{flex-direction:column;}
@@ -193,14 +190,13 @@
   <aside class="sidebar no-print">
     <div class="brand"><span class="b1">BINGO</span><span class="b2">generador de tablas</span></div>
 
+    <!-- Nuevo panel para el texto del casillero central -->
     <div class="panel-group">
-      <h3>Logo del casillero central</h3>
-      <div class="logo-row">
-        <div class="logo-preview" id="logoPreview"><span>sin<br>logo</span></div>
-        <label class="file-btn" for="logoInput">Subir imagen</label>
-        <input type="file" id="logoInput" accept="image/*">
+      <h3>Texto del casillero central</h3>
+      <div class="row-flex" style="gap:8px;">
+        <input type="text" id="centerTextInput" class="num-input" style="flex:1; width:auto; text-align:left; padding-left:10px;" placeholder="Escribe el texto" value="Bingo Rosa">
+        <button class="btn btn-gold" id="applyCenterTextBtn" style="flex:0; padding:12px 16px;">Aplicar</button>
       </div>
-      <button class="link-btn" id="removeLogoBtn" style="display:none;">Quitar logo</button>
     </div>
 
     <div class="panel-group">
@@ -225,7 +221,7 @@
       <b>G</b> 46–60 &nbsp;·&nbsp; <b>O</b> 61–75<br>
       Tablas 1–5: forman las letras B·I·N·G·O.<br>
       Tabla 6: completa (cartón lleno).<br>
-      Centro = siempre libre (logo).
+      Centro = siempre libre (texto personalizado).
     </div>
 
     <div class="sidebar-footer">
@@ -261,7 +257,11 @@ const BITMAPS = {
   FULL: [[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1],[1,1,1,1,1]]
 };
 
-const state = { logo:null, nextGameNum:1, pages:[] };
+const state = { 
+  centerText: 'Bingo Rosa',   // <-- texto para el casillero central
+  nextGameNum: 1, 
+  pages: [] 
+};
 
 function pad5(n){ return String(n).padStart(5,'0'); }
 function randInt(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
@@ -292,7 +292,7 @@ function pushNewPage(){
   state.pages.push({
     gameNum: pad5(state.nextGameNum++),
     tables: PATTERN_ORDER.map(p=>makeTableFromPattern(p)),
-    footer: 'www.tunegocio.com'
+    footer: 'Bingo Rosa'
   });
 }
 function addPages(n){ for(let i=0;i<n;i++) pushNewPage(); render(); }
@@ -308,11 +308,9 @@ function syncEditableFields(){
   });
 }
 
+// Muestra el texto personalizado en el centro
 function freeCellHTML(gameNum, tableIdx){
-  const inner = state.logo
-    ? `<img class="logo-img" src="${state.logo}" alt="logo">`
-    : `<div class="logo-placeholder">TU LOGO</div>`;
-  return `${inner}<span class="sub-id">${gameNum}-${tableIdx+1}</span>`;
+  return `<div class="center-text">${state.centerText}</div><span class="sub-id">${gameNum}-${tableIdx+1}</span>`;
 }
 
 function fillCardGrid(gridEl, data, gameNum, tableIdx){
@@ -397,6 +395,29 @@ function render(){
   document.getElementById('emptyState').style.display = state.pages.length ? 'none' : 'flex';
 }
 
+// Evento para actualizar el texto central
+document.getElementById('applyCenterTextBtn').addEventListener('click', ()=>{
+  const input = document.getElementById('centerTextInput');
+  const newText = input.value.trim();
+  if(newText !== '') {
+    state.centerText = newText;
+    render();
+  } else {
+    // Si el usuario borra todo, poner el valor por defecto
+    state.centerText = 'TU LOGO';
+    input.value = 'TU LOGO';
+    render();
+  }
+});
+
+// También al presionar Enter en el input
+document.getElementById('centerTextInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') {
+    document.getElementById('applyCenterTextBtn').click();
+  }
+});
+
+// --- Resto de eventos (páginas, impresión, etc.) ---
 document.getElementById('canvas').addEventListener('click', (e)=>{
   const reshuffleBtn = e.target.closest('.reshuffle');
   if(reshuffleBtn){
@@ -430,27 +451,7 @@ document.getElementById('addPagesBtn').addEventListener('click', ()=>{
 
 document.getElementById('printBtn').addEventListener('click', ()=>{ syncEditableFields(); window.print(); });
 
-document.getElementById('logoInput').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    state.logo = reader.result;
-    document.getElementById('logoPreview').innerHTML = `<img src="${state.logo}" alt="logo preview">`;
-    document.getElementById('removeLogoBtn').style.display = 'inline';
-    render();
-  };
-  reader.readAsDataURL(file);
-});
-
-document.getElementById('removeLogoBtn').addEventListener('click', ()=>{
-  state.logo = null;
-  document.getElementById('logoPreview').innerHTML = `<span>sin<br>logo</span>`;
-  document.getElementById('removeLogoBtn').style.display = 'none';
-  document.getElementById('logoInput').value = '';
-  render();
-});
-
+// Inicializar con una página
 addPages(1);
 </script>
 </body>
