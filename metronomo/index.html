@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -327,6 +328,7 @@
             cursor: pointer; flex-grow: 1; transition: 0.2s; backdrop-filter: blur(5px);
         }
         .btn-tap:hover { border-color: var(--accent); background: rgba(0,0,0,0.6); }
+        .btn-tap.tap-pulse { border-color: var(--accent); background: rgba(212, 168, 79, 0.32); box-shadow: 0 0 22px rgba(212, 168, 79, 0.45); transform: scale(0.96); transition: 0.08s; }
 
         .visually-disabled { opacity: 0.4; pointer-events: none; }
         .adv-label { font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-top: 5px; border-bottom: 1px solid rgba(212,168,79,0.3); padding-bottom: 3px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
@@ -335,6 +337,148 @@
         .action-row { display: grid; gap: 14px; grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr); }
 
         #timer-display { font-size: 0.9rem; color: var(--accent); font-weight: bold; display: none; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+        /* ===== MODO PRO / BÁSICO ===== */
+        .mode-toggle {
+            display: inline-flex; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.16);
+            border-radius: 999px; padding: 4px; margin-bottom: 20px;
+        }
+        .mode-toggle-btn {
+            border: none; background: transparent; color: var(--text-dim);
+            padding: 9px 26px; border-radius: 999px; font-size: 0.78rem; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: 0.2s;
+        }
+        .mode-toggle-btn.active { background: var(--accent); color: var(--ink); box-shadow: 0 4px 14px rgba(0,0,0,0.28); }
+        .mode-toggle-btn:not(.active):hover { color: var(--text); }
+
+        /* Oculta lo avanzado en modo básico */
+        .metronome-container.mode-basic .controls-grid,
+        .metronome-container.mode-basic .extra-indicators,
+        .metronome-container.mode-basic .visualizer { display: none; }
+
+        /* Nombre de tempo (Andantino, Allegro...) solo visible en modo básico */
+        .tempo-name {
+            display: none; color: var(--text-dim); font-size: 0.85rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;
+        }
+        .metronome-container.mode-basic .tempo-name { display: block; }
+
+        /* Cuadros de selección rápida (Compás / Figura) del modo básico */
+        .basic-controls { display: none; gap: 12px; margin-bottom: 22px; }
+        .metronome-container.mode-basic .basic-controls { display: flex; }
+        .basic-select-wrap { position: relative; flex: 1; }
+        .basic-box {
+            width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 14px; padding: 14px 10px; display: flex; flex-direction: column;
+            align-items: center; gap: 4px; cursor: pointer; color: var(--text); transition: 0.2s;
+        }
+        .basic-box:hover, .basic-box.open { border-color: var(--accent); background: rgba(212, 168, 79, 0.14); }
+        .basic-box-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); }
+        .basic-box-value { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+        .basic-dropdown {
+            position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 30;
+            background: var(--charcoal2); border: 1px solid rgba(255,255,255,0.18); border-radius: 12px;
+            padding: 8px; display: none; flex-direction: column; gap: 3px;
+            box-shadow: 0 16px 34px rgba(0,0,0,0.45); max-height: 280px; overflow-y: auto;
+        }
+        .basic-dropdown.open { display: flex; }
+        .basic-dropdown-item {
+            background: transparent; border: none; color: var(--text); text-align: left;
+            padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 0.88rem;
+            display: flex; align-items: center; gap: 8px; width: 100%;
+        }
+        .basic-dropdown-item:hover { background: rgba(212, 168, 79, 0.18); color: var(--accent); }
+        .basic-dropdown-item.selected { color: var(--accent); font-weight: bold; }
+        .basic-dropdown-item .fig-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+
+        /* ===== Rutinas (guardar / cargar presets) — visible en Pro y Básico ===== */
+        .preset-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .preset-wrap { flex: none; width: 175px; }
+        #scoreOpenBtn { width: 175px; }
+        .preset-box { padding: 10px 14px; }
+        .preset-box .basic-box-value { font-size: 0.85rem; }
+        .preset-wrap .basic-dropdown { min-width: 280px; }
+        .preset-row { display: flex; align-items: center; gap: 4px; }
+        .preset-row .basic-dropdown-item { flex: 1; }
+        .preset-del-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 6px 8px; font-size: 0.85rem; border-radius: 6px; }
+        .preset-del-btn:hover { color: var(--danger); background: rgba(239,68,68,0.12); }
+        .preset-empty { padding: 10px; font-size: 0.78rem; color: var(--text-dim); text-align: center; }
+        .preset-divider { height: 1px; background: rgba(255,255,255,0.14); margin: 6px 2px; }
+        .preset-save-row { display: flex; gap: 6px; padding: 4px 2px 2px; }
+        .preset-name-input { flex: 1; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; color: var(--text); padding: 8px 10px; font-size: 0.8rem; min-width: 0; }
+        .preset-save-btn { background: var(--accent); color: var(--ink); border: none; border-radius: 8px; padding: 8px 12px; font-weight: bold; font-size: 0.78rem; cursor: pointer; white-space: nowrap; }
+
+        /* ===== Fila extra del modo básico: pantalla completa + atajos ===== */
+        .basic-extra-row { display: none; flex-direction: column; align-items: center; gap: 12px; margin-top: 22px; }
+        .metronome-container.mode-basic .basic-extra-row { display: flex; }
+        .fullscreen-btn {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18); color: var(--text-dim);
+            padding: 10px 18px; border-radius: 999px; font-size: 0.8rem; cursor: pointer; transition: 0.2s;
+        }
+        .fullscreen-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(212,168,79,0.1); }
+        .shortcuts-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; font-size: 0.7rem; color: var(--text-dim); }
+        .shortcuts-legend span { display: inline-flex; align-items: center; gap: 4px; }
+        .shortcuts-legend kbd {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22); border-radius: 5px;
+            padding: 2px 6px; font-family: inherit; font-size: 0.7rem; color: var(--text);
+        }
+
+        /* ===== Modo pantalla completa (para proyectar en clase) ===== */
+        .fullscreen-view {
+            display: none; position: fixed; inset: 0; z-index: 999; background: var(--ink);
+            flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+            padding: 24px;
+        }
+        .fullscreen-view.open { display: flex; }
+        .fullscreen-close {
+            position: absolute; top: 24px; right: 24px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text); width: 46px; height: 46px; border-radius: 50%; font-size: 1.3rem; cursor: pointer;
+        }
+        .fullscreen-close:hover { background: var(--accent); color: var(--ink); }
+        .fullscreen-tempo-name { color: var(--text-dim); font-size: clamp(1.2rem, 3vw, 2rem); text-transform: uppercase; letter-spacing: 0.12em; }
+        .fullscreen-bpm {
+            font-family: Georgia, "Times New Roman", serif; font-weight: 900; color: var(--accent);
+            font-size: clamp(8rem, 30vw, 20rem); line-height: 1; font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 60px rgba(212, 168, 79, 0.35);
+        }
+        .fullscreen-label { color: var(--text-dim); font-size: clamp(1rem, 2.4vw, 1.6rem); letter-spacing: 0.2em; margin-bottom: 30px; }
+        .fullscreen-controls { display: flex; align-items: center; gap: 24px; }
+        .fullscreen-controls .btn-circle { width: 64px; height: 64px; font-size: 2rem; }
+        .fullscreen-controls .btn-primary { padding: 22px 46px; font-size: 1.4rem; }
+
+        /* ===== Vista de partitura (imagen o PDF) con metrónomo flotante ===== */
+        .score-view { display: none; position: fixed; inset: 0; z-index: 1000; background: var(--ink); flex-direction: column; }
+        .score-view.open { display: flex; }
+        .score-zoom-row {
+            position: absolute; top: 20px; left: 20px; z-index: 5; display: flex; align-items: center; gap: 10px;
+            background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px;
+            padding: 6px 16px; backdrop-filter: blur(6px);
+        }
+        .score-zoom-row button { background: transparent; border: none; color: var(--text); font-size: 1.15rem; width: 26px; height: 26px; cursor: pointer; }
+        .score-zoom-row button:hover { color: var(--accent); }
+        #scoreZoomLabel { font-size: 0.76rem; color: var(--text-dim); min-width: 38px; text-align: center; }
+        .score-content {
+            flex: 1; overflow: auto; display: block; text-align: center;
+            padding: 74px 12px 120px; -webkit-overflow-scrolling: touch;
+        }
+        .score-content img { display: inline-block; touch-action: pinch-zoom; border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); background: #fff; max-width: none; }
+        .score-content iframe { display: block; width: 100%; height: 100%; border: none; border-radius: 4px; background: #fff; }
+        .score-empty-hint { color: var(--text-dim); font-size: 0.9rem; text-align: center; padding: 20px; margin-top: 40vh; }
+        .score-metro-bar {
+            position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5;
+            display: flex; align-items: center; gap: 12px; background: rgba(20,20,20,0.88);
+            border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 10px 18px;
+            backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0,0,0,0.5); max-width: 94vw;
+        }
+        .score-bpm-mini { display: flex; flex-direction: column; align-items: center; line-height: 1.05; min-width: 44px; }
+        .score-bpm-mini span { font-weight: 900; font-size: 1.15rem; color: var(--accent); }
+        .score-bpm-mini small { font-size: 0.52rem; color: var(--text-dim); letter-spacing: 0.1em; }
+        .score-play-btn {
+            background: var(--accent); color: var(--ink); border: none; border-radius: 50%; width: 52px; height: 52px;
+            font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: none;
+        }
+        .score-play-btn.playing { background: var(--danger); color: #fff; }
+        .score-tap-btn { padding: 0 16px; height: 44px; font-size: 0.72rem; }
 
         @media (max-width: 820px) {
             .site-header { align-items: flex-start; flex-direction: column; }
@@ -419,12 +563,30 @@
 <main class="app-shell">
     <section class="tool-hero">
         <p class="eyebrow">Aplicación musical</p>
-        <h1>Metrónomo</h1>
         <p>Una herramienta para estudiar pulso, subdivisiones, swing, claves, polirritmias, polimetrías y rutinas de práctica con control fino.</p>
     </section>
 
-    <section class="metronome-container" aria-label="Controles del metronomo">
-        <div class="header"><h1>Panel de práctica</h1></div>
+    <section class="metronome-container" aria-label="Controles del metronomo" id="metroContainer">
+        <div class="mode-toggle" role="tablist" aria-label="Modo del metrónomo">
+            <button type="button" class="mode-toggle-btn" id="modeProBtn" role="tab" aria-selected="false">Pro</button>
+            <button type="button" class="mode-toggle-btn active" id="modeBasicBtn" role="tab" aria-selected="true">Básico</button>
+        </div>
+        <div class="header"><h1>Metrónomo</h1></div>
+
+        <div class="preset-bar">
+            <div class="basic-select-wrap preset-wrap">
+                <button type="button" class="basic-box preset-box" id="presetBtn">
+                    <span class="basic-box-label">Rutinas</span>
+                    <span class="basic-box-value" id="presetBtnValue">Guardar / Cargar</span>
+                </button>
+                <div class="basic-dropdown" id="presetDropdown"></div>
+            </div>
+            <button type="button" class="basic-box preset-box" id="scoreOpenBtn">
+                <span class="basic-box-label">Partitura</span>
+                <span class="basic-box-value" id="scoreBtnValue">📄 Cargar</span>
+            </button>
+            <input type="file" id="scoreFileInput" accept="image/*,application/pdf" style="display:none">
+        </div>
 
         <div class="stage hidden" id="stageArea">
             <div class="bulb bulb-swing" id="light-swing"></div>
@@ -434,12 +596,30 @@
             <div id="pendulum" class="pendulum"></div>
         </div>
 
+        <div class="basic-controls" id="basicControls">
+            <div class="basic-select-wrap">
+                <button type="button" class="basic-box" id="basicCompasBtn">
+                    <span class="basic-box-label">Compás</span>
+                    <span class="basic-box-value" id="basicCompasValue">4/4</span>
+                </button>
+                <div class="basic-dropdown" id="basicCompasDropdown"></div>
+            </div>
+            <div class="basic-select-wrap">
+                <button type="button" class="basic-box" id="basicFiguraBtn">
+                    <span class="basic-box-label">Figura</span>
+                    <span class="basic-box-value" id="basicFiguraValue">♩</span>
+                </button>
+                <div class="basic-dropdown" id="basicFiguraDropdown"></div>
+            </div>
+        </div>
+
         <div class="bpm-section">
+            <div class="tempo-name" id="tempo-name">Andantino</div>
             <div class="bpm-display" id="bpm-display">80</div>
             <div class="quick-bpm-row" id="quick-bpm-row"></div>
             <div class="bpm-controls">
                 <button class="btn-circle" onclick="adjustBpm(-1)">-</button>
-                <input type="range" id="bpm-slider" min="20" max="320" value="80">
+                <input type="range" id="bpm-slider" min="20" max="400" value="80">
                 <button class="btn-circle" onclick="adjustBpm(1)">+</button>
             </div>
         </div>
@@ -461,8 +641,16 @@
                             <option value="4" selected>4/4</option><option value="5">5/4</option><option value="6">6/8</option><option value="7">7/8</option>
                         </select>
                         <select id="subdivision">
-                            <option value="1" selected>Negras</option><option value="2">Corcheas</option><option value="3">Tresillos</option>
-                            <option value="4">Semicorch.</option><option value="6">Seisillos</option>
+                            <option value="0.25">Redonda</option>
+                            <option value="0.333333">Blanca c/punt.</option>
+                            <option value="0.5">Blanca</option>
+                            <option value="0.666667">Negra c/punt.</option>
+                            <option value="1" selected>Negras</option>
+                            <option value="2">Corcheas</option>
+                            <option value="2s">Corchea c/swing</option>
+                            <option value="3">Tresillos</option>
+                            <option value="4">Semicorch.</option>
+                            <option value="6">Seisillos</option>
                         </select>
                     </div>
                     <input type="text" id="custom-amalgam" placeholder="Amalgama Custom (Ej: 3+2+2)">
@@ -552,8 +740,49 @@
             <button class="btn-primary" id="play-btn">INICIAR</button>
             <button class="btn-tap" id="tap-btn">TAP</button>
         </div>
+
+        <div class="basic-extra-row" id="basicExtraRow">
+            <button class="fullscreen-btn" id="fullscreenBtn" type="button">⛶ Pantalla completa (para clase)</button>
+            <div class="shortcuts-legend">
+                <span><kbd>Espacio</kbd> Play/Stop</span>
+                <span><kbd>←</kbd><kbd>→</kbd> Velocidad</span>
+                <span><kbd>↑</kbd><kbd>↓</kbd> Volumen</span>
+            </div>
+        </div>
     </section>
 </main>
+
+<div class="fullscreen-view" id="fullscreenView">
+    <button class="fullscreen-close" id="fullscreenClose" type="button" aria-label="Cerrar pantalla completa">✕</button>
+    <div class="fullscreen-tempo-name" id="fsTempoName">Andantino</div>
+    <div class="fullscreen-bpm" id="fsBpm">80</div>
+    <div class="fullscreen-label">BPM</div>
+    <div class="fullscreen-controls">
+        <button class="btn-circle" id="fsMinus">-</button>
+        <button class="btn-primary" id="fsPlayBtn">INICIAR</button>
+        <button class="btn-circle" id="fsPlus">+</button>
+    </div>
+    <button class="btn-tap" id="fsTapBtn" style="margin-top: 18px; max-width: 220px;">TAP</button>
+</div>
+
+<div class="score-view" id="scoreView">
+    <button class="fullscreen-close" id="scoreCloseBtn" aria-label="Cerrar partitura">✕</button>
+    <div class="score-zoom-row" id="scoreZoomRow">
+        <button type="button" id="scoreZoomOut" aria-label="Alejar">−</button>
+        <span id="scoreZoomLabel">100%</span>
+        <button type="button" id="scoreZoomIn" aria-label="Acercar">+</button>
+    </div>
+    <div class="score-content" id="scoreContent">
+        <div class="score-empty-hint">Carga una imagen o PDF de tu partitura para empezar a practicar.</div>
+    </div>
+    <div class="score-metro-bar">
+        <button class="btn-circle" id="scoreMinus">-</button>
+        <div class="score-bpm-mini"><span id="scoreBpmVal">80</span><small>BPM</small></div>
+        <button class="btn-circle" id="scorePlus">+</button>
+        <button class="score-play-btn" id="scorePlayBtn" aria-label="Play/Stop">▶</button>
+        <button class="btn-tap score-tap-btn" id="scoreTapBtn">TAP</button>
+    </div>
+</div>
 
 <footer class="site-footer">
     <span>Crescendo Academy</span>
@@ -592,7 +821,20 @@
     let audioContext = null; let masterGainNode = null; let isPlaying = false; let tempo = 80.0;
     let lookahead = 25.0; let scheduleAheadTime = 0.1; let timerID; let notesInQueue = []; let pendulumSide = 1;
 
-    let nextMainTime = 0.0; let mainSubNote = 0; let mainBeatInBar = 0; let mainMeasureCount = 0;
+    // --- Worker de precisión: evita que setTimeout se ralentice si la pestaña pasa a segundo plano ---
+    let schedulerWorker = null;
+    function createSchedulerWorker() {
+        try {
+            const workerCode = `let id=null; self.onmessage=function(e){ if(e.data==='start'){ if(id) clearInterval(id); id=setInterval(()=>postMessage('tick'), ${lookahead}); } else if(e.data==='stop'){ clearInterval(id); id=null; } };`;
+            const blob = new Blob([workerCode], { type: 'application/javascript' });
+            const w = new Worker(URL.createObjectURL(blob));
+            w.onmessage = () => { if (isPlaying) scheduler(); };
+            return w;
+        } catch (e) { return null; } // fallback silencioso a setTimeout si el navegador bloquea Workers
+    }
+    schedulerWorker = createSchedulerWorker();
+
+    let nextMainTime = 0.0; let mainBeatPos = 0.0; let mainMeasureCount = 0;
     let totalBeats = 4; let accentPulses = [0]; 
     let nextClaveTime = 0.0; let claveStep = 0;
     const clavePatterns = { 'son32': [1,0,0,1,0,0,1,0, 0,0,1,0,1,0,0,0], 'son23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,1,0], 'rumba32': [1,0,0,1,0,0,0,1, 0,0,1,0,1,0,0,0], 'rumba23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,0,1] };
@@ -618,14 +860,343 @@
         pyrTgl: document.getElementById('pyramid-toggle'), pyrSet: document.getElementById('pyramid-settings'), pyrBars: document.getElementById('pyr-bars'),
         dropTgl: document.getElementById('dropout-toggle'), dropSet: document.getElementById('dropout-settings'), dropOn: document.getElementById('drop-on'), dropOff: document.getElementById('drop-off'),
         claveSel: document.getElementById('clave-select'), polyTgl: document.getElementById('poly-toggle'), polyX: document.getElementById('poly-x'), polyY: document.getElementById('poly-y'), pmTgl: document.getElementById('pm-toggle'), pmVal: document.getElementById('pm-val'),
-        indPoly: document.getElementById('ind-poly'), indClave: document.getElementById('ind-clave'), indPm: document.getElementById('ind-pm')
+        indPoly: document.getElementById('ind-poly'), indClave: document.getElementById('ind-clave'), indPm: document.getElementById('ind-pm'),
+        tempoName: document.getElementById('tempo-name'),
+
+        fsView: document.getElementById('fullscreenView'), fsBpm: document.getElementById('fsBpm'), fsTempoName: document.getElementById('fsTempoName'),
+        fsPlayBtn: document.getElementById('fsPlayBtn'), fsTapBtn: document.getElementById('fsTapBtn'), fsMinus: document.getElementById('fsMinus'), fsPlus: document.getElementById('fsPlus'),
+        fullscreenBtn: document.getElementById('fullscreenBtn'), fullscreenClose: document.getElementById('fullscreenClose'),
+
+        scoreOpenBtn: document.getElementById('scoreOpenBtn'), scoreBtnValue: document.getElementById('scoreBtnValue'), scoreFileInput: document.getElementById('scoreFileInput'),
+        scoreView: document.getElementById('scoreView'), scoreContent: document.getElementById('scoreContent'), scoreCloseBtn: document.getElementById('scoreCloseBtn'),
+        scoreZoomRow: document.getElementById('scoreZoomRow'), scoreZoomLabel: document.getElementById('scoreZoomLabel'), scoreZoomOut: document.getElementById('scoreZoomOut'), scoreZoomIn: document.getElementById('scoreZoomIn'),
+        scoreBpmVal: document.getElementById('scoreBpmVal'), scorePlayBtn: document.getElementById('scorePlayBtn'), scoreTapBtn: document.getElementById('scoreTapBtn'), scoreMinus: document.getElementById('scoreMinus'), scorePlus: document.getElementById('scorePlus')
     };
 
     const quickBpmRow = document.getElementById('quick-bpm-row');
-    for (let i = 40; i <= 320; i += 20) {
+    for (let i = 40; i <= 400; i += 20) {
         let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
         btn.onclick = () => { tempo = i; updateBpmUI(); }; quickBpmRow.appendChild(btn);
     }
+
+    // --- Nombre de tempo (para el modo básico, estilo "Andantino") ---
+    function tempoMarking(bpm) {
+        if (bpm < 40) return 'Grave';
+        if (bpm < 60) return 'Largo';
+        if (bpm < 66) return 'Larghetto';
+        if (bpm < 76) return 'Adagio';
+        if (bpm < 92) return 'Andante';
+        if (bpm < 108) return 'Andantino';
+        if (bpm < 120) return 'Moderato';
+        if (bpm < 156) return 'Allegro';
+        if (bpm < 176) return 'Vivace';
+        if (bpm < 200) return 'Presto';
+        return 'Prestissimo';
+    }
+
+    // --- Modo PRO / BÁSICO ---
+    const metroContainer = document.getElementById('metroContainer');
+    const modeProBtn = document.getElementById('modeProBtn');
+    const modeBasicBtn = document.getElementById('modeBasicBtn');
+
+    function setMode(mode) {
+        const isBasic = mode === 'basic';
+        metroContainer.classList.toggle('mode-basic', isBasic);
+        modeProBtn.classList.toggle('active', !isBasic);
+        modeProBtn.setAttribute('aria-selected', String(!isBasic));
+        modeBasicBtn.classList.toggle('active', isBasic);
+        modeBasicBtn.setAttribute('aria-selected', String(isBasic));
+        try { localStorage.setItem('metronomo-modo', mode); } catch (e) {}
+        updateBpmUI();
+    }
+    modeProBtn.addEventListener('click', () => setMode('pro'));
+    modeBasicBtn.addEventListener('click', () => setMode('basic'));
+
+    // --- Cuadros rápidos del modo básico: Compás y Figura ---
+    // Reutilizan exactamente los mismos <select> y el mismo motor que el modo Pro,
+    // solo cambia la forma de seleccionarlos (cuadro + menú en vez de <select> nativo).
+    const compasOptions = [
+        { value: '1', label: '1/4' }, { value: '2', label: '2/4' }, { value: '3', label: '3/4' },
+        { value: '4', label: '4/4' }, { value: '5', label: '5/4' }, { value: '6', label: '6/8' }, { value: '7', label: '7/8' }
+    ];
+    const figuraOptions = [
+        { value: '0.25', label: 'Redonda', icon: '𝅝' },
+        { value: '0.333333', label: 'Blanca c/punt.', icon: '𝅗𝅥·' },
+        { value: '0.5', label: 'Blanca', icon: '𝅗𝅥' },
+        { value: '0.666667', label: 'Negra c/punt.', icon: '♩·' },
+        { value: '1', label: 'Negras', icon: '♩' },
+        { value: '2', label: 'Corcheas', icon: '♪' },
+        { value: '2s', label: 'Corchea c/swing', icon: '♪〜' },
+        { value: '3', label: 'Tresillos', icon: '♪³' },
+        { value: '4', label: 'Semicorcheas', icon: '♬' },
+        { value: '6', label: 'Seisillos', icon: '♬⁶' }
+    ];
+
+    const basicCompasBtn = document.getElementById('basicCompasBtn');
+    const basicCompasDropdown = document.getElementById('basicCompasDropdown');
+    const basicCompasValue = document.getElementById('basicCompasValue');
+    const basicFiguraBtn = document.getElementById('basicFiguraBtn');
+    const basicFiguraDropdown = document.getElementById('basicFiguraDropdown');
+    const basicFiguraValue = document.getElementById('basicFiguraValue');
+
+    function buildBasicDropdown(container, options, onSelect) {
+        container.innerHTML = '';
+        options.forEach(opt => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'basic-dropdown-item';
+            item.dataset.value = opt.value;
+            item.innerHTML = opt.icon ? `<span class="fig-icon">${opt.icon}</span><span>${opt.label}</span>` : `<span>${opt.label}</span>`;
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                onSelect(opt.value);
+                container.classList.remove('open');
+            });
+            container.appendChild(item);
+        });
+    }
+
+    buildBasicDropdown(basicCompasDropdown, compasOptions, (val) => {
+        UI.amalgamInp.value = ''; // el compás rápido siempre reemplaza a la amalgama custom
+        UI.beatsSel.value = val;
+        UI.beatsSel.dispatchEvent(new Event('change'));
+        syncBasicLabels();
+    });
+    buildBasicDropdown(basicFiguraDropdown, figuraOptions, (val) => {
+        UI.subSel.value = val;
+        UI.subSel.dispatchEvent(new Event('change'));
+        syncBasicLabels();
+    });
+
+    // "Corchea c/swing" (2s) y "Corcheas" (2) comparten el mismo motor (sub=2); esto solo
+    // ajusta el % de swing automáticamente para que cada figura suene como corresponde,
+    // sin pisar un swing ya personalizado por el usuario.
+    UI.subSel.addEventListener('change', () => {
+        if (UI.subSel.value === '2s') {
+            if (parseInt(UI.swingSld.value) === 50) { UI.swingSld.value = 67; UI.swingSld.dispatchEvent(new Event('input')); }
+        } else if (UI.subSel.value === '2') {
+            if (parseInt(UI.swingSld.value) !== 50) { UI.swingSld.value = 50; UI.swingSld.dispatchEvent(new Event('input')); }
+        }
+    });
+
+    basicCompasBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
+        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
+        basicCompasDropdown.classList.toggle('open'); basicCompasBtn.classList.toggle('open');
+    });
+    basicFiguraBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
+        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
+        basicFiguraDropdown.classList.toggle('open'); basicFiguraBtn.classList.toggle('open');
+    });
+    document.addEventListener('click', () => {
+        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
+        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
+        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
+    });
+
+    function syncBasicLabels() {
+        const isCustom = UI.amalgamInp.value.trim() !== '';
+        const compasOpt = compasOptions.find(o => o.value === UI.beatsSel.value);
+        basicCompasValue.innerText = isCustom ? 'Custom' : (compasOpt ? compasOpt.label : UI.beatsSel.value);
+        const figOpt = figuraOptions.find(o => o.value === UI.subSel.value);
+        basicFiguraValue.innerText = figOpt ? figOpt.icon : '♩';
+
+        Array.from(basicCompasDropdown.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.beatsSel.value));
+        Array.from(basicFiguraDropdown.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.subSel.value));
+    }
+    UI.beatsSel.addEventListener('change', syncBasicLabels);
+    UI.subSel.addEventListener('change', syncBasicLabels);
+    UI.amalgamInp.addEventListener('input', syncBasicLabels);
+    syncBasicLabels();
+
+    // --- Pantalla completa (para proyectar en clase) ---
+    UI.fullscreenBtn.addEventListener('click', () => { UI.fsView.classList.add('open'); });
+    UI.fullscreenClose.addEventListener('click', () => { UI.fsView.classList.remove('open'); });
+    UI.fsView.addEventListener('click', (e) => { if (e.target === UI.fsView) UI.fsView.classList.remove('open'); });
+    UI.fsPlayBtn.addEventListener('click', toggleMetronome);
+    UI.fsMinus.addEventListener('click', () => adjustBpm(-1));
+    UI.fsPlus.addEventListener('click', () => adjustBpm(1));
+    document.addEventListener('keydown', (e) => {
+        if (e.code !== 'Escape') return;
+        if (UI.fsView.classList.contains('open')) UI.fsView.classList.remove('open');
+        else if (UI.scoreView.classList.contains('open')) closeScoreView();
+    });
+
+    // --- Cargar partitura (imagen o PDF) para practicar con el metrónomo encima ---
+    // Un solo botón (no un panel siempre visible): al tocarlo, si no hay nada cargado abre
+    // el selector de archivo; si ya hay una partitura cargada, reabre directamente la vista
+    // de práctica a pantalla completa con la barra de metrónomo flotante abajo.
+    let loadedScoreURL = null, loadedScoreType = null, scoreZoom = 100;
+
+    function openScoreView() { UI.scoreView.classList.add('open'); }
+    function closeScoreView() { UI.scoreView.classList.remove('open'); }
+
+    function buildScoreContent() {
+        UI.scoreContent.innerHTML = '';
+        scoreZoom = 100; UI.scoreZoomLabel.innerText = '100%';
+        if (loadedScoreType === 'image') {
+            const img = document.createElement('img');
+            img.id = 'scoreImg'; img.src = loadedScoreURL; img.style.width = scoreZoom + '%';
+            UI.scoreContent.appendChild(img);
+            UI.scoreZoomRow.style.display = 'flex';
+        } else {
+            const frame = document.createElement('iframe');
+            frame.id = 'scorePdfFrame'; frame.src = loadedScoreURL; frame.title = 'Partitura PDF';
+            UI.scoreContent.appendChild(frame);
+            UI.scoreZoomRow.style.display = 'none'; // el visor de PDF del navegador ya trae su propio zoom
+        }
+    }
+
+    UI.scoreOpenBtn.addEventListener('click', () => {
+        if (loadedScoreURL) openScoreView(); else UI.scoreFileInput.click();
+    });
+    UI.scoreFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        if (loadedScoreURL) URL.revokeObjectURL(loadedScoreURL);
+        loadedScoreURL = URL.createObjectURL(file);
+        loadedScoreType = (file.type === 'application/pdf') ? 'pdf' : 'image';
+        UI.scoreBtnValue.innerText = file.name.length > 16 ? file.name.slice(0, 14) + '…' : file.name;
+        buildScoreContent();
+        openScoreView();
+        UI.scoreFileInput.value = ''; // permite volver a elegir el mismo archivo si hace falta
+    });
+    UI.scoreCloseBtn.addEventListener('click', closeScoreView);
+    UI.scoreView.addEventListener('click', (e) => { if (e.target === UI.scoreView) closeScoreView(); });
+
+    function applyScoreZoom() {
+        const img = document.getElementById('scoreImg');
+        if (img) img.style.width = scoreZoom + '%';
+        UI.scoreZoomLabel.innerText = scoreZoom + '%';
+    }
+    UI.scoreZoomOut.addEventListener('click', () => { scoreZoom = Math.max(40, scoreZoom - 15); applyScoreZoom(); });
+    UI.scoreZoomIn.addEventListener('click', () => { scoreZoom = Math.min(300, scoreZoom + 15); applyScoreZoom(); });
+    UI.scoreZoomLabel.addEventListener('click', () => { scoreZoom = 100; applyScoreZoom(); });
+
+    // La barra de metrónomo flotante dentro de la partitura controla el mismo motor de audio
+    UI.scorePlayBtn.addEventListener('click', toggleMetronome);
+    UI.scoreTapBtn.addEventListener('click', () => doTap(UI.scoreTapBtn));
+    UI.scoreMinus.addEventListener('click', () => adjustBpm(-1));
+    UI.scorePlus.addEventListener('click', () => adjustBpm(1));
+
+    // --- Estado completo del metrónomo (para Rutinas guardadas y auto-guardado de sesión) ---
+    const STATE_SELECT_FIELDS = ['beats-per-measure', 'subdivision', 'snd-accent', 'snd-beat', 'snd-sub', 'snd-swing', 'snd-clave', 'snd-poly', 'snd-pm', 'clave-select', 'train-mode'];
+    const STATE_RANGE_FIELDS = ['swing-slider', 'pitch-accent', 'pitch-beat', 'pitch-sub', 'pitch-swing', 'pitch-clave', 'pitch-poly', 'pitch-pm', 'vol-master', 'vol-accent', 'vol-normal', 'vol-sub', 'vol-extra'];
+    const STATE_NUMBER_FIELDS = ['poly-x', 'poly-y', 'pm-val', 'train-start', 'train-end', 'train-step', 'train-bars', 'train-inc', 'pyr-bars', 'drop-on', 'drop-off', 'timer-minutes'];
+    const STATE_TEXT_FIELDS = ['custom-amalgam'];
+    const STATE_CHECK_FIELDS = ['pendulumToggle', 'accent-toggle', 'poly-toggle', 'pm-toggle', 'trainer-toggle', 'pyramid-toggle', 'dropout-toggle'];
+
+    function collectState() {
+        const s = { tempo: Math.round(tempo) };
+        [...STATE_SELECT_FIELDS, ...STATE_RANGE_FIELDS, ...STATE_NUMBER_FIELDS, ...STATE_TEXT_FIELDS].forEach(id => {
+            const el = document.getElementById(id); if (el) s[id] = el.value;
+        });
+        STATE_CHECK_FIELDS.forEach(id => { const el = document.getElementById(id); if (el) s[id] = el.checked; });
+        return s;
+    }
+
+    function applyState(s) {
+        if (!s) return;
+        const setVal = (id, val) => { if (val === undefined) return; const el = document.getElementById(id); if (el) el.value = val; };
+        const setChk = (id, val) => { if (val === undefined) return; const el = document.getElementById(id); if (el) el.checked = val; };
+
+        if (typeof s.tempo === 'number') tempo = Math.max(20, Math.min(400, s.tempo));
+        [...STATE_SELECT_FIELDS, ...STATE_RANGE_FIELDS, ...STATE_NUMBER_FIELDS, ...STATE_TEXT_FIELDS].forEach(id => setVal(id, s[id]));
+        STATE_CHECK_FIELDS.forEach(id => setChk(id, s[id]));
+
+        if (masterGainNode) masterGainNode.gain.value = UI.volMaster.value;
+        UI.swingVal.innerText = UI.swingSld.value;
+        UI.stage.classList.toggle('hidden', !UI.pendTgl.checked);
+        UI.trainSet.classList.toggle('visually-disabled', !UI.trainTgl.checked);
+        UI.dropSet.classList.toggle('visually-disabled', !UI.dropTgl.checked);
+        UI.pyrSet.classList.toggle('visually-disabled', !UI.pyrTgl.checked);
+
+        parsePattern(); updateBpmUI(); renderVisualizer(); syncBasicLabels();
+    }
+
+    // --- Rutinas guardadas (localStorage) ---
+    const PRESETS_KEY = 'metronomo-presets';
+    function loadPresets() { try { return JSON.parse(localStorage.getItem(PRESETS_KEY) || '[]'); } catch (e) { return []; } }
+    function savePresetsList(arr) { try { localStorage.setItem(PRESETS_KEY, JSON.stringify(arr)); } catch (e) {} }
+
+    const presetBtn = document.getElementById('presetBtn');
+    const presetDropdown = document.getElementById('presetDropdown');
+
+    function closeAllBasicDropdowns() {
+        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
+        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
+        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
+    }
+
+    function renderPresetDropdown() {
+        const presets = loadPresets();
+        presetDropdown.innerHTML = '';
+        if (presets.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'preset-empty'; empty.innerText = 'Aún no hay rutinas guardadas.';
+            presetDropdown.appendChild(empty);
+        } else {
+            presets.forEach((p, idx) => {
+                const row = document.createElement('div'); row.className = 'preset-row';
+                const loadBtn = document.createElement('button');
+                loadBtn.type = 'button'; loadBtn.className = 'basic-dropdown-item'; loadBtn.innerText = p.name;
+                loadBtn.addEventListener('click', (e) => { e.stopPropagation(); applyState(p.data); closeAllBasicDropdowns(); });
+                const delBtn = document.createElement('button');
+                delBtn.type = 'button'; delBtn.className = 'preset-del-btn'; delBtn.title = 'Eliminar rutina'; delBtn.innerText = '✕';
+                delBtn.addEventListener('click', (e) => { e.stopPropagation(); const list = loadPresets(); list.splice(idx, 1); savePresetsList(list); renderPresetDropdown(); });
+                row.appendChild(loadBtn); row.appendChild(delBtn);
+                presetDropdown.appendChild(row);
+            });
+        }
+        const divider = document.createElement('div'); divider.className = 'preset-divider';
+        presetDropdown.appendChild(divider);
+
+        const saveRow = document.createElement('div'); saveRow.className = 'preset-save-row';
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text'; nameInput.className = 'preset-name-input'; nameInput.placeholder = 'Nombre de la rutina...';
+        nameInput.addEventListener('click', (e) => e.stopPropagation());
+        nameInput.addEventListener('keydown', (e) => e.stopPropagation());
+        const saveBtn = document.createElement('button');
+        saveBtn.type = 'button'; saveBtn.className = 'preset-save-btn'; saveBtn.innerText = 'Guardar';
+        saveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const name = nameInput.value.trim() || `Rutina ${loadPresets().length + 1}`;
+            const list = loadPresets(); list.push({ name, data: collectState() }); savePresetsList(list);
+            renderPresetDropdown();
+        });
+        saveRow.appendChild(nameInput); saveRow.appendChild(saveBtn);
+        presetDropdown.appendChild(saveRow);
+    }
+
+    presetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
+        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
+        if (!presetDropdown.classList.contains('open')) renderPresetDropdown();
+        presetDropdown.classList.toggle('open'); presetBtn.classList.toggle('open');
+    });
+
+    // --- Auto-guardado de la última sesión (persistencia entre visitas) ---
+    const LAST_STATE_KEY = 'metronomo-lastState';
+    let saveStateTimer = null;
+    function scheduleSaveLastState() {
+        clearTimeout(saveStateTimer);
+        saveStateTimer = setTimeout(() => { try { localStorage.setItem(LAST_STATE_KEY, JSON.stringify(collectState())); } catch (e) {} }, 500);
+    }
+    document.addEventListener('input', scheduleSaveLastState, true);
+    document.addEventListener('change', scheduleSaveLastState, true);
+
+    (function restoreLastSession() {
+        try {
+            const raw = localStorage.getItem(LAST_STATE_KEY);
+            if (raw) applyState(JSON.parse(raw));
+        } catch (e) {}
+    })();
+
+
+    setMode((() => { try { return localStorage.getItem('metronomo-modo') || 'basic'; } catch (e) { return 'basic'; } })());
 
     document.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return; 
@@ -644,8 +1215,15 @@
     }
     UI.volMaster.addEventListener('input', (e) => { if(masterGainNode) masterGainNode.gain.value = e.target.value; });
 
-    function updateBpmUI() { UI.bpmDisp.innerText = Math.round(tempo); UI.bpmSld.value = Math.round(tempo); }
-    function adjustBpm(amount) { tempo = Math.max(20, Math.min(320, tempo + amount)); updateBpmUI(); }
+    function updateBpmUI() {
+        UI.bpmDisp.innerText = Math.round(tempo); UI.bpmSld.value = Math.round(tempo);
+        if (UI.tempoName) UI.tempoName.innerText = tempoMarking(Math.round(tempo));
+        if (UI.fsBpm) UI.fsBpm.innerText = Math.round(tempo);
+        if (UI.fsTempoName) UI.fsTempoName.innerText = tempoMarking(Math.round(tempo));
+        if (UI.scoreBpmVal) UI.scoreBpmVal.innerText = Math.round(tempo);
+        if (typeof scheduleSaveLastState === 'function') scheduleSaveLastState();
+    }
+    function adjustBpm(amount) { tempo = Math.max(20, Math.min(400, tempo + amount)); updateBpmUI(); }
     UI.bpmSld.addEventListener('input', (e) => { tempo = parseInt(e.target.value); updateBpmUI(); });
     
     UI.pendTgl.addEventListener('change', (e) => UI.stage.classList.toggle('hidden', !e.target.checked));
@@ -658,14 +1236,17 @@
     });
 
     let tapTimes = [];
-    UI.tapBtn.addEventListener('click', () => {
+    function doTap(btn) {
         const now = performance.now(); tapTimes.push(now); if (tapTimes.length > 4) tapTimes.shift();
         if (tapTimes.length > 1) {
             let iv = []; for (let i = 1; i < tapTimes.length; i++) iv.push(tapTimes[i] - tapTimes[i-1]);
-            tempo = Math.max(20, Math.min(320, Math.round(60000 / (iv.reduce((a, b) => a + b) / iv.length)))); updateBpmUI();
+            tempo = Math.max(20, Math.min(400, Math.round(60000 / (iv.reduce((a, b) => a + b) / iv.length)))); updateBpmUI();
         }
-        UI.tapBtn.blur();
-    });
+        btn.classList.add('tap-pulse'); setTimeout(() => btn.classList.remove('tap-pulse'), 120);
+        btn.blur();
+    }
+    UI.tapBtn.addEventListener('click', () => doTap(UI.tapBtn));
+    UI.fsTapBtn.addEventListener('click', () => doTap(UI.fsTapBtn));
 
     function parsePattern() {
         const customVal = UI.amalgamInp.value.replace(/\s+/g, '');
@@ -680,13 +1261,14 @@
         renderVisualizer();
     }
     UI.beatsSel.addEventListener('change', parsePattern);
-    UI.amalgamInp.addEventListener('input', () => { parsePattern(); if(isPlaying) { mainSubNote = 0; mainBeatInBar = 0; barCount = 0; }});
+    UI.amalgamInp.addEventListener('input', () => { parsePattern(); if(isPlaying) { mainBeatPos = 0; barCount = 0; }});
 
     function renderVisualizer() {
-        UI.vis.innerHTML = ''; const sub = parseInt(UI.subSel.value);
-        for (let i = 0; i < totalBeats * sub; i++) {
+        UI.vis.innerHTML = ''; const sub = parseFloat(UI.subSel.value);
+        const dotCount = Math.max(1, Math.round(totalBeats * sub));
+        for (let i = 0; i < dotCount; i++) {
             const dot = document.createElement('div'); dot.className = 'dot';
-            if (i % sub !== 0) dot.classList.add('sub-dot');
+            if (sub >= 1 && i % sub !== 0) dot.classList.add('sub-dot');
             dot.id = `dot-${i}`; UI.vis.appendChild(dot);
         }
     }
@@ -779,9 +1361,16 @@
             if (nEv.time >= limit) break; 
 
             if (nEv.engine === 'main') {
-                let sub = parseInt(UI.subSel.value); let isBeat = (mainSubNote === 0);
-                let isAcc = isBeat && accentPulses.includes(mainBeatInBar) && UI.accentTgl.checked;
-                let swing = parseInt(UI.swingSld.value); let isSwingNote = (sub === 2 && swing !== 50 && mainSubNote === 1);
+                // sub = pulsos por negra. >=1 => subdivisiones dentro del pulso (corcheas, tresillos...).
+                // <1 => la figura dura varios pulsos (blanca, redonda, con puntillo...).
+                let sub = parseFloat(UI.subSel.value); let beatStep = 1 / sub;
+                let beatFrac = mainBeatPos - Math.floor(mainBeatPos);
+                let isBeat = beatFrac < 1e-6 || beatFrac > 1 - 1e-6; // esta pulsación cae justo en un tiempo (negra) del compás
+                let beatIdx = Math.round(mainBeatPos) % totalBeats;
+                let isAcc = isBeat && accentPulses.includes(beatIdx) && UI.accentTgl.checked;
+                let swing = parseInt(UI.swingSld.value);
+                let subNoteCalc = Math.round(beatFrac * sub);
+                let isSwingNote = (sub === 2 && swing !== 50 && subNoteCalc === 1);
                 
                 let isMuted = false;
                 if (UI.dropTgl.checked) {
@@ -789,7 +1378,7 @@
                     if ((mainMeasureCount % cBars) >= parseInt(UI.dropOn.value)) isMuted = true;
                 }
 
-                notesInQueue.push({ engine: 'main', time: nextMainTime, noteIdx: (mainBeatInBar * sub) + mainSubNote, isAcc: isAcc, isBeat: isBeat, isMuted: isMuted, sub: sub });
+                notesInQueue.push({ engine: 'main', time: nextMainTime, noteIdx: Math.round(mainBeatPos * sub), isAcc: isAcc, isBeat: isBeat, isMuted: isMuted, sub: sub });
 
                 let sMode, mainVol, pMult;
                 if (isAcc) { sMode = document.getElementById('snd-accent').value; mainVol = parseFloat(UI.volAccent.value); pMult = parseFloat(document.getElementById('pitch-accent').value); }
@@ -800,45 +1389,46 @@
                 playSynthSound(nextMainTime, sMode, mainVol, isMuted, pMult);
 
                 let secPerBeat = 60.0 / tempo;
-                if (isSwingNote || (sub === 2 && swing !== 50 && mainSubNote === 0)) {
-                    let sf = swing / 100; nextMainTime += secPerBeat * (mainSubNote === 0 ? sf : (1 - sf));
-                } else { nextMainTime += secPerBeat / sub; }
+                if (isSwingNote || (sub === 2 && swing !== 50 && subNoteCalc === 0)) {
+                    let sf = swing / 100; nextMainTime += secPerBeat * (subNoteCalc === 0 ? sf : (1 - sf));
+                } else { nextMainTime += secPerBeat * beatStep; }
 
-                mainSubNote++;
-                if (mainSubNote >= sub) {
-                    mainSubNote = 0; mainBeatInBar++;
-                    if (mainBeatInBar >= totalBeats) {
-                        mainBeatInBar = 0; mainMeasureCount++;
-                        
-                        // ANCLAJE CORREGIDO: Resetea la clave CADA 2 COMPASES del metrónomo principal
-                        if (mainMeasureCount % 2 === 0) {
-                            if (UI.claveSel.value !== 'off') {
-                                claveStep = 0;
-                                nextClaveTime = nextMainTime;
-                            }
+                let newPos = mainBeatPos + beatStep;
+                let barsCompleted = Math.floor(newPos / totalBeats + 1e-9);
+                mainBeatPos = newPos - barsCompleted * totalBeats;
+                if (mainBeatPos < 1e-6) mainBeatPos = 0;
+
+                for (let b = 0; b < barsCompleted; b++) {
+                    mainMeasureCount++;
+
+                    // ANCLAJE CORREGIDO: Resetea la clave CADA 2 COMPASES del metrónomo principal
+                    if (mainMeasureCount % 2 === 0) {
+                        if (UI.claveSel.value !== 'off') {
+                            claveStep = 0;
+                            nextClaveTime = nextMainTime;
                         }
-                        
-                        if (UI.trainTgl.checked) {
-                            barCount++;
-                            if (barCount >= currentTrainBars) {
-                                let step = parseInt(UI.trainStep.value) * trainDir;
-                                let target = parseInt(UI.trainEnd.value); let start = parseInt(UI.trainStart.value); let inc = parseInt(UI.trainInc.value);
-                                tempo += step; currentTrainBars += inc; 
-                                if (trainDir === 1 && tempo > target) {
-                                    if (UI.trainMode.value === 'loop') { tempo = start; currentTrainBars = parseInt(UI.trainBars.value); } 
-                                    else { trainDir = -1; tempo = target - parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value); }
-                                } else if (trainDir === -1 && tempo < start) {
-                                    trainDir = 1; tempo = start + parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value);
-                                }
-                                tempo = Math.max(20, Math.min(320, tempo)); updateBpmUI(); barCount = 0; 
+                    }
+
+                    if (UI.trainTgl.checked) {
+                        barCount++;
+                        if (barCount >= currentTrainBars) {
+                            let step = parseInt(UI.trainStep.value) * trainDir;
+                            let target = parseInt(UI.trainEnd.value); let start = parseInt(UI.trainStart.value); let inc = parseInt(UI.trainInc.value);
+                            tempo += step; currentTrainBars += inc; 
+                            if (trainDir === 1 && tempo > target) {
+                                if (UI.trainMode.value === 'loop') { tempo = start; currentTrainBars = parseInt(UI.trainBars.value); } 
+                                else { trainDir = -1; tempo = target - parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value); }
+                            } else if (trainDir === -1 && tempo < start) {
+                                trainDir = 1; tempo = start + parseInt(UI.trainStep.value); currentTrainBars = parseInt(UI.trainBars.value);
                             }
+                            tempo = Math.max(20, Math.min(400, tempo)); updateBpmUI(); barCount = 0; 
                         }
-                        if (UI.pyrTgl.checked) {
-                            pyramidBarCount++;
-                            if (pyramidBarCount >= parseInt(UI.pyrBars.value)) {
-                                pyramidIndex = (pyramidIndex + 1) % pyramidArray.length;
-                                UI.subSel.value = pyramidArray[pyramidIndex]; renderVisualizer(); pyramidBarCount = 0;
-                            }
+                    }
+                    if (UI.pyrTgl.checked) {
+                        pyramidBarCount++;
+                        if (pyramidBarCount >= parseInt(UI.pyrBars.value)) {
+                            pyramidIndex = (pyramidIndex + 1) % pyramidArray.length;
+                            UI.subSel.value = pyramidArray[pyramidIndex]; renderVisualizer(); pyramidBarCount = 0;
                         }
                     }
                 }
@@ -869,7 +1459,7 @@
                 if (UI.pmTgl.checked) pmCount = (pmCount + 1) % (parseInt(UI.pmVal.value) || 1);
             }
         }
-        timerID = setTimeout(scheduler, lookahead);
+        if (!schedulerWorker) timerID = setTimeout(scheduler, lookahead); // fallback sin Worker
     }
 
     let lastMainIdx = -1;
@@ -888,7 +1478,7 @@
                     UI.lightSwing.style.opacity = "1"; setTimeout(() => UI.lightSwing.style.opacity = "0", 60);
                 }
 
-                Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (!d.id.endsWith('-0') && d.id.split('-')[1]%ev.sub!==0 ? ' sub-dot' : ''));
+                Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (ev.sub >= 1 && !d.id.endsWith('-0') && d.id.split('-')[1]%ev.sub!==0 ? ' sub-dot' : ''));
                 const aDot = document.getElementById(`dot-${ev.noteIdx}`);
                 if (aDot && !ev.isMuted) {
                     if (ev.isAcc) aDot.classList.add('active-downbeat'); else if (ev.isBeat) aDot.classList.add('active-beat'); else aDot.classList.add('active-sub');
@@ -919,16 +1509,19 @@
             if (audioContext.state === 'suspended') audioContext.resume();
             
             let startTime = audioContext.currentTime + 0.05;
-            nextMainTime = startTime; mainSubNote = 0; mainBeatInBar = 0; mainMeasureCount = 0;
+            nextMainTime = startTime; mainBeatPos = 0; mainMeasureCount = 0;
             nextClaveTime = startTime; claveStep = 0; nextPolyTime = startTime; nextPmTime = startTime; pmCount = 0;
             
             if (UI.trainTgl.checked) { tempo = parseInt(UI.trainStart.value); trainDir = 1; currentTrainBars = parseInt(UI.trainBars.value); updateBpmUI(); }
             if(UI.pyrTgl.checked) { pyramidIndex = 0; pyramidBarCount = 0; UI.subSel.value = pyramidArray[0]; renderVisualizer(); }
 
             scheduler(); requestAnimationFrame(draw);
+            if (schedulerWorker) schedulerWorker.postMessage('start');
             
             UI.playBtn.innerText = "DETENER"; UI.playBtn.style.background = "var(--danger)"; UI.playBtn.style.color = "#fff";
             UI.playBtn.style.boxShadow = "0 0 20px rgba(239, 68, 68, 0.4)";
+            UI.fsPlayBtn.innerText = "DETENER"; UI.fsPlayBtn.style.background = "var(--danger)"; UI.fsPlayBtn.style.color = "#fff";
+            UI.scorePlayBtn.innerText = "■"; UI.scorePlayBtn.classList.add('playing');
 
             const mins = parseFloat(UI.timeMin.value);
             if (mins > 0) {
@@ -937,9 +1530,12 @@
             }
         } else {
             isPlaying = false; clearTimeout(timerID); clearInterval(practiceIntervalId);
+            if (schedulerWorker) schedulerWorker.postMessage('stop');
             UI.playBtn.innerText = "INICIAR"; UI.playBtn.style.background = "var(--accent)"; UI.playBtn.style.color = "white"; UI.playBtn.style.boxShadow = "none"; UI.timeDisp.style.display = "none";
+            UI.fsPlayBtn.innerText = "INICIAR"; UI.fsPlayBtn.style.background = "var(--accent)"; UI.fsPlayBtn.style.color = "white";
+            UI.scorePlayBtn.innerText = "▶"; UI.scorePlayBtn.classList.remove('playing');
             UI.pendulum.style.transition = "transform 0.3s ease-out"; UI.pendulum.style.transform = `rotate(0deg)`; UI.vis.style.opacity = "1"; UI.pendulum.style.opacity = "1";
-            Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (!d.id.endsWith('-0') && d.id.split('-')[1]%parseInt(UI.subSel.value)!==0 ? ' sub-dot' : ''));
+            { const sReset = parseFloat(UI.subSel.value); Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (sReset >= 1 && !d.id.endsWith('-0') && d.id.split('-')[1]%sReset!==0 ? ' sub-dot' : '')); }
         }
         UI.playBtn.blur(); 
     }
