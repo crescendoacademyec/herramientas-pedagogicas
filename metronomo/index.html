@@ -233,6 +233,13 @@
             line-height: 1; font-variant-numeric: tabular-nums;
             text-shadow: 0 0 30px rgba(212, 168, 79, 0.28);
         }
+        .bpm-display, .fullscreen-bpm, .score-bpm-mini span { cursor: text; }
+        .bpm-edit-input {
+            font: inherit; color: inherit; background: transparent; text-shadow: inherit;
+            border: none; border-bottom: 0.05em solid var(--accent); text-align: center;
+            width: 2.6ch; outline: none; -moz-appearance: textfield; padding: 0; margin: 0;
+        }
+        .bpm-edit-input::-webkit-outer-spin-button, .bpm-edit-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
         .quick-bpm-row { display: flex; gap: 6px; padding: 5px 0; margin: 10px 0; width: 100%; }
         .quick-bpm-btn {
@@ -257,7 +264,11 @@
         .ind { transition: 0.1s; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
         .ind.flash { color: #fff; text-shadow: 0 0 10px #fff; }
 
-        .visualizer { display: flex; justify-content: center; gap: 10px; margin: 15px 0 30px 0; min-height: 25px; flex-wrap: wrap; }
+        .visualizer { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 4px 0 30px 0; min-height: 46px; flex-wrap: wrap; }
+        .beat-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .beat-num { font-size: 0.72rem; font-weight: 800; color: var(--text-dim); min-height: 15px; line-height: 1; transition: color 0.08s, transform 0.08s; font-variant-numeric: tabular-nums; }
+        .beat-num.empty { visibility: hidden; }
+        .beat-num.active { color: var(--accent); transform: scale(1.25); }
         .dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.05s ease-out; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
         .dot.active-downbeat { background: var(--beat-1); box-shadow: 0 0 15px var(--beat-1); transform: scale(1.3); }
         .dot.active-beat { background: var(--text); box-shadow: 0 0 10px var(--text); transform: scale(1.15); }
@@ -353,8 +364,7 @@
 
         /* Oculta lo avanzado en modo básico */
         .metronome-container.mode-basic .controls-grid,
-        .metronome-container.mode-basic .extra-indicators,
-        .metronome-container.mode-basic .visualizer { display: none; }
+        .metronome-container.mode-basic .extra-indicators { display: none; }
 
         /* Nombre de tempo (Andantino, Allegro...) solo visible en modo básico */
         .tempo-name {
@@ -445,6 +455,10 @@
         .fullscreen-controls { display: flex; align-items: center; gap: 24px; }
         .fullscreen-controls .btn-circle { width: 64px; height: 64px; font-size: 2rem; }
         .fullscreen-controls .btn-primary { padding: 22px 46px; font-size: 1.4rem; }
+        .fs-visualizer { margin: 6px 0 34px; gap: clamp(10px, 2vw, 24px); }
+        .fs-visualizer .beat-num { font-size: clamp(1rem, 2.2vw, 1.7rem); }
+        .fs-visualizer .dot { width: clamp(20px, 3vw, 36px); height: clamp(20px, 3vw, 36px); }
+        .fs-visualizer .dot.sub-dot, .fs-visualizer .dot.active-sub { width: clamp(12px, 2vw, 22px); height: clamp(12px, 2vw, 22px); }
 
         /* ===== Vista de partitura (imagen o PDF) con metrónomo flotante ===== */
         .score-view { display: none; position: fixed; inset: 0; z-index: 1000; background: var(--ink); flex-direction: column; }
@@ -457,22 +471,42 @@
         .score-zoom-row button { background: transparent; border: none; color: var(--text); font-size: 1.15rem; width: 26px; height: 26px; cursor: pointer; }
         .score-zoom-row button:hover { color: var(--accent); }
         #scoreZoomLabel { font-size: 0.76rem; color: var(--text-dim); min-width: 38px; text-align: center; }
+        .score-beat-bar {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5;
+            background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.16); border-radius: 999px;
+            padding: 9px 20px 7px; backdrop-filter: blur(6px); max-width: 90vw; overflow-x: auto;
+        }
+        .score-visualizer { margin: 0; min-height: 32px; gap: 8px; flex-wrap: nowrap; }
+        .score-visualizer .beat-num { font-size: 0.64rem; }
+        .score-visualizer .dot { width: 12px; height: 12px; }
+        .score-visualizer .dot.sub-dot, .score-visualizer .dot.active-sub { width: 8px; height: 8px; }
         .score-content {
             flex: 1; overflow: auto; display: block; text-align: center;
-            padding: 74px 12px 120px; -webkit-overflow-scrolling: touch;
+            padding: 92px 12px 120px; -webkit-overflow-scrolling: touch;
         }
         .score-content img { display: inline-block; touch-action: pinch-zoom; border-radius: 4px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); background: #fff; max-width: none; }
         .score-content iframe { display: block; width: 100%; height: 100%; border: none; border-radius: 4px; background: #fff; }
         .score-empty-hint { color: var(--text-dim); font-size: 0.9rem; text-align: center; padding: 20px; margin-top: 40vh; }
         .score-metro-bar {
             position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5;
-            display: flex; align-items: center; gap: 12px; background: rgba(20,20,20,0.88);
-            border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 10px 18px;
-            backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0,0,0,0.5); max-width: 94vw;
+            display: flex; flex-direction: row; align-items: center; gap: 8px; background: rgba(20,20,20,0.88);
+            border: 1px solid rgba(255,255,255,0.16); border-radius: 999px; padding: 8px 14px;
+            backdrop-filter: blur(10px); box-shadow: 0 12px 34px rgba(0,0,0,0.5);
+            max-width: 94vw; overflow-x: auto; -webkit-overflow-scrolling: touch;
         }
-        .score-bpm-mini { display: flex; flex-direction: column; align-items: center; line-height: 1.05; min-width: 44px; }
-        .score-bpm-mini span { font-weight: 900; font-size: 1.15rem; color: var(--accent); }
-        .score-bpm-mini small { font-size: 0.52rem; color: var(--text-dim); letter-spacing: 0.1em; }
+        .score-bar-sep { width: 1px; align-self: stretch; background: rgba(255,255,255,0.14); flex: none; margin: 4px 0; }
+        .score-mini-wrap { position: relative; flex: none; }
+        .score-mini-btn {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+            border-radius: 999px; padding: 8px 12px; font-size: 0.76rem; font-weight: 700; cursor: pointer; transition: 0.2s;
+            white-space: nowrap;
+        }
+        .score-mini-btn:hover, .score-mini-btn.open { border-color: var(--accent); background: rgba(212,168,79,0.14); color: var(--accent); }
+        .score-mini-dropdown { top: auto; right: auto; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: 200px; z-index: 1100; }
+        .score-bpm-mini { display: flex; flex-direction: column; align-items: center; line-height: 1.05; min-width: 40px; flex: none; }
+        .score-bpm-mini span { font-weight: 900; font-size: 1.1rem; color: var(--accent); }
+        .score-bpm-mini small { font-size: 0.5rem; color: var(--text-dim); letter-spacing: 0.1em; }
+        .score-metro-bar > .btn-circle, .score-metro-bar > .score-play-btn, .score-metro-bar > .score-tap-btn { flex: none; }
         .score-play-btn {
             background: var(--accent); color: var(--ink); border: none; border-radius: 50%; width: 52px; height: 52px;
             font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: none;
@@ -757,6 +791,7 @@
     <div class="fullscreen-tempo-name" id="fsTempoName">Andantino</div>
     <div class="fullscreen-bpm" id="fsBpm">80</div>
     <div class="fullscreen-label">BPM</div>
+    <div class="visualizer fs-visualizer" id="fsBeatVis"></div>
     <div class="fullscreen-controls">
         <button class="btn-circle" id="fsMinus">-</button>
         <button class="btn-primary" id="fsPlayBtn">INICIAR</button>
@@ -772,10 +807,22 @@
         <span id="scoreZoomLabel">100%</span>
         <button type="button" id="scoreZoomIn" aria-label="Acercar">+</button>
     </div>
+    <div class="score-beat-bar" id="scoreBeatBar">
+        <div class="visualizer score-visualizer" id="scoreBeatVis"></div>
+    </div>
     <div class="score-content" id="scoreContent">
         <div class="score-empty-hint">Carga una imagen o PDF de tu partitura para empezar a practicar.</div>
     </div>
     <div class="score-metro-bar">
+        <div class="basic-select-wrap score-mini-wrap">
+            <button type="button" class="score-mini-btn" id="scoreCompasBtn"><span id="scoreCompasValue">4/4</span></button>
+            <div class="basic-dropdown score-mini-dropdown" id="scoreCompasDropdown"></div>
+        </div>
+        <div class="basic-select-wrap score-mini-wrap">
+            <button type="button" class="score-mini-btn" id="scoreFiguraBtn"><span id="scoreFiguraValue">♩</span></button>
+            <div class="basic-dropdown score-mini-dropdown" id="scoreFiguraDropdown"></div>
+        </div>
+        <div class="score-bar-sep"></div>
         <button class="btn-circle" id="scoreMinus">-</button>
         <div class="score-bpm-mini"><span id="scoreBpmVal">80</span><small>BPM</small></div>
         <button class="btn-circle" id="scorePlus">+</button>
@@ -870,10 +917,9 @@
         scoreOpenBtn: document.getElementById('scoreOpenBtn'), scoreBtnValue: document.getElementById('scoreBtnValue'), scoreFileInput: document.getElementById('scoreFileInput'),
         scoreView: document.getElementById('scoreView'), scoreContent: document.getElementById('scoreContent'), scoreCloseBtn: document.getElementById('scoreCloseBtn'),
         scoreZoomRow: document.getElementById('scoreZoomRow'), scoreZoomLabel: document.getElementById('scoreZoomLabel'), scoreZoomOut: document.getElementById('scoreZoomOut'), scoreZoomIn: document.getElementById('scoreZoomIn'),
-        scoreBpmVal: document.getElementById('scoreBpmVal'), scorePlayBtn: document.getElementById('scorePlayBtn'), scoreTapBtn: document.getElementById('scoreTapBtn'), scoreMinus: document.getElementById('scoreMinus'), scorePlus: document.getElementById('scorePlus')
-    };
-
-    const quickBpmRow = document.getElementById('quick-bpm-row');
+        scoreBpmVal: document.getElementById('scoreBpmVal'), scorePlayBtn: document.getElementById('scorePlayBtn'), scoreTapBtn: document.getElementById('scoreTapBtn'), scoreMinus: document.getElementById('scoreMinus'), scorePlus: document.getElementById('scorePlus'),
+        scoreBeatVis: document.getElementById('scoreBeatVis'), fsBeatVis: document.getElementById('fsBeatVis')
+    };    const quickBpmRow = document.getElementById('quick-bpm-row');
     for (let i = 40; i <= 400; i += 20) {
         let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
         btn.onclick = () => { tempo = i; updateBpmUI(); }; quickBpmRow.appendChild(btn);
@@ -979,6 +1025,61 @@
         }
     });
 
+    // --- Compás y Figura editables desde la barra de la partitura (mismo motor, mismos datos) ---
+    const scoreCompasBtn = document.getElementById('scoreCompasBtn');
+    const scoreCompasDropdown = document.getElementById('scoreCompasDropdown');
+    const scoreCompasValue = document.getElementById('scoreCompasValue');
+    const scoreFiguraBtn = document.getElementById('scoreFiguraBtn');
+    const scoreFiguraDropdown = document.getElementById('scoreFiguraDropdown');
+    const scoreFiguraValue = document.getElementById('scoreFiguraValue');
+
+    buildBasicDropdown(scoreCompasDropdown, compasOptions, (val) => {
+        UI.amalgamInp.value = '';
+        UI.beatsSel.value = val;
+        UI.beatsSel.dispatchEvent(new Event('change'));
+        syncBasicLabels();
+    });
+    buildBasicDropdown(scoreFiguraDropdown, figuraOptions, (val) => {
+        UI.subSel.value = val;
+        UI.subSel.dispatchEvent(new Event('change'));
+        syncBasicLabels();
+    });
+
+    function closeAllQuickDropdowns() {
+        [basicCompasDropdown, basicFiguraDropdown, scoreCompasDropdown, scoreFiguraDropdown].forEach(d => d.classList.remove('open'));
+        [basicCompasBtn, basicFiguraBtn, scoreCompasBtn, scoreFiguraBtn].forEach(b => b.classList.remove('open'));
+        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
+    }
+    // El menú se saca de la barra (que tiene overflow-x y transform, y por eso lo recortaba)
+    // y se reubica con coordenadas fijas respecto a la pantalla, siempre arriba del botón.
+    function positionDropdownAbove(btn, dropdown) {
+        const rect = btn.getBoundingClientRect();
+        const half = dropdown.offsetWidth ? dropdown.offsetWidth / 2 : 100;
+        const clampedLeft = Math.min(Math.max(rect.left + rect.width / 2, half + 10), window.innerWidth - half - 10);
+        dropdown.style.position = 'fixed';
+        dropdown.style.top = 'auto';
+        dropdown.style.left = clampedLeft + 'px';
+        dropdown.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+        dropdown.style.transform = 'translateX(-50%)';
+    }
+    function openScoreMiniDropdown(btn, dropdown) {
+        document.body.appendChild(dropdown);
+        dropdown.classList.add('open'); btn.classList.add('open');
+        positionDropdownAbove(btn, dropdown);
+    }
+    scoreCompasBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const willOpen = !scoreCompasDropdown.classList.contains('open');
+        closeAllQuickDropdowns();
+        if (willOpen) openScoreMiniDropdown(scoreCompasBtn, scoreCompasDropdown);
+    });
+    scoreFiguraBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const willOpen = !scoreFiguraDropdown.classList.contains('open');
+        closeAllQuickDropdowns();
+        if (willOpen) openScoreMiniDropdown(scoreFiguraBtn, scoreFiguraDropdown);
+    });
+
     basicCompasBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
@@ -991,21 +1092,20 @@
         presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
         basicFiguraDropdown.classList.toggle('open'); basicFiguraBtn.classList.toggle('open');
     });
-    document.addEventListener('click', () => {
-        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
-        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
-        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
-    });
+    document.addEventListener('click', () => { closeAllQuickDropdowns(); });
 
     function syncBasicLabels() {
         const isCustom = UI.amalgamInp.value.trim() !== '';
         const compasOpt = compasOptions.find(o => o.value === UI.beatsSel.value);
-        basicCompasValue.innerText = isCustom ? 'Custom' : (compasOpt ? compasOpt.label : UI.beatsSel.value);
-        const figOpt = figuraOptions.find(o => o.value === UI.subSel.value);
-        basicFiguraValue.innerText = figOpt ? figOpt.icon : '♩';
+        const compasLabel = isCustom ? 'Custom' : (compasOpt ? compasOpt.label : UI.beatsSel.value);
+        basicCompasValue.innerText = compasLabel; scoreCompasValue.innerText = compasLabel;
 
-        Array.from(basicCompasDropdown.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.beatsSel.value));
-        Array.from(basicFiguraDropdown.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.subSel.value));
+        const figOpt = figuraOptions.find(o => o.value === UI.subSel.value);
+        const figIcon = figOpt ? figOpt.icon : '♩';
+        basicFiguraValue.innerText = figIcon; scoreFiguraValue.innerText = figIcon;
+
+        [basicCompasDropdown, scoreCompasDropdown].forEach(d => Array.from(d.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.beatsSel.value)));
+        [basicFiguraDropdown, scoreFiguraDropdown].forEach(d => Array.from(d.children).forEach(el => el.classList.toggle('selected', el.dataset.value === UI.subSel.value)));
     }
     UI.beatsSel.addEventListener('change', syncBasicLabels);
     UI.subSel.addEventListener('change', syncBasicLabels);
@@ -1124,11 +1224,7 @@
     const presetBtn = document.getElementById('presetBtn');
     const presetDropdown = document.getElementById('presetDropdown');
 
-    function closeAllBasicDropdowns() {
-        basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
-        basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
-        presetDropdown.classList.remove('open'); presetBtn.classList.remove('open');
-    }
+    function closeAllBasicDropdowns() { closeAllQuickDropdowns(); }
 
     function renderPresetDropdown() {
         const presets = loadPresets();
@@ -1174,6 +1270,8 @@
         e.stopPropagation();
         basicCompasDropdown.classList.remove('open'); basicCompasBtn.classList.remove('open');
         basicFiguraDropdown.classList.remove('open'); basicFiguraBtn.classList.remove('open');
+        scoreCompasDropdown.classList.remove('open'); scoreCompasBtn.classList.remove('open');
+        scoreFiguraDropdown.classList.remove('open'); scoreFiguraBtn.classList.remove('open');
         if (!presetDropdown.classList.contains('open')) renderPresetDropdown();
         presetDropdown.classList.toggle('open'); presetBtn.classList.toggle('open');
     });
@@ -1225,6 +1323,56 @@
     }
     function adjustBpm(amount) { tempo = Math.max(20, Math.min(400, tempo + amount)); updateBpmUI(); }
     UI.bpmSld.addEventListener('input', (e) => { tempo = parseInt(e.target.value); updateBpmUI(); });
+
+    // --- Edición manual de tempo: clic en el número de BPM para escribirlo directamente ---
+    function makeTempoEditable(el, opts) {
+        if (!el) return;
+        opts = opts || {};
+        el.title = 'Clic para escribir el tempo';
+        el.addEventListener('click', () => {
+            if (el.querySelector('input')) return; // ya está en edición
+            const previous = Math.round(tempo);
+            const input = document.createElement('input');
+            input.type = 'number'; input.inputMode = 'numeric';
+            input.min = 20; input.max = 400; input.step = 1;
+            input.value = previous;
+            input.className = 'bpm-edit-input';
+            if (opts.copyFont) {
+                // Copia el estilo de fuente real del número (tamaño/peso/color/sombra)
+                // para que el input no se vea más pequeño que el número original.
+                const cs = getComputedStyle(el);
+                input.style.fontSize = cs.fontSize;
+                input.style.fontFamily = cs.fontFamily;
+                input.style.fontWeight = cs.fontWeight;
+                input.style.fontStyle = cs.fontStyle;
+                input.style.color = cs.color;
+                input.style.lineHeight = cs.lineHeight;
+                input.style.textShadow = cs.textShadow;
+            }
+            el.innerHTML = '';
+            el.appendChild(input);
+            input.focus(); input.select();
+
+            let committed = false;
+            const commit = () => {
+                if (committed) return; committed = true;
+                let v = parseInt(input.value, 10);
+                if (isNaN(v)) v = previous;
+                tempo = Math.max(20, Math.min(400, v));
+                updateBpmUI();
+            };
+            input.addEventListener('keydown', (e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') { input.blur(); }
+                else if (e.key === 'Escape') { committed = true; updateBpmUI(); }
+            });
+            input.addEventListener('click', (e) => e.stopPropagation());
+            input.addEventListener('blur', commit);
+        });
+    }
+    makeTempoEditable(UI.bpmDisp, { copyFont: true });
+    makeTempoEditable(UI.fsBpm, { copyFont: true });
+    makeTempoEditable(UI.scoreBpmVal);
     
     UI.pendTgl.addEventListener('change', (e) => UI.stage.classList.toggle('hidden', !e.target.checked));
     UI.swingSld.addEventListener('input', (e) => UI.swingVal.innerText = e.target.value);
@@ -1263,14 +1411,29 @@
     UI.beatsSel.addEventListener('change', parsePattern);
     UI.amalgamInp.addEventListener('input', () => { parsePattern(); if(isPlaying) { mainBeatPos = 0; barCount = 0; }});
 
-    function renderVisualizer() {
-        UI.vis.innerHTML = ''; const sub = parseFloat(UI.subSel.value);
+    function buildVisualizerInto(container) {
+        if (!container) return;
+        container.innerHTML = ''; const sub = parseFloat(UI.subSel.value);
         const dotCount = Math.max(1, Math.round(totalBeats * sub));
         for (let i = 0; i < dotCount; i++) {
+            const beatPos = i / sub;
+            const isBeatDot = Math.abs(beatPos - Math.round(beatPos)) < 1e-6;
+
+            const col = document.createElement('div'); col.className = 'beat-col';
+            const num = document.createElement('div'); num.className = 'beat-num';
+            if (isBeatDot) { num.innerText = (Math.round(beatPos) % totalBeats) + 1; } else { num.classList.add('empty'); num.innerText = '·'; }
+
             const dot = document.createElement('div'); dot.className = 'dot';
             if (sub >= 1 && i % sub !== 0) dot.classList.add('sub-dot');
-            dot.id = `dot-${i}`; UI.vis.appendChild(dot);
+            dot.dataset.idx = i;
+
+            col.appendChild(num); col.appendChild(dot); container.appendChild(col);
         }
+    }
+    function renderVisualizer() {
+        buildVisualizerInto(UI.vis);
+        buildVisualizerInto(UI.scoreBeatVis);
+        buildVisualizerInto(UI.fsBeatVis);
     }
     UI.subSel.addEventListener('change', renderVisualizer);
 
@@ -1468,7 +1631,8 @@
 
         evs.forEach(ev => {
             if (ev.engine === 'main' && ev.noteIdx !== lastMainIdx) {
-                UI.vis.style.opacity = ev.isMuted ? "0.2" : "1"; UI.pendulum.style.opacity = ev.isMuted ? "0.2" : "1";
+                [UI.vis, UI.scoreBeatVis, UI.fsBeatVis].forEach(vc => { if (vc) vc.style.opacity = ev.isMuted ? "0.2" : "1"; });
+                UI.pendulum.style.opacity = ev.isMuted ? "0.2" : "1";
 
                 if (UI.pendTgl.checked && ev.isBeat) {
                     pendulumSide *= -1; UI.pendulum.style.transition = `transform ${60/tempo}s ease-in-out`; UI.pendulum.style.transform = `rotate(${25 * pendulumSide}deg)`;
@@ -1478,11 +1642,16 @@
                     UI.lightSwing.style.opacity = "1"; setTimeout(() => UI.lightSwing.style.opacity = "0", 60);
                 }
 
-                Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (ev.sub >= 1 && !d.id.endsWith('-0') && d.id.split('-')[1]%ev.sub!==0 ? ' sub-dot' : ''));
-                const aDot = document.getElementById(`dot-${ev.noteIdx}`);
-                if (aDot && !ev.isMuted) {
-                    if (ev.isAcc) aDot.classList.add('active-downbeat'); else if (ev.isBeat) aDot.classList.add('active-beat'); else aDot.classList.add('active-sub');
-                }
+                [UI.vis, UI.scoreBeatVis, UI.fsBeatVis].forEach(vc => {
+                    if (!vc) return;
+                    vc.querySelectorAll('.dot').forEach(d => d.className = 'dot' + (ev.sub >= 1 && d.dataset.idx % ev.sub !== 0 ? ' sub-dot' : ''));
+                    vc.querySelectorAll('.beat-num').forEach(n => n.classList.remove('active'));
+                    const aDot = vc.querySelector(`.dot[data-idx="${ev.noteIdx}"]`);
+                    if (aDot && !ev.isMuted) {
+                        if (ev.isAcc) aDot.classList.add('active-downbeat'); else if (ev.isBeat) aDot.classList.add('active-beat'); else aDot.classList.add('active-sub');
+                        if (ev.isBeat) { const numEl = aDot.parentElement && aDot.parentElement.querySelector('.beat-num'); if (numEl && !numEl.classList.contains('empty')) numEl.classList.add('active'); }
+                    }
+                });
                 lastMainIdx = ev.noteIdx;
             }
             if ((ev.engine === 'poly' || ev.engine === 'clave' || ev.engine === 'pm') && !ev.isMuted) {
@@ -1535,7 +1704,14 @@
             UI.fsPlayBtn.innerText = "INICIAR"; UI.fsPlayBtn.style.background = "var(--accent)"; UI.fsPlayBtn.style.color = "white";
             UI.scorePlayBtn.innerText = "▶"; UI.scorePlayBtn.classList.remove('playing');
             UI.pendulum.style.transition = "transform 0.3s ease-out"; UI.pendulum.style.transform = `rotate(0deg)`; UI.vis.style.opacity = "1"; UI.pendulum.style.opacity = "1";
-            { const sReset = parseFloat(UI.subSel.value); Array.from(UI.vis.children).forEach(d => d.className = 'dot' + (sReset >= 1 && !d.id.endsWith('-0') && d.id.split('-')[1]%sReset!==0 ? ' sub-dot' : '')); }
+            if (UI.scoreBeatVis) UI.scoreBeatVis.style.opacity = "1";
+            if (UI.fsBeatVis) UI.fsBeatVis.style.opacity = "1";
+            { const sReset = parseFloat(UI.subSel.value);
+              [UI.vis, UI.scoreBeatVis, UI.fsBeatVis].forEach(vc => { if (!vc) return;
+                vc.querySelectorAll('.dot').forEach(d => d.className = 'dot' + (sReset >= 1 && d.dataset.idx % sReset !== 0 ? ' sub-dot' : ''));
+                vc.querySelectorAll('.beat-num').forEach(n => n.classList.remove('active'));
+              });
+            }
         }
         UI.playBtn.blur(); 
     }
