@@ -22,6 +22,23 @@
     --white-key-shadow:#e4e2dc;
     --black-key:#141414;
     --line-color:#c9c5bb;
+
+    /* Paneles flotantes sobre el visor de partitura (antes hardcodeados) */
+    --panel-bg: rgba(0,0,0,0.5);
+    --panel-text: #eee;
+    --panel-btn-bg: rgba(255,255,255,0.12);
+    --panel-btn-bg-hover: rgba(255,255,255,0.22);
+    --panel-danger-bg: rgba(163,55,42,0.35);
+    --panel-danger-bg-hover: rgba(163,55,42,0.55);
+    --panel-danger-text: #f3b3a8;
+    --panel-warn-text: #f3d9a8;
+    --panel-accent-bg: rgba(71,99,87,0.5);
+    --panel-accent-bg-hover: rgba(71,99,87,0.75);
+    --panel-accent-text: #bfe0cf;
+
+    /* Colores de referencia mano izquierda / mano derecha */
+    --hand-left-color: #7fb8e0;
+    --hand-right-color: #e0a97f;
   }
   *{box-sizing:border-box;}
   html,body{
@@ -209,6 +226,49 @@
     color: var(--text);
   }
   input[type=range]{ width:90px; accent-color:var(--gold); }
+
+  /* Mini-toggle reutilizable dentro de la controlbar (ej. "Manos") */
+  .toggle-mini{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:0.78rem;
+    color: var(--muted);
+    cursor:pointer;
+    user-select:none;
+  }
+  .toggle-mini input[type="checkbox"]{
+    appearance:none;
+    width:34px;
+    height:18px;
+    background: rgba(255,255,255,0.2);
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.25);
+    position:relative;
+    cursor:pointer;
+    transition:background 0.2s, border-color 0.2s;
+    flex-shrink:0;
+  }
+  .toggle-mini input[type="checkbox"]:checked{
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .toggle-mini input[type="checkbox"]::before{
+    content:"";
+    position:absolute;
+    top:1px;
+    left:1px;
+    width:14px;
+    height:14px;
+    background:#fff;
+    border-radius:50%;
+    transition:transform 0.2s;
+  }
+  .toggle-mini input[type="checkbox"]:checked::before{
+    transform: translateX(16px);
+  }
+
+  /* Grupo de "rango de práctica" — eliminado (ver /areas/crescendo-web-tools.md si se retoma más adelante) */
   input[type=color]{
     width:30px;height:24px;border:none;border-radius:5px;padding:0;cursor:pointer;background:none;
   }
@@ -254,9 +314,15 @@
     background: rgba(255,255,255,0.08);
     color: var(--muted);
     white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s ease;
+    display: inline-block;
   }
+  .sample-status:hover{ background: rgba(255,255,255,0.16); }
   .sample-status.loaded{ background:rgba(71,99,87,0.3); color:#bfe0cf; }
+  .sample-status.loaded:hover{ background:rgba(71,99,87,0.45); }
   .sample-status.fallback{ background:rgba(163,55,42,0.25); color:#f3b3a8; }
+  .sample-status.fallback:hover{ background:rgba(163,55,42,0.4); }
 
   .sample-clear-btn{
     display: none;
@@ -383,7 +449,8 @@
     position: absolute;
     bottom: 14px;
     right: 40px;
-    background: rgba(0,0,0,0.5);
+    z-index: 5;
+    background: var(--panel-bg);
     backdrop-filter: blur(4px);
     padding: 4px 10px;
     border-radius: 20px;
@@ -391,7 +458,7 @@
     gap: 8px;
     align-items: center;
     font-size: 0.7rem;
-    color: #eee;
+    color: var(--panel-text);
   }
   .pdf-controls label{
     display: flex;
@@ -412,11 +479,11 @@
     display: none;
     align-items: center;
     gap: 4px;
-    background: rgba(163,55,42,0.35);
+    background: var(--panel-danger-bg);
     border: none;
     border-radius: 4px;
     padding: 4px 10px;
-    color: #f3b3a8;
+    color: var(--panel-danger-text);
     font-size: 0.7rem;
     cursor: pointer;
     transition: background .15s ease;
@@ -425,7 +492,7 @@
     display: inline-flex;
   }
   .pdf-clear-btn:hover{
-    background: rgba(163,55,42,0.55);
+    background: var(--panel-danger-bg-hover);
   }
 
   .web-viewer{
@@ -438,8 +505,9 @@
     position: absolute;
     bottom: 14px;
     left: 16px;
+    z-index: 5;
     max-width: calc(100% - 32px);
-    background: rgba(0,0,0,0.5);
+    background: var(--panel-bg);
     backdrop-filter: blur(4px);
     padding: 4px 8px;
     border-radius: 14px;
@@ -448,7 +516,7 @@
     gap: 6px;
     align-items: center;
     font-size: 0.7rem;
-    color: #eee;
+    color: var(--panel-text);
   }
   .web-controls input{
     width: 160px;
@@ -458,7 +526,7 @@
     border-radius: 4px;
     border: 1px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.08);
-    color: #eee;
+    color: var(--panel-text);
   }
   .web-controls input::placeholder{ color: rgba(238,238,238,0.55); }
   .web-controls button{
@@ -466,17 +534,17 @@
     align-items: center;
     justify-content: center;
     gap: 4px;
-    background: rgba(255,255,255,0.12);
+    background: var(--panel-btn-bg);
     border: none;
     border-radius: 4px;
     padding: 4px 8px;
-    color: #eee;
+    color: var(--panel-text);
     font-size: 0.7rem;
     cursor: pointer;
     transition: background .15s ease;
   }
   .web-controls button:hover{
-    background: rgba(255,255,255,0.22);
+    background: var(--panel-btn-bg-hover);
   }
   .web-controls .pdf-clear-btn{
     display: none;
@@ -488,7 +556,7 @@
     flex-basis: 100%;
     font-size: 0.65rem;
     line-height: 1.4;
-    color: #f3d9a8;
+    color: var(--panel-warn-text);
     padding: 2px 2px 0;
   }
 
@@ -518,8 +586,9 @@
     position: absolute;
     top: 14px;
     right: 40px;
+    z-index: 5;
     max-width: calc(100% - 80px);
-    background: rgba(0,0,0,0.5);
+    background: var(--panel-bg);
     backdrop-filter: blur(4px);
     padding: 4px 10px;
     border-radius: 14px;
@@ -529,7 +598,7 @@
     align-items: center;
     justify-content: flex-end;
     font-size: 0.7rem;
-    color: #eee;
+    color: var(--panel-text);
   }
   .score-play-controls.visible{
     display: flex;
@@ -538,24 +607,24 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    background: rgba(71,99,87,0.5);
+    background: var(--panel-accent-bg);
     border: none;
     border-radius: 4px;
     padding: 4px 8px;
-    color: #bfe0cf;
+    color: var(--panel-accent-text);
     font-size: 0.7rem;
     cursor: pointer;
     transition: background .15s ease;
   }
   .score-play-btn:hover{
-    background: rgba(71,99,87,0.75);
+    background: var(--panel-accent-bg-hover);
   }
   .score-play-btn.secondary{
-    background: rgba(255,255,255,0.12);
-    color: #eee;
+    background: var(--panel-btn-bg);
+    color: var(--panel-text);
   }
   .score-play-btn.secondary:hover{
-    background: rgba(255,255,255,0.22);
+    background: var(--panel-btn-bg-hover);
   }
   .score-play-btn.marked{
     background: rgba(255,196,64,0.55);
@@ -633,7 +702,7 @@
   }
   .score-status{
     font-size: 0.65rem;
-    color: #f3b3a8;
+    color: var(--panel-danger-text);
     padding: 2px 8px;
   }
 
@@ -719,6 +788,20 @@
   #keyboard.beginner-mode .black-key .label{
     font-size:0.7rem;
     line-height: 1.15;
+  }
+
+  /* Referencia visual de mano izquierda / mano derecha (split en Do central) */
+  #keyboard.show-hands .white-key.hand-left{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+  }
+  #keyboard.show-hands .white-key.hand-right{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+  }
+  #keyboard.show-hands .black-key.hand-left{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-left-color) 55%, var(--black-key)) 60%, #000 100%);
+  }
+  #keyboard.show-hands .black-key.hand-right{
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-right-color) 55%, var(--black-key)) 60%, #000 100%);
   }
 
   .hint{
@@ -856,11 +939,43 @@
     <div class="field">
       <label for="noteDisplay">Notas</label>
       <select id="noteDisplay">
-        <option value="ocultar" selected>Ocultar notas</option>
-        <option value="mostrar">Mostrar notas</option>
+        <option value="ocultar">Ocultar notas</option>
+        <option value="mostrar" selected>Mostrar notas</option>
         <option value="solfeo">Modo solfeo</option>
       </select>
     </div>
+
+    <div class="field">
+      <label for="noteLang">Idioma</label>
+      <select id="noteLang" title="Idioma de los nombres de nota (independiente del modo Beginner/Pro)">
+        <option value="es" selected>Do Re Mi</option>
+        <option value="en">C D E</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="keySelect">Tonalidad</label>
+      <select id="keySelect" title="Fija una tonalidad: se usa para el grado del acorde (I, IV, V...) y para dibujar la armadura de clave (sostenidos/bemoles) en el pentagrama">
+        <option value="">— (sin armadura)</option>
+        <option value="0">Do mayor / La menor (sin alteraciones)</option>
+        <option value="7">Sol mayor / Mi menor (1 sostenido)</option>
+        <option value="2">Re mayor / Si menor (2 sostenidos)</option>
+        <option value="9">La mayor / Fa# menor (3 sostenidos)</option>
+        <option value="4">Mi mayor / Do# menor (4 sostenidos)</option>
+        <option value="11">Si mayor / Sol# menor (5 sostenidos)</option>
+        <option value="6">Fa# mayor / Re# menor (6 sostenidos)</option>
+        <option value="1">Reb mayor / Sib menor (5 bemoles)</option>
+        <option value="8">Lab mayor / Fa menor (4 bemoles)</option>
+        <option value="3">Mib mayor / Do menor (3 bemoles)</option>
+        <option value="10">Sib mayor / Sol menor (2 bemoles)</option>
+        <option value="5">Fa mayor / Re menor (1 bemol)</option>
+      </select>
+    </div>
+
+    <label class="toggle-mini" for="handsToggle" title="Colorea las teclas para diferenciar mano izquierda y mano derecha (split en Do central)">
+      <input type="checkbox" id="handsToggle">
+      Manos
+    </label>
 
     <div class="field">
       <label for="volume">Volumen</label>
@@ -873,14 +988,8 @@
     </div>
 
     <div class="sample-controls">
-      <label for="sampleFolder" title="Selecciona la carpeta con tus samples de audio">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-        </svg>
-        Samples
-      </label>
       <input type="file" id="sampleFolder" webkitdirectory multiple class="file-input-hidden">
-      <button type="button" class="sample-clear-btn" id="sampleClearBtn" title="Quitar samples cargados y volver al SoundFont de piano">
+      <button type="button" class="sample-clear-btn" id="sampleClearBtn" title="Quitar samples cargados y volver al SoundFont de piano" aria-label="Quitar samples cargados y volver al SoundFont de piano">
         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
           <line x1="18" y1="6" x2="6" y2="18"/>
           <line x1="6" y1="6" x2="18" y2="18"/>
@@ -891,7 +1000,7 @@
 
     <div class="right-indicators">
       <span class="sound-source-indicator" id="soundSourceIndicator">cargando...</span>
-      <span class="sample-status" id="sampleStatus">sin samples</span>
+      <label class="sample-status" id="sampleStatus" for="sampleFolder" title="Sin samples cargados — clic para elegir una carpeta de samples de audio">sin samples</label>
       <span class="sustain-indicator" id="sustainIndicator" title="Estado del pedal de sustain (clic para probar sin pedal MIDI)">
         <span class="sustain-dot" id="sustainDot"></span>
         Sustain
@@ -915,14 +1024,14 @@
       <div class="web-controls" id="webControls">
         <input type="text" id="webUrlInput" placeholder="Pega un enlace (https://...)">
         <button type="button" id="webLoadBtn" title="Cargar la página aquí">Cargar página</button>
-        <button type="button" id="webOpenNewTabBtn" title="Abrir en una pestaña nueva">
+        <button type="button" id="webOpenNewTabBtn" title="Abrir en una pestaña nueva" aria-label="Abrir en una pestaña nueva">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
             <polyline points="15 3 21 3 21 9"/>
             <line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
         </button>
-        <button type="button" class="pdf-clear-btn" id="webClearBtn" title="Cerrar la página web">
+        <button type="button" class="pdf-clear-btn" id="webClearBtn" title="Cerrar la página web" aria-label="Cerrar la página web">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -933,22 +1042,22 @@
       </div>
 
       <div class="score-play-controls" id="scorePlayControls">
-        <button type="button" class="score-play-btn secondary" id="scorePrevBtn" title="Retroceder una nota">
+        <button type="button" class="score-play-btn secondary" id="scorePrevBtn" title="Retroceder una nota" aria-label="Retroceder una nota">
           <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
         </button>
-        <button type="button" class="score-play-btn" id="scorePlayBtn" title="Reproducir partitura (o barra espaciadora)">
+        <button type="button" class="score-play-btn" id="scorePlayBtn" title="Reproducir partitura (o barra espaciadora)" aria-label="Reproducir partitura">
           <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           Play
         </button>
-        <button type="button" class="score-play-btn" id="scorePauseBtn" title="Pausar (o barra espaciadora)">
+        <button type="button" class="score-play-btn" id="scorePauseBtn" title="Pausar (o barra espaciadora)" aria-label="Pausar partitura">
           <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
           Pausa
         </button>
-        <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener">
+        <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener" aria-label="Detener partitura">
           <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></svg>
           Stop
         </button>
-        <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota">
+        <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota" aria-label="Avanzar una nota">
           <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
         </button>
         <div class="score-tempo" title="Tempo de reproducción">
@@ -957,20 +1066,20 @@
           <input type="number" id="scoreTempo" min="20" max="300" value="100" step="5" inputmode="numeric">
           <button type="button" class="score-tempo-btn" id="scoreTempoUp" aria-label="Aumentar velocidad" title="Aumentar velocidad">+</button>
         </div>
-        <button type="button" class="score-play-btn secondary" id="scoreZoomOutBtn" title="Alejar partitura">
+        <button type="button" class="score-play-btn secondary" id="scoreZoomOutBtn" title="Alejar partitura" aria-label="Alejar partitura">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
         </button>
-        <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
+        <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura" aria-label="Acercar partitura">
           <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
         </button>
         <span style="width:1px;align-self:stretch;background:rgba(255,255,255,0.25);margin:0 2px;"></span>
-        <button type="button" class="score-play-btn secondary" id="scoreLoopStartBtn" title="Marcar inicio del tramo a repetir (en la posición actual)">A</button>
-        <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)">B</button>
-        <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" disabled>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopStartBtn" title="Marcar inicio del tramo a repetir (en la posición actual)" aria-label="Marcar inicio del tramo a repetir">A</button>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)" aria-label="Marcar fin del tramo a repetir">B</button>
+        <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" aria-label="Repetir en bucle el tramo marcado" disabled>
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
           Loop
         </button>
-        <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo">
+        <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo" aria-label="Quitar marcas del tramo">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -986,7 +1095,7 @@
         </label>
         <input type="file" id="pdfUpload" accept=".pdf,.xml,.musicxml,.mxl,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg" class="file-input-hidden">
         <span class="score-status" id="scoreStatus"></span>
-        <button type="button" class="pdf-clear-btn" id="pdfClearBtn" title="Quitar la partitura actual">
+        <button type="button" class="pdf-clear-btn" id="pdfClearBtn" title="Quitar la partitura actual" aria-label="Quitar la partitura actual">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
             <line x1="18" y1="6" x2="6" y2="18"/>
             <line x1="6" y1="6" x2="18" y2="18"/>
@@ -1021,6 +1130,12 @@
 
 <script>
 (function(){
+  // Bandera de depuración: los console.warn/console.error de los bloques
+  // catch se mantienen siempre activos (son útiles para diagnosticar fallas
+  // reportadas por usuarios); solo los console.log puramente informativos
+  // se silencian en producción y se activan poniendo DEBUG en true.
+  const DEBUG = false;
+
   // ---------- DETECCIÓN DE SISTEMA OPERATIVO ----------
   const ua = navigator.userAgent.toLowerCase();
   const isMac = /macintosh|mac os x/.test(ua);
@@ -1066,10 +1181,15 @@
 
   // ---------- ESTADO GLOBAL ----------
   let currentMode = 'beginner';
-  let currentDisplay = 'ocultar';
+  let currentDisplay = 'mostrar';
+  // Idioma de los nombres de nota: independiente del modo Beginner/Pro,
+  // controlado por el selector #noteLang (antes iba atado a currentMode).
+  let currentLang = 'es';
   let currentMidiRange = { min: 48, max: 83 };
   let keyElByMidi = {};
   let allNotes = [];
+  let showHands = false;
+  let currentKeyPc = null; // pitch-class (0-11) de la tonalidad elegida, o null si no hay ninguna
 
   // ---------- DOM REFS ----------
   const keyboardEl = document.getElementById('keyboard');
@@ -1077,15 +1197,27 @@
   const modeLabelBeginner = document.getElementById('modeLabelBeginner');
   const modeLabelPro = document.getElementById('modeLabelPro');
   const noteDisplaySelect = document.getElementById('noteDisplay');
+  const noteLangSelect = document.getElementById('noteLang');
+  const keySelect = document.getElementById('keySelect');
+  const handsToggle = document.getElementById('handsToggle');
   const hintText = document.getElementById('hintText');
 
   const chordNameEl = document.getElementById('chordName');
   const chordSubEl = document.getElementById('chordSub');
 
   // ---------- CONSTRUCCIÓN DEL TECLADO ----------
+  // División convencional mano izquierda / mano derecha: Do central (MIDI 60)
+  // en adelante es mano derecha; por debajo, mano izquierda. Es una referencia
+  // pedagógica general (método de piano estándar), no una regla absoluta.
+  const HAND_SPLIT_MIDI = 60;
+  function handClassFor(midi) {
+    return midi < HAND_SPLIT_MIDI ? 'hand-left' : 'hand-right';
+  }
+
   function buildKeyboard(minMidi, maxMidi) {
     keyboardEl.innerHTML = '';
     keyboardEl.classList.toggle('beginner-mode', currentMode === 'beginner');
+    keyboardEl.classList.toggle('show-hands', showHands);
     keyElByMidi = {};
     const notes = [];
     for (let m = minMidi; m <= maxMidi; m++) {
@@ -1102,7 +1234,7 @@
     notes.forEach(n => {
       if (n.isBlack) return;
       const el = document.createElement('div');
-      el.className = 'white-key';
+      el.className = 'white-key ' + handClassFor(n.midi);
       el.style.left = (whiteIndex * whiteWidthPct) + '%';
       el.style.width = whiteWidthPct + '%';
       el.dataset.midi = n.midi;
@@ -1119,7 +1251,7 @@
     notes.forEach(n => {
       if (!n.isBlack) { wi++; return; }
       const el = document.createElement('div');
-      el.className = 'black-key';
+      el.className = 'black-key ' + handClassFor(n.midi);
       const left = wi * whiteWidthPct - blackWidthPct / 2;
       el.style.left = left + '%';
       el.style.width = blackWidthPct + '%';
@@ -1139,8 +1271,7 @@
 
   function updateLabels() {
     const display = currentDisplay;
-    const mode = currentMode;
-    const lang = (mode === 'beginner') ? 'es' : 'en';
+    const lang = currentLang;
     const isSolfeo = (display === 'solfeo');
 
     for (const midi in keyElByMidi) {
@@ -1243,7 +1374,7 @@
         } else {
           setSourceIndicator('SoundFont: acústico', 'sf');
         }
-        console.log('SoundFont de piano acústico cargado correctamente.');
+        if (DEBUG) console.log('SoundFont de piano acústico cargado correctamente.');
       })
       .catch(err => {
         sfLoading = false;
@@ -1419,6 +1550,66 @@
     svg.appendChild(g);
   }
 
+  // ---------- ARMADURA DE CLAVE (sostenidos/bemoles según la tonalidad) ----------
+  // Orden estándar de aparición: sostenidos "Fa Do Sol Re La Mi Si",
+  // bemoles "Si Mi La Re Sol Do Fa" (el orden de bemoles es el inverso del de sostenidos).
+  const SHARP_LETTERS = ['F','C','G','D','A','E','B'];
+  const FLAT_LETTERS  = ['B','E','A','D','G','C','F'];
+  // Octava convencional de cada alteración según la clave (posición estándar de notación).
+  const SHARP_OCTAVE_TREBLE = { F:5, C:5, G:5, D:5, A:4, E:5, B:4 };
+  const SHARP_OCTAVE_BASS   = { F:3, C:3, G:3, D:3, A:2, E:3, B:2 };
+  const FLAT_OCTAVE_TREBLE  = { B:4, E:5, A:4, D:5, G:4, C:5, F:4 };
+  const FLAT_OCTAVE_BASS    = { B:2, E:3, A:2, D:3, G:2, C:3, F:2 };
+
+  // Tonalidad mayor y su relativa menor (comparten la misma armadura), indexada
+  // por pitch-class (0-11) del tono mayor. type:null = Do mayor/La menor (sin alteraciones).
+  const KEY_SIGNATURES = {
+    0:  { type: null,  count: 0 },
+    7:  { type: 'sharp', count: 1 },
+    2:  { type: 'sharp', count: 2 },
+    9:  { type: 'sharp', count: 3 },
+    4:  { type: 'sharp', count: 4 },
+    11: { type: 'sharp', count: 5 },
+    6:  { type: 'sharp', count: 6 },
+    1:  { type: 'flat',  count: 5 },
+    8:  { type: 'flat',  count: 4 },
+    3:  { type: 'flat',  count: 3 },
+    10: { type: 'flat',  count: 2 },
+    5:  { type: 'flat',  count: 1 }
+  };
+
+  const KEYSIG_X_START = 420;
+  const KEYSIG_SPACING = 100;
+
+  function drawKeySignature() {
+    svg.querySelectorAll('.keysig-el').forEach(e => e.remove());
+    if (currentKeyPc === null) return;
+    const sig = KEY_SIGNATURES[currentKeyPc];
+    if (!sig || sig.count === 0) return;
+
+    const letters = sig.type === 'sharp' ? SHARP_LETTERS : FLAT_LETTERS;
+    const octTreble = sig.type === 'sharp' ? SHARP_OCTAVE_TREBLE : FLAT_OCTAVE_TREBLE;
+    const octBass = sig.type === 'sharp' ? SHARP_OCTAVE_BASS : FLAT_OCTAVE_BASS;
+    const glyph = sig.type === 'sharp' ? '♯' : '♭';
+
+    for (let i = 0; i < sig.count; i++) {
+      const letter = letters[i];
+      const x = KEYSIG_X_START + i * KEYSIG_SPACING;
+
+      const stepTreble = diatonicStep(letter, octTreble[letter]);
+      const yTreble = stepY(stepTreble);
+      const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': 240, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      symTreble.textContent = glyph;
+      svg.appendChild(symTreble);
+
+      const stepBass = diatonicStep(letter, octBass[letter]);
+      const yBass = stepY(stepBass);
+      const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': 240, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      symBass.textContent = glyph;
+      svg.appendChild(symBass);
+    }
+  }
+
   function drawBaseStaff() {
     svg.innerHTML = '';
     svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
@@ -1438,6 +1629,7 @@
     svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
   }
   drawBaseStaff();
+  drawKeySignature();
 
   function ledgerLinesFor(step, clef) {
     const lines = [];
@@ -1682,10 +1874,12 @@
     if (sampleMap.size === 0) {
       statusEl.textContent = 'sin samples';
       statusEl.className = 'sample-status fallback';
+      statusEl.title = 'Sin samples cargados — clic para elegir una carpeta de samples de audio';
       if (clearBtn) clearBtn.classList.remove('visible');
     } else {
       statusEl.textContent = `${sampleMap.size} samples cargados`;
       statusEl.className = 'sample-status loaded';
+      statusEl.title = `${sampleMap.size} samples cargados — clic para elegir otra carpeta`;
       if (clearBtn) clearBtn.classList.add('visible');
     }
   }
@@ -2385,6 +2579,11 @@
     currentMidiRange = RANGES[currentMode];
     modeLabelBeginner.classList.toggle('active', !isPro);
     modeLabelPro.classList.toggle('active', isPro);
+    // Valor pedagógico por defecto al cambiar de modo: un principiante se
+    // beneficia de ver los nombres de nota; en modo Pro se ocultan por
+    // defecto (el idioma de las notas, en cambio, ya no depende del modo).
+    currentDisplay = isPro ? 'ocultar' : 'mostrar';
+    noteDisplaySelect.value = currentDisplay;
     // Forzar redibujo con requestAnimationFrame para asegurar que el contenedor tenga tamaño
     requestAnimationFrame(() => {
       buildKeyboard(currentMidiRange.min, currentMidiRange.max);
@@ -2395,6 +2594,25 @@
   noteDisplaySelect.addEventListener('change', function() {
     currentDisplay = this.value;
     updateLabels();
+  });
+
+  // ---------- CAMBIO DE IDIOMA DE NOTAS (independiente del modo) ----------
+  noteLangSelect.addEventListener('change', function() {
+    currentLang = this.value;
+    updateLabels();
+  });
+
+  // ---------- TONALIDAD (para mostrar grados junto al acorde) ----------
+  keySelect.addEventListener('change', function() {
+    currentKeyPc = this.value === '' ? null : parseInt(this.value, 10);
+    drawKeySignature();
+    updateChordDisplay();
+  });
+
+  // ---------- TOGGLE DE MANOS ----------
+  handsToggle.addEventListener('change', function() {
+    showHands = this.checked;
+    keyboardEl.classList.toggle('show-hands', showHands);
   });
 
   // ---------- DETECTOR DE ACORDES (UNIFICADO) ----------
@@ -2498,26 +2716,30 @@
     { name: '6(no3)', intervals: [0,7,9] },
     { name: '7(b5)no3', intervals: [0,6,10] },
     { name: '11(b5)no3', intervals: [0,5,6,10] },
-    { name: '+∆(#11)', intervals: [0,6,8,11] },
+    { name: '+∆(#11)no3', intervals: [0,6,8,11] },
     { name: '13(b5)no3', intervals: [0,2,6,9,10] },
     { name: '13sus9', intervals: [0,2,5,9,10] },
-    { name: '∆13', intervals: [0,2,4,9,11] },
+    { name: '∆13no5', intervals: [0,2,4,9,11] },
     { name: '+∆(#11)', intervals: [0,4,6,8,11] },
     { name: '+add9', intervals: [0,2,4,8] },
     { name: '13(b5)b9#9', intervals: [0,1,3,4,6,9,10] },
-    { name: 'ø11', intervals: [0,2,5,6,10] },
-    { name: '13', intervals: [0,4,9,10] },
-    { name: '6(9)', intervals: [0,2,4,9] },
-    { name: '∆13', intervals: [0,4,7,9,11] }
+    { name: 'ø11no3', intervals: [0,2,5,6,10] },
+    { name: '13(no5,no9)', intervals: [0,4,9,10] },
+    { name: '6(9)no5', intervals: [0,2,4,9] },
+    { name: '∆13no9', intervals: [0,4,7,9,11] }
   ];
 
   // Ordenar por longitud de intervalos (de mayor a menor) para priorizar los más específicos
   const CHORD_PATTERNS_SORTED = CHORD_PATTERNS.slice().sort((a,b) => b.intervals.length - a.intervals.length);
 
-  function identifyChord(midiNotes) {
-    if (!midiNotes || midiNotes.length < 2) return null;
-    const pcs = [...new Set(midiNotes.map(m => m % 12))].sort((a,b) => a-b);
-    if (pcs.length < 2) return null;
+  // Cache de coincidencias de acorde por conjunto de pitch-classes (independiente
+  // de la nota más grave, que solo afecta la inversión y se calcula aparte).
+  // Evita recorrer ~100 patrones × hasta 12 raíces en cada nota que se toca.
+  const chordMatchCache = new Map();
+
+  function findBestChordMatch(pcs) {
+    const cacheKey = pcs.join(',');
+    if (chordMatchCache.has(cacheKey)) return chordMatchCache.get(cacheKey);
 
     let bestMatch = null;
     let bestScore = -1;
@@ -2547,6 +2769,16 @@
       }
     }
 
+    chordMatchCache.set(cacheKey, bestMatch);
+    return bestMatch;
+  }
+
+  function identifyChord(midiNotes) {
+    if (!midiNotes || midiNotes.length < 2) return null;
+    const pcs = [...new Set(midiNotes.map(m => m % 12))].sort((a,b) => a-b);
+    if (pcs.length < 2) return null;
+
+    const bestMatch = findBestChordMatch(pcs);
     if (!bestMatch) return null;
 
     const lowestMidi = Math.min(...midiNotes);
@@ -2559,11 +2791,29 @@
     }
 
     return {
-      rootName: NOTE_NAMES_EN[bestMatch.root],
+      rootPc: rootPc,
+      rootName: NOTE_NAMES_EN[rootPc],
       suffix: bestMatch.name,
       inversion: inversion,
       noteCount: midiNotes.length
     };
+  }
+
+  // ---------- GRADOS (NÚMEROS ROMANOS) RESPECTO A UNA TONALIDAD ----------
+  // Referencia diatónica estándar de escala mayor; los grados fuera de esa
+  // escala se muestran con alteración (bII, #IV, etc.), una convención de
+  // análisis funcional habitual también para tonalidades menores relativas.
+  const ROMAN_DEGREES = ['I','bII','II','bIII','III','IV','#IV','V','bVI','VI','bVII','VII'];
+  function computeRomanNumeral(rootPc, keyPc, suffix) {
+    const rel = ((rootPc - keyPc) % 12 + 12) % 12;
+    let numeral = ROMAN_DEGREES[rel];
+    const isDim = suffix.startsWith('º') || suffix.startsWith('ø');
+    const isAug = suffix.startsWith('+');
+    const isMinor = suffix.startsWith('m');
+    if (isMinor || isDim) numeral = numeral.toLowerCase();
+    if (isDim) numeral += '°';
+    else if (isAug) numeral += '+';
+    return numeral;
   }
 
   function updateChordDisplay() {
@@ -2578,7 +2828,11 @@
       const result = identifyChord(activeMidi);
       if (result) {
         chordNameEl.textContent = result.rootName + result.suffix + result.inversion;
-        chordSubEl.textContent = result.noteCount + ' notas';
+        let sub = result.noteCount + ' notas';
+        if (currentKeyPc !== null) {
+          sub += ' · ' + computeRomanNumeral(result.rootPc, currentKeyPc, result.suffix);
+        }
+        chordSubEl.textContent = sub;
       } else {
         chordNameEl.textContent = '...';
         chordSubEl.textContent = activeMidi.length + ' notas';
@@ -2592,12 +2846,21 @@
 
   // ---------- INICIALIZACIÓN ----------
   currentMode = 'beginner';
-  currentDisplay = 'ocultar';
+  // Beginner arranca mostrando los nombres de nota (más útil para quien
+  // recién empieza); Pro arrancará oculto la primera vez que se active
+  // (ver el listener de modeToggle).
+  currentDisplay = 'mostrar';
+  currentLang = 'es';
+  currentKeyPc = null;
+  showHands = false;
   currentMidiRange = RANGES.beginner;
   modeToggle.checked = false;
   modeLabelBeginner.classList.add('active');
   modeLabelPro.classList.remove('active');
-  noteDisplaySelect.value = 'ocultar';
+  noteDisplaySelect.value = 'mostrar';
+  noteLangSelect.value = 'es';
+  keySelect.value = '';
+  handsToggle.checked = false;
   // Forzar redibujo inicial
   requestAnimationFrame(() => {
     buildKeyboard(currentMidiRange.min, currentMidiRange.max);
