@@ -717,6 +717,68 @@
         }
         .learn-item .reference strong { color: var(--gold-light); }
 
+        .interval-item { flex-direction: column; align-items: stretch; }
+        .interval-item-head { display: flex; align-items: center; gap: 10px 16px; }
+        .interval-dir-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .interval-dir {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--teal-700);
+            border-radius: 6px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+        }
+        .dir-label {
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gold-light);
+        }
+        .staff-wrap { color: var(--cream); width: 100%; max-width: 150px; }
+        .staff-wrap .staff-svg { width: 100%; height: auto; display: block; }
+        .note-label {
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.7rem;
+            color: var(--cream-dim);
+        }
+        .interval-dir .play-sample { margin: 2px 0; }
+        .song-list {
+            list-style: none;
+            margin: 4px 0 0;
+            padding: 0;
+            width: 100%;
+            text-align: left;
+            font-size: 0.74rem;
+            color: var(--cream-dim);
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .song-list li {
+            padding: 4px 0 4px 14px;
+            position: relative;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .song-list li:first-child { border-top: none; }
+        .song-list li::before {
+            content: '🎵';
+            position: absolute;
+            left: -3px;
+            top: 4px;
+            font-size: 0.65rem;
+        }
+        @media (max-width: 640px) {
+            .interval-dir-grid { grid-template-columns: 1fr; }
+        }
+
         .site-footer {
             border-top: 1px solid var(--line);
             color: var(--muted);
@@ -1096,22 +1158,132 @@
         localStorage.setItem(STORAGE_KEY_CHORDS, JSON.stringify(ids));
     }
 
-    // ---- Intervalos con referencias ----
+    // ---- Intervalos con referencias (ascendentes y descendentes) ----
+    // Ejemplos recopilados de musicca.com/es/canciones-intervalos
     const ALL_INTERVALS = [
-        { semitones: 0, name: 'Unísono', ref: 'Misma nota' },
-        { semitones: 1, name: '2ª menor', ref: 'Tema de Tiburón (Jaws) | Tema de Tiburón' },
-        { semitones: 2, name: '2ª mayor', ref: 'Feliz Cumpleaños (inicio) | Feliz Cumpleaños' },
-        { semitones: 3, name: '3ª menor', ref: 'Greensleeves | Greensleeves' },
-        { semitones: 4, name: '3ª mayor', ref: 'Cuando los santos marchan | Cuando los santos marchan' },
-        { semitones: 5, name: '4ª justa', ref: 'Himno a la Alegría (inicio) | Himno a la Alegría' },
-        { semitones: 6, name: '4ª aumentada', ref: 'Tema de Los Simpson | Tema de Los Simpson' },
-        { semitones: 7, name: '5ª justa', ref: 'Star Wars (tema principal) | Star Wars' },
-        { semitones: 8, name: '6ª menor', ref: 'Love Story (tema) | Love Story' },
-        { semitones: 9, name: '6ª mayor', ref: 'Tema de NBC | Tema de NBC' },
-        { semitones: 10, name: '7ª menor', ref: 'Somewhere (West Side Story) | Somewhere' },
-        { semitones: 11, name: '7ª mayor', ref: 'Take On Me (A-ha) | Take On Me' },
-        { semitones: 12, name: 'Octava', ref: 'Somewhere Over the Rainbow | Somewhere Over the Rainbow' }
+        { semitones: 0, name: 'Unísono',
+          asc: ['Gloria al Bravo Pueblo (Vicente Salias, 1810)', 'Jingle Bells (James Lord Pierpont, 1857)', 'Feliz Cumpleaños (Mildred Hill, 1893)', 'Let It Be (The Beatles, 1970)', 'Candle in the Wind (Elton John, 1973)'],
+          desc: ['Gloria al Bravo Pueblo (Vicente Salias, 1810)', 'Jingle Bells (James Lord Pierpont, 1857)', 'Feliz Cumpleaños (Mildred Hill, 1893)', 'Let It Be (The Beatles, 1970)', 'Candle in the Wind (Elton John, 1973)'] },
+        { semitones: 1, name: '2ª menor',
+          asc: ['¡Oh, gloria inmarcesible! (Oreste Sindici, 1887)', 'White Christmas (Irving Berlin, 1954)', "A Hard Day's Night (The Beatles, 1964)", 'Tema de Tiburón (John Williams, 1975)', "Isn't She Lovely (Stevie Wonder, 1976)"],
+          desc: ['Joy to the World (Isaac Watts, 1719)', 'Für Elise (Ludwig van Beethoven, 1810)', 'Fly Me to the Moon (Frank Sinatra, 1954)', 'All My Loving (The Beatles, 1963)', 'Fields of Gold (Sting, 1993)'] },
+        { semitones: 2, name: '2ª mayor',
+          asc: ['Martinillo (canción folk)', 'Himno Nacional Argentino (Blas Parera, 1813)', 'Noche de Paz (Franz Xaver Gruber, 1818)', 'Rodolfo el Reno (J. Marks, 1939)', 'La Patita (Cri-Cri, 1957)'],
+          desc: ['La Primera Navidad (canción folk)', 'Mary Tenía un Corderito (canción folk)', 'Eight Days a Week (The Beatles, 1964)', 'Yesterday (The Beatles, 1965)', 'Wonderwall (Oasis, 1995)'] },
+        { semitones: 3, name: '3ª menor',
+          asc: ['Greensleeves (canción folk)', 'Antón Pirulero (canción folk)', 'Georgia on My Mind (Hoagy Carmichael, 1930)', 'What the World Needs Now (Burt Bacharach, 1965)', 'Axel F (Beverly Hills Cop, 1985)'],
+          desc: ['The Star-Spangled Banner (Francis Scott Key, 1814)', 'La Mañana (Edvard Grieg, 1875)', 'Frosty the Snowman (Walter Rollins, 1950)', 'Hey Jude (The Beatles, 1968)', "They Don't Care About Us (Michael Jackson, 1996)"] },
+        { semitones: 4, name: '3ª mayor',
+          asc: ["For He's a Jolly Good Fellow (canción folk)", 'Morning Has Broken (canción folk)', 'La Primavera (Antonio Vivaldi, 1721-25)', 'Himno Nacional Mexicano (Jaime Nunó, 1854)', 'What a Wonderful World (George Douglas, 1967)'],
+          desc: ['Swing Low, Sweet Chariot (canción folk)', 'Quinta Sinfonía (Ludwig van Beethoven, 1804)', 'Summertime (George Gershwin, 1935)', 'Giant Steps (John Coltrane, 1960)', 'Tears in Heaven (Eric Clapton, 1991)'] },
+        { semitones: 5, name: '4ª justa',
+          asc: ['We Wish You a Merry Christmas (canción folk)', 'Amazing Grace (John Newton, 1773)', 'Someday My Prince Will Come (F. Churchill, 1937)', 'Love Me Tender (Elvis Presley, 1956)', 'Black or White (Michael Jackson, 1991)'],
+          desc: ['O Come, All Ye Faithful (John Wade, 1751)', 'Marcha Real (Espinosa de los Monteros, 1761)', 'Eine kleine Nachtmusik (W.A. Mozart, 1787)', 'I´ve Been Working on the Railroad (canción folk)', 'All of Me (Gerald Marks, 1931)'] },
+        { semitones: 6, name: '4ª aumentada',
+          asc: ['Maria – Coro (Leonard Bernstein, 1956)', 'The Simpsons Theme (Danny Elfman, 1989)', 'The Saint (Edwin Astley, 1997)'],
+          desc: ['Blue 7 (Sonny Rollins, 1956)', 'Turn Back, O Man (Godspell, 1971)', 'YYZ (Rush, 1981)', 'Even Flow (Pearl Jam, 1991)'] },
+        { semitones: 7, name: '5ª justa',
+          asc: ['Scarborough Fair (canción folk)', 'Byssan Lull (canción folk)', "Can't Help Falling in Love (Elvis Presley, 1961)", 'Perhaps Love (John Denver, 1981)', 'Top Gun Anthem (Harold Faltermeyer, 1986)'],
+          desc: ['Minuet en Sol (Christian Petzold, 1725)', 'The Way You Look Tonight (Dorothy Fields, 1936)', 'Have You Met Miss Jones? (Richard Rodgers, 1937)', 'Flintstones Theme (Hoyt Curtin, 1961)', 'Love Will Keep You Warm (Swan Lee, 2004)'] },
+        { semitones: 8, name: '6ª menor',
+          asc: ['Go Down Moses (canción folk)', 'Vals en Do sostenido menor (Frédéric Chopin, 1847)', 'In My Life – introducción (The Beatles, 1965)', 'A Town with an Ocean View (Joe Hisaishi, 1989)', 'Close Every Door (Andrew Lloyd Webber, 1991)'],
+          desc: ['Forêts Paisibles (Jean-Philippe Rameau, 1735)', 'Chega de Saudade (Antônio Carlos Jobim, 1957)', 'Love Story Theme (Francis Lai, 1970)', "You're Everything (Chick Corea, 1973)"] },
+        { semitones: 9, name: '6ª mayor',
+          asc: ['My Bonnie Lies over the Ocean (canción folk)', 'Nocturno en Mi Mayor (Frédéric Chopin, 1830)', 'La Traviata: Brindisi (Giuseppe Verdi, 1853)', 'My Way (Frank Sinatra, 1969)', 'Only Love (Nana Mouskouri, 1985)'],
+          desc: ['Nobody Knows the Trouble I´ve Seen (canción folk)', 'A Weaver of Dreams (Nat King Cole, 1925)', 'The Music of the Night (Andrew Lloyd Webber, 1986)', 'Man in the Mirror – Coro (Michael Jackson, 1988)', 'No Surprises (Radiohead, 1997)'] },
+        { semitones: 10, name: '7ª menor',
+          asc: ["Maman les p'tits bateaux (canción folk)", 'Somewhere (Leonard Bernstein, 1957)', 'Theme from Star Trek (Alexander Courage, 1966)', 'The Winner Takes It All – Coro (ABBA, 1980)'],
+          desc: ['An American in Paris (George Gershwin, 1951)', 'Watermelon Man (Herbie Hancock, 1962)', 'Lady Jane – Coro (Rolling Stones, 1966)'] },
+        { semitones: 11, name: '7ª mayor',
+          asc: ['Fantasy Island Theme (John Ottman, 1977)', 'Take on Me – Coro (A-ha, 1984)', 'Popular (Nada Surf, 1996)', "Don't Know Why (Norah Jones, 2002)"],
+          desc: ['I Love You (Cole Porter, 1944)'] },
+        { semitones: 12, name: 'Octava',
+          asc: ["Singin' in the Rain (Nacio Herb Brown, 1929)", 'Over the Rainbow (Harold Arlen, 1939)', 'The Christmas Song (Robert Wells, 1945)', 'Blue Bossa (Kenny Dorham, 1963)', 'Ironic (Alanis Morissette, 1996)'],
+          desc: ['Willow Weep for Me (Ann Ronell, 1932)', 'Doogie Howser Theme (Mike Post, 1989)', 'Todos los Días un Poco (León Gieco, 1993)', 'To Zanarkand (Nobuo Uematsu, 2002)'] }
     ];
+
+    // ---- Escritura de las notas para el pentagrama (a partir de Do4) ----
+    // asc: nota superior al subir el intervalo desde Do4 | desc: nota inferior al bajar el intervalo desde Do4
+    const STAFF_SPELL_ASC = {
+        0:{l:'C',a:0,o:0}, 1:{l:'D',a:-1,o:0}, 2:{l:'D',a:0,o:0}, 3:{l:'E',a:-1,o:0}, 4:{l:'E',a:0,o:0},
+        5:{l:'F',a:0,o:0}, 6:{l:'F',a:1,o:0}, 7:{l:'G',a:0,o:0}, 8:{l:'A',a:-1,o:0}, 9:{l:'A',a:0,o:0},
+        10:{l:'B',a:-1,o:0}, 11:{l:'B',a:0,o:0}, 12:{l:'C',a:0,o:1}
+    };
+    const STAFF_SPELL_DESC = {
+        0:{l:'C',a:0,o:0}, 1:{l:'B',a:0,o:-1}, 2:{l:'B',a:-1,o:-1}, 3:{l:'A',a:0,o:-1}, 4:{l:'A',a:-1,o:-1},
+        5:{l:'G',a:0,o:-1}, 6:{l:'G',a:-1,o:-1}, 7:{l:'F',a:0,o:-1}, 8:{l:'E',a:0,o:-1}, 9:{l:'E',a:-1,o:-1},
+        10:{l:'D',a:0,o:-1}, 11:{l:'D',a:-1,o:-1}, 12:{l:'C',a:0,o:-1}
+    };
+    const STAFF_LETTER_VAL = {C:0,D:1,E:2,F:3,G:4,A:5,B:6};
+
+    // Genera un pentagrama SVG compacto mostrando la nota raíz (Do4) y la nota del intervalo
+    function buildIntervalStaffSVG(semitones, descending) {
+        const spellTable = descending ? STAFF_SPELL_DESC : STAFF_SPELL_ASC;
+        const target = spellTable[semitones];
+        const root = { l:'C', a:0, o:0 };
+        const W = 150, H = 126;
+        const STEP = 5;              // px por paso diatónico
+        const BASELINE = 66;         // y de la línea inferior (Mi4)
+        const REF_IDX = STAFF_LETTER_VAL['E'] + 4*7; // índice diatónico de Mi4 (línea inferior)
+        function diatonicIndex(letter, octave){ return STAFF_LETTER_VAL[letter] + octave*7; }
+        function yFor(note, baseOctave){
+            const idx = diatonicIndex(note.l, baseOctave + note.o);
+            return BASELINE - (idx - REF_IDX) * STEP;
+        }
+        const rootY = yFor(root, 4);
+        const targetY = yFor(target, 4);
+        const staffLeft = 34, staffRight = W - 10;
+        let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" class="staff-svg">`;
+        // 5 líneas del pentagrama
+        for (let i = 0; i < 5; i++) {
+            const y = BASELINE - i * (2 * STEP);
+            svg += `<line x1="${staffLeft}" y1="${y}" x2="${staffRight}" y2="${y}" stroke="currentColor" stroke-width="1" opacity="0.55"/>`;
+        }
+        // Clave de sol (aproximada con glifo unicode)
+        svg += `<text x="${staffLeft - 22}" y="${BASELINE + 6}" font-size="34" fill="currentColor">𝄞</text>`;
+        // Líneas adicionales (ledger lines) para cada nota si cae fuera del pentagrama
+        function ledgerLines(note, baseOctave, x){
+            const idx = diatonicIndex(note.l, baseOctave + note.o);
+            const rel = idx - REF_IDX;
+            let out = '';
+            if (rel < 0) {
+                for (let r = -2; r >= rel; r -= 2) {
+                    const y = BASELINE - r * STEP;
+                    out += `<line x1="${x-8}" y1="${y}" x2="${x+8}" y2="${y}" stroke="currentColor" stroke-width="1" opacity="0.7"/>`;
+                }
+            } else if (rel > 8) {
+                for (let r = 10; r <= rel; r += 2) {
+                    const y = BASELINE - r * STEP;
+                    out += `<line x1="${x-8}" y1="${y}" x2="${x+8}" y2="${y}" stroke="currentColor" stroke-width="1" opacity="0.7"/>`;
+                }
+            }
+            return out;
+        }
+        const noteX1 = 64, noteX2 = 100;
+        svg += ledgerLines(root, 4, noteX1);
+        svg += ledgerLines(target, 4, noteX2);
+        // Notas (cabeza + plica) y alteraciones
+        function drawNote(x, y, acc){
+            let out = '';
+            if (acc === -1) out += `<text x="${x-15}" y="${y+4}" font-size="13" fill="currentColor">♭</text>`;
+            if (acc === 1) out += `<text x="${x-15}" y="${y+4}" font-size="13" fill="currentColor">♯</text>`;
+            out += `<ellipse cx="${x}" cy="${y}" rx="5.4" ry="4" fill="currentColor" transform="rotate(-18 ${x} ${y})"/>`;
+            const stemUp = y > (BASELINE - 4*STEP);
+            if (stemUp) out += `<line x1="${x+5}" y1="${y}" x2="${x+5}" y2="${y-28}" stroke="currentColor" stroke-width="1.4"/>`;
+            else out += `<line x1="${x-5}" y1="${y}" x2="${x-5}" y2="${y+28}" stroke="currentColor" stroke-width="1.4"/>`;
+            return out;
+        }
+        svg += drawNote(noteX1, rootY, root.a);
+        svg += drawNote(noteX2, targetY, target.a);
+        svg += `</svg>`;
+        return svg;
+    }
+    function noteLabel(semitones, descending){
+        const spellTable = descending ? STAFF_SPELL_DESC : STAFF_SPELL_ASC;
+        const t = spellTable[semitones];
+        const acc = t.a === -1 ? '♭' : (t.a === 1 ? '♯' : '');
+        return `Do4 ${descending ? '→' : '→'} ${t.l}${acc}${4 + t.o}`;
+    }
 
     let selectedIntervalIds = [];
     function initIntervalSelection() {
@@ -1793,11 +1965,31 @@
                         </div>
                         <div class="learn-container">
                             ${filtered.map(inter => `
-                                <div class="learn-item">
-                                    <span class="item-title">${inter.name}</span>
-                                    <span class="item-desc">${inter.semitones} semitonos</span>
-                                    <button class="play-sample" data-sem="${inter.semitones}" title="Escuchar intervalo ascendente">▶</button>
-                                    <div class="reference"><strong>🎵 Referencia:</strong> ${inter.ref}</div>
+                                <div class="learn-item interval-item">
+                                    <div class="interval-item-head">
+                                        <span class="item-title">${inter.name}</span>
+                                        <span class="item-desc">${inter.semitones} semitonos</span>
+                                    </div>
+                                    <div class="interval-dir-grid">
+                                        <div class="interval-dir">
+                                            <div class="dir-label">▲ Ascendente</div>
+                                            <div class="staff-wrap">${buildIntervalStaffSVG(inter.semitones, false)}</div>
+                                            <div class="note-label">${noteLabel(inter.semitones, false)}</div>
+                                            <button class="play-sample" data-sem="${inter.semitones}" data-dir="asc" title="Escuchar intervalo ascendente">▶</button>
+                                            <ul class="song-list">
+                                                ${inter.asc.map(s => `<li>${s}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                        <div class="interval-dir">
+                                            <div class="dir-label">▼ Descendente</div>
+                                            <div class="staff-wrap">${buildIntervalStaffSVG(inter.semitones, true)}</div>
+                                            <div class="note-label">${noteLabel(inter.semitones, true)}</div>
+                                            <button class="play-sample" data-sem="${inter.semitones}" data-dir="desc" title="Escuchar intervalo descendente">▶</button>
+                                            <ul class="song-list">
+                                                ${inter.desc.map(s => `<li>${s}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -1809,12 +2001,13 @@
                     samples.forEach(btn => {
                         btn.addEventListener('click', function() {
                             const sem = parseInt(this.dataset.sem, 10);
+                            const dir = this.dataset.dir || 'asc';
                             const base = 60;
-                            const notes = [base, base + sem];
+                            const second = dir === 'desc' ? base - sem : base + sem;
                             const ctx = ensureCtx();
                             const t0 = ctx.currentTime;
-                            playChord([notes[0]], t0, 0.5, 0.7);
-                            playChord([notes[1]], t0 + 0.7, 1.2, 0.8);
+                            playChord([base], t0, 0.5, 0.7);
+                            playChord([second], t0 + 0.7, 1.2, 0.8);
                         });
                     });
                 }, 0);
