@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Afinador Crescendo: herramienta web para afinar guitarra, ukelele, requinto, violin, violonchelo y bajo por microfono.">
+
+<title>Afinador Crescendo</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+    /* ===== VARIABLES GLOBALES (unificadas con el resto de la suite Crescendo) ===== */
+    :root {
+        --ink: #161514;
+        --charcoal: #24201d;
+        --charcoal2: #1c1916;
+        --paper: #fbf7f0;
+        --cream: #f1e6d2;
+        --gold: #d4a84f;
+        --gold-dim: rgba(212,168,79,0.35);
+        --moss: #476357;
+        --wine: #7a3b3b;
+        --line: rgba(255,255,255,0.14);
+        --text: #fffaf0;
+        --muted: rgba(255,250,240,0.68);
+        --bg: #161514;
+        --panel: rgba(255, 250, 240, 0.09);
+        --panel-light: rgba(255, 250, 240, 0.13);
+        --accent: #d4a84f;
+        --accent-hover: #e5bd67;
+        --danger: #b66543;
+        --text-dim: rgba(255, 250, 240, 0.7);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+        background:
+            linear-gradient(120deg, rgba(22, 21, 20, 0.94), rgba(22, 21, 20, 0.74)),
+            var(--ink);
+        color: var(--text);
+        display: block;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+    }
+
+    body::before {
+        background: radial-gradient(circle at 74% 18%, rgba(212, 168, 79, 0.22), transparent 34%);
+        content: "";
+        inset: 0;
+        pointer-events: none;
+        position: fixed;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== HEADER (unificado — mismas clases que metronomo_index.html) ===== */
+    .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px clamp(20px, 5vw, 64px);
+        border-bottom: 1px solid var(--line);
+        background: rgba(22, 21, 20, 0.82);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        position: relative;
+        z-index: 2;
+    }
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.05rem;
+        letter-spacing: 0.02em;
+        color: var(--cream);
+    }
+    .brand-mark {
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        background: var(--gold);
+        color: var(--ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Georgia, serif;
+        font-weight: 700;
+        font-size: 1rem;
+        flex: none;
+    }
+    .site-header .tag {
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .header-right {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        flex-wrap: wrap;
+    }
+    .social-bar {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .social-bar a {
+        color: var(--muted);
+        display: inline-flex;
+        transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .social-bar a:hover {
+        color: var(--gold);
+        transform: scale(1.1);
+    }
+    .social-bar svg { display: block; width: 19px; height: 19px; }
+    .school-logo-link { display: inline-block; line-height: 0; }
+    .school-logo {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid var(--gold-dim);
+        transition: transform .15s;
+    }
+    .school-logo:hover { transform: scale(1.05); }
+
+    @media (max-width: 640px) {
+        .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+        .header-right { width: 100%; justify-content: space-between; }
+        .site-header .tag { display: none; }
+    }
+
+    /* ===== FOOTER (estilo unificado — mismo lenguaje visual que el header;
+       reemplaza este bloque por tu footer real de Crescendo si tienes uno estandarizado) ===== */
+    .site-footer {
+        border-top: 1px solid var(--line);
+        padding: 26px clamp(20px, 5vw, 64px) 34px;
+        background: rgba(22, 21, 20, 0.6);
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    .site-footer .foot-brand {
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--cream);
+        font-size: 1rem;
+        margin-bottom: 4px;
+    }
+    .site-footer p {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin: 4px 0;
+    }
+    .site-footer a { color: var(--gold); }
+    .site-footer a:hover { color: var(--accent-hover); }
+
+    /* ===== CONTENIDO PRINCIPAL ===== */
+    .app-shell {
+        margin: 0 auto;
+        max-width: 760px;
+        padding: clamp(28px, 5vw, 56px) clamp(18px, 4vw, 40px) 60px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .tool-hero { display: grid; gap: 10px; margin-bottom: 22px; text-align: center; }
+    .eyebrow {
+        color: #9ab8aa;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        margin: 0;
+        text-transform: uppercase;
+    }
+    .tool-hero h1 {
+        color: var(--text);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.2rem, 6vw, 3.2rem);
+        letter-spacing: 0;
+        line-height: 1;
+        margin: 0;
+    }
+    .tool-hero p { color: var(--text-dim); font-size: 1rem; line-height: 1.6; margin: 0 auto; max-width: 540px; }
+
+    /* instrument tabs */
+    .instrument-select{
+        display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px;
+        scrollbar-width:none;
+    }
+    .instrument-select::-webkit-scrollbar{ display:none; }
+    .inst-btn{
+        flex:none; padding:9px 16px; border-radius:999px; border:1px solid var(--line);
+        background:var(--panel); color:var(--muted); font-weight:600; font-size:13px;
+        cursor:pointer; transition:.15s; white-space:nowrap;
+    }
+    .inst-btn.active{ color:var(--ink); border-color:transparent; background:var(--gold); }
+    .inst-btn:not(.active):hover{ border-color:var(--gold-dim); color:var(--text); }
+
+    .metronome-container{
+        background: #000;
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.3);
+        padding: clamp(18px, 3vw, 30px);
+    }
+
+    .card-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .tuning-name{ font-size:13px; color:var(--muted); }
+    .tuning-name b{ color:var(--text); }
+
+    .auto-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
+    .switch{ width:42px; height:24px; border-radius:999px; background:rgba(255,255,255,.14); position:relative; cursor:pointer; transition:.2s; flex:none; }
+    .switch.on{ background:var(--moss); }
+    .switch .knob{ width:18px; height:18px; border-radius:50%; background:var(--paper); position:absolute; top:3px; left:3px; transition:.2s; }
+    .switch.on .knob{ left:21px; }
+
+    /* pitch dial */
+    .dial-wrap{ display:flex; flex-direction:column; align-items:center; margin:16px 0 6px; }
+    .dial-scale{ position:relative; width:100%; max-width:420px; height:30px; }
+    .dial-scale .flat, .dial-scale .sharp{ position:absolute; top:0; font-size:20px; color:var(--muted); opacity:.6; }
+    .dial-scale .flat{ left:6px; } .dial-scale .sharp{ right:6px; }
+
+    .dial{
+        width:150px; height:150px; border-radius:50%;
+        border:3px solid var(--line);
+        display:flex; align-items:center; justify-content:center;
+        position:relative; transition:border-color .15s, box-shadow .15s;
+        background: rgba(0,0,0,0.25);
+        box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .dial .note{ font-family:Georgia, serif; font-size:42px; font-weight:700; color: var(--text); }
+    .dial .arrow{
+        position:absolute; bottom:-14px; width:0;height:0;
+        border-left:9px solid transparent; border-right:9px solid transparent;
+        border-top:12px solid var(--line); transition:.15s; opacity:0;
+    }
+    .dial.in-tune{ border-color:var(--moss); box-shadow:0 0 22px rgba(71,99,87,.55); }
+    .dial.in-tune .arrow{ opacity:0; }
+    .dial.flat-warn{ border-color:var(--wine); }
+    .dial.sharp-warn{ border-color:var(--gold); }
+
+    .cents-track{
+        width:100%; max-width:420px; height:6px; border-radius:999px; background:rgba(255,255,255,.1);
+        margin-top:16px; position:relative; overflow:hidden;
+    }
+    .cents-track .mid{ position:absolute; left:50%; top:-4px; width:2px; height:14px; background:var(--line); transform:translateX(-50%); }
+    .cents-fill{
+        position:absolute; top:0; height:100%; width:6px; border-radius:999px;
+        background:var(--gold); left:50%; transform:translateX(-50%);
+        transition:left .1s linear, background .15s;
+    }
+
+    .readout{ display:flex; justify-content:center; gap:18px; margin-top:12px; font-size:12px; color:var(--muted); }
+    .readout b{ color:var(--text); font-variant-numeric: tabular-nums; }
+
+    /* headstock + pegs */
+    .headstock-zone{ display:flex; align-items:center; justify-content:center; gap:12px; margin-top:24px; }
+    .peg-col{ display:flex; flex-direction:column; gap:14px; min-width:72px; }
+    .peg-col.inline-col{ flex-direction:column; }
+    .peg{
+        width:58px; height:58px; border-radius:50%;
+        border:1px solid var(--line); background:rgba(0,0,0,0.34);
+        color:var(--muted); font-family:Georgia, serif; font-weight:700; font-size:17px;
+        display:flex; align-items:center; justify-content:center;
+        cursor:pointer; transition:.15s; position:relative;
+    }
+    .peg:hover{ border-color:var(--gold-dim); transform:scale(1.03); }
+    .peg .hz{ position:absolute; bottom:-16px; font-size:9px; color:var(--muted); opacity:0; font-variant-numeric: tabular-nums; }
+    .peg.selected{ color:var(--ink); border-color:transparent; background:var(--gold); box-shadow:0 0 18px rgba(212,168,79,.55); }
+    .peg.selected .hz{ opacity:.85; color:#3a2a06; }
+    .peg.correct{ background:var(--moss); color:var(--paper); border-color:transparent; box-shadow:0 0 22px rgba(71,99,87,.7); }
+
+    .headstock-realistic{
+        position:relative;
+        flex:0 1 290px;
+        width:min(290px, 42vw);
+        min-width:180px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        filter: drop-shadow(0 18px 28px rgba(0,0,0,.34));
+    }
+    .headstock-realistic img{
+        display:block;
+        width:100%;
+        max-height:410px;
+        object-fit:contain;
+        user-select:none;
+        -webkit-user-drag:none;
+    }
+    .peg-hotspot{
+        position:absolute;
+        width:34px;
+        height:34px;
+        margin:-17px 0 0 -17px;
+        border-radius:50%;
+        border:0;
+        background:transparent;
+        cursor:pointer;
+        opacity:0;
+        padding:0;
+    }
+    .peg-hotspot:hover{ opacity:.12; background:var(--gold); }
+    .peg-hotspot.selected,
+    .peg-hotspot.correct{
+        opacity:1;
+        background:radial-gradient(circle, rgba(91,255,129,.58) 0%, rgba(91,255,129,.18) 45%, transparent 72%);
+        box-shadow:0 0 28px rgba(91,255,129,.7);
+    }
+    .peg-hotspot.selected{ background:radial-gradient(circle, rgba(212,168,79,.65) 0%, rgba(212,168,79,.16) 45%, transparent 72%); box-shadow:0 0 28px rgba(212,168,79,.7); }
+    .headstock-realistic.instrument-bajo{ max-width:300px; }
+    .headstock-realistic.instrument-violin,
+    .headstock-realistic.instrument-cello{ max-width:260px; }
+    .headstock-realistic.instrument-cello{ transform:scale(.84); transform-origin:center center; }
+    @media (max-width:640px){
+        .headstock-zone{ gap:6px; }
+        .peg-col{ min-width:54px; gap:10px; }
+        .peg{ width:50px; height:50px; font-size:15px; }
+        .headstock-realistic{ width:min(220px, 55vw); min-width:145px; }
+        .headstock-realistic img{ max-height:330px; }
+    }
+
+    /* mic control */
+    .mic-zone{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-top:28px; }
+    .mic-btn{
+        display:flex; align-items:center; gap:10px; padding:14px 30px; border-radius:999px;
+        border:none; cursor:pointer; font-weight:700; font-size:1rem;
+        background:var(--gold); color:var(--ink); box-shadow: 0 18px 44px rgba(0,0,0,0.22);
+        transition:.2s;
+    }
+    .mic-btn:hover{ background:var(--accent-hover); }
+    .mic-btn.listening{ background:var(--moss); color:var(--paper); }
+    .mic-status{ font-size:12px; color:var(--muted); text-align:center; max-width:320px; }
+    .mic-status.err{ color:var(--danger); }
+
+    .note-choice{ text-align:center; color:var(--muted); font-size:12px; margin-top:12px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/index_final.html" class="brand">
+    <div class="brand-mark">CA</div>
+    <div>
+      <div>Crescendo Academy</div>
+      <div class="tag">Afinador virtual</div>
+    </div>
+  </a>
+  <div class="header-right">
+    <nav class="social-bar" aria-label="Redes sociales de Crescendo Academy">
+      <a href="#" title="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+      <a href="#" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3c-2.8 0-5 2.2-5 5v3H6v4h3v8h4v-8h3.2l.8-4H13V9c0-.6.4-1 1-1z"/></svg></a>
+      <a href="#" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12s0-3.2-.4-4.7c-.3-.9-1-1.6-1.9-1.9C18.2 5 12 5 12 5s-6.2 0-7.7.4c-.9.3-1.6 1-1.9 1.9C2 8.8 2 12 2 12s0 3.2.4 4.7c.3.9 1 1.6 1.9 1.9C5.8 19 12 19 12 19s6.2 0 7.7-.4c.9-.3 1.6-1 1.9-1.9.4-1.5.4-4.7.4-4.7zM10 15.5v-7l6 3.5-6 3.5z"/></svg></a>
+      <a href="#" title="TikTok" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 3c.4 2.2 1.9 3.7 4 4v3c-1.5 0-2.9-.5-4-1.3v6.1a5.3 5.3 0 1 1-5.3-5.3c.3 0 .6 0 .9.1v3.1a2.2 2.2 0 1 0 1.6 2.1V3h2.8z"/></svg></a>
+      <a href="#" title="Spotify" aria-label="Spotify"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M7 10.5c3-1 6.7-.8 9.3.8M7.5 13.5c2.5-.8 5.5-.6 7.7.7M8 16.3c2-.6 4.4-.5 6.1.5" stroke="#161514" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></a>
+      <a href="#" title="WhatsApp" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.6-1.4 1.2-2 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-2.9-1.3-4.8-4.2-5-4.4-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5.2.6.7 2 .8 2.1.1.2.1.4 0 .6-.1.2-.2.3-.3.5-.2.2-.3.3-.5.5-.2.2-.4.4-.2.7.2.3.9 1.5 1.9 2.4 1.3 1.2 2.4 1.5 2.7 1.7.3.2.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.3.7-.2.3.1 1.8.9 2.1 1 .3.2.5.2.6.4.1.2.1.9-.1 1.5z"/></svg></a>
+    </nav>
+    <a class="school-logo-link" href="#" title="Sitio de Crescendo Academy">
+      <img class="school-logo" src="logo_escuela.png" alt="Crescendo Academy">
+    </a>
+  </div>
+</header>
+
+<div class="app-shell">
+  <div class="tool-hero">
+    <p class="eyebrow">Afinador virtual</p>
+    <h1>Afina tu instrumento</h1>
+    <p>Detección de tono por micrófono, en tiempo real, directamente desde el navegador.</p>
+  </div>
+
+  <div class="instrument-select" id="instrumentSelect"></div>
+
+  <div class="metronome-container">
+    <div class="card-top">
+      <div class="tuning-name">Afinación: <b id="tuningLabel">Estándar</b></div>
+      <div class="auto-toggle">
+        Autom.
+        <div class="switch on" id="autoSwitch"><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <div class="dial-wrap">
+      <div class="dial-scale">
+        <span class="flat">♭</span><span class="sharp">♯</span>
+      </div>
+      <div class="dial" id="dial">
+        <div class="note" id="dialNote">–</div>
+        <div class="arrow" id="dialArrow"></div>
+      </div>
+      <div class="cents-track">
+        <div class="mid"></div>
+        <div class="cents-fill" id="centsFill"></div>
+      </div>
+      <div class="readout">
+        <span><b id="freqReadout">0.0</b> Hz</span>
+        <span><b id="centsReadout">0</b> cents</span>
+      </div>
+    </div>
+
+    <div class="headstock-zone" id="headstockZone"></div>
+
+    <div class="note-choice" id="noteChoice">Toca una clavija para afinar esa cuerda manualmente, o activa "Autom." para detección automática.</div>
+
+    <div class="mic-zone">
+      <button class="mic-btn" id="micBtn">🎙️ Activar micrófono</button>
+      <div class="mic-status" id="micStatus">El micrófono solo se usa en tu navegador — el audio nunca se envía a ningún servidor.</div>
+    </div>
+  </div>
+</div>
+
+<footer class="site-footer">
+  <div class="foot-brand">Crescendo Academy</div>
+  <p>Escuela de música 100% online · <a href="/index_final.html">Ver todas las herramientas</a></p>
+  <p>© <span id="year"></span> Crescendo Academy. Todos los derechos reservados.</p>
+</footer>
+
+<script type="module">
+import { PitchDetector } from "https://esm.sh/pitchy@4";
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ---------------- Configuración de instrumentos ---------------- */
+const INSTRUMENTS = {
+  guitarra: {
+    label: 'Guitarra',
+    tuning: 'Estándar (E A D G B E)',
+    shape: 'slotted6',
+    layout: 'split',
+    strings: [
+      { note:'E', oct:2, freq:82.41 },
+      { note:'A', oct:2, freq:110.00 },
+      { note:'D', oct:3, freq:146.83 },
+      { note:'G', oct:3, freq:196.00 },
+      { note:'B', oct:3, freq:246.94 },
+      { note:'E', oct:4, freq:329.63 },
+    ]
+  },
+  ukelele: {
+    label: 'Ukelele',
+    tuning: 'Estándar (G C E A)',
+    shape: 'slotted4',
+    layout: 'split',
+    strings: [
+      { note:'G', oct:4, freq:392.00 },
+      { note:'C', oct:4, freq:261.63 },
+      { note:'E', oct:4, freq:329.63 },
+      { note:'A', oct:4, freq:440.00 },
+    ]
+  },
+  requinto: {
+    label: 'Requinto',
+    tuning: 'Estándar (A D G C E A)',
+    shape: 'slotted6-req',
+    layout: 'split',
+    strings: [
+      { note:'A', oct:2, freq:110.00 },
+      { note:'D', oct:3, freq:146.83 },
+      { note:'G', oct:3, freq:196.00 },
+      { note:'C', oct:4, freq:261.63 },
+      { note:'E', oct:4, freq:329.63 },
+      { note:'A', oct:4, freq:440.00 },
+    ]
+  },
+  violin: {
+    label: 'Violín',
+    tuning: 'Estándar (G D A E)',
+    shape: 'scrollViolin',
+    layout: 'split',
+    strings: [
+      { note:'G', oct:3, freq:196.00 },
+      { note:'D', oct:4, freq:293.66 },
+      { note:'A', oct:4, freq:440.00 },
+      { note:'E', oct:5, freq:659.25 },
+    ]
+  },
+  cello: {
+    label: 'Violonchelo',
+    tuning: 'Estándar (C G D A)',
+    shape: 'scrollCello',
+    layout: 'split',
+    strings: [
+      { note:'C', oct:2, freq:65.41 },
+      { note:'G', oct:2, freq:98.00 },
+      { note:'D', oct:3, freq:146.83 },
+      { note:'A', oct:3, freq:220.00 },
+    ]
+  },
+  bajo: {
+    label: 'Bajo',
+    tuning: 'Estándar 4 cuerdas (E A D G)',
+    shape: 'inline4',
+    layout: 'inline',
+    strings: [
+      { note:'E', oct:1, freq:41.20 },
+      { note:'A', oct:1, freq:55.00 },
+      { note:'D', oct:2, freq:73.42 },
+      { note:'G', oct:2, freq:98.00 },
+    ]
+  },
+};
+
+let currentInstrumentKey = 'guitarra';
+let selectedStringIndex = null;
+let autoMode = true;
+
+/* ---------------- UI: selector de instrumentos ---------------- */
+const instrumentSelect = document.getElementById('instrumentSelect');
+Object.entries(INSTRUMENTS).forEach(([key, inst]) => {
+  const btn = document.createElement('button');
+  btn.className = 'inst-btn' + (key === currentInstrumentKey ? ' active' : '');
+  btn.textContent = inst.label;
+  btn.dataset.key = key;
+  btn.addEventListener('click', () => selectInstrument(key));
+  instrumentSelect.appendChild(btn);
+});
+
+function selectInstrument(key){
+  currentInstrumentKey = key;
+  selectedStringIndex = null;
+  [...instrumentSelect.children].forEach(b => b.classList.toggle('active', b.dataset.key === key));
+  document.getElementById('tuningLabel').textContent = INSTRUMENTS[key].tuning;
+  renderHeadstock();
+}
+
+/* ---------------- UI: interruptor automático ---------------- */
+const autoSwitch = document.getElementById('autoSwitch');
+const noteChoice = document.getElementById('noteChoice');
+autoSwitch.addEventListener('click', () => {
+  autoMode = !autoMode;
+  autoSwitch.classList.toggle('on', autoMode);
+  if(autoMode){
+    selectedStringIndex = null;
+    noteChoice.textContent = 'Modo automático: detectando la cuerda más cercana a lo que suena.';
+  } else {
+    selectedStringIndex = 0;
+    noteChoice.textContent = 'Modo manual: toca una clavija para elegir qué cuerda afinar.';
+  }
+  renderHeadstock();
+});
+
+/* ---------------- Cabezal + clavijas ---------------- */
+function renderHeadstock(){
+  const inst = INSTRUMENTS[currentInstrumentKey];
+  const zone = document.getElementById('headstockZone');
+  zone.innerHTML = '';
+
+  const hotspotMap = {
+    // Coordenadas en el mismo orden que INSTRUMENTS[key].strings
+    guitarra: [[25,38],[25,68],[25,91],[75,38],[75,68],[75,91]],
+    ukelele: [[31,40],[31,71],[69,40],[69,71]],
+    requinto: [[31,35],[31,59],[31,82],[69,35],[69,59],[69,82]],
+    violin: [[22,42],[22,67],[78,42],[78,67]],
+    cello: [[22,42],[22,67],[78,42],[78,67]],
+    bajo: [[15,24],[15,47],[15,69],[15,91]]
+  };
+
+    const imageMap = {
+    guitarra: "img/guitarra.png",
+    ukelele: "img/ukelele.png",
+    requinto: "img/requinto.png",
+    violin: "img/violin.png",
+    cello: "img/cello.png",
+    bajo: "img/bajo.png",
+  };
+
+  const stage = document.createElement('div');
+  stage.className = 'headstock-realistic instrument-' + currentInstrumentKey;
+  const img = document.createElement('img');
+  img.src = imageMap[currentInstrumentKey];
+  img.alt = `Clavijero realista de ${inst.label}`;
+  img.draggable = false;
+  stage.appendChild(img);
+
+  (hotspotMap[currentInstrumentKey] || []).forEach((pos, idx) => {
+    const hs = document.createElement('button');
+    hs.type = 'button';
+    hs.className = 'peg-hotspot peg' + (idx === selectedStringIndex ? ' selected' : '');
+    hs.dataset.idx = idx;
+    hs.style.left = pos[0] + '%';
+    hs.style.top = pos[1] + '%';
+    hs.title = `${inst.strings[idx]?.note || ''}${inst.strings[idx]?.oct || ''}`;
+    hs.addEventListener('click', () => {
+      autoMode = false;
+      autoSwitch.classList.remove('on');
+      selectedStringIndex = idx;
+      noteChoice.textContent = `Afinando manualmente: ${inst.strings[idx].note}${inst.strings[idx].oct}.`;
+      renderHeadstock();
+    });
+    stage.appendChild(hs);
+  });
+
+  const strings = inst.strings.map((s,i)=>({...s, idx:i}));
+  if(inst.layout === 'inline'){
+    zone.appendChild(stage);
+    zone.appendChild(buildPegColumn(strings));
+  } else {
+    const half = Math.ceil(strings.length/2);
+    zone.appendChild(buildPegColumn(strings.slice(0, half)));
+    zone.appendChild(stage);
+    zone.appendChild(buildPegColumn(strings.slice(half)));
+  }
+}
+
+function buildPegColumn(strings){
+  const col = document.createElement('div');
+  col.className = 'peg-col';
+  strings.forEach(s => {
+    const peg = document.createElement('div');
+    peg.className = 'peg' + (s.idx === selectedStringIndex ? ' selected' : '');
+    peg.dataset.idx = s.idx;
+    peg.innerHTML = `${s.note}<span class="hz">${s.freq.toFixed(1)}Hz</span>`;
+    peg.addEventListener('click', () => {
+      autoMode = false;
+      autoSwitch.classList.remove('on');
+      selectedStringIndex = s.idx;
+      noteChoice.textContent = `Afinando manualmente: ${s.note}${s.oct}.`;
+      renderHeadstock();
+    });
+    col.appendChild(peg);
+  });
+  return col;
+}
+
+/* ===== DEFINICIONES COMPARTIDAS MEJORADAS ===== */
+const HEADSTOCK_DEFS = `
+  <!-- Maderas -->
+  <linearGradient id="woodClassic" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#7a4a2a"/>
+    <stop offset="0.25" stop-color="#5c3520"/>
+    <stop offset="0.5" stop-color="#4a2a18"/>
+    <stop offset="0.75" stop-color="#3d2212"/>
+    <stop offset="1" stop-color="#2a150a"/>
+  </linearGradient>
+  <linearGradient id="woodKoa" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#b8834a"/>
+    <stop offset="0.3" stop-color="#a06d38"/>
+    <stop offset="0.6" stop-color="#8a5a2e"/>
+    <stop offset="1" stop-color="#5c3a1e"/>
+  </linearGradient>
+  <linearGradient id="woodMaple" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#e8c89a"/>
+    <stop offset="0.3" stop-color="#d4a76a"/>
+    <stop offset="0.7" stop-color="#c4945a"/>
+    <stop offset="1" stop-color="#a07840"/>
+  </linearGradient>
+  <linearGradient id="woodEbony" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2a2a2a"/>
+    <stop offset="0.5" stop-color="#1a1a1a"/>
+    <stop offset="1" stop-color="#0d0d0d"/>
+  </linearGradient>
+  <linearGradient id="woodDark" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#3a2a1a"/>
+    <stop offset="1" stop-color="#1a1208"/>
+  </linearGradient>
+
+  <!-- Metales -->
+  <linearGradient id="goldPlate" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f9e076"/>
+    <stop offset="0.3" stop-color="#d4a84f"/>
+    <stop offset="0.7" stop-color="#b8923a"/>
+    <stop offset="1" stop-color="#8a6a20"/>
+  </linearGradient>
+  <linearGradient id="chromePlate" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#f0f0f0"/>
+    <stop offset="0.3" stop-color="#c0c0c0"/>
+    <stop offset="0.6" stop-color="#909090"/>
+    <stop offset="1" stop-color="#606060"/>
+  </linearGradient>
+  <linearGradient id="chromeCylinder" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#888"/>
+    <stop offset="0.2" stop-color="#e8e8e8"/>
+    <stop offset="0.5" stop-color="#aaa"/>
+    <stop offset="0.8" stop-color="#ddd"/>
+    <stop offset="1" stop-color="#666"/>
+  </linearGradient>
+  <radialGradient id="pearlButton" cx="0.4" cy="0.3" r="0.8">
+    <stop offset="0" stop-color="#fff"/>
+    <stop offset="0.3" stop-color="#f0f0f0"/>
+    <stop offset="0.7" stop-color="#d0d0d0"/>
+    <stop offset="1" stop-color="#a0a0a0"/>
+  </radialGradient>
+  <radialGradient id="ebonyPeg" cx="0.35" cy="0.3" r="0.8">
+    <stop offset="0" stop-color="#3a3a3a"/>
+    <stop offset="0.5" stop-color="#1a1a1a"/>
+    <stop offset="1" stop-color="#0a0a0a"/>
+  </radialGradient>
+
+  <!-- Filtros de sombra -->
+  <filter id="shadowSoft" x="-20%" y="-20%" width="140%" height="140%">
+    <feDropShadow dx="1" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.4"/>
+  </filter>
+  <filter id="shadowDeep" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000" flood-opacity="0.5"/>
+  </filter>
+  <filter id="innerShadow">
+    <feOffset dx="0" dy="1"/>
+    <feGaussianBlur stdDeviation="1" result="offset-blur"/>
+    <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+    <feFlood flood-color="black" flood-opacity="0.3" result="color"/>
+    <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+    <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+  </filter>
+
+  <!-- Patrón de vetas -->
+  <pattern id="grainPattern" width="40" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(8)">
+    <path d="M0,10 Q10,5 20,10 T40,10" stroke="#000" stroke-width="0.8" fill="none" opacity="0.08"/>
+    <path d="M0,15 Q15,8 30,15" stroke="#000" stroke-width="0.5" fill="none" opacity="0.05"/>
+  </pattern>
+`;
+
+/* ===== FUNCIONES AUXILIARES ===== */
+function grainOverlay(x, y, w, h, opacity = 0.06) {
+  let paths = '';
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const yy = y + (h * (i + 0.5) / count);
+    const wobble = 4 + (i % 3) * 3;
+    paths += `<path d="M${x},${yy} C${x + w * 0.25},${yy - wobble} ${x + w * 0.75},${yy + wobble} ${x + w},${yy}" stroke="#1a0a00" stroke-width="${1.2 - i * 0.1}" fill="none" opacity="${opacity}"/>`;
+    paths += `<path d="M${x + w * 0.1},${yy + 3} C${x + w * 0.4},${yy - wobble + 3} ${x + w * 0.8},${yy + wobble + 3} ${x + w * 0.9},${yy + 3}" stroke="#3d1f0a" stroke-width="0.6" fill="none" opacity="${opacity * 0.5}"/>`;
+  }
+  return paths;
+}
+
+function woodHighlight(shape) {
+  return `<path d="${shape}" fill="none" stroke="#c4945a" stroke-width="1.5" opacity="0.25" transform="translate(-0.5,-0.5)"/>`;
+}
+
+function classicalTuner(x, y, side, angle = 0) {
+  const dir = side === 'left' ? -1 : 1;
+  const plateX = side === 'left' ? x - 14 : x + 2;
+  const postX = side === 'left' ? x - 6 : x + 6;
+  const knobCx = side === 'left' ? x - 22 : x + 22;
+  const knobCy = y;
+
+  return `
+    <rect x="${plateX}" y="${y - 10}" width="12" height="20" rx="2" fill="url(#goldPlate)" filter="url(#shadowSoft)"/>
+    <circle cx="${plateX + (side==='left'?2:10)}" cy="${y - 6}" r="1" fill="#8a6a20"/>
+    <circle cx="${plateX + (side==='left'?2:10)}" cy="${y + 6}" r="1" fill="#8a6a20"/>
+    <rect x="${postX - 2}" y="${y - 3}" width="4" height="6" fill="url(#chromeCylinder)"/>
+    <line x1="${postX}" y1="${y}" x2="${knobCx - dir * 3}" y2="${knobCy}" stroke="#b0b0b0" stroke-width="2.5"/>
+    <ellipse cx="${knobCx}" cy="${knobCy}" rx="7" ry="10" fill="url(#pearlButton)" filter="url(#shadowSoft)" transform="rotate(${angle} ${knobCx} ${knobCy})"/>
+    <ellipse cx="${knobCx}" cy="${knobCy}" rx="5" ry="7" fill="none" stroke="#ccc" stroke-width="0.5" opacity="0.5" transform="rotate(${angle} ${knobCx} ${knobCy})"/>
+  `;
+}
+
+function frictionPegRealistic(cx, cy, side, len) {
+  const dir = side === 'left' ? -1 : 1;
+  const shaftEnd = cx + dir * len;
+  const knobCx = shaftEnd + dir * 10;
+
+  return `
+    <line x1="${cx}" y1="${cy}" x2="${shaftEnd}" y2="${cy}" stroke="#2a1a0a" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="${shaftEnd}" cy="${cy}" r="3.5" fill="url(#woodEbony)"/>
+    <ellipse cx="${knobCx}" cy="${cy}" rx="9" ry="14" fill="url(#ebonyPeg)" filter="url(#shadowSoft)"/>
+    <ellipse cx="${knobCx - dir * 2}" cy="${cy - 3}" rx="4" ry="7" fill="#3a3a3a" opacity="0.4"/>
+    <circle cx="${cx - dir * 3}" cy="${cy}" r="2" fill="#0a0a0a"/>
+  `;
+}
+
+function sealedTuner(x, y, side) {
+  const dir = side === 'left' ? -1 : 1;
+  const housingX = side === 'left' ? x - 16 : x;
+  const postX = side === 'left' ? x - 8 : x + 8;
+  const keyCx = postX + dir * 18;
+
+  return `
+    <rect x="${housingX}" y="${y - 12}" width="16" height="24" rx="3" fill="url(#chromePlate)" filter="url(#shadowSoft)"/>
+    <rect x="${housingX + 2}" y="${y - 10}" width="12" height="20" rx="2" fill="none" stroke="#e0e0e0" stroke-width="0.5"/>
+    <circle cx="${housingX + 8}" cy="${y - 8}" r="1.2" fill="#555"/>
+    <circle cx="${housingX + 8}" cy="${y + 8}" r="1.2" fill="#555"/>
+    <circle cx="${postX}" cy="${y}" r="4" fill="url(#chromeCylinder)"/>
+    <circle cx="${postX}" cy="${y}" r="2.5" fill="#333"/>
+    <line x1="${postX}" y1="${y}" x2="${keyCx - dir * 4}" y2="${y}" stroke="#aaa" stroke-width="3" stroke-linecap="round"/>
+    <rect x="${keyCx - 5}" y="${y - 4}" width="10" height="8" rx="2" fill="url(#chromePlate)" filter="url(#shadowSoft)"/>
+    <line x1="${keyCx - 3}" y1="${y - 2}" x2="${keyCx + 3}" y2="${y + 2}" stroke="#777" stroke-width="0.8"/>
+    <line x1="${keyCx + 3}" y1="${y - 2}" x2="${keyCx - 3}" y2="${y + 2}" stroke="#777" stroke-width="0.8"/>
+  `;
+}
+
+function slottedHole(x, y, w, h) {
+  return `
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${w/2}" fill="#0d0804" opacity="0.7"/>
+    <rect x="${x + 1}" y="${y + h * 0.35}" width="${w - 2}" height="${h * 0.3}" rx="2" fill="url(#chromeCylinder)" opacity="0.9"/>
+    <line x1="${x + w/2}" y1="${y + 2}" x2="${x + w/2}" y2="${y + h - 2}" stroke="#222" stroke-width="0.5"/>
+  `;
+}
+
+function nutWithSlots(x, y, w, h, stringCount, stringSpacing) {
+  let slots = '';
+  const startX = x + (w - (stringCount - 1) * stringSpacing) / 2;
+  for (let i = 0; i < stringCount; i++) {
+    slots += `<line x1="${startX + i * stringSpacing}" y1="${y}" x2="${startX + i * stringSpacing}" y2="${y + h}" stroke="#b8a078" stroke-width="1"/>`;
+  }
+  return `
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="1.5" fill="#f5e6d0" filter="url(#shadowSoft)"/>
+    <rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${h - 2}" rx="1" fill="none" stroke="#fff" stroke-width="0.5" opacity="0.4"/>
+    ${slots}
+  `;
+}
+
+function realisticStrings(startY, endY, count, spacing, startX) {
+  let s = '';
+  for (let i = 0; i < count; i++) {
+    const x = startX + i * spacing;
+    const thickness = 1 + (count - 1 - i) * 0.3;
+    s += `<line x1="${x}" y1="${startY}" x2="${x}" y2="${endY}" stroke="#c8c0b0" stroke-width="${thickness}" opacity="0.7"/>`;
+    s += `<line x1="${x - 0.3}" y1="${startY}" x2="${x - 0.3}" y2="${endY}" stroke="#fff" stroke-width="${thickness * 0.3}" opacity="0.3"/>`;
+  }
+  return s;
+}
+
+function crescendoWordmark(x, y, size, opts = {}) {
+  const color = opts.color || '#d4a84f';
+  const anchor = opts.anchor || 'middle';
+  const rotate = opts.rotate ? ` transform="rotate(${opts.rotate} ${x} ${y})"` : '';
+  const underline = opts.underline !== false
+    ? `<path d="M${x - size * 2.2},${y + size * 0.6} Q${x},${y + size} ${x + size * 2.2},${y + size * 0.6}" stroke="${color}" stroke-width="${Math.max(1, size * 0.07)}" fill="none" opacity="0.8"/>`
+    : '';
+  return `
+    <text x="${x}" y="${y}" text-anchor="${anchor}" font-family="'Playfair Display', Georgia, serif"
+      font-style="italic" font-weight="600" font-size="${size}" fill="${color}"
+      opacity="0.9" letter-spacing="${size * 0.02}" filter="url(#shadowSoft)"${rotate}>Crescendo</text>
+    ${underline}
+  `;
+}
+
+function buildHeadstockSvg(shape){
+  const wrap = document.createElement('div');
+  wrap.className = 'headstock-svg';
+  wrap.innerHTML = HEADSTOCK_BUILDERS[shape] ? HEADSTOCK_BUILDERS[shape]() : HEADSTOCK_BUILDERS['slotted6']();
+  return wrap;
+}
+
+const HEADSTOCK_BUILDERS = {
+
+  /* ===== GUITARRA CLÁSICA (3+3 ranurado) ===== */
+  slotted6() {
+    const w = 160, h = 360;
+    const outline = `
+      M80,6
+      C55,6 38,14 36,28
+      C34,38 38,48 40,58
+      L40,88
+      C40,92 38,96 36,100
+      L36,200
+      C36,208 42,214 50,214
+      L52,214
+      C56,218 60,222 65,224
+      L95,224
+      C100,222 104,218 108,214
+      L110,214
+      C118,214 124,208 124,200
+      L124,100
+      C122,96 120,92 120,88
+      L120,58
+      C122,48 126,38 124,28
+      C122,14 105,6 80,6 Z
+    `;
+
+    const slotY = [52, 96, 140];
+    let slots = '';
+    slotY.forEach(y => {
+      slots += slottedHole(42, y, 14, 34);
+      slots += slottedHole(104, y, 14, 34);
+    });
+
+    const tuners =
+      classicalTuner(42, 69, 'left', -15) +
+      classicalTuner(42, 113, 'left', -5) +
+      classicalTuner(42, 157, 'left', 10) +
+      classicalTuner(118, 69, 'right', 15) +
+      classicalTuner(118, 113, 'right', 5) +
+      classicalTuner(118, 157, 'right', -10);
+
+    const neck = `<rect x="62" y="220" width="36" height="140" fill="url(#woodDark)"/>`;
+    const nut = nutWithSlots(56, 220, 48, 8, 6, 7.5);
+    const strings = realisticStrings(228, h, 6, 7.5, 59.75);
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${outline}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${outline}" fill="url(#woodClassic)" stroke="#2a1808" stroke-width="2" filter="url(#innerShadow)"/>
+      ${grainOverlay(35, 20, 90, 195, 0.07)}
+      ${woodHighlight(outline)}
+      ${slots}
+      ${tuners}
+      ${crescendoWordmark(80, 32, 10)}
+      ${neck}${nut}${strings}
+    </svg>`;
+  },
+
+  /* ===== REQUINTO (3+3 ranurado, más pequeño) ===== */
+  'slotted6-req'() {
+    const w = 140, h = 320;
+    const outline = `
+      M70,6
+      C48,6 34,14 32,26
+      C30,36 34,44 36,52
+      L36,78
+      C36,82 34,86 32,90
+      L32,178
+      C32,184 38,190 44,190
+      L46,190
+      C50,194 54,196 58,198
+      L82,198
+      C86,196 90,194 94,190
+      L96,190
+      C102,190 108,184 108,178
+      L108,90
+      C106,86 104,82 104,78
+      L104,52
+      C106,44 110,36 108,26
+      C106,14 92,6 70,6 Z
+    `;
+
+    const slotY = [48, 88, 128];
+    let slots = '';
+    slotY.forEach(y => {
+      slots += slottedHole(36, y, 12, 30);
+      slots += slottedHole(92, y, 12, 30);
+    });
+
+    const tuners =
+      classicalTuner(36, 63, 'left', -12) +
+      classicalTuner(36, 103, 'left', 0) +
+      classicalTuner(36, 143, 'left', 8) +
+      classicalTuner(104, 63, 'right', 12) +
+      classicalTuner(104, 103, 'right', 0) +
+      classicalTuner(104, 143, 'right', -8);
+
+    const neck = `<rect x="54" y="194" width="32" height="126" fill="url(#woodDark)"/>`;
+    const nut = nutWithSlots(50, 194, 40, 6, 6, 6.2);
+    const strings = realisticStrings(200, h, 6, 6.2, 53.1);
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${outline}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${outline}" fill="url(#woodClassic)" stroke="#2a1808" stroke-width="1.8" filter="url(#innerShadow)"/>
+      ${grainOverlay(30, 18, 80, 175, 0.06)}
+      ${woodHighlight(outline)}
+      ${slots}
+      ${tuners}
+      ${crescendoWordmark(70, 30, 8.5)}
+      ${neck}${nut}${strings}
+    </svg>`;
+  },
+
+  /* ===== UKELELE (2+2 ranurado) ===== */
+  slotted4() {
+    const w = 130, h = 280;
+    const outline = `
+      M65,6
+      C46,6 34,14 33,26
+      C32,34 35,42 37,50
+      L37,74
+      C37,78 35,82 34,86
+      L34,152
+      C34,158 39,164 46,164
+      L48,164
+      C52,168 56,170 60,172
+      L70,172
+      C74,170 78,168 82,164
+      L84,164
+      C91,164 96,158 96,152
+      L96,86
+      C95,82 93,78 93,74
+      L93,50
+      C95,42 98,34 97,26
+      C96,14 84,6 65,6 Z
+    `;
+
+    const slotY = [52, 96];
+    let slots = '';
+    slotY.forEach(y => {
+      slots += slottedHole(36, y, 13, 34);
+      slots += slottedHole(81, y, 13, 34);
+    });
+
+    const tuners =
+      classicalTuner(36, 69, 'left', -10) +
+      classicalTuner(36, 113, 'left', 5) +
+      classicalTuner(94, 69, 'right', 10) +
+      classicalTuner(94, 113, 'right', -5);
+
+    const neck = `<rect x="50" y="168" width="30" height="112" fill="url(#woodDark)"/>`;
+    const nut = nutWithSlots(46, 168, 38, 6, 4, 9);
+    const strings = realisticStrings(174, h, 4, 9, 55.5);
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${outline}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${outline}" fill="url(#woodKoa)" stroke="#3d2210" stroke-width="1.8" filter="url(#innerShadow)"/>
+      ${grainOverlay(32, 20, 66, 145, 0.08)}
+      ${woodHighlight(outline)}
+      ${slots}
+      ${tuners}
+      ${crescendoWordmark(65, 32, 9)}
+      ${neck}${nut}${strings}
+    </svg>`;
+  },
+
+  /* ===== VIOLÍN (voluta + clavijas de fricción) ===== */
+  scrollViolin() {
+    const w = 120, h = 280;
+    const scroll = `
+      M60,8
+      C78,6 92,16 90,32
+      C88,46 76,52 66,48
+      C72,44 73,36 66,32
+      C58,28 52,36 56,44
+      C42,42 36,28 44,16
+      C50,8 54,8 60,8 Z
+      M62,24
+      C65,23 67,26 65,29
+      C63,31 59,29 60,26
+      C60,25 61,24 62,24 Z
+    `;
+
+    const scrollRelief = `
+      <ellipse cx="74" cy="28" rx="14" ry="18" fill="none" stroke="#3a2210" stroke-width="1" opacity="0.3"/>
+      <ellipse cx="76" cy="28" rx="10" ry="14" fill="none" stroke="#5c3a1e" stroke-width="0.8" opacity="0.2"/>
+      <ellipse cx="78" cy="28" rx="6" ry="9" fill="none" stroke="#7a4a2a" stroke-width="0.6" opacity="0.15"/>
+    `;
+
+    const pegbox = `
+      <rect x="44" y="54" width="32" height="72" rx="5" fill="url(#woodClassic)" stroke="#1a0f08" stroke-width="1.5" filter="url(#shadowDeep)"/>
+      <rect x="48" y="58" width="24" height="64" rx="3" fill="#0c0805"/>
+      <rect x="42" y="126" width="36" height="8" rx="1" fill="url(#woodEbony)" filter="url(#shadowSoft)"/>
+    `;
+
+    const pegs =
+      frictionPegRealistic(46, 72, 'left', 14) +
+      frictionPegRealistic(74, 72, 'right', 14) +
+      frictionPegRealistic(46, 108, 'left', 14) +
+      frictionPegRealistic(74, 108, 'right', 14);
+
+    const neck = `<path d="M50,134 L70,134 L64,${h} L56,${h} Z" fill="url(#woodClassic)" filter="url(#innerShadow)"/>`;
+
+    const stringColors = ['#c8c0b0', '#c8c0b0', '#d4a84f', '#c8c0b0'];
+    const stringPaths = [-5, -1.5, 1.5, 5].map((offset, i) => {
+      const x = 60 + offset;
+      return `
+        <line x1="${x}" y1="134" x2="${x}" y2="${h}" stroke="${stringColors[i]}" stroke-width="${1.2 - i * 0.15}" opacity="0.75"/>
+        <line x1="${x - 0.3}" y1="134" x2="${x - 0.3}" y2="${h}" stroke="#fff" stroke-width="0.3" opacity="0.25"/>
+      `;
+    }).join('');
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${scroll}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${scroll}" fill="url(#woodClassic)" stroke="#2a1808" stroke-width="1.5" filter="url(#innerShadow)"/>
+      ${scrollRelief}
+      ${grainOverlay(38, 10, 44, 45, 0.06)}
+      ${pegbox}
+      ${pegs}
+      ${crescendoWordmark(60, 140, 5.5, {underline: false})}
+      ${neck}
+      ${stringPaths}
+    </svg>`;
+  },
+
+  /* ===== VIOLONCHELO (voluta grande + clavijas robustas) ===== */
+  scrollCello() {
+    const w = 150, h = 300;
+    const scroll = `
+      M75,6
+      C98,4 112,16 110,34
+      C108,50 94,58 82,52
+      C90,47 91,38 82,33
+      C72,28 64,38 69,48
+      C52,46 45,30 54,16
+      C60,6 66,6 75,6 Z
+      M77,26
+      C81,25 83,29 81,32
+      C78,35 74,32 75,28
+      C75,27 76,26 77,26 Z
+    `;
+
+    const scrollRelief = `
+      <ellipse cx="92" cy="30" rx="16" ry="22" fill="none" stroke="#3a2210" stroke-width="1.2" opacity="0.3"/>
+      <ellipse cx="95" cy="30" rx="12" ry="17" fill="none" stroke="#5c3a1e" stroke-width="1" opacity="0.2"/>
+      <ellipse cx="98" cy="30" rx="8" ry="11" fill="none" stroke="#7a4a2a" stroke-width="0.8" opacity="0.15"/>
+    `;
+
+    const pegbox = `
+      <rect x="54" y="58" width="42" height="88" rx="6" fill="url(#woodClassic)" stroke="#1a0f08" stroke-width="2" filter="url(#shadowDeep)"/>
+      <rect x="60" y="64" width="30" height="76" rx="4" fill="#0c0805"/>
+      <rect x="52" y="146" width="46" height="10" rx="1.5" fill="url(#woodEbony)" filter="url(#shadowSoft)"/>
+    `;
+
+    const pegs =
+      frictionPegRealistic(58, 82, 'left', 18) +
+      frictionPegRealistic(92, 82, 'right', 18) +
+      frictionPegRealistic(58, 126, 'left', 18) +
+      frictionPegRealistic(92, 126, 'right', 18);
+
+    const neck = `<path d="M62,156 L88,156 L80,${h} L70,${h} Z" fill="url(#woodClassic)" filter="url(#innerShadow)"/>`;
+
+    const stringColors = ['#c8c0b0', '#c8c0b0', '#d4a84f', '#c8c0b0'];
+    const stringPaths = [-7, -2.5, 2.5, 7].map((offset, i) => {
+      const x = 75 + offset;
+      return `
+        <line x1="${x}" y1="156" x2="${x}" y2="${h}" stroke="${stringColors[i]}" stroke-width="${1.6 - i * 0.2}" opacity="0.75"/>
+        <line x1="${x - 0.4}" y1="156" x2="${x - 0.4}" y2="${h}" stroke="#fff" stroke-width="0.4" opacity="0.25"/>
+      `;
+    }).join('');
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${scroll}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${scroll}" fill="url(#woodClassic)" stroke="#2a1808" stroke-width="2" filter="url(#innerShadow)"/>
+      ${scrollRelief}
+      ${grainOverlay(50, 12, 55, 45, 0.06)}
+      ${pegbox}
+      ${pegs}
+      ${crescendoWordmark(75, 152, 6.5, {underline: false})}
+      ${neck}
+      ${stringPaths}
+    </svg>`;
+  },
+
+  /* ===== BAJO ELÉCTRICO (afinadores sellados en línea) ===== */
+  inline4() {
+    const w = 150, h = 360;
+    const outline = `
+      M28,10 L96,10
+      C114,10 126,24 125,44
+      L119,316
+      C118,332 106,344 90,344
+      L46,344
+      C32,344 22,334 22,320
+      L16,46
+      C15,24 10,10 28,10 Z
+    `;
+
+    let tuners = '';
+    const ty = [50, 132, 214, 296];
+    ty.forEach(y => { tuners += sealedTuner(112, y, 'right'); });
+
+    const neck = `<rect x="54" y="320" width="28" height="40" fill="url(#woodDark)"/>`;
+    const nut = nutWithSlots(50, 320, 36, 7, 4, 8);
+    const strings = realisticStrings(327, h, 4, 8, 56);
+
+    return `<svg viewBox="0 0 ${w} ${h}"><defs>${HEADSTOCK_DEFS}</defs>
+      <path d="${outline}" fill="#1a0f08" transform="translate(2,3)" opacity="0.3"/>
+      <path d="${outline}" fill="url(#woodDark)" stroke="#0d0805" stroke-width="2.2" filter="url(#innerShadow)"/>
+      ${grainOverlay(18, 50, 105, 260, 0.06)}
+      ${woodHighlight(outline)}
+      ${tuners}
+      ${crescendoWordmark(60, 190, 14, {rotate:-90, underline:true})}
+      ${neck}${nut}${strings}
+    </svg>`;
+  },
+};
+
+renderHeadstock();
+document.getElementById('tuningLabel').textContent = INSTRUMENTS[currentInstrumentKey].tuning;
+
+/* ---------------- Utilidades de afinación ---------------- */
+function centsOffFromTarget(freq, targetFreq){
+  return 1200 * Math.log2(freq / targetFreq);
+}
+
+function closestStringIndex(freq){
+  const inst = INSTRUMENTS[currentInstrumentKey];
+  let best = 0, bestDiff = Infinity;
+  inst.strings.forEach((s, i) => {
+    const diff = Math.abs(centsOffFromTarget(freq, s.freq));
+    if(diff < bestDiff){ bestDiff = diff; best = i; }
+  });
+  return best;
+}
+
+/* ---------------- Captura de audio + detección de tono ---------------- */
+const micBtn = document.getElementById('micBtn');
+const micStatus = document.getElementById('micStatus');
+const dial = document.getElementById('dial');
+const dialNote = document.getElementById('dialNote');
+const dialArrow = document.getElementById('dialArrow');
+const centsFill = document.getElementById('centsFill');
+const freqReadout = document.getElementById('freqReadout');
+const centsReadout = document.getElementById('centsReadout');
+
+let audioCtx, analyser, detector, dataArray, rafId, stream;
+let listening = false;
+
+micBtn.addEventListener('click', async () => {
+  if(listening){ stopListening(); return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({ audio: {
+      echoCancellation:false, noiseSuppression:false, autoGainControl:false
+    }});
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 4096;
+    source.connect(analyser);
+
+    detector = PitchDetector.forFloat32Array(analyser.fftSize);
+    detector.minVolumeDecibels = -45;
+    dataArray = new Float32Array(analyser.fftSize);
+
+    listening = true;
+    micBtn.textContent = '⏹️ Detener';
+    micBtn.classList.add('listening');
+    micStatus.textContent = 'Escuchando... toca una cuerda.';
+    micStatus.classList.remove('err');
+    tick();
+  }catch(err){
+    micStatus.textContent = 'No se pudo acceder al micrófono. Revisa los permisos del navegador.';
+    micStatus.classList.add('err');
+  }
+});
+
+function stopListening(){
+  listening = false;
+  cancelAnimationFrame(rafId);
+  if(stream) stream.getTracks().forEach(t => t.stop());
+  if(audioCtx) audioCtx.close();
+  micBtn.textContent = '🎙️ Activar micrófono';
+  micBtn.classList.remove('listening');
+  micStatus.textContent = 'Micrófono detenido.';
+  resetDial();
+}
+
+function tick(){
+  analyser.getFloatTimeDomainData(dataArray);
+  const [pitch, clarity] = detector.findPitch(dataArray, audioCtx.sampleRate);
+
+  if(clarity > 0.9 && pitch > 20 && pitch < 1500){
+    handlePitch(pitch);
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+function handlePitch(freq){
+  const inst = INSTRUMENTS[currentInstrumentKey];
+  const idx = autoMode ? closestStringIndex(freq) : selectedStringIndex;
+  const target = inst.strings[idx];
+  const cents = centsOffFromTarget(freq, target.freq);
+
+  if(autoMode){
+    document.querySelectorAll('.peg').forEach(p => p.classList.remove('selected','correct'));
+    const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
+    if(peg) peg.classList.add(Math.abs(cents) < 5 ? 'correct' : 'selected');
+  } else {
+    const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
+    document.querySelectorAll('.peg').forEach(p => p.classList.remove('correct'));
+    if(peg && Math.abs(cents) < 5) peg.classList.add('correct');
+  }
+
+  freqReadout.textContent = freq.toFixed(1);
+  centsReadout.textContent = Math.round(cents);
+  dialNote.textContent = target.note;
+
+  const clamped = Math.max(-50, Math.min(50, cents));
+  centsFill.style.left = `calc(50% + ${clamped * 2.6}px)`;
+
+  dial.classList.remove('in-tune','flat-warn','sharp-warn');
+  if(Math.abs(cents) < 5){
+    dial.classList.add('in-tune');
+    centsFill.style.background = 'var(--moss)';
+    dialArrow.style.opacity = '0';
+  } else if(cents < 0){
+    dial.classList.add('flat-warn');
+    centsFill.style.background = 'var(--wine)';
+    dialArrow.style.transform = 'translateX(-16px) rotate(180deg)';
+    dialArrow.style.opacity = '1';
+  } else {
+    dial.classList.add('sharp-warn');
+    centsFill.style.background = 'var(--gold)';
+    dialArrow.style.transform = 'translateX(16px) rotate(0deg)';
+    dialArrow.style.opacity = '1';
+  }
+}
+
+function resetDial(){
+  dial.classList.remove('in-tune','flat-warn','sharp-warn');
+  dialNote.textContent = '–';
+  freqReadout.textContent = '0.0';
+  centsReadout.textContent = '0';
+  centsFill.style.left = '50%';
+  document.querySelectorAll('.peg').forEach(p => p.classList.remove('correct'));
+}
+</script>
+</body>
+</html>
