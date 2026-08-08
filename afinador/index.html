@@ -450,7 +450,7 @@
 </footer>
 
 <script type="module">
-import { PitchDetector } from "https://esm.sh/pitchy@4";
+import { PitchDetector } from "https://esm.sh/pitchy@4.1.0";
 
 document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();
 
@@ -462,9 +462,9 @@ const INSTRUMENTS = {
     shape: 'slotted6',
     layout: 'split',
     strings: [
-      { note:'E', oct:2, freq:82.41 },
-      { note:'A', oct:2, freq:110.00 },
       { note:'D', oct:3, freq:146.83 },
+      { note:'A', oct:2, freq:110.00 },
+      { note:'E', oct:2, freq:82.41 },
       { note:'G', oct:3, freq:196.00 },
       { note:'B', oct:3, freq:246.94 },
       { note:'E', oct:4, freq:329.63 },
@@ -476,8 +476,8 @@ const INSTRUMENTS = {
     shape: 'slotted4',
     layout: 'split',
     strings: [
-      { note:'G', oct:4, freq:392.00 },
       { note:'C', oct:4, freq:261.63 },
+      { note:'G', oct:4, freq:392.00 },
       { note:'E', oct:4, freq:329.63 },
       { note:'A', oct:4, freq:440.00 },
     ]
@@ -488,9 +488,9 @@ const INSTRUMENTS = {
     shape: 'slotted6-req',
     layout: 'split',
     strings: [
-      { note:'A', oct:2, freq:110.00 },
-      { note:'D', oct:3, freq:146.83 },
       { note:'G', oct:3, freq:196.00 },
+      { note:'D', oct:3, freq:146.83 },
+      { note:'A', oct:2, freq:110.00 },
       { note:'C', oct:4, freq:261.63 },
       { note:'E', oct:4, freq:329.63 },
       { note:'A', oct:4, freq:440.00 },
@@ -502,8 +502,8 @@ const INSTRUMENTS = {
     shape: 'scrollViolin',
     layout: 'split',
     strings: [
-      { note:'G', oct:3, freq:196.00 },
       { note:'D', oct:4, freq:293.66 },
+      { note:'G', oct:3, freq:196.00 },
       { note:'A', oct:4, freq:440.00 },
       { note:'E', oct:5, freq:659.25 },
     ]
@@ -514,8 +514,8 @@ const INSTRUMENTS = {
     shape: 'scrollCello',
     layout: 'split',
     strings: [
-      { note:'C', oct:2, freq:65.41 },
       { note:'G', oct:2, freq:98.00 },
+      { note:'C', oct:2, freq:65.41 },
       { note:'D', oct:3, freq:146.83 },
       { note:'A', oct:3, freq:220.00 },
     ]
@@ -526,10 +526,10 @@ const INSTRUMENTS = {
     shape: 'inline4',
     layout: 'inline',
     strings: [
-      { note:'E', oct:1, freq:41.20 },
-      { note:'A', oct:1, freq:55.00 },
-      { note:'D', oct:2, freq:73.42 },
       { note:'G', oct:2, freq:98.00 },
+      { note:'D', oct:2, freq:73.42 },
+      { note:'A', oct:1, freq:55.00 },
+      { note:'E', oct:1, freq:41.20 },
     ]
   },
   vocal: {
@@ -1257,7 +1257,7 @@ micBtn.addEventListener('click', async () => {
     source.connect(analyser);
 
     detector = PitchDetector.forFloat32Array(analyser.fftSize);
-    detector.minVolumeDecibels = -45;
+    try { detector.minVolumeDecibels = -45; } catch(e) { /* propiedad no soportada en esta build; se ignora sin romper la detección */ }
     dataArray = new Float32Array(analyser.fftSize);
 
     listening = true;
@@ -1287,7 +1287,7 @@ function tick(){
   analyser.getFloatTimeDomainData(dataArray);
   const [pitch, clarity] = detector.findPitch(dataArray, audioCtx.sampleRate);
 
-  if(clarity > 0.9 && pitch > 20 && pitch < 1500){
+  if(clarity > 0.85 && pitch > 20 && pitch < 1500){
     handlePitch(pitch);
   }
   rafId = requestAnimationFrame(tick);
