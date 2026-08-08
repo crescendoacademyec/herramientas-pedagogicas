@@ -223,9 +223,24 @@
 
     /* pitch dial */
     .dial-wrap{ display:flex; flex-direction:column; align-items:center; margin:16px 0 6px; }
-    .dial-scale{ position:relative; width:100%; max-width:420px; height:30px; }
-    .dial-scale .flat, .dial-scale .sharp{ position:absolute; top:0; font-size:20px; color:var(--muted); opacity:.6; }
-    .dial-scale .flat{ left:6px; } .dial-scale .sharp{ right:6px; }
+    /* Contenedor para el círculo y los símbolos laterales */
+    .dial-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px; /* separación entre símbolos y círculo */
+    }
+    .side-symbol {
+        font-size: 32px;
+        color: var(--muted);
+        opacity: 0.6;
+        font-weight: 700;
+        line-height: 1;
+        user-select: none;
+        font-family: Georgia, serif;
+    }
+    .side-symbol.flat { /* margen izquierdo extra si se desea */ }
+    .side-symbol.sharp { /* margen derecho extra si se desea */ }
 
     .dial{
         width:70px; height:70px; border-radius:50%;
@@ -234,6 +249,7 @@
         position:relative; transition:border-color .15s, box-shadow .15s;
         background: rgba(0,0,0,0.25);
         box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
+        flex: 0 0 auto;
     }
     .dial .note{ font-family:Georgia, serif; font-size:42px; font-weight:700; color: var(--text); }
     .dial.vocal-mode .note{ font-size:30px; }
@@ -326,6 +342,8 @@
         .peg{ width:50px; height:50px; font-size:15px; }
         .headstock-realistic{ width:min(220px, 55vw); min-width:145px; }
         .headstock-realistic img{ max-height:330px; }
+        .side-symbol { font-size: 24px; }
+        .dial-row { gap: 10px; }
     }
 
     /* mic control */
@@ -417,13 +435,16 @@
     </div>
 
     <div class="dial-wrap">
-      <div class="dial-scale">
-        <span class="flat">♭</span><span class="sharp">♯</span>
+      <!-- NUEVA FILA: símbolos a los lados del círculo -->
+      <div class="dial-row">
+        <span class="side-symbol flat">♭</span>
+        <div class="dial" id="dial">
+          <div class="note" id="dialNote">–</div>
+          <div class="arrow" id="dialArrow"></div>
+        </div>
+        <span class="side-symbol sharp">♯</span>
       </div>
-      <div class="dial" id="dial">
-        <div class="note" id="dialNote">–</div>
-        <div class="arrow" id="dialArrow"></div>
-      </div>
+      <!-- cents-track y readout se mantienen -->
       <div class="cents-track">
         <div class="mid"></div>
         <div class="cents-fill" id="centsFill"></div>
