@@ -183,12 +183,18 @@
 
     /* instrument tabs */
     .instrument-select{
-        display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px;
-        scrollbar-width:none;
+    display: flex;
+    flex-wrap: wrap;         /* permite que bajen a otra línea si no caben */
+    gap: 8px;                /* separación entre botones */
+    justify-content: space-evenly; /* ← reparte el espacio sobrante equitativamente */
+    padding-bottom: 4px;
+    margin-bottom: 18px;
+    /* Elimina overflow-x: auto; ya no es necesario si usamos wrap */
+    scrollbar-width: none;
     }
     .instrument-select::-webkit-scrollbar{ display:none; }
     .inst-btn{
-        flex:none; padding:9px 16px; border-radius:999px; border:1px solid var(--line);
+        flex:none; padding:9px 16px; border-radius:10px; border:1px solid var(--line);
         background:var(--panel); color:var(--muted); font-weight:600; font-size:13px;
         cursor:pointer; transition:.15s; white-space:nowrap;
     }
@@ -211,7 +217,7 @@
 
     .auto-toggle{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted); }
     .switch{ width:42px; height:24px; border-radius:999px; background:rgba(255,255,255,.14); position:relative; cursor:pointer; transition:.2s; flex:none; }
-    .switch.on{ background:var(--moss); }
+    .switch.on{ background: #00c853; }
     .switch .knob{ width:18px; height:18px; border-radius:50%; background:var(--paper); position:absolute; top:3px; left:3px; transition:.2s; }
     .switch.on .knob{ left:21px; }
 
@@ -230,6 +236,7 @@
         box-shadow: inset 0 4px 10px rgba(0,0,0,0.4);
     }
     .dial .note{ font-family:Georgia, serif; font-size:42px; font-weight:700; color: var(--text); }
+    .dial.vocal-mode .note{ font-size:30px; }
     .dial .arrow{
         position:absolute; bottom:-14px; width:0;height:0;
         border-left:9px solid transparent; border-right:9px solid transparent;
@@ -394,7 +401,7 @@
 
 <div class="app-shell">
   <div class="tool-hero">
-    <p class="eyebrow">Afinador virtual</p>
+    <h1 class="eyebrow">Afinador virtual</h1>
     <p>Detección de tono por micrófono, en tiempo real, directamente desde el navegador.</p>
   </div>
 
@@ -403,7 +410,7 @@
   <div class="metronome-container">
     <div class="card-top">
       <div class="tuning-name">Afinación: <b id="tuningLabel">Estándar</b></div>
-      <div class="auto-toggle">
+      <div class="auto-toggle" id="autoToggleWrap">
         Auto.
         <div class="switch on" id="autoSwitch"><div class="knob"></div></div>
       </div>
@@ -433,7 +440,6 @@
 
     <div class="mic-zone">
       <button class="mic-btn" id="micBtn">🎙️ Activar micrófono</button>
-      <div class="mic-status" id="micStatus">El micrófono solo se usa en tu navegador — el audio nunca se envía a ningún servidor.</div>
     </div>
   </div>
 </div>
@@ -526,6 +532,13 @@ const INSTRUMENTS = {
       { note:'G', oct:2, freq:98.00 },
     ]
   },
+  vocal: {
+    label: 'Vocal',
+    tuning: 'Detección cromática (cualquier nota)',
+    shape: null,
+    layout: 'vocal',
+    strings: [] // no hay una afinación fija: la nota objetivo se calcula en vivo según lo que se canta
+  },
 };
 
 let currentInstrumentKey = 'guitarra';
@@ -548,6 +561,14 @@ function selectInstrument(key){
   selectedStringIndex = null;
   [...instrumentSelect.children].forEach(b => b.classList.toggle('active', b.dataset.key === key));
   document.getElementById('tuningLabel').textContent = INSTRUMENTS[key].tuning;
+
+  const isVocal = key === 'vocal';
+  document.getElementById('autoToggleWrap').style.display = isVocal ? 'none' : 'flex';
+  dial.classList.toggle('vocal-mode', isVocal);
+  noteChoice.textContent = isVocal
+    ? 'Canta o entona una nota: el afinador la reconocerá automáticamente y te dirá qué tan afinada está.'
+    : (autoMode ? 'Modo automático: detectando la cuerda más cercana a lo que suena.' : 'Modo manual: toca una clavija para elegir qué cuerda afinar.');
+
   renderHeadstock();
 }
 
@@ -590,6 +611,7 @@ function renderHeadstock(){
     violin: "img/violin.png",
     cello: "img/cello.png",
     bajo: "img/bajo.png",
+    vocal: "img/vocal.png",
   };
 
   const stage = document.createElement('div');
@@ -619,7 +641,9 @@ function renderHeadstock(){
   });
 
   const strings = inst.strings.map((s,i)=>({...s, idx:i}));
-  if(inst.layout === 'inline'){
+  if(inst.layout === 'vocal'){
+    zone.appendChild(stage);
+  } else if(inst.layout === 'inline'){
     zone.appendChild(stage);
     zone.appendChild(buildPegColumn(strings));
   } else {
@@ -1195,6 +1219,18 @@ function closestStringIndex(freq){
   return best;
 }
 
+/* Modo Vocal: no hay una afinación fija, así que se busca la nota cromática
+   más cercana (temperamento igual, A4 = 440Hz) en cualquier octava. */
+const CHROMATIC_NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+function closestChromaticNote(freq){
+  const midi = 69 + 12 * Math.log2(freq / 440);
+  const rounded = Math.round(midi);
+  const targetFreq = 440 * Math.pow(2, (rounded - 69) / 12);
+  const note = CHROMATIC_NOTES[((rounded % 12) + 12) % 12];
+  const oct = Math.floor(rounded / 12) - 1;
+  return { note, oct, freq: targetFreq };
+}
+
 /* ---------------- Captura de audio + detección de tono ---------------- */
 const micBtn = document.getElementById('micBtn');
 const micStatus = document.getElementById('micStatus');
@@ -1258,24 +1294,32 @@ function tick(){
 }
 
 function handlePitch(freq){
-  const inst = INSTRUMENTS[currentInstrumentKey];
-  const idx = autoMode ? closestStringIndex(freq) : selectedStringIndex;
-  const target = inst.strings[idx];
-  const cents = centsOffFromTarget(freq, target.freq);
+  const isVocal = currentInstrumentKey === 'vocal';
+  let target, cents, idx = null;
 
-  if(autoMode){
-    document.querySelectorAll('.peg').forEach(p => p.classList.remove('selected','correct'));
-    const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
-    if(peg) peg.classList.add(Math.abs(cents) < 5 ? 'correct' : 'selected');
+  if(isVocal){
+    target = closestChromaticNote(freq);
+    cents = centsOffFromTarget(freq, target.freq);
   } else {
-    const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
-    document.querySelectorAll('.peg').forEach(p => p.classList.remove('correct'));
-    if(peg && Math.abs(cents) < 5) peg.classList.add('correct');
+    const inst = INSTRUMENTS[currentInstrumentKey];
+    idx = autoMode ? closestStringIndex(freq) : selectedStringIndex;
+    target = inst.strings[idx];
+    cents = centsOffFromTarget(freq, target.freq);
+
+    if(autoMode){
+      document.querySelectorAll('.peg').forEach(p => p.classList.remove('selected','correct'));
+      const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
+      if(peg) peg.classList.add(Math.abs(cents) < 5 ? 'correct' : 'selected');
+    } else {
+      const peg = document.querySelector(`.peg[data-idx="${idx}"]`);
+      document.querySelectorAll('.peg').forEach(p => p.classList.remove('correct'));
+      if(peg && Math.abs(cents) < 5) peg.classList.add('correct');
+    }
   }
 
   freqReadout.textContent = freq.toFixed(1);
   centsReadout.textContent = Math.round(cents);
-  dialNote.textContent = target.note;
+  dialNote.textContent = isVocal ? `${target.note}${target.oct}` : target.note;
 
   const clamped = Math.max(-50, Math.min(50, cents));
   centsFill.style.left = `calc(50% + ${clamped * 2.6}px)`;
