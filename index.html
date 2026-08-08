@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Herramientas — Crescendo Academy</title>
-<meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Guitarra Virtual (guitarra, ukelele y requinto), Cuerdas Frotadas, Folk Virtual, Bajo Virtual, Metrónomo, Entrenamiento auditivo y Analizador Armónico Crescendo (AAC).">
+<meta name="description" content="Herramientas interactivas de Crescendo Academy: Piano Virtual, Guitarra Virtual (guitarra, ukelele y requinto), Cuerdas Frotadas, Folk Virtual, Bajo Virtual, Metrónomo, Afinador, Entrenamiento auditivo y Analizador Armónico Crescendo (AAC).">
 <style>
   :root{
     --ink: #0a0a0a;
@@ -44,6 +44,7 @@
     --c-teal: #157a7a;
     --c-purple: #9b6b9b;
     --c-rose: #d9696b;
+    --c-sage: #6b8c7b;  /* nuevo color para el afinador */
   }
 
   *{ box-sizing:border-box; }
@@ -298,6 +299,7 @@
   .card--teal{ --card-color: var(--c-teal); }
   .card--purple{ --card-color: var(--c-purple); }
   .card--rose{ --card-color: var(--c-rose); }
+  .card--sage{ --card-color: var(--c-sage); }
 
   .card-icon{
     width: 44px; height:44px;
@@ -417,12 +419,14 @@
     .card, .social-bar a, .school-logo, .whatsapp-float{ transition: none; }
   }
 
-  /* Ajuste para 8 tarjetas: la última fila con 2 elementos se centra con grid automático */
+  /* Ajuste para 9 tarjetas: la última fila con 3 elementos se distribuye normalmente */
   .grid .card:nth-child(7) { grid-column: 1 / 2; }
   .grid .card:nth-child(8) { grid-column: 2 / 3; }
+  .grid .card:nth-child(9) { grid-column: 3 / 4; }
   @media (max-width: 900px) {
     .grid .card:nth-child(7),
-    .grid .card:nth-child(8) { grid-column: auto; }
+    .grid .card:nth-child(8),
+    .grid .card:nth-child(9) { grid-column: auto; }
   }
 </style>
 </head>
@@ -497,14 +501,14 @@
 
       <div class="eyebrow">Recursos interactivos</div>
       <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
-      <p>Piano, guitarra/ukelele/requinto, cuerdas frotadas, instrumentos folclóricos de cuerda, bajo, metrónomo, entrenamiento auditivo y analizador armónico — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
+      <p>Piano, guitarra/ukelele/requinto, cuerdas frotadas, instrumentos folclóricos de cuerda, bajo, metrónomo, afinador, entrenamiento auditivo y analizador armónico — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
     </div>
   </section>
 
   <section class="tools">
     <div class="tools-head">
       <h2>Herramientas disponibles</h2>
-      <span>8 herramientas</span>
+      <span>9 herramientas</span>
     </div>
 
     <div class="grid">
@@ -616,6 +620,22 @@
         </div>
         <h3>Metrónomo</h3>
         <p>Herramienta para estudiar pulso, subdivisiones, swing, claves, polirritmias, polimetrías y rutinas de práctica con control fino.</p>
+        <span class="cta">Abrir herramienta
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </span>
+      </a>
+
+      <!-- Afinador -->
+      <a class="card card--sage" href="afinador/">
+        <span class="tag-pill">Afinación</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.5 5.5l2.8 2.8M15.7 15.7l2.8 2.8M18.5 5.5l-2.8 2.8M8.3 15.7l-2.8 2.8"/>
+          </svg>
+        </div>
+        <h3>Afinador</h3>
+        <p>Detección de tono por micrófono en tiempo real. Afina guitarra, ukelele, requinto, violín, violonchelo y bajo con una interfaz visual clara y precisa.</p>
         <span class="cta">Abrir herramienta
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </span>
