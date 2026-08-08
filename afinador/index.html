@@ -58,7 +58,7 @@
 
     a { color: inherit; text-decoration: none; }
 
-    /* ===== HEADER (unificado — mismas clases que metronomo_index.html) ===== */
+    /* ===== HEADER (unificado con el metrónomo) ===== */
     .site-header {
         display: flex;
         align-items: center;
@@ -136,31 +136,24 @@
         .site-header .tag { display: none; }
     }
 
-    /* ===== FOOTER (estilo unificado — mismo lenguaje visual que el header;
-       reemplaza este bloque por tu footer real de Crescendo si tienes uno estandarizado) ===== */
+    /* ===== FOOTER (unificado con el metrónomo) ===== */
     .site-footer {
+        padding: 26px clamp(20px, 6vw, 64px) 40px;
         border-top: 1px solid var(--line);
-        padding: 26px clamp(20px, 5vw, 64px) 34px;
-        background: rgba(22, 21, 20, 0.6);
-        text-align: center;
-        position: relative;
-        z-index: 1;
-    }
-    .site-footer .foot-brand {
-        font-family: Georgia, "Times New Roman", serif;
-        color: var(--cream);
-        font-size: 1rem;
-        margin-bottom: 4px;
-    }
-    .site-footer p {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
         color: var(--muted);
-        font-size: 0.8rem;
-        margin: 4px 0;
+        font-size: 0.78rem;
+        background: rgba(22, 21, 20, 0.82);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        margin-top: 40px;
     }
-    .site-footer a { color: var(--gold); }
-    .site-footer a:hover { color: var(--accent-hover); }
 
-    /* ===== CONTENIDO PRINCIPAL ===== */
+    /* ===== CONTENIDO PRINCIPAL (afinador) ===== */
     .app-shell {
         margin: 0 auto;
         max-width: 760px;
@@ -347,26 +340,56 @@
 <body>
 
 <header class="site-header">
-  <a href="/index_final.html" class="brand">
-    <div class="brand-mark">CA</div>
-    <div>
-      <div>Crescendo Academy</div>
-      <div class="tag">Afinador virtual</div>
+    <div class="brand">
+        Crescendo Academy
     </div>
-  </a>
-  <div class="header-right">
-    <nav class="social-bar" aria-label="Redes sociales de Crescendo Academy">
-      <a href="#" title="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
-      <a href="#" title="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 8h3V4h-3c-2.8 0-5 2.2-5 5v3H6v4h3v8h4v-8h3.2l.8-4H13V9c0-.6.4-1 1-1z"/></svg></a>
-      <a href="#" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12s0-3.2-.4-4.7c-.3-.9-1-1.6-1.9-1.9C18.2 5 12 5 12 5s-6.2 0-7.7.4c-.9.3-1.6 1-1.9 1.9C2 8.8 2 12 2 12s0 3.2.4 4.7c.3.9 1 1.6 1.9 1.9C5.8 19 12 19 12 19s6.2 0 7.7-.4c.9-.3 1.6-1 1.9-1.9.4-1.5.4-4.7.4-4.7zM10 15.5v-7l6 3.5-6 3.5z"/></svg></a>
-      <a href="#" title="TikTok" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 3c.4 2.2 1.9 3.7 4 4v3c-1.5 0-2.9-.5-4-1.3v6.1a5.3 5.3 0 1 1-5.3-5.3c.3 0 .6 0 .9.1v3.1a2.2 2.2 0 1 0 1.6 2.1V3h2.8z"/></svg></a>
-      <a href="#" title="Spotify" aria-label="Spotify"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"/><path d="M7 10.5c3-1 6.7-.8 9.3.8M7.5 13.5c2.5-.8 5.5-.6 7.7.7M8 16.3c2-.6 4.4-.5 6.1.5" stroke="#161514" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg></a>
-      <a href="#" title="WhatsApp" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.6-1.4 1.2-2 1.3-.5.1-1.1.1-1.8-.1-.4-.1-1-.3-1.7-.6-2.9-1.3-4.8-4.2-5-4.4-.1-.2-1.2-1.6-1.2-3s.7-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5.2.6.7 2 .8 2.1.1.2.1.4 0 .6-.1.2-.2.3-.3.5-.2.2-.3.3-.5.5-.2.2-.4.4-.2.7.2.3.9 1.5 1.9 2.4 1.3 1.2 2.4 1.5 2.7 1.7.3.2.5.1.7-.1.2-.2.8-.9 1-1.2.2-.3.4-.3.7-.2.3.1 1.8.9 2.1 1 .3.2.5.2.6.4.1.2.1.9-.1 1.5z"/></svg></a>
-    </nav>
-    <a class="school-logo-link" href="#" title="Sitio de Crescendo Academy">
-      <img class="school-logo" src="logo_escuela.png" alt="Crescendo Academy">
-    </a>
-  </div>
+    <div class="header-right">
+        <div class="tag">Herramientas para clases de música</div>
+        <div class="social-bar">
+            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+            </a>
+            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                    <polyline points="22,6 12,13 2,6"/>
+                </svg>
+            </a>
+            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 7V2h12v5"/>
+                    <path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+                    <path d="M8 12h8"/>
+                </svg>
+            </a>
+            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+            </a>
+        </div>
+        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
+            <img
+                src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png"
+                alt="Logo Crescendo Academy"
+                class="school-logo"
+            />
+        </a>
+    </div>
 </header>
 
 <div class="app-shell">
@@ -417,15 +440,14 @@
 </div>
 
 <footer class="site-footer">
-  <div class="foot-brand">Crescendo Academy</div>
-  <p>Escuela de música 100% online · <a href="/index_final.html">Ver todas las herramientas</a></p>
-  <p>© <span id="year"></span> Crescendo Academy. Todos los derechos reservados.</p>
+    <span>Crescendo Academy</span>
+    <span id="footerYear"></span>
 </footer>
 
 <script type="module">
 import { PitchDetector } from "https://esm.sh/pitchy@4";
 
-document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();
 
 /* ---------------- Configuración de instrumentos ---------------- */
 const INSTRUMENTS = {
