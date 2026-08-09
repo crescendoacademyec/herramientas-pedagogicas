@@ -157,13 +157,16 @@
     z-index: 1;
   }
 
-  /* Pentagrama ocupando todo el ancho del hero */
+  /* Pentagrama ocupando todo el ancho de la página (rompe el contenedor de 760px) */
   .hero .staff{
     position: absolute;
-    left: 0;
-    right: 0;
-    top: 78%;
-    height: 150px;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    top: calc(78% + 22px);
+    height: 144px;
     transform: translateY(-50%);
     pointer-events: none;
     opacity: 0.55;
@@ -178,6 +181,34 @@
     stroke: var(--brass);
     stroke-width: 2.5;
     opacity: 0.5;
+  }
+  /* Claves de sol y de fa, alineadas con el pentagrama, lado derecho */
+  .hero .staff .clefs{
+    position: absolute;
+    top: 0;
+    right: clamp(24px, 6vw, 90px);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 3vw, 40px);
+  }
+  .hero .staff .clef{
+    font-family: "Times New Roman", Georgia, serif;
+    color: var(--brass);
+    opacity: 0.55;
+    line-height: 1;
+    user-select: none;
+  }
+  .hero .staff .clef-treble{
+    font-size: 250px;
+    transform: translateY(-5px);
+  }
+  .hero .staff .clef-bass{
+    font-size: 130px;
+    transform: translateY(-15px);
+  }
+  @media (max-width: 768px){
+    .hero .staff .clefs{ display: none; }
   }
 
   .eyebrow{
@@ -497,6 +528,10 @@
           <line x1="0%" y1="70%" x2="100%" y2="70%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
           <line x1="0%" y1="90%" x2="100%" y2="90%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
         </svg>
+        <div class="clefs" aria-hidden="true">
+          <span class="clef clef-treble">&#119070;</span>
+          <span class="clef clef-bass">&#119074;</span>
+        </div>
       </div>
 
       <div class="eyebrow">Recursos interactivos</div>
