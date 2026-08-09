@@ -1016,6 +1016,10 @@
                 playBtn.innerHTML = '<span>⏳</span><span class="btn-label">Cargando...</span>';
                 playBtn.style.background = 'var(--gold-dim)';
             }
+            // El innerHTML se acaba de reemplazar, así que hay que refrescar
+            // la referencia a .btn-label; si no, "Repetir" se escribe sobre
+            // un nodo ya desconectado del DOM y el botón nunca cambia de texto.
+            playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
         }
     }
 
