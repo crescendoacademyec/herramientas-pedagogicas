@@ -29,16 +29,31 @@
             --c-orange: #f0791a;
             --c-gold: #f3b02e;
             --c-blue: #4fb9de;
+            --lvl-1: #4caf6b;
+            --lvl-2: #7cb342;
+            --lvl-3: #a9b83c;
+            --lvl-4: #d4b83a;
+            --lvl-5: #e0982f;
+            --lvl-6: #e57a2a;
+            --lvl-7: #d85a3a;
+            --lvl-8: #c0392b;
             font-size: 16px;
         }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
         body {
-            background: radial-gradient(circle at 20% -10%, #171a1a 0%, var(--teal-950) 55%);
+            background: radial-gradient(circle at 20% -10%, #1f2224 0%, #1c1d1f 55%);
             color: var(--cream);
             font-family: Georgia, 'Iowan Old Style', 'Palatino Linotype', serif;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+        }
+        body::before {
+            background: radial-gradient(circle at 74% 18%, rgba(217, 138, 61, 0.22), transparent 34%);
+            content: "";
+            inset: 0;
+            pointer-events: none;
+            position: fixed;
         }
         a { color: inherit; text-decoration: none; }
 
@@ -126,7 +141,7 @@
         }
 
         .app-description {
-            background: rgba(255, 255, 255, 0.04);
+            background: #000;
             border-left: 3px solid var(--gold);
             padding: 10px 16px;
             margin: 0 0 20px 0;
@@ -157,10 +172,14 @@
             transition: border-color .15s, color .15s, background .15s;
             position: relative;
         }
-        .lvl-btn:nth-child(4n+1) { --btn-color: var(--c-teal); }
-        .lvl-btn:nth-child(4n+2) { --btn-color: var(--c-orange); }
-        .lvl-btn:nth-child(4n+3) { --btn-color: var(--c-gold); }
-        .lvl-btn:nth-child(4n+4) { --btn-color: var(--c-blue); }
+        .lvl-btn:nth-child(1) { --btn-color: var(--lvl-1); }
+        .lvl-btn:nth-child(2) { --btn-color: var(--lvl-2); }
+        .lvl-btn:nth-child(3) { --btn-color: var(--lvl-3); }
+        .lvl-btn:nth-child(4) { --btn-color: var(--lvl-4); }
+        .lvl-btn:nth-child(5) { --btn-color: var(--lvl-5); }
+        .lvl-btn:nth-child(6) { --btn-color: var(--lvl-6); }
+        .lvl-btn:nth-child(7) { --btn-color: var(--lvl-7); }
+        .lvl-btn:nth-child(8) { --btn-color: var(--lvl-8); }
         .lvl-btn .n {
             color: var(--btn-color, var(--gold));
             font-weight: 700;
@@ -177,7 +196,7 @@
         }
 
         .card {
-            background: var(--teal-900);
+            background: #000;
             border: 1px solid var(--teal-700);
             border-radius: 6px;
             padding: 34px 28px;
@@ -857,20 +876,20 @@
     const LEVELS = [
         { id: 1, title: 'Intervalos', short: 'Intervalos',
           instr: 'Escucha el intervalo y selecciona su nombre.' },
-        { id: 2, title: 'Acordes Básicos', short: 'Acordes',
+        { id: 2, title: 'Acordes Básicos', short: 'Diccionario de Acordes',
           instr: 'Escucha el acorde y selecciona su tipo.' },
-        { id: 3, title: 'Acordes Diatónicos', short: '7mas diatónicas',
-          instr: 'Tónica → acorde diatónico. ¿Qué grado sonó?' },
-        { id: 4, title: 'Dominantes Secundarios', short: 'V7/II, V7/V...',
+        { id: 3, title: 'Acordes Diatónicos', short: 'Cuatriadas diatónicas',
+          instr: 'Imaj7 (tónica) → acorde diatónico. ¿Qué grado sonó?' },
+        { id: 4, title: 'Dominantes Secundarios', short: 'Dominantes Secundarios',
           instr: 'Tónica → dominante secundario → resolución. ¿A qué grado resolvió?' },
-        { id: 5, title: 'Disminuidos Secundarios', short: 'viiº7 secundarios',
+        { id: 5, title: 'Disminuidos Secundarios', short: 'Disminuidos secundarios',
           instr: 'Tónica → disminuido secundario → resolución. ¿A qué grado resolvió?' },
-        { id: 6, title: 'Sustitución Tritonal', short: 'bII7 por V7',
+        { id: 6, title: 'Sustitución Tritonal', short: 'Sustituto Tritonal',
           instr: 'Tónica → acorde previo → resolución. ¿Dominante secundario o sustitución tritonal?' },
-        { id: 7, title: 'Cambios de Centro Tonal', short: 'Modulaciones',
+        { id: 7, title: 'Cambios de Centro Tonal', short: 'Modulaciones Tonales',
           instr: 'Tónica de referencia → ii–V–I en una nueva tonalidad. ¿Hacia dónde se movió el centro tonal?' },
-        { id: 8, title: 'Acordes Major6 / 6-9', short: 'Sustitutos de IΔ7',
-          instr: 'Tónica → acorde de tónica. ¿Δ7, 6 o 6/9?' },
+        { id: 8, title: 'Acordes Major6 / 6-9', short: 'Sustitutos de Imaj7',
+          instr: 'Tónica → acorde de tónica. ¿maj7, 6 o 6/9?' },
     ];
 
     const PITCH_NAMES = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
@@ -892,7 +911,7 @@
     }
 
     function prettyLabel(d) {
-        const map = ['I Δ7','ii m7','iii m7','IV Δ7','V7','vi m7','vii ø7'];
+        const map = ['I maj7','ii m7','iii m7','IV maj7','V7','vi m7','vii ø7'];
         return map[d];
     }
 
@@ -1069,6 +1088,7 @@
     const STORAGE_KEY_STATS = 'earTraining_stats';
     const STORAGE_KEY_CHORDS = 'earTraining_chords';
     const STORAGE_KEY_INTERVALS = 'earTraining_intervals';
+    const STORAGE_KEY_LEVEL3 = 'earTraining_level3targets';
 
     function getLevelStats(levelId) {
         const all = JSON.parse(localStorage.getItem(STORAGE_KEY_STATS) || '{}');
@@ -1100,6 +1120,7 @@
         { id:'cmadd4', display:'m(add4)', intervals:[0,3,5,7] },
         { id:'c6', display:'6', intervals:[0,4,7,9] },
         { id:'cm6', display:'m6', intervals:[0,3,7,9] },
+        { id:'cmaj7', display:'maj7', intervals:[0,4,7,11] },
         { id:'cmi7', display:'m7 (mi7)', intervals:[0,3,7,10] },
         { id:'cmi7b', display:'m7 (c-7)', intervals:[0,3,7,10] },
         { id:'c7', display:'7', intervals:[0,4,7,10] },
@@ -1137,6 +1158,14 @@
         { id:'c13sharp11', display:'13#11', intervals:[0,4,7,10,14,18,21] },
         { id:'c7_6sharp5', display:'7(6#5)', intervals:[0,4,8,9,10] }
     ];
+
+    const CHORD_DEGREE_MAP = {
+        0:'1', 1:'♭2', 2:'2', 3:'♭3', 4:'3', 5:'4', 6:'♭5', 7:'5', 8:'♯5',
+        9:'6', 10:'♭7', 11:'7', 13:'♭9', 14:'9', 15:'♯9', 17:'11', 18:'♯11', 21:'13'
+    };
+    function chordDegreesLabel(intervals) {
+        return intervals.map(iv => CHORD_DEGREE_MAP[iv] !== undefined ? CHORD_DEGREE_MAP[iv] : iv).join('-');
+    }
 
     const defaultSelectedChords = ['cmaj','cmin'];
     let selectedChordIds = [];
@@ -1304,10 +1333,32 @@
         localStorage.setItem(STORAGE_KEY_INTERVALS, JSON.stringify(ids));
     }
 
+    // ---- Nivel 3: grados diatónicos objetivo (frente a la referencia Imaj7) ----
+    const ALL_LEVEL3_TARGETS = [0,1,2,3,4,5,6].map(d => ({ d, label: prettyLabel(d) }));
+    let selectedLevel3Degrees = [];
+    function initLevel3Selection() {
+        const saved = localStorage.getItem(STORAGE_KEY_LEVEL3);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const valid = parsed.filter(id => ALL_LEVEL3_TARGETS.some(t => t.d === id));
+                    if (valid.length > 0) { selectedLevel3Degrees = valid; return; }
+                }
+            } catch(e) {}
+        }
+        selectedLevel3Degrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+        localStorage.setItem(STORAGE_KEY_LEVEL3, JSON.stringify(selectedLevel3Degrees));
+    }
+    function saveLevel3Selection(ids) {
+        localStorage.setItem(STORAGE_KEY_LEVEL3, JSON.stringify(ids));
+    }
+
     function resetAllStats() {
         localStorage.removeItem(STORAGE_KEY_STATS);
         localStorage.removeItem(STORAGE_KEY_CHORDS);
         localStorage.removeItem(STORAGE_KEY_INTERVALS);
+        localStorage.removeItem(STORAGE_KEY_LEVEL3);
         location.reload();
     }
 
@@ -1324,10 +1375,10 @@
             { title: 'sus4', desc: '1-4-5', steps: [{notes:[60,65,67], start:0, dur:2}], ref: '"Oye Como Va" - Santana' },
         ],
         3: [
-            { title: 'IΔ7 (Cmaj7)', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'Imaj7 (Cmaj7)', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Time After Time"' },
             { title: 'ii7 (Dm7)', desc: '1-♭3-5-♭7', steps: [{notes:[62,65,69,72], start:0, dur:2}], ref: '"Time After Time"' },
             { title: 'iii7 (Em7)', desc: '1-♭3-5-♭7', steps: [{notes:[64,67,71,74], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'IVΔ7 (Fmaj7)', desc: '1-3-5-7', steps: [{notes:[65,69,72,76], start:0, dur:2}], ref: '"Time After Time"' },
+            { title: 'IVmaj7 (Fmaj7)', desc: '1-3-5-7', steps: [{notes:[65,69,72,76], start:0, dur:2}], ref: '"Time After Time"' },
             { title: 'V7 (G7)', desc: '1-3-5-♭7', steps: [{notes:[67,71,74,77], start:0, dur:2}], ref: '"Time After Time"' },
             { title: 'vi7 (Am7)', desc: '1-♭3-5-♭7', steps: [{notes:[69,72,76,79], start:0, dur:2}], ref: '"Time After Time"' },
             { title: 'viiø7 (Bm7b5)', desc: '1-♭3-♭5-♭7', steps: [{notes:[71,74,78,81], start:0, dur:2}], ref: '"Time After Time"' },
@@ -1430,7 +1481,7 @@
               ref: '"The Christmas Song"' },
         ],
         8: [
-            { title: 'Δ7', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Body and Soul"' },
+            { title: 'maj7', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Body and Soul"' },
             { title: '6', desc: '1-3-5-6', steps: [{notes:[60,64,67,69], start:0, dur:2}], ref: '"Body and Soul"' },
             { title: '6/9', desc: '1-3-5-6-9', steps: [{notes:[60,64,67,69,74], start:0, dur:2}], ref: '"Body and Soul"' },
         ]
@@ -1495,19 +1546,30 @@
     }
 
     function genLevel3() {
+        const available = ALL_LEVEL3_TARGETS.filter(t => selectedLevel3Degrees.includes(t.d));
+        if (available.length === 0) {
+            return {
+                options: ['Selecciona al menos un acorde objetivo'],
+                correctIdx: 0,
+                seq: [],
+                feedback: () => 'Por favor, selecciona al menos un acorde objetivo en el panel de abajo.'
+            };
+        }
         const keyPc = randInt(12);
-        const degree = randInt(7);
-        const degs = pick([0,1,2,3,4,5,6], 4);
-        if (!degs.includes(degree)) degs[0] = degree;
-        const options = pick(degs, 4).map(d => ({ d, label: prettyLabel(d) }));
-        const correctIdx = options.findIndex(o => o.d === degree);
+        const target = available[randInt(available.length)];
+        const degree = target.d;
+        let candidates = pick(available, 4);
+        if (!candidates.some(c => c.d === degree)) candidates[0] = target;
+        candidates = candidates.sort(() => Math.random() - 0.5);
+        const options = candidates.map(c => c.label);
+        const correctIdx = candidates.findIndex(c => c.d === degree);
         const seq = [
-            { notes: [BASE + keyPc], start: 0.05, dur: 0.55, vel: 0.7 },
-            { notes: diatonicChordMidis(keyPc, degree, BASE), start: 0.9, dur: 3.0, vel: 0.85 },
+            { notes: diatonicChordMidis(keyPc, 0, BASE), start: 0.05, dur: 1.8, vel: 0.75 },
+            { notes: diatonicChordMidis(keyPc, degree, BASE), start: 2.0, dur: 3.0, vel: 0.85 },
         ];
         const feedback = ok =>
-            `${ok?'Correcto':'Era'} — <b>${prettyLabel(degree)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b>.`;
-        return { options: options.map(o => o.label), correctIdx, seq, feedback };
+            `${ok?'Correcto':'Era'} — <b>${prettyLabel(degree)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b> (referencia: Imaj7).`;
+        return { options, correctIdx, seq, feedback };
     }
 
     function genLevel4() {
@@ -1604,7 +1666,7 @@
     function genLevel8() {
         const keyPc = randInt(12);
         const TYPES = [
-            { f: CHORD.MAJ7, label: 'Δ7' },
+            { f: CHORD.MAJ7, label: 'maj7' },
             { f: CHORD.MAJ6, label: '6' },
             { f: CHORD.MAJ69, label: '6/9' },
         ];
@@ -1738,6 +1800,7 @@
         if (!gen) return;
         round = gen();
         round.answered = false;
+        enablePlayButton(sfLoaded || sfLoadError);
         renderQuiz();
         if (challengeActive && autoPlay && sfLoaded) {
             setTimeout(() => { if (round && !round.answered) playRound(); }, 200);
@@ -1752,6 +1815,7 @@
                 playChord(step.notes, t0 + step.start, step.dur, 1.0);
             });
         }
+        if (playBtnLabel) playBtnLabel.textContent = 'Repetir';
     }
 
     function selectAnswer(i, btnEls) {
@@ -1852,6 +1916,21 @@
                         localStorage.setItem(STORAGE_KEY_INTERVALS, JSON.stringify(selectedIntervalIds));
                     }
                 }
+                if (activeLevel === 3) {
+                    const saved = localStorage.getItem(STORAGE_KEY_LEVEL3);
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            if (Array.isArray(parsed) && parsed.length > 0) {
+                                const valid = parsed.filter(id => ALL_LEVEL3_TARGETS.some(t => t.d === id));
+                                if (valid.length > 0) selectedLevel3Degrees = valid;
+                            }
+                        } catch(e) {}
+                    } else {
+                        selectedLevel3Degrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+                        localStorage.setItem(STORAGE_KEY_LEVEL3, JSON.stringify(selectedLevel3Degrees));
+                    }
+                }
                 if (challengeActive) cancelChallenge();
                 renderLevels();
                 renderCard();
@@ -1942,6 +2021,38 @@
             `;
         }
 
+        // Selector de acordes objetivo (nivel 3)
+        let level3Picker = '';
+        if (activeLevel === 3) {
+            level3Picker = `
+                <div class="chord-picker">
+                    <details class="picker-dropdown">
+                        <summary>
+                            <span class="picker-summary-label">Acordes objetivo a practicar (Imaj7 → ...)</span>
+                            <span class="picker-summary-right">
+                                <span class="picker-summary-count" id="level3PickerCount">${selectedLevel3Degrees.length}/${ALL_LEVEL3_TARGETS.length}</span>
+                                <span class="picker-summary-arrow">▾</span>
+                            </span>
+                        </summary>
+                        <div class="picker-panel">
+                            <div class="picker-buttons">
+                                <button type="button" id="selectAllLevel3">Todos</button>
+                                <button type="button" id="deselectAllLevel3">Ninguno</button>
+                            </div>
+                            <div class="picker-grid" id="level3PickerGrid">
+                                ${ALL_LEVEL3_TARGETS.map(t => `
+                                    <label>
+                                        <input type="checkbox" value="${t.d}" ${selectedLevel3Degrees.includes(t.d) ? 'checked' : ''}>
+                                        Imaj7 → ${t.label}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            `;
+        }
+
         let mainContent = '';
 
         // --- MODO APRENDER ---
@@ -2011,8 +2122,57 @@
                         });
                     });
                 }, 0);
+            } else if (activeLevel === 2) {
+                // Nivel 2: acordes básicos — usar dinámicamente los tipos seleccionados en el picker
+                const filteredChords = ALL_CHORD_TYPES.filter(c => selectedChordIds.includes(c.id));
+                if (filteredChords.length === 0) {
+                    mainContent = `
+                        <div class="stage">
+                            <div class="stage-label">${lv.instr}</div>
+                            ${chordPicker}
+                            <p style="text-align:center;color:var(--cream-dim);margin-top:12px;">Selecciona al menos un tipo de acorde arriba para ver su información.</p>
+                        </div>
+                    `;
+                } else {
+                    const items = filteredChords.map(c => ({
+                        title: c.display,
+                        desc: chordDegreesLabel(c.intervals),
+                        steps: [{ notes: c.intervals.map(iv => 60 + iv), start: 0, dur: 2 }]
+                    }));
+                    mainContent = `
+                        <div class="stage">
+                            <div class="stage-label">${lv.instr}</div>
+                            ${chordPicker}
+                        </div>
+                        <div class="learn-container">
+                            ${items.map((item, idx) => `
+                                <div class="learn-item">
+                                    <span class="item-title">${item.title}</span>
+                                    ${item.desc ? `<span class="item-desc">${item.desc}</span>` : ''}
+                                    <button class="play-sample" data-idx="${idx}" title="Escuchar ejemplo">▶</button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        const samples = card.querySelectorAll('.play-sample[data-idx]');
+                        samples.forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                const idx = parseInt(this.dataset.idx, 10);
+                                const item = items[idx];
+                                if (item && item.steps) {
+                                    const ctx = ensureCtx();
+                                    const t0 = ctx.currentTime;
+                                    item.steps.forEach(step => {
+                                        playChord(step.notes, t0 + step.start, step.dur, 1.0);
+                                    });
+                                }
+                            });
+                        });
+                    }, 0);
+                }
             } else {
-                // Otros niveles: usar LEARN_CONTENT
+                // Otros niveles: usar LEARN_CONTENT (contenido fijo curado)
                 const items = LEARN_CONTENT[activeLevel];
                 if (!items) {
                     mainContent = `<p style="text-align:center;color:var(--cream-dim);">No hay contenido de aprendizaje para este nivel.</p>`;
@@ -2066,7 +2226,7 @@
                     </label>
                     ${intervalPicker}
                     ${chordPicker}
-                    <button class="replay-btn" id="replayBtn">Repetir</button>
+                    ${level3Picker}
                     <div class="volume-control">
                         <label for="volumeSlider">Volumen</label>
                         <input type="range" id="volumeSlider" min="0" max="7" step="0.1" value="4">
@@ -2116,6 +2276,123 @@
             });
         });
 
+        // --- Event listeners de los pickers (intervalos / acordes) — funcionan en ambos modos ---
+        const afterPickerChange = () => {
+            if (learnMode) {
+                const dropdown = card.querySelector('.picker-dropdown');
+                const wasOpen = dropdown ? dropdown.open : false;
+                renderCard();
+                const newDropdown = card.querySelector('.picker-dropdown');
+                if (newDropdown && wasOpen) newDropdown.open = true;
+            } else {
+                newRound();
+            }
+        };
+
+        // Picker de intervalos (nivel 1)
+        const intervalGrid = document.getElementById('intervalPickerGrid');
+        const intervalCountEl = document.getElementById('intervalPickerCount');
+        const updateIntervalCount = () => { if (intervalCountEl) intervalCountEl.textContent = `${selectedIntervalIds.length}/${ALL_INTERVALS.length}`; };
+        if (intervalGrid) {
+            const checkboxes = intervalGrid.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const semitone = parseInt(this.value, 10);
+                    if (this.checked) {
+                        if (!selectedIntervalIds.includes(semitone)) selectedIntervalIds.push(semitone);
+                    } else {
+                        selectedIntervalIds = selectedIntervalIds.filter(id => id !== semitone);
+                    }
+                    saveIntervalSelection(selectedIntervalIds);
+                    updateIntervalCount();
+                    afterPickerChange();
+                });
+            });
+            document.getElementById('selectAllIntervals')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = true);
+                selectedIntervalIds = ALL_INTERVALS.map(inter => inter.semitones);
+                saveIntervalSelection(selectedIntervalIds);
+                updateIntervalCount();
+                afterPickerChange();
+            });
+            document.getElementById('deselectAllIntervals')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = false);
+                selectedIntervalIds = [];
+                saveIntervalSelection(selectedIntervalIds);
+                updateIntervalCount();
+                afterPickerChange();
+            });
+        }
+
+        // Picker de acordes (nivel 2)
+        const chordGrid = document.getElementById('chordPickerGrid');
+        const chordCountEl = document.getElementById('chordPickerCount');
+        const updateChordCount = () => { if (chordCountEl) chordCountEl.textContent = `${selectedChordIds.length}/${ALL_CHORD_TYPES.length}`; };
+        if (chordGrid) {
+            const checkboxes = chordGrid.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        if (!selectedChordIds.includes(this.value)) selectedChordIds.push(this.value);
+                    } else {
+                        selectedChordIds = selectedChordIds.filter(id => id !== this.value);
+                    }
+                    saveChordSelection(selectedChordIds);
+                    updateChordCount();
+                    afterPickerChange();
+                });
+            });
+            document.getElementById('selectAllChords')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = true);
+                selectedChordIds = ALL_CHORD_TYPES.map(c => c.id);
+                saveChordSelection(selectedChordIds);
+                updateChordCount();
+                afterPickerChange();
+            });
+            document.getElementById('deselectAllChords')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = false);
+                selectedChordIds = [];
+                saveChordSelection(selectedChordIds);
+                updateChordCount();
+                afterPickerChange();
+            });
+        }
+
+        // Picker de acordes objetivo (nivel 3)
+        const level3Grid = document.getElementById('level3PickerGrid');
+        const level3CountEl = document.getElementById('level3PickerCount');
+        const updateLevel3Count = () => { if (level3CountEl) level3CountEl.textContent = `${selectedLevel3Degrees.length}/${ALL_LEVEL3_TARGETS.length}`; };
+        if (level3Grid) {
+            const checkboxes = level3Grid.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const degree = parseInt(this.value, 10);
+                    if (this.checked) {
+                        if (!selectedLevel3Degrees.includes(degree)) selectedLevel3Degrees.push(degree);
+                    } else {
+                        selectedLevel3Degrees = selectedLevel3Degrees.filter(id => id !== degree);
+                    }
+                    saveLevel3Selection(selectedLevel3Degrees);
+                    updateLevel3Count();
+                    afterPickerChange();
+                });
+            });
+            document.getElementById('selectAllLevel3')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = true);
+                selectedLevel3Degrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+                saveLevel3Selection(selectedLevel3Degrees);
+                updateLevel3Count();
+                afterPickerChange();
+            });
+            document.getElementById('deselectAllLevel3')?.addEventListener('click', function() {
+                checkboxes.forEach(cb => cb.checked = false);
+                selectedLevel3Degrees = [];
+                saveLevel3Selection(selectedLevel3Degrees);
+                updateLevel3Count();
+                afterPickerChange();
+            });
+        }
+
         // --- Event listeners para modo práctica ---
         if (!learnMode) {
             playBtn = document.getElementById('playBtn');
@@ -2123,9 +2400,6 @@
                 playBtnLabel = playBtn.querySelector('.btn-label') || playBtn;
                 playBtn.onclick = playRound;
             }
-
-            const replayBtn = document.getElementById('replayBtn');
-            if (replayBtn) replayBtn.onclick = playRound;
 
             const nextBtn = document.getElementById('nextBtn');
             if (nextBtn) nextBtn.onclick = newRound;
@@ -2150,75 +2424,6 @@
             const challengeCancelBtn = document.getElementById('challengeCancelBtn');
             if (challengeBtn) challengeBtn.addEventListener('click', startChallenge);
             if (challengeCancelBtn) challengeCancelBtn.addEventListener('click', cancelChallenge);
-
-            // Picker de intervalos (nivel 1)
-            const intervalGrid = document.getElementById('intervalPickerGrid');
-            const intervalCountEl = document.getElementById('intervalPickerCount');
-            const updateIntervalCount = () => { if (intervalCountEl) intervalCountEl.textContent = `${selectedIntervalIds.length}/${ALL_INTERVALS.length}`; };
-            if (intervalGrid) {
-                const checkboxes = intervalGrid.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        const semitone = parseInt(this.value, 10);
-                        if (this.checked) {
-                            if (!selectedIntervalIds.includes(semitone)) selectedIntervalIds.push(semitone);
-                        } else {
-                            selectedIntervalIds = selectedIntervalIds.filter(id => id !== semitone);
-                        }
-                        saveIntervalSelection(selectedIntervalIds);
-                        updateIntervalCount();
-                        newRound();
-                    });
-                });
-                document.getElementById('selectAllIntervals')?.addEventListener('click', function() {
-                    checkboxes.forEach(cb => cb.checked = true);
-                    selectedIntervalIds = ALL_INTERVALS.map(inter => inter.semitones);
-                    saveIntervalSelection(selectedIntervalIds);
-                    updateIntervalCount();
-                    newRound();
-                });
-                document.getElementById('deselectAllIntervals')?.addEventListener('click', function() {
-                    checkboxes.forEach(cb => cb.checked = false);
-                    selectedIntervalIds = [];
-                    saveIntervalSelection(selectedIntervalIds);
-                    updateIntervalCount();
-                    newRound();
-                });
-            }
-
-            // Picker de acordes (nivel 2)
-            const chordGrid = document.getElementById('chordPickerGrid');
-            const chordCountEl = document.getElementById('chordPickerCount');
-            const updateChordCount = () => { if (chordCountEl) chordCountEl.textContent = `${selectedChordIds.length}/${ALL_CHORD_TYPES.length}`; };
-            if (chordGrid) {
-                const checkboxes = chordGrid.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        if (this.checked) {
-                            if (!selectedChordIds.includes(this.value)) selectedChordIds.push(this.value);
-                        } else {
-                            selectedChordIds = selectedChordIds.filter(id => id !== this.value);
-                        }
-                        saveChordSelection(selectedChordIds);
-                        updateChordCount();
-                        newRound();
-                    });
-                });
-                document.getElementById('selectAllChords')?.addEventListener('click', function() {
-                    checkboxes.forEach(cb => cb.checked = true);
-                    selectedChordIds = ALL_CHORD_TYPES.map(c => c.id);
-                    saveChordSelection(selectedChordIds);
-                    updateChordCount();
-                    newRound();
-                });
-                document.getElementById('deselectAllChords')?.addEventListener('click', function() {
-                    checkboxes.forEach(cb => cb.checked = false);
-                    selectedChordIds = [];
-                    saveChordSelection(selectedChordIds);
-                    updateChordCount();
-                    newRound();
-                });
-            }
 
             // Inicializar SoundFont
             if (!sfLoading && !sfLoaded && !sfLoadError) {
@@ -2269,6 +2474,7 @@
     // ============================================================
     initChordSelection();
     initIntervalSelection();
+    initLevel3Selection();
 
     // Por defecto, nivel 1 en modo práctica
     learnMode = false;
