@@ -24,7 +24,10 @@
 
 @font-face {
   font-family: "MTF Improviso Light";
-  src: url("../../assets/fonts/MTF-ImprovisoLighter.otf") format("opentype");
+  /* Bravura implementa los puntos de código SMuFL (U+E000…).
+     La fuente original no formaba parte del proyecto, por lo que los
+     navegadores mostraban cuadros vacíos en claves, silencios y figuras. */
+  src: local("Bravura"), url("assets/fonts/Bravura.otf") format("opentype");
   font-display: swap;
 }
 
