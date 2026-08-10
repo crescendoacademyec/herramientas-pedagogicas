@@ -16,8 +16,8 @@
     <meta property="og:title" content="Editor Crescendo">
     <meta property="og:description" content="Escribe, organiza y reproduce ejercicios musicales con herramientas pedagógicas de notación.">
     <meta property="og:url" content="https://jaramillomusiclab.com/lab/editor-partituras/">
-    <meta property="og:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
-    <meta property="og:image:secure_url" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
+    <meta property="og:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg">
+    <meta property="og:image:secure_url" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Editor Crescendo">
     <meta name="twitter:description" content="Escribe, organiza y reproduce ejercicios musicales con herramientas pedagógicas de notación.">
-    <meta name="twitter:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
+    <meta name="twitter:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg">
     <meta name="twitter:image:alt" content="Editor Crescendo">
     <title>Editor Crescendo</title>
     <link rel="icon" href="../../favicon.svg?v=1" type="image/svg+xml">
@@ -39,17 +39,20 @@
         if (enabled) document.documentElement.classList.add("appearance-admin-enabled");
       })();
     </script>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="ipad-shell.css">
+    <!-- Los módulos del editor viven en src/. Esta base conserva el HTML en la raíz
+         y permite que las dependencias se resuelvan correctamente en GitHub Pages. -->
+    <base href="src/">
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../ipad-shell.css">
   </head>
   <body class="editor-page">
     <div class="page-bg" aria-hidden="true"></div>
     <header class="app-header">
-      <a class="brand" href="../../">
+      <a class="brand" href="../">
         <span class="brand-mark">JML</span>
         <span>Jaramillo Music Lab</span>
       </a>
-      <a class="lab-link" href="../../lab.html">Volver al Lab</a>
+      <a class="lab-link" href="../">Volver al inicio</a>
     </header>
 
     <main class="app-shell">
