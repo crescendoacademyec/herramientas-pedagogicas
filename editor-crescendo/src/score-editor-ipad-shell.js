@@ -1,11 +1,7 @@
 (function (global) {
-  const ICON_SPRITE = "../midi-piano/assets/lucide-sprite.svg";
-
-  // Iconos dibujados en línea (sin depender del sprite externo) para los
-  // botones de la barra de la app: mostrar/ocultar herramientas, el grupo de
-  // guardar/deshacer/rehacer/reproducir, y teclado MIDI/inspector/pantalla
-  // completa. Si el sprite externo no carga (ruta rota, protocolo file://,
-  // etc.) estos botones igual muestran un gráfico reconocible.
+  // Todos los íconos de la app se dibujan en línea, sin depender de ningún
+  // archivo externo (sprite, fuente de íconos, etc.). Así los botones
+  // siempre muestran su gráfico sin importar cómo se sirva la página.
   const INLINE_ICONS = Object.freeze({
     "panel-left": [
       '<rect x="3" y="3" width="18" height="18" rx="2"/>',
@@ -41,6 +37,131 @@
       '<path d="M21 8V5a2 2 0 0 0-2-2h-3"/>',
       '<path d="M3 16v3a2 2 0 0 0 2 2h3"/>',
       '<path d="M16 21h3a2 2 0 0 0 2-2v-3"/>'
+    ].join(""),
+    x: [
+      '<line x1="18" y1="6" x2="6" y2="18"/>',
+      '<line x1="6" y1="6" x2="18" y2="18"/>'
+    ].join(""),
+    "arrow-left": [
+      '<line x1="19" y1="12" x2="5" y2="12"/>',
+      '<polyline points="12 19 5 12 12 5"/>'
+    ].join(""),
+    "folder-open": [
+      '<path d="M3 8V6a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/>',
+      '<path d="M3 8h18l-1.7 9.3a2 2 0 0 1-2 1.7H6.7a2 2 0 0 1-2-1.7z"/>'
+    ].join(""),
+    "pencil-line": [
+      '<path d="M12 20h9"/>',
+      '<path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>'
+    ].join(""),
+    "music-2": [
+      '<circle cx="8" cy="18" r="3"/>',
+      '<path d="M11 18V3l9-1v13"/>'
+    ].join(""),
+    music: [
+      '<path d="M9 18V5l12-2v13"/>',
+      '<circle cx="6" cy="18" r="3"/>',
+      '<circle cx="18" cy="16" r="3"/>'
+    ].join(""),
+    type: [
+      '<polyline points="4 7 4 4 20 4 20 7"/>',
+      '<line x1="9" y1="20" x2="15" y2="20"/>',
+      '<line x1="12" y1="4" x2="12" y2="20"/>'
+    ].join(""),
+    "list-ordered": [
+      '<line x1="10" y1="6" x2="21" y2="6"/>',
+      '<line x1="10" y1="12" x2="21" y2="12"/>',
+      '<line x1="10" y1="18" x2="21" y2="18"/>',
+      '<path d="M4 4h2v4"/>',
+      '<path d="M4 8h3"/>',
+      '<path d="M4 15c0-1 2-1.5 2-2.5S5 11 4 11.5"/>',
+      '<path d="M4 19h3"/>'
+    ].join(""),
+    "circle-help": [
+      '<circle cx="12" cy="12" r="9"/>',
+      '<path d="M9.1 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3"/>',
+      '<line x1="12" y1="17" x2="12.01" y2="17"/>'
+    ].join(""),
+    "mouse-pointer-2": '<path d="M4 4l7.07 17 2.51-7.39L21 11.07Z"/>',
+    "square-pen": [
+      '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>',
+      '<path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L11 16l-4 1 1-4Z"/>'
+    ].join(""),
+    "link-2": [
+      '<path d="M9 17H7a5 5 0 0 1 0-10h2"/>',
+      '<path d="M15 7h2a5 5 0 1 1 0 10h-2"/>',
+      '<line x1="8" y1="12" x2="16" y2="12"/>'
+    ].join(""),
+    braces: [
+      '<path d="M8 3a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2"/>',
+      '<path d="M16 3a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2"/>'
+    ].join(""),
+    "move-horizontal": [
+      '<polyline points="18 8 22 12 18 16"/>',
+      '<polyline points="6 8 2 12 6 16"/>',
+      '<line x1="2" y1="12" x2="22" y2="12"/>'
+    ].join(""),
+    "wand-sparkles": [
+      '<path d="m3 21 9-9"/>',
+      '<path d="M12.2 6.2 15 3l6 6-3 3z"/>',
+      '<path d="M15 4V2"/>',
+      '<path d="M20 9h2"/>',
+      '<path d="M17.8 6.2 19 5"/>'
+    ].join(""),
+    "rows-3": [
+      '<rect x="3" y="3" width="18" height="5" rx="1"/>',
+      '<rect x="3" y="9.5" width="18" height="5" rx="1"/>',
+      '<rect x="3" y="16" width="18" height="5" rx="1"/>'
+    ].join(""),
+    "panel-top": [
+      '<rect x="3" y="3" width="18" height="18" rx="2"/>',
+      '<path d="M3 9h18"/>'
+    ].join(""),
+    timer: [
+      '<line x1="10" y1="2" x2="14" y2="2"/>',
+      '<line x1="12" y1="14" x2="12" y2="9"/>',
+      '<circle cx="12" cy="14" r="8"/>'
+    ].join(""),
+    hash: [
+      '<line x1="4" y1="9" x2="20" y2="9"/>',
+      '<line x1="4" y1="15" x2="20" y2="15"/>',
+      '<line x1="10" y1="3" x2="8" y2="21"/>',
+      '<line x1="16" y1="3" x2="14" y2="21"/>'
+    ].join(""),
+    sparkles: '<path d="M12 2l1.7 5.6L19 9.3l-5.3 1.7L12 16.6l-1.7-5.6L5 9.3l5.3-1.7Z"/>',
+    "audio-lines": [
+      '<line x1="4" y1="8" x2="4" y2="16"/>',
+      '<line x1="9" y1="4" x2="9" y2="20"/>',
+      '<line x1="14" y1="7" x2="14" y2="17"/>',
+      '<line x1="19" y1="10" x2="19" y2="14"/>'
+    ].join(""),
+    "between-horizontal-end": [
+      '<rect x="3" y="3" width="7" height="18" rx="1"/>',
+      '<rect x="14" y="3" width="7" height="18" rx="1"/>',
+      '<path d="M10 12h4"/>',
+      '<path d="m12 9 3 3-3 3"/>'
+    ].join(""),
+    "columns-3": [
+      '<rect x="3" y="3" width="18" height="18" rx="2"/>',
+      '<line x1="9" y1="3" x2="9" y2="21"/>',
+      '<line x1="15" y1="3" x2="15" y2="21"/>'
+    ].join(""),
+    badge: [
+      '<circle cx="12" cy="12" r="9"/>',
+      '<path d="m9 12 2 2 4-4"/>'
+    ].join(""),
+    "audio-waveform": '<path d="M2 13a2 2 0 0 0 2-2 2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 0 2 2 2 2 0 0 0 2-2 2 2 0 0 1 2-2 2 2 0 0 1 2 2 2 2 0 0 0 2 2"/>',
+    scan: [
+      '<path d="M3 7V5a2 2 0 0 1 2-2h2"/>',
+      '<path d="M17 3h2a2 2 0 0 1 2 2v2"/>',
+      '<path d="M21 17v2a2 2 0 0 1-2 2h-2"/>',
+      '<path d="M7 21H5a2 2 0 0 1-2-2v-2"/>'
+    ].join(""),
+    "file-plus-2": [
+      '<path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5z"/>',
+      '<path d="M14 2v6h6"/>',
+      '<path d="M9 15h6"/>',
+      '<path d="M12 12v6"/>'
     ].join("")
   });
   const PANEL_STORAGE_KEY = "jml-score-ipad-shell-v1";
@@ -102,15 +223,8 @@
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     if (className) svg.setAttribute("class", className);
     svg.setAttribute("aria-hidden", "true");
-    const inline = INLINE_ICONS[name];
-    if (inline) {
-      svg.setAttribute("viewBox", "0 0 24 24");
-      svg.innerHTML = inline;
-      return svg;
-    }
-    const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
-    use.setAttribute("href", `${ICON_SPRITE}#${name}`);
-    svg.appendChild(use);
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.innerHTML = INLINE_ICONS[name] || "";
     return svg;
   }
 
