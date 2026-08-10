@@ -563,7 +563,9 @@
       startAt: 0,
       startOffsetMs: 0,
       tempoEvents: [],
-      durationMs: 0
+      durationMs: 0,
+      acousticPianoPromise: null,
+      acousticPianoOutput: null
     },
     autoDropConfig: {
       lowerLimitMidi: 62,
@@ -10155,10 +10157,104 @@
     return events.sort((a, b) => a.startMs - b.startMs || a.midi - b.midi);
   }
 
+  // Piano acústico por SoundFont: se usa como salida MIDI de respaldo cuando
+  // el navegador no expone ninguna salida MIDI local de hardware/software
+  // (el caso normal para casi cualquier alumno). Implementa la misma forma
+  // que un MIDIOutput real (`send(mensaje, timestamp)`, `clear()`, `name`,
+  // `state`) para que el resto del motor de reproducción no necesite saber
+  // la diferencia.
+  function createAcousticPianoOutput(instrument, audioContext) {
+    const originTime = performance.now();
+    const originAudioTime = audioContext.currentTime;
+    const activeNodes = new Map();
+    const audioTimeFor = (timestamp) => {
+      const target = Number.isFinite(timestamp) ? timestamp : performance.now();
+      return Math.max(audioContext.currentTime, originAudioTime + (target - originTime) / 1000);
+    };
+    const noteOn = (midi, velocity, timestamp) => {
+      const when = audioTimeFor(timestamp);
+      const node = instrument.play(midi, when, {
+        gain: Math.max(0.05, Math.min(1, (Number(velocity) || 88) / 127)),
+        duration: 6
+      });
+      const stack = activeNodes.get(midi) || [];
+      stack.push(node);
+      activeNodes.set(midi, stack);
+    };
+    const noteOff = (midi, timestamp) => {
+      const when = audioTimeFor(timestamp);
+      const stack = activeNodes.get(midi);
+      if (!stack || !stack.length) return;
+      const node = stack.shift();
+      try {
+        node?.stop?.(when);
+      } catch {
+        // A node that already finished playing is safe to ignore.
+      }
+      if (stack.length) activeNodes.set(midi, stack);
+      else activeNodes.delete(midi);
+    };
+    return {
+      name: "Piano acústico (SoundFont)",
+      manufacturer: "Cuaderno de estudio",
+      state: "connected",
+      send(message, timestamp) {
+        const status = message[0] & 0xF0;
+        const midi = message[1];
+        const velocity = message[2];
+        if (status === 0x90 && velocity > 0) noteOn(midi, velocity, timestamp);
+        else if (status === 0x80 || (status === 0x90 && velocity === 0)) noteOff(midi, timestamp);
+        // Los mensajes de cambio de programa y control change se ignoran:
+        // el piano acústico es el único timbre de esta salida.
+      },
+      clear() {
+        activeNodes.forEach((stack) => {
+          stack.forEach((node) => {
+            try {
+              node?.stop?.();
+            } catch {
+              // Ignorable: el nodo ya pudo haber terminado de sonar.
+            }
+          });
+        });
+        activeNodes.clear();
+      }
+    };
+  }
+
+  async function acousticPianoOutput() {
+    if (state.midiPlayback.acousticPianoOutput) return state.midiPlayback.acousticPianoOutput;
+    if (!window.Soundfont) return null;
+    if (!state.midiPlayback.acousticPianoPromise) {
+      state.midiPlayback.acousticPianoPromise = (async () => {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        const audioContext = new AudioContextClass();
+        if (audioContext.state === "suspended") {
+          try { await audioContext.resume(); } catch {
+            // Some browsers only allow resuming after a user gesture; the
+            // click on the playback button itself counts as that gesture.
+          }
+        }
+        const instrument = await window.Soundfont.instrument(audioContext, "acoustic_grand_piano");
+        return createAcousticPianoOutput(instrument, audioContext);
+      })().catch(() => null);
+    }
+    state.midiPlayback.acousticPianoOutput = await state.midiPlayback.acousticPianoPromise;
+    return state.midiPlayback.acousticPianoOutput;
+  }
+
   async function midiPlaybackOutput(options = {}) {
     const quiet = options.quiet === true;
     if (!navigator.requestMIDIAccess) {
-      if (!quiet) await showEditorMessage("Este navegador no tiene Web MIDI disponible. Usa Chrome o Edge en HTTPS/local para reproducir por MIDI local.");
+      const piano = await acousticPianoOutput();
+      if (piano) {
+        state.midiPlayback.output = piano;
+        state.midiPlayback.outputName = piano.name;
+        emitEditorState();
+        return piano;
+      }
+      if (!quiet) await showEditorMessage("Este navegador no tiene Web MIDI disponible y no se pudo cargar el piano acústico. Usa Chrome o Edge, o revisa tu conexión a internet.");
       return null;
     }
     try {
@@ -10166,15 +10262,29 @@
         state.midiPlayback.access = await navigator.requestMIDIAccess({ sysex: false });
       }
     } catch (error) {
+      const piano = await acousticPianoOutput();
+      if (piano) {
+        state.midiPlayback.output = piano;
+        state.midiPlayback.outputName = piano.name;
+        emitEditorState();
+        return piano;
+      }
       if (!quiet) await showEditorMessage("No se pudo activar MIDI local. Revisa permisos MIDI del navegador.");
       return null;
     }
     const outputs = [...state.midiPlayback.access.outputs.values()];
     const output = outputs.find((candidate) => candidate.state === "connected") || outputs[0] || null;
     if (!output) {
+      const piano = await acousticPianoOutput();
+      if (piano) {
+        state.midiPlayback.output = piano;
+        state.midiPlayback.outputName = piano.name;
+        emitEditorState();
+        return piano;
+      }
       state.midiPlayback.outputName = "";
       emitEditorState();
-      if (!quiet) await showEditorMessage("No hay ninguna salida MIDI local disponible.");
+      if (!quiet) await showEditorMessage("No hay ninguna salida MIDI local disponible y no se pudo cargar el piano acústico. Revisa tu conexión a internet.");
       return null;
     }
     state.midiPlayback.output = output;
