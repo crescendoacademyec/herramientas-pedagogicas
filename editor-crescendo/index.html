@@ -1,14 +1,412 @@
+
 <!doctype html>
 <html lang="es">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#101115" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Editor de partituras para escribir, organizar, reproducir y compartir ejercicios musicales con herramientas pedagógicas de notación."
+    >
+    <meta name="robots" content="index,follow,max-image-preview:large">
+    <link rel="canonical" href="https://jaramillomusiclab.com/lab/editor-partituras/">
+    <meta property="og:locale" content="es_CO">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Editor Crescendo">
+    <meta property="og:title" content="Editor Crescendo">
+    <meta property="og:description" content="Escribe, organiza y reproduce ejercicios musicales con herramientas pedagógicas de notación.">
+    <meta property="og:url" content="https://jaramillomusiclab.com/lab/editor-partituras/">
+    <meta property="og:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
+    <meta property="og:image:secure_url" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Editor Crescendo">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Editor Crescendo">
+    <meta name="twitter:description" content="Escribe, organiza y reproduce ejercicios musicales con herramientas pedagógicas de notación.">
+    <meta name="twitter:image" content="https://jaramillomusiclab.com/assets/lab/editor-partituras-social.jpg?v=2">
+    <meta name="twitter:image:alt" content="Editor Crescendo">
     <title>Editor Crescendo</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="../../favicon.svg?v=1" type="image/svg+xml">
+    <script>
+      (() => {
+        const params = new URLSearchParams(window.location.search);
+        const enabledFromUrl = params.has("admin")
+          ? ["1", "true", "si", "sí", "yes", "on"].includes(String(params.get("admin") || "").toLowerCase())
+          : null;
+        const enabled = enabledFromUrl ?? false;
+        if (enabled) document.documentElement.classList.add("appearance-admin-enabled");
+      })();
+    </script>
+    <link rel="stylesheet" href="styles.css?v=139">
+    <link rel="stylesheet" href="ipad-shell.css?v=7">
   </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="src/app.js"></script>
+  <body class="editor-page">
+    <div class="page-bg" aria-hidden="true"></div>
+    <header class="app-header">
+      <a class="brand" href="../../">
+        <span class="brand-mark">JML</span>
+        <span>Jaramillo Music Lab</span>
+      </a>
+      <a class="lab-link" href="../../lab.html">Volver al Lab</a>
+    </header>
+
+    <main class="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Aplicación de notación</p>
+        <h1>Cuaderno de estudio</h1>
+        <p>
+          Escribe, organiza, reproduce y comparte ejercicios musicales con
+          herramientas de notación, cifrado, texto, MIDI y exportación MusicXML.
+        </p>
+      </section>
+
+      <section class="exercise-library" aria-label="Menú de archivo del cuaderno">
+        <div class="exercise-menubar" role="menubar" aria-label="Archivo del cuaderno">
+          <details class="exercise-app-menu">
+            <summary class="exercise-app-menu__summary" role="menuitem">
+              <span>Archivo</span>
+            </summary>
+            <div class="exercise-app-menu__panel exercise-app-menu__panel--file" role="menu">
+              <label>
+                <span>Ejercicios</span>
+                <select id="exerciseSelect">
+                  <option value="">Sin ejercicios guardados</option>
+                </select>
+              </label>
+              <label>
+                <span>Título</span>
+                <input id="exerciseTitleInput" type="text" placeholder="Ej. Ligaduras en 6/8">
+              </label>
+              <label>
+                <span>Descripción</span>
+                <input id="exerciseDescriptionInput" type="text" placeholder="Indicaciones breves para el estudiante">
+              </label>
+              <div class="exercise-app-menu__actions">
+                <button id="loadExerciseButton" type="button">Cargar</button>
+                <button id="saveExerciseButton" type="button">Guardar</button>
+                <button id="exportExerciseButton" type="button">Exportar</button>
+                <button id="exportMusicXmlButton" type="button">Exportar XML</button>
+                <label class="exercise-import">
+                  Importar
+                  <input id="importExerciseInput" type="file" accept="application/json,.json">
+                </label>
+                <button id="deleteExerciseButton" type="button">Eliminar local</button>
+              </div>
+            </div>
+          </details>
+
+          <details class="exercise-app-menu">
+            <summary class="exercise-app-menu__summary" role="menuitem">
+              <span>Escenas</span>
+            </summary>
+            <div class="exercise-app-menu__panel exercise-app-menu__panel--scenes" role="menu" aria-label="Escenas del ejercicio">
+              <div class="exercise-library__mode" role="group" aria-label="Modo de navegación">
+                <button id="reviewModeButton" class="is-active" type="button">Repaso</button>
+                <button id="exerciseModeButton" type="button">Ejercicio</button>
+              </div>
+              <label>
+                <span>Escenas</span>
+                <select id="sceneSelect">
+                  <option value="">Sin escenas</option>
+                </select>
+              </label>
+              <div class="exercise-app-menu__actions exercise-app-menu__actions--scenes">
+                <button id="saveSceneButton" type="button">Guardar escena</button>
+                <button id="loadSceneButton" type="button">Ir</button>
+                <button id="overwriteSceneButton" type="button">Reescribir</button>
+                <button id="prevSceneButton" type="button" aria-label="Escena anterior">Escena anterior</button>
+                <button id="nextSceneButton" type="button" aria-label="Escena siguiente">Escena siguiente</button>
+                <button id="moveSceneUpButton" type="button" aria-label="Mover escena antes">Mover arriba</button>
+                <button id="moveSceneDownButton" type="button" aria-label="Mover escena después">Mover abajo</button>
+                <button id="deleteSceneButton" type="button">Borrar</button>
+              </div>
+            </div>
+          </details>
+
+          <details class="exercise-app-menu">
+            <summary class="exercise-app-menu__summary" role="menuitem">
+              <span>Ayuda</span>
+            </summary>
+            <div class="exercise-app-menu__panel exercise-app-menu__panel--help" role="menu" aria-label="Ayuda del cuaderno">
+              <p class="exercise-app-menu__intro">Manual completo de usuario del Cuaderno de estudio.</p>
+              <div class="exercise-app-menu__actions">
+                <button id="openManualButton" type="button">Abrir manual</button>
+              </div>
+            </div>
+          </details>
+
+          <p id="exerciseStatus" class="exercise-library__status" aria-live="polite"></p>
+        </div>
+      </section>
+
+      <section id="manualOverlay" class="manual-overlay" hidden aria-hidden="true">
+        <article class="manual-reader" role="dialog" aria-modal="true" aria-labelledby="manualTitle">
+          <header class="manual-reader__header">
+            <div>
+              <p class="manual-reader__eyebrow">Ayuda</p>
+              <h2 id="manualTitle">Manual de usuario</h2>
+            </div>
+            <button id="closeManualButton" class="manual-reader__close" type="button" aria-label="Cerrar manual">&times;</button>
+          </header>
+          <div class="manual-reader__tools">
+            <label class="manual-search">
+              <span>Buscar en el manual</span>
+              <input id="manualSearchInput" type="search" placeholder="Ej. Gen, escenas, MusicXML..." autocomplete="off">
+            </label>
+            <p id="manualSearchStatus" class="manual-search__status" aria-live="polite"></p>
+          </div>
+          <div class="manual-reader__main">
+            <nav id="manualNav" class="manual-reader__nav" aria-label="Secciones del manual"></nav>
+            <div id="manualBody" class="manual-reader__body" tabindex="0">
+              <p class="manual-reader__loading">Cargando manual...</p>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="editor editor-workbench" aria-label="Editor de partituras">
+        <div class="editor-menu editor-menu--primary" role="toolbar" aria-label="Menú principal del editor">
+          <button class="icon-chip music-icon palette-trigger is-active" id="selectToolButton" data-palette="selection" type="button" aria-label="Seleccionar" aria-expanded="false" aria-controls="durationDrawer" title="Seleccionar">
+            <span aria-hidden="true">Selección</span>
+          </button>
+          <button class="icon-chip music-icon" id="editModeButton" type="button" aria-label="Modo edición" title="Modo edición"><span aria-hidden="true">Editar</span></button>
+          <button class="icon-chip music-icon palette-trigger" id="figureMenuButton" data-palette="figures" type="button" aria-label="Figuras" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Figuras</span></button>
+          <label class="grid-control" title="Grid del cursor · Alt+1 / Alt+2">
+            <span>Grid</span>
+            <select id="gridDurationSelect" aria-label="Grid del cursor">
+              <option value="breve">Cuadrada</option>
+              <option value="whole">Redonda</option>
+              <option value="half">Blanca</option>
+              <option value="quarter">Negra</option>
+              <option value="eighth" selected>Corchea</option>
+              <option value="sixteenth">Semicorchea</option>
+              <option value="thirty-second">Fusa</option>
+              <option value="sixty-fourth">Semifusa</option>
+              <option value="one-twenty-eighth">Garrapatea</option>
+            </select>
+          </label>
+          <button class="icon-chip music-icon palette-trigger" data-palette="ties" type="button" aria-label="Ligadura" aria-expanded="false" aria-controls="durationDrawer">
+            <span aria-hidden="true">Ligaduras</span>
+          </button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="tuplets" type="button" aria-label="Tresillo 3:2" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Tuplets</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="meters" type="button" aria-label="Signatura tres cuartos" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Compás</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="tempo" type="button" aria-label="Tempo" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Tempo</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="clefs" type="button" aria-label="Clave de sol" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Claves</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="articulations" type="button" aria-label="Acento" aria-expanded="false" aria-controls="durationDrawer">
+            <span aria-hidden="true">Articulaciones</span>
+          </button>
+          <button class="icon-chip music-icon" id="keySignatureButton" data-palette="keys" type="button" aria-label="Armadura" title="Armadura"><span aria-hidden="true">Armadura</span></button>
+          <button class="icon-chip music-icon" id="dynamicsButton" data-palette="dynamics" type="button" aria-label="Dinámicas" title="Dinámicas"><span aria-hidden="true">Dinámicas</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="endings" type="button" aria-label="Casillas" aria-expanded="false" aria-controls="durationDrawer"><span aria-hidden="true">Casillas</span></button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="canvas" type="button" aria-label="Canvas" aria-expanded="false" aria-controls="durationDrawer">
+            <span aria-hidden="true">Canvas</span>
+          </button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="tools" type="button" aria-label="Drops" aria-expanded="false" aria-controls="durationDrawer" title="Drops">
+            <span class="tool-main-label" aria-hidden="true">Drops</span>
+          </button>
+          <button class="icon-chip music-icon palette-trigger" data-palette="bars" type="button" aria-label="Barra de repetición" aria-expanded="false" aria-controls="durationDrawer">
+            <span aria-hidden="true">Barras</span>
+          </button>
+          <button class="icon-chip music-icon" id="reflowButton" type="button" aria-label="Reorganizar partitura" aria-pressed="false" title="Reorganizar partitura"><span aria-hidden="true">Reorganizar</span></button>
+          <button class="icon-chip music-icon" id="musicXmlButton" type="button" aria-label="Exportar MusicXML" title="Exportar MusicXML"><span aria-hidden="true">MusicXML</span></button>
+          <button class="icon-chip music-icon" id="captureSceneButton" type="button" aria-label="Guardar escena" title="Guardar escena">
+            <span aria-hidden="true">Guardar escena</span>
+          </button>
+          <button class="icon-chip music-icon palette-trigger" id="sceneMenuButton" data-palette="scenes" type="button" aria-label="Escenas" aria-expanded="false" aria-controls="durationDrawer" title="Escenas">
+            <span aria-hidden="true">Escenas</span>
+          </button>
+          <button class="icon-chip music-icon" id="fullscreenButton" type="button" aria-label="Pantalla completa" title="Pantalla completa">
+            <span aria-hidden="true">Pantalla</span>
+          </button>
+          <label class="playback-bpm-control" title="BPM de reproducción">
+            <span>BPM</span>
+            <input id="playbackBpmInput" type="number" min="20" max="320" step="1" value="140" inputmode="numeric" aria-label="BPM de reproducción">
+          </label>
+          <button class="icon-chip music-icon palette-trigger jazz-mode-button" id="jazzModeButton" data-palette="jazz" type="button" aria-label="Jazz mode" aria-expanded="false" aria-controls="durationDrawer" title="Jazz mode"><span aria-hidden="true">Jazz</span></button>
+          <button class="icon-chip music-icon" id="playbackButton" type="button" aria-label="Reproducir MIDI local desde la selección" title="Reproducir MIDI local desde la selección">
+            <span aria-hidden="true">Reproducir</span>
+          </button>
+          <div class="segmented compact mode-controls utility-controls" hidden>
+            <button id="noteMode" class="is-active" type="button">Nota</button>
+            <button id="restMode" type="button">Silencio</button>
+          </div>
+          <div class="segmented compact edit-controls">
+            <button id="undoButton" type="button" aria-label="Deshacer" title="Deshacer">
+              <span aria-hidden="true">Deshacer</span>
+            </button>
+            <button id="redoButton" type="button" aria-label="Rehacer" title="Rehacer">
+              <span aria-hidden="true">Rehacer</span>
+            </button>
+            <button id="shiftModeButton" type="button" aria-label="Modo desplazamiento" title="Modo desplazamiento">
+              <span aria-hidden="true">Mover</span>
+            </button>
+            <button id="textModeButton" type="button" aria-label="Texto" title="Texto">
+              <span aria-hidden="true">Texto</span>
+            </button>
+            <button id="chordModeButton" type="button" aria-label="Cifrado" title="Cifrado">
+              <span aria-hidden="true">Cifrado</span>
+            </button>
+            <button id="clearButton" type="button" aria-label="Limpiar" title="Limpiar">
+              <span aria-hidden="true">Limpiar</span>
+            </button>
+          </div>
+          <strong class="cursor-pill utility-controls" id="cursorLabel">Compás 1 · 1/4</strong>
+        </div>
+
+        <div class="text-toolbar is-hidden" id="textToolbar" role="toolbar" aria-label="Controles de texto">
+          <label>
+            <span>Fuente</span>
+            <select id="textFontSelect">
+              <option value="Ink Free">Ink Free</option>
+              <option value="MTF Improviso Text">Improviso Text</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Arial">Arial</option>
+            </select>
+          </label>
+          <label>
+            <span>Tamaño</span>
+            <input id="textSizeInput" type="number" min="8" max="96" step="1" value="24">
+          </label>
+          <label>
+            <span>Color</span>
+            <input id="textColorInput" type="color" value="#15120f">
+          </label>
+          <label>
+            <span>Enclosure</span>
+            <select id="textEnclosureSelect">
+              <option value="none">Ninguno</option>
+              <option value="box">Caja</option>
+              <option value="round">Redondo</option>
+              <option value="circle">Círculo</option>
+            </select>
+          </label>
+          <label>
+            <span>Justificación</span>
+            <select id="textAlignSelect">
+              <option value="left">Izquierda</option>
+              <option value="center">Centro</option>
+              <option value="right">Derecha</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="editor-menu editor-menu--drawer is-hidden" id="durationDrawer" role="toolbar" aria-label="Menú desplegable contextual">
+          <div class="segmented duration-icons" id="durationTools" role="group" aria-label="Duración activa"></div>
+        </div>
+
+        <div class="editor-stage">
+          <section class="systems-canvas" aria-label="Canvas de sistemas">
+            <div class="system-row is-active">
+              <div class="system-area">
+                <div class="score-shell">
+                  <svg id="score" class="score" role="img" aria-label="Partitura editable"></svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="appearance-panel appearance-panel--icons" data-admin-only aria-label="Administrador de iconos">
+            <section class="midi-label-appearance" aria-label="Apariencia de etiquetas del teclado MIDI">
+              <header class="midi-label-appearance__header">
+                <p class="appearance-panel__eyebrow">Etiquetas</p>
+                <h3>Teclado MIDI</h3>
+              </header>
+              <div id="midiLabelAppearanceControls" class="appearance-controls"></div>
+            </section>
+            <header class="appearance-panel__header">
+              <div>
+                <p class="appearance-panel__eyebrow">Iconos</p>
+                <h3>Administrador</h3>
+              </div>
+              <div class="appearance-actions">
+                <button id="resetIconAppearance" type="button">Reset</button>
+                <button id="copyIconAppearance" type="button">Copiar</button>
+                <button id="exportIconAppearance" type="button">JSON</button>
+              </div>
+            </header>
+            <p class="appearance-panel__hint">
+              Haz click sobre cualquier icono de la app para editarlo aquí.
+            </p>
+            <div id="iconAppearancePreview" class="icon-appearance-preview" role="img" aria-label="Vista previa del icono"></div>
+            <label class="appearance-icon-picker">
+              <span>Buscar</span>
+              <input id="iconAppearanceSearch" type="search" placeholder="Ej. repetición, barras, midi...">
+            </label>
+            <label class="appearance-icon-picker">
+              <span>Icono</span>
+              <select id="iconAppearanceSelect"></select>
+            </label>
+            <div id="iconAppearanceControls" class="appearance-controls"></div>
+          </aside>
+        </div>
+        <section class="midi-keyboard-panel" id="midiKeyboardPanel" aria-label="Teclado MIDI del editor">
+          <div class="midi-figure-strip" id="midiFigureStrip" role="menubar" aria-label="Herramientas para el teclado MIDI"></div>
+          <button class="midi-chord-toggle" id="midiChordButton" type="button" aria-label="Modo acorde del teclado MIDI" aria-pressed="false"><span data-icon-layer="default">Acorde</span></button>
+          <div class="midi-keyboard" id="midiKeyboard" role="group" aria-label="Teclado MIDI desde A0 hasta C8"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="score-editor-key-signatures.js?v=2"></script>
+    <script src="score-editor-anchored-text.js?v=1"></script>
+    <script src="score-editor-meter.js?v=1"></script>
+    <script src="score-editor-rhythm.js?v=1"></script>
+    <script src="score-editor-durations.js?v=3"></script>
+    <script src="score-editor-smufl-data.js?v=4"></script>
+    <script src="score-editor-smufl.js?v=1"></script>
+    <script src="score-editor-svg.js?v=1"></script>
+    <script src="score-editor-basic-render.js?v=1"></script>
+    <script src="score-editor-entry-render.js?v=1"></script>
+    <script src="score-editor-mark-render.js?v=1"></script>
+    <script src="score-editor-glyph-render.js?v=1"></script>
+    <script src="score-editor-item-style.js?v=2"></script>
+    <script src="score-editor-storage.js?v=2"></script>
+    <script src="score-editor-ui-options.js?v=1"></script>
+    <script src="score-editor-clefs.js?v=1"></script>
+    <script src="score-editor-palettes.js?v=7"></script>
+    <script src="score-editor-appearance.js?v=3"></script>
+    <script src="score-editor-admin-controls.js?v=1"></script>
+    <script src="score-editor-exercises.js?v=3"></script>
+    <script src="score-editor-voices.js?v=1"></script>
+    <script src="score-editor-score-model.js?v=1"></script>
+    <script src="score-editor-systems.js?v=1"></script>
+    <script src="score-editor-measure-anchors.js?v=1"></script>
+    <script src="score-editor-measures.js?v=2"></script>
+    <script src="score-editor-writing.js?v=2"></script>
+    <script src="score-editor-timeline.js?v=1"></script>
+    <script src="score-editor-rhythmic-columns.js?v=1"></script>
+    <script src="score-editor-input-session.js?v=1"></script>
+    <script src="score-editor-keymap.js?v=4"></script>
+    <script src="score-editor-touch.js?v=2"></script>
+    <script src="score-editor-history.js?v=1"></script>
+    <script src="score-editor-tooltips.js?v=3"></script>
+    <script src="score-editor-popups.js?v=2"></script>
+    <script src="score-editor-selection.js?v=2"></script>
+    <script src="score-editor-context-menu.js?v=1"></script>
+    <script src="score-editor-icon-html.js?v=9"></script>
+    <script src="score-editor-menu-renderer.js?v=3"></script>
+    <script src="score-editor-application-menu.js?v=2"></script>
+    <script src="score-editor-auto-voicing.js?v=1"></script>
+    <script src="score-editor-progress.js?v=1"></script>
+    <script src="score-editor-exercise-library.js?v=2"></script>
+    <script src="score-editor-viewport.js?v=1"></script>
+    <script src="score-editor-mode-controls.js?v=1"></script>
+    <script src="score-editor-marks.js?v=3"></script>
+    <script src="score-editor-text-items.js?v=2"></script>
+    <script src="score-editor-appearance-defaults.js?v=12"></script>
+    <script src="score-editor-midi-piano-data.js?v=2"></script>
+    <script src="score-editor-midi-chords.js?v=13"></script>
+    <script src="score-editor-midi-recognition.js?v=2"></script>
+    <script src="score-editor-midi-capture.js?v=1"></script>
+    <script src="score-editor-midi-keyboard.js?v=4"></script>
+    <script src="score-editor-midi-playback.js?v=2"></script>
+    <script src="score-editor-musicxml-export.js?v=9"></script>
+    <script src="score-editor-geometry.js?v=1"></script>
+    <script src="score-editor-performance.js?v=1"></script>
+    <script src="score-editor-engraving.js?v=2"></script>
+    <script src="score-editor-ipad-shell.js?v=2"></script>
+    <script src="app.js?v=416"></script>
   </body>
 </html>
