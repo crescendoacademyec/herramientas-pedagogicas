@@ -1372,7 +1372,7 @@
         if (sampleMap.size > 0) {
           setSourceIndicator('Samples personalizados', 'sample');
         } else {
-          setSourceIndicator('SoundFont: acústico', 'sf');
+          setSourceIndicator('Piano Acústico', 'sf');
         }
         if (DEBUG) console.log('SoundFont de piano acústico cargado correctamente.');
       })
@@ -1863,7 +1863,7 @@
     }
     updateSampleStatus();
     if (sampleMap.size > 0) setSourceIndicator('Samples personalizados', 'sample');
-    else if (sfPlayer) setSourceIndicator('SoundFont: acústico', 'sf');
+    else if (sfPlayer) setSourceIndicator('Piano Acústico', 'sf');
     else setSourceIndicator('Sintético (fallback)', 'osc');
     return loaded;
   }
@@ -1899,7 +1899,7 @@
   sampleClearBtn.addEventListener('click', function() {
     sampleMap.clear();
     updateSampleStatus();
-    if (sfPlayer) setSourceIndicator('SoundFont: acústico', 'sf');
+    if (sfPlayer) setSourceIndicator('Piano Acústico', 'sf');
     else if (sfLoading) setSourceIndicator('cargando SoundFont...', '');
     else setSourceIndicator('Sintético (fallback)', 'osc');
     folderInput.value = '';
