@@ -360,15 +360,15 @@
     root.dataset.keyboardVisible = String(state.keyboardVisible);
 
     const rail = element("nav", "ipad-navigation-rail");
-    rail.setAttribute("aria-label", "Áreas del Cuaderno de estudio");
+    rail.setAttribute("aria-label", "Áreas del editor");
     rail.setAttribute("role", "tablist");
     const brand = element("a", "ipad-navigation-brand");
     brand.href = "../../lab.html";
     brand.title = "Volver al Lab";
-    brand.setAttribute("aria-label", "Jaramillo Music Lab");
+    brand.setAttribute("aria-label", "Editor Crescendo");
     brand.append(
       element("span", "ipad-brand-mark", "EC"),
-      element("span", "ipad-brand-caption", "")
+      element("span", "ipad-brand-caption", "Crescendo")
     );
     rail.appendChild(brand);
 
