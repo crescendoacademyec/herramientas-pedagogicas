@@ -363,8 +363,8 @@
     rail.setAttribute("aria-label", "Áreas del editor");
     rail.setAttribute("role", "tablist");
     const brand = element("a", "ipad-navigation-brand");
-    brand.href = "../../lab.html";
-    brand.title = "Volver al Lab";
+    brand.href = "https://crescendoacademyec.github.io/herramientas-pedagogicas/";
+    brand.title = "Volver a la página principal";
     brand.setAttribute("aria-label", "Editor Crescendo");
     brand.append(
       element("span", "ipad-brand-mark", "EC"),
@@ -385,9 +385,9 @@
       navButtons.set(item.id, button);
     });
     const labLink = element("a", "ipad-navigation-button ipad-navigation-exit");
-    labLink.href = "../../lab.html";
-    labLink.title = "Volver al Lab";
-    labLink.append(icon("arrow-left"), element("span", "", "Lab"));
+    labLink.href = "https://crescendoacademyec.github.io/herramientas-pedagogicas/";
+    labLink.title = "Volver a la página principal";
+    labLink.append(icon("arrow-left"), element("span", "", "Crescendo"));
     rail.appendChild(labLink);
 
     const main = element("main", "ipad-app-main");
@@ -396,7 +396,7 @@
     const toggleLeft = createIconButton({ icon: "panel-left", label: "Mostrar u ocultar herramientas" });
     const heading = element("div", "ipad-screen-heading");
     heading.append(
-      element("span", "ipad-eyebrow", "CUADERNO DE ESTUDIO"),
+      element("span", "ipad-eyebrow", "Editor Crescendo"),
       element("h1", "", "Ejercicio sin título")
     );
     const documentSubtitle = element("span", "ipad-document-subtitle", "Partitura editable");
