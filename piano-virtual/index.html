@@ -203,6 +203,9 @@
     font-size:0.78rem;
     color: var(--muted);
   }
+  .field-volume{
+    margin-left: auto;
+  }
   select{
     appearance: none;
     -webkit-appearance: none;
@@ -305,6 +308,41 @@
     font-weight: 700;
   }
 
+  .color-value-row{ display:flex; align-items:center; gap:6px; }
+  .color-swatch{
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+  .color-swatch-item{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: 7px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    width: 100%;
+    white-space: nowrap;
+  }
+  .color-swatch-item:hover{ background: rgba(212,168,79,0.18); }
+  .color-swatch-item.selected{ color: var(--gold); font-weight:700; }
+  .color-swatch-item .color-swatch{ width:17px; height:17px; }
+  .color-swatch-item.custom-trigger{
+    border-top: 1px solid rgba(255,255,255,0.12);
+    margin-top: 4px;
+    padding-top: 9px;
+  }
+  .color-swatch-item.custom-trigger .color-swatch{
+    background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
+  }
+
   /* Mini-toggle reutilizable dentro de la controlbar (ej. "Manos") */
   .toggle-mini{
     display:flex;
@@ -346,6 +384,44 @@
     transform: translateX(16px);
   }
 
+  .hand-toggle-group{ display:flex; gap:6px; }
+  .hand-btn{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    gap: 4px;
+    min-width: 44px;
+    padding: 6px 8px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05);
+    color: var(--muted);
+    cursor:pointer;
+    transition: background .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+  }
+  .hand-btn-label{
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 600;
+  }
+  .hand-btn svg{ width:19px; height:19px; display:block; }
+  .hand-icon-mirror{ transform: scaleX(-1); }
+  .hand-btn:hover{ border-color: rgba(255,255,255,0.3); color:var(--text); }
+  #handLeftBtn.active{
+    background: var(--hand-left-color);
+    border-color: var(--hand-left-color);
+    color:#0b1a24;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--hand-left-color) 55%, transparent);
+  }
+  #handRightBtn.active{
+    background: var(--hand-right-color);
+    border-color: var(--hand-right-color);
+    color:#241a0b;
+    box-shadow: 0 0 10px color-mix(in srgb, var(--hand-right-color) 55%, transparent);
+  }
+
   /* Grupo de "rango de práctica" — eliminado (ver /areas/crescendo-web-tools.md si se retoma más adelante) */
   input[type=color]{
     width:30px;height:24px;border:none;border-radius:5px;padding:0;cursor:pointer;background:none;
@@ -385,22 +461,6 @@
   .pdf-controls label:hover{
     background: rgba(255,255,255,0.18);
   }
-  .sample-status{
-    font-size:0.75rem;
-    padding:3px 10px;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.08);
-    color: var(--muted);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: background .15s ease;
-    display: inline-block;
-  }
-  .sample-status:hover{ background: rgba(255,255,255,0.16); }
-  .sample-status.loaded{ background:rgba(71,99,87,0.3); color:#bfe0cf; }
-  .sample-status.loaded:hover{ background:rgba(71,99,87,0.45); }
-  .sample-status.fallback{ background:rgba(163,55,42,0.25); color:#f3b3a8; }
-  .sample-status.fallback:hover{ background:rgba(163,55,42,0.4); }
 
   .sample-clear-btn{
     display: none;
@@ -430,39 +490,120 @@
     gap: 12px;
     flex-wrap: wrap;
   }
-  .sound-source-indicator{
-    font-size:0.7rem;
-    padding:2px 10px;
-    border-radius: 12px;
+  .instrument-box{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap:4px;
+    min-width: 68px;
     background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+    padding: 6px 10px;
+    cursor: pointer;
     color: var(--muted);
     white-space: nowrap;
+    transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+  }
+  .instrument-box:hover,
+  .instrument-box.open{
+    border-color: var(--gold);
+    background: rgba(212,168,79,0.12);
+  }
+  .instrument-icon{
     display: inline-flex;
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+    color: inherit;
+  }
+  .instrument-icon svg{ width:100%; height:100%; display:block; }
+  .instrument-box-label{
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .sr-only{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .instrument-box.sf{ background:rgba(71,99,87,0.3); color:#bfe0cf; }
+  .instrument-box.sample{ background:rgba(212,168,79,0.3); color:#f1e6d2; }
+  .instrument-box.osc{ background:rgba(163,55,42,0.25); color:#f3b3a8; }
+
+  .instrument-item{
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    width: 100%;
+    white-space: nowrap;
+  }
+  .instrument-item .instrument-icon{ width:18px; height:18px; color: var(--muted); }
+  .instrument-item:hover{ background: rgba(212,168,79,0.18); color: var(--gold); }
+  .instrument-item:hover .instrument-icon{ color: var(--gold); }
+  .instrument-item.selected{ color: var(--gold); font-weight:700; }
+  .instrument-item.selected .instrument-icon{ color: var(--gold); }
+
+  /* ===== Badges con icono: samples / sustain / MIDI (texto arriba, icono abajo) ===== */
+  .icon-badge{
+    display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 4px;
-  }
-  .sound-source-indicator.sf{ background:rgba(71,99,87,0.3); color:#bfe0cf; }
-  .sound-source-indicator.sample{ background:rgba(212,168,79,0.3); color:#f1e6d2; }
-  .sound-source-indicator.osc{ background:rgba(163,55,42,0.25); color:#f3b3a8; }
-
-  .midi-status{
-    font-size:0.75rem;
-    padding:3px 9px;
-    border-radius:999px;
+    min-width: 68px;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 10px;
     background: rgba(255,250,240,0.1);
+    border: 1px solid rgba(255,255,255,0.14);
     color: var(--muted);
-    white-space:nowrap;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: color .15s ease, background-color .15s ease, border-color .15s ease;
   }
-  .midi-status.ok{ background:rgba(71,99,87,0.35); color:#bfe0cf; }
-  .midi-status.err{ background:rgba(163,55,42,0.3); color:#f3b3a8; }
+  .icon-badge .badge-icon{
+    display: inline-flex;
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+    color: #f3b3a8; /* rojo por defecto: inactivo/desconectado */
+    transition: color .15s ease;
+  }
+  .icon-badge .badge-icon svg{ width:100%; height:100%; display:block; }
+  .icon-badge.badge-on .badge-icon{ color: #7fe0a0; }
+  .icon-badge:hover{ border-color: rgba(255,255,255,0.28); }
 
   .sustain-indicator{
-    display:inline-flex;
+    display:flex;
+    flex-direction: column;
     align-items:center;
-    gap:6px;
-    font-size:0.75rem;
-    padding:3px 10px;
-    border-radius:999px;
+    gap:4px;
+    min-width: 68px;
+    font-size:0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    font-weight: 600;
+    padding:6px 10px;
+    border-radius:10px;
     background: rgba(255,250,240,0.1);
     color: var(--muted);
     white-space:nowrap;
@@ -470,9 +611,23 @@
     border:1px solid rgba(255,255,255,0.14);
     user-select:none;
   }
+  .sustain-indicator:hover{ border-color: rgba(255,255,255,0.28); }
+  .sustain-icon-row{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .pedal-icon{
+    display: inline-flex;
+    width: 21px;
+    height: 21px;
+    flex-shrink: 0;
+    color: var(--muted);
+  }
+  .pedal-icon svg{ width:100%; height:100%; display:block; }
   .sustain-dot{
-    width:11px;
-    height:11px;
+    width:9px;
+    height:9px;
     border-radius:50%;
     background:#ffffff;
     border:1px solid rgba(0,0,0,0.25);
@@ -881,17 +1036,17 @@
     line-height: 1.15;
   }
 
-  /* Referencia visual de mano izquierda / mano derecha (split en Do central) */
-  #keyboard.show-hands .white-key.hand-left{
+  /* Referencia visual de mano izquierda / mano derecha (split en Do central) — independientes */
+  #keyboard.show-hand-left .white-key.hand-left{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
-  #keyboard.show-hands .white-key.hand-right{
+  #keyboard.show-hand-right .white-key.hand-right{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
-  #keyboard.show-hands .black-key.hand-left{
+  #keyboard.show-hand-left .black-key.hand-left{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-left-color) 55%, var(--black-key)) 60%, #000 100%);
   }
-  #keyboard.show-hands .black-key.hand-right{
+  #keyboard.show-hand-right .black-key.hand-right{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-right-color) 55%, var(--black-key)) 60%, #000 100%);
   }
 
@@ -957,6 +1112,9 @@
     .right-indicators{
       margin-left: 0;
       justify-content: flex-start;
+    }
+    .field-volume{
+      margin-left: 0;
     }
   }
 </style>
@@ -1026,6 +1184,11 @@
 <main class="app-content">
 
   <div class="controlbar">
+    <div class="field field-volume">
+      <label for="volume">Volumen</label>
+      <input type="range" id="volume" min="0" max="7" step="0.01" value="4">
+    </div>
+
     <div class="quick-select" id="qsNotes">
       <button type="button" class="quick-select-box" id="qsNotesBox" aria-haspopup="listbox" aria-expanded="false">
         <span class="quick-select-label">Notas</span>
@@ -1074,19 +1237,37 @@
       </select>
     </div>
 
-    <label class="toggle-mini" for="handsToggle" title="Colorea las teclas para diferenciar mano izquierda y mano derecha (split en Do central)">
-      <input type="checkbox" id="handsToggle">
-      Manos
-    </label>
-
-    <div class="field">
-      <label for="volume">Volumen</label>
-      <input type="range" id="volume" min="0" max="7" step="0.01" value="4">
+    <div class="quick-select" id="qsColor">
+      <button type="button" class="quick-select-box color-box" id="qsColorBox" aria-haspopup="listbox" aria-expanded="false">
+        <span class="quick-select-label">Color Teclas</span>
+        <span class="color-value-row">
+          <span class="color-swatch" id="qsColorSwatch"></span>
+          <span class="quick-select-value" id="qsColorValue">Azul</span>
+        </span>
+      </button>
+      <div class="quick-select-dropdown" id="qsColorDropdown" role="listbox"></div>
+      <input type="color" id="activeColor" value="#66b3ff" class="file-input-hidden" tabindex="-1" aria-hidden="true">
     </div>
 
-    <div class="field">
-      <label for="activeColor">Color Teclas</label>
-      <input type="color" id="activeColor" value="#66b3ff">
+    <div class="hand-toggle-group">
+      <button type="button" class="hand-btn" id="handLeftBtn" title="Resaltar el registro de la mano izquierda" aria-pressed="false">
+        <span class="hand-btn-label">MI</span>
+        <svg class="hand-icon-mirror" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 22h7a3 3 0 0 0 3-3v-5.5a1.5 1.5 0 0 0-3 0"/>
+          <path d="M17 13.5v-3a1.5 1.5 0 0 0-3 0v2.5"/>
+          <path d="M14 12.5V9a1.5 1.5 0 0 0-3 0v4"/>
+          <path d="M11 12.5V7a1.5 1.5 0 0 0-3 0v9l-1.5-2.3a1.4 1.4 0 0 0-2.4 1.5L7 21"/>
+        </svg>
+      </button>
+      <button type="button" class="hand-btn" id="handRightBtn" title="Resaltar el registro de la mano derecha" aria-pressed="false">
+        <span class="hand-btn-label">MD</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 22h7a3 3 0 0 0 3-3v-5.5a1.5 1.5 0 0 0-3 0"/>
+          <path d="M17 13.5v-3a1.5 1.5 0 0 0-3 0v2.5"/>
+          <path d="M14 12.5V9a1.5 1.5 0 0 0-3 0v4"/>
+          <path d="M11 12.5V7a1.5 1.5 0 0 0-3 0v9l-1.5-2.3a1.4 1.4 0 0 0-2.4 1.5L7 21"/>
+        </svg>
+      </button>
     </div>
 
     <div class="sample-controls">
@@ -1101,13 +1282,37 @@
     </div>
 
     <div class="right-indicators">
-      <span class="sound-source-indicator" id="soundSourceIndicator">cargando...</span>
-      <label class="sample-status" id="sampleStatus" for="sampleFolder" title="Sin samples cargados — clic para elegir una carpeta de samples de audio">sin samples</label>
+      <div class="quick-select" id="qsInstrument">
+        <button type="button" class="instrument-box" id="qsInstrumentBox" aria-haspopup="listbox" aria-expanded="false" title="Cambiar el sonido del piano">
+          <span class="instrument-box-label">Sonido</span>
+          <span class="instrument-icon" id="qsInstrumentIcon"></span>
+          <span class="sr-only" id="qsInstrumentName">cargando…</span>
+        </button>
+        <div class="quick-select-dropdown" id="qsInstrumentDropdown" role="listbox"></div>
+      </div>
+      <label class="icon-badge" id="sampleStatus" for="sampleFolder" title="Sin samples cargados — clic para elegir una carpeta de samples de audio">
+        <span>Samples</span>
+        <span class="badge-icon" id="sampleStatusIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+        </span>
+        <span class="sr-only" id="sampleStatusText">sin samples</span>
+      </label>
       <span class="sustain-indicator" id="sustainIndicator" title="Estado del pedal de sustain (clic para probar sin pedal MIDI)">
-        <span class="sustain-dot" id="sustainDot"></span>
-        Sustain
+        <span>Sustain</span>
+        <span class="sustain-icon-row">
+          <span class="pedal-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 17h14l5-5v-2H4Z"/><line x1="4" y1="17" x2="4" y2="20"/><line x1="14" y1="17" x2="14" y2="20"/></svg>
+          </span>
+          <span class="sustain-dot" id="sustainDot"></span>
+        </span>
       </span>
-      <span class="midi-status" id="midiStatus">MIDI: buscando…</span>
+      <span class="icon-badge" id="midiStatus">
+        <span>MIDI</span>
+        <span class="badge-icon" id="midiStatusIcon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="20" height="8" rx="1"/><line x1="5" y1="9" x2="5" y2="17"/><line x1="8" y1="9" x2="8" y2="14"/><line x1="11" y1="9" x2="11" y2="17"/><line x1="14" y1="9" x2="14" y2="14"/><line x1="17" y1="9" x2="17" y2="17"/></svg>
+        </span>
+        <span class="sr-only" id="midiStatusText">MIDI: buscando…</span>
+      </span>
     </div>
   </div>
 
@@ -1286,7 +1491,8 @@
   let currentMidiRange = { min: 48, max: 83 };
   let keyElByMidi = {};
   let allNotes = [];
-  let showHands = false;
+  let showHandLeft = false;
+  let showHandRight = false;
   let currentKeyPc = null; // pitch-class (0-11) de la tonalidad elegida, o null si no hay ninguna
 
   // ---------- DOM REFS ----------
@@ -1354,7 +1560,8 @@
   const qsNotes = initQuickSelect(noteDisplaySelect, document.getElementById('qsNotesBox'), document.getElementById('qsNotesValue'), document.getElementById('qsNotesDropdown'));
   const qsLang = initQuickSelect(noteLangSelect, document.getElementById('qsLangBox'), document.getElementById('qsLangValue'), document.getElementById('qsLangDropdown'));
   const qsKey = initQuickSelect(keySelect, document.getElementById('qsKeyBox'), document.getElementById('qsKeyValue'), document.getElementById('qsKeyDropdown'));
-  const handsToggle = document.getElementById('handsToggle');
+  const handLeftBtn = document.getElementById('handLeftBtn');
+  const handRightBtn = document.getElementById('handRightBtn');
   const hintText = document.getElementById('hintText');
 
   const chordNameEl = document.getElementById('chordName');
@@ -1372,7 +1579,8 @@
   function buildKeyboard(minMidi, maxMidi) {
     keyboardEl.innerHTML = '';
     keyboardEl.classList.toggle('beginner-mode', currentMode === 'beginner');
-    keyboardEl.classList.toggle('show-hands', showHands);
+    keyboardEl.classList.toggle('show-hand-left', showHandLeft);
+    keyboardEl.classList.toggle('show-hand-right', showHandRight);
     keyElByMidi = {};
     const notes = [];
     for (let m = minMidi; m <= maxMidi; m++) {
@@ -1508,30 +1716,85 @@
   const activeSources = {};
   let sfPlayer = null;
   let sfLoading = false;
-  const sourceIndicator = document.getElementById('soundSourceIndicator');
 
-  function setSourceIndicator(text, cls) {
-    sourceIndicator.textContent = text;
-    sourceIndicator.className = 'sound-source-indicator' + (cls ? ' ' + cls : '');
+  // ---------- SELECTOR DE INSTRUMENTO (SoundFont) ----------
+  const ICON_ACOUSTIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4c0 0 11-1.3 15.5 4C20.6 10 20 14 17 15.5H6c-1.7 0-3-1.6-3-3.5V5.3C3 4.7 3.4 4.2 4 4Z"/><line x1="6.5" y1="15.5" x2="6.5" y2="19"/><line x1="9.5" y1="15.5" x2="9.5" y2="19"/><line x1="12.5" y1="15.5" x2="12.5" y2="19"/></svg>';
+  const ICON_ELECTRIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="7" rx="1"/><line x1="6.5" y1="7" x2="6.5" y2="14"/><line x1="10" y1="7" x2="10" y2="14"/><line x1="13.5" y1="7" x2="13.5" y2="14"/><line x1="17" y1="7" x2="17" y2="14"/><line x1="6" y1="14" x2="4" y2="20"/><line x1="18" y1="14" x2="20" y2="20"/><line x1="4" y1="20" x2="20" y2="20"/></svg>';
+  const ICON_ORGAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="15" width="18" height="4" rx="1"/><line x1="6" y1="4" x2="6" y2="9"/><line x1="10" y1="4" x2="10" y2="9"/><line x1="14" y1="4" x2="14" y2="9"/><line x1="18" y1="4" x2="18" y2="9"/></svg>';
+
+  const INSTRUMENTS = [
+    { id: 'acoustic_grand_piano', label: 'Piano Acústico', icon: ICON_ACOUSTIC },
+    { id: 'electric_piano_1', label: 'Piano Eléctrico (Rhodes)', icon: ICON_ELECTRIC },
+    { id: 'electric_piano_2', label: 'Piano Eléctrico (Wurli)', icon: ICON_ELECTRIC },
+    { id: 'drawbar_organ', label: 'Órgano', icon: ICON_ORGAN },
+  ];
+  let currentInstrumentId = INSTRUMENTS[0].id;
+
+  const instrumentBox = document.getElementById('qsInstrumentBox');
+  const instrumentIconEl = document.getElementById('qsInstrumentIcon');
+  const instrumentNameEl = document.getElementById('qsInstrumentName');
+  const instrumentDropdown = document.getElementById('qsInstrumentDropdown');
+
+  function instrumentInfo(id) {
+    return INSTRUMENTS.find(i => i.id === id) || INSTRUMENTS[0];
   }
 
-  function initSoundFont() {
-    if (sfPlayer || sfLoading) return;
+  function setSourceIndicator(text, cls) {
+    instrumentNameEl.textContent = text;
+    instrumentBox.title = text + ' — clic para cambiar el sonido';
+    instrumentBox.className = 'instrument-box' + (cls ? ' ' + cls : '');
+  }
+
+  INSTRUMENTS.forEach(inst => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'instrument-item';
+    item.dataset.value = inst.id;
+    item.innerHTML = '<span class="instrument-icon">' + inst.icon + '</span><span>' + inst.label + '</span>';
+    item.addEventListener('click', () => {
+      closeAllQuickSelects();
+      loadInstrument(inst.id);
+    });
+    instrumentDropdown.appendChild(item);
+  });
+  function syncInstrumentSelection() {
+    instrumentDropdown.querySelectorAll('.instrument-item').forEach(item => {
+      item.classList.toggle('selected', item.dataset.value === currentInstrumentId);
+    });
+  }
+  instrumentBox.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = !instrumentDropdown.classList.contains('open');
+    closeAllQuickSelects();
+    if (willOpen) {
+      instrumentBox.classList.add('open');
+      instrumentDropdown.classList.add('open');
+      instrumentBox.setAttribute('aria-expanded', 'true');
+    }
+  });
+
+  function loadInstrument(id) {
+    currentInstrumentId = id;
+    instrumentIconEl.innerHTML = instrumentInfo(id).icon;
+    syncInstrumentSelection();
+    sfPlayer = null;
     sfLoading = true;
-    setSourceIndicator('cargando SoundFont...', '');
+    setSourceIndicator('cargando…', '');
     const ctx = ensureCtx();
-    Soundfont.instrument(ctx, 'acoustic_grand_piano', { destination: masterBus })
+    Soundfont.instrument(ctx, id, { destination: masterBus })
       .then(instrument => {
+        if (currentInstrumentId !== id) return; // el usuario cambió de instrumento mientras cargaba
         sfPlayer = instrument;
         sfLoading = false;
         if (sampleMap.size > 0) {
           setSourceIndicator('Samples personalizados', 'sample');
         } else {
-          setSourceIndicator('Piano Acústico', 'sf');
+          setSourceIndicator(instrumentInfo(id).label, 'sf');
         }
-        if (DEBUG) console.log('SoundFont de piano acústico cargado correctamente.');
+        if (DEBUG) console.log('SoundFont cargado:', id);
       })
       .catch(err => {
+        if (currentInstrumentId !== id) return;
         sfLoading = false;
         if (sampleMap.size > 0) {
           setSourceIndicator('Samples personalizados', 'sample');
@@ -1540,6 +1803,11 @@
         }
         console.warn('Error al cargar SoundFont, se usará oscilador:', err);
       });
+  }
+  instrumentIconEl.innerHTML = instrumentInfo(currentInstrumentId).icon;
+  function initSoundFont() {
+    if (sfPlayer || sfLoading) return;
+    loadInstrument(currentInstrumentId);
   }
   setTimeout(initSoundFont, 100);
 
@@ -1878,11 +2146,12 @@
 
   // ---------- MIDI ----------
   const midiStatus = document.getElementById('midiStatus');
+  const midiStatusText = document.getElementById('midiStatusText');
   const sustainIndicator = document.getElementById('sustainIndicator');
   sustainIndicator.addEventListener('click', () => { setSustain(!sustainOn); });
   function setStatus(text, cls) {
-    midiStatus.textContent = text;
-    midiStatus.className = 'midi-status' + (cls ? ' ' + cls : '');
+    midiStatusText.textContent = text;
+    midiStatus.className = 'icon-badge' + (cls === 'ok' ? ' badge-on' : '');
   }
 
   if (navigator.requestMIDIAccess) {
@@ -1987,11 +2256,69 @@
     }
   });
 
-  // ---------- COLOR PERSONALIZADO ----------
+  // ---------- COLOR DE TECLAS (caja + desplegable con muestras) ----------
   const colorInput = document.getElementById('activeColor');
-  colorInput.addEventListener('input', () => {
-    document.documentElement.style.setProperty('--active-color', colorInput.value);
+  const COLOR_PRESETS = [
+    { hex: '#66b3ff', name: 'Azul' },
+    { hex: '#ff6e6e', name: 'Rojo' },
+    { hex: '#7fe0a0', name: 'Verde' },
+    { hex: '#ffce54', name: 'Ámbar' },
+    { hex: '#d18fff', name: 'Violeta' },
+    { hex: '#ff8fc7', name: 'Rosa' },
+    { hex: '#7fdbe0', name: 'Turquesa' },
+    { hex: '#f2f2f2', name: 'Blanco' },
+  ];
+  const qsColorBox = document.getElementById('qsColorBox');
+  const qsColorSwatch = document.getElementById('qsColorSwatch');
+  const qsColorValue = document.getElementById('qsColorValue');
+  const qsColorDropdown = document.getElementById('qsColorDropdown');
+
+  function applyActiveColor(hex, name) {
+    document.documentElement.style.setProperty('--active-color', hex);
+    colorInput.value = hex;
+    qsColorSwatch.style.background = hex;
+    qsColorValue.textContent = name;
+    qsColorDropdown.querySelectorAll('.color-swatch-item[data-hex]').forEach(item => {
+      item.classList.toggle('selected', item.dataset.hex.toLowerCase() === hex.toLowerCase());
+    });
+  }
+
+  COLOR_PRESETS.forEach(preset => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'color-swatch-item';
+    item.dataset.hex = preset.hex;
+    item.innerHTML = '<span class="color-swatch" style="background:' + preset.hex + '"></span><span>' + preset.name + '</span>';
+    item.addEventListener('click', () => {
+      applyActiveColor(preset.hex, preset.name);
+      closeAllQuickSelects();
+    });
+    qsColorDropdown.appendChild(item);
   });
+  const customItem = document.createElement('button');
+  customItem.type = 'button';
+  customItem.className = 'color-swatch-item custom-trigger';
+  customItem.innerHTML = '<span class="color-swatch"></span><span>Personalizado…</span>';
+  customItem.addEventListener('click', () => {
+    closeAllQuickSelects();
+    colorInput.click();
+  });
+  qsColorDropdown.appendChild(customItem);
+
+  colorInput.addEventListener('input', () => {
+    applyActiveColor(colorInput.value, 'Personalizado');
+  });
+  qsColorBox.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const willOpen = !qsColorDropdown.classList.contains('open');
+    closeAllQuickSelects();
+    if (willOpen) {
+      qsColorBox.classList.add('open');
+      qsColorDropdown.classList.add('open');
+      qsColorBox.setAttribute('aria-expanded', 'true');
+    }
+  });
+  applyActiveColor(colorInput.value, 'Azul');
 
   // ---------- SAMPLES ----------
   async function loadSamplesFromFolder(files) {
@@ -2018,22 +2345,23 @@
     }
     updateSampleStatus();
     if (sampleMap.size > 0) setSourceIndicator('Samples personalizados', 'sample');
-    else if (sfPlayer) setSourceIndicator('Piano Acústico', 'sf');
+    else if (sfPlayer) setSourceIndicator(instrumentInfo(currentInstrumentId).label, 'sf');
     else setSourceIndicator('Sintético (fallback)', 'osc');
     return loaded;
   }
 
   function updateSampleStatus() {
     const statusEl = document.getElementById('sampleStatus');
+    const statusTextEl = document.getElementById('sampleStatusText');
     const clearBtn = document.getElementById('sampleClearBtn');
     if (sampleMap.size === 0) {
-      statusEl.textContent = 'sin samples';
-      statusEl.className = 'sample-status fallback';
+      statusTextEl.textContent = 'sin samples';
+      statusEl.className = 'icon-badge';
       statusEl.title = 'Sin samples cargados — clic para elegir una carpeta de samples de audio';
       if (clearBtn) clearBtn.classList.remove('visible');
     } else {
-      statusEl.textContent = `${sampleMap.size} samples cargados`;
-      statusEl.className = 'sample-status loaded';
+      statusTextEl.textContent = `${sampleMap.size} samples cargados`;
+      statusEl.className = 'icon-badge badge-on';
       statusEl.title = `${sampleMap.size} samples cargados — clic para elegir otra carpeta`;
       if (clearBtn) clearBtn.classList.add('visible');
     }
@@ -2054,8 +2382,8 @@
   sampleClearBtn.addEventListener('click', function() {
     sampleMap.clear();
     updateSampleStatus();
-    if (sfPlayer) setSourceIndicator('Piano Acústico', 'sf');
-    else if (sfLoading) setSourceIndicator('cargando SoundFont...', '');
+    if (sfPlayer) setSourceIndicator(instrumentInfo(currentInstrumentId).label, 'sf');
+    else if (sfLoading) setSourceIndicator('cargando…', '');
     else setSourceIndicator('Sintético (fallback)', 'osc');
     folderInput.value = '';
   });
@@ -2768,10 +3096,18 @@
     updateChordDisplay();
   });
 
-  // ---------- TOGGLE DE MANOS ----------
-  handsToggle.addEventListener('change', function() {
-    showHands = this.checked;
-    keyboardEl.classList.toggle('show-hands', showHands);
+  // ---------- TOGGLE DE MANOS (independientes) ----------
+  handLeftBtn.addEventListener('click', function() {
+    showHandLeft = !showHandLeft;
+    keyboardEl.classList.toggle('show-hand-left', showHandLeft);
+    handLeftBtn.classList.toggle('active', showHandLeft);
+    handLeftBtn.setAttribute('aria-pressed', String(showHandLeft));
+  });
+  handRightBtn.addEventListener('click', function() {
+    showHandRight = !showHandRight;
+    keyboardEl.classList.toggle('show-hand-right', showHandRight);
+    handRightBtn.classList.toggle('active', showHandRight);
+    handRightBtn.setAttribute('aria-pressed', String(showHandRight));
   });
 
   // ---------- DETECTOR DE ACORDES (UNIFICADO) ----------
@@ -3011,7 +3347,8 @@
   currentDisplay = 'mostrar';
   currentLang = 'es';
   currentKeyPc = null;
-  showHands = false;
+  showHandLeft = false;
+  showHandRight = false;
   currentMidiRange = RANGES.beginner;
   modeBeginnerBtn.classList.add('active');
   modeProBtn.classList.remove('active');
@@ -3023,7 +3360,10 @@
   qsNotes.sync();
   qsLang.sync();
   qsKey.sync();
-  handsToggle.checked = false;
+  handLeftBtn.classList.remove('active');
+  handRightBtn.classList.remove('active');
+  handLeftBtn.setAttribute('aria-pressed', 'false');
+  handRightBtn.setAttribute('aria-pressed', 'false');
   // Forzar redibujo inicial
   requestAnimationFrame(() => {
     buildKeyboard(currentMidiRange.min, currentMidiRange.max);
