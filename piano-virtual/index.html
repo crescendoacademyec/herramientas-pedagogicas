@@ -79,51 +79,35 @@
     color: var(--text);
   }
 
-  /* Switch Beginners / Pro */
-  .mode-switch {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--muted);
+  /* Switch Beginners / Pro — control segmentado tipo píldora (mismo patrón que metronomo) */
+  .mode-toggle {
+    display: inline-flex;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 999px;
+    padding: 3px;
     margin-left: 8px;
-  }
-  .mode-switch input[type="checkbox"] {
-    appearance: none;
-    width: 44px;
-    height: 24px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.25);
-    position: relative;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
     flex-shrink: 0;
   }
-  .mode-switch input[type="checkbox"]:checked {
+  .mode-toggle-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .mode-toggle-btn.active {
     background: var(--gold);
-    border-color: var(--gold);
+    color: var(--ink);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.28);
   }
-  .mode-switch input[type="checkbox"]::before {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    background: white;
-    border-radius: 50%;
-    transition: transform 0.2s;
-  }
-  .mode-switch input[type="checkbox"]:checked::before {
-    transform: translateX(20px);
-  }
-  .mode-switch .mode-label {
-    user-select: none;
-    transition: color 0.2s;
-  }
-  .mode-switch .mode-label.active {
+  .mode-toggle-btn:not(.active):hover {
     color: var(--text);
   }
 
@@ -168,7 +152,7 @@
   @media (max-width:860px){
     .topbar{ flex-direction:column; align-items:stretch; }
     .brand{ justify-content:center; flex-wrap:wrap; }
-    .mode-switch{ margin-left:0; justify-content:center; }
+    .mode-toggle{ margin-left:0; justify-content:center; }
     #chordDisplay{ margin:6px auto; min-width:100px; font-size:1.2rem; }
     .social-bar{ justify-content:center; }
     .school-logo-link{ margin-left:0; }
@@ -192,6 +176,8 @@
   }
 
   .controlbar{
+    position: relative;
+    z-index: 20;
     flex:0 0 auto;
     display:flex;
     align-items:center;
@@ -218,14 +204,106 @@
     color: var(--muted);
   }
   select{
+    appearance: none;
+    -webkit-appearance: none;
     font-size:0.78rem;
-    padding:3px 6px;
-    border-radius:5px;
-    border:1px solid rgba(255,255,255,0.2);
-    background: rgba(22, 21, 20, 0.78);
+    font-weight: 500;
+    height: 32px;
+    padding: 0 28px 0 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.14);
+    background: rgba(255,255,255,0.05) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%23c9c5bb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>') no-repeat right 8px center;
+    background-size: 14px;
     color: var(--text);
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease;
+  }
+  select:hover{
+    background-color: rgba(255,255,255,0.09);
+    border-color: rgba(255,255,255,0.24);
+  }
+  select:focus-visible{
+    outline: none;
+    border-color: var(--gold);
   }
   input[type=range]{ width:90px; accent-color:var(--gold); }
+
+  /* ===== Selector rápido tipo "caja" (mismo patrón que FIGURA/COMPÁS del metrónomo) ===== */
+  .quick-select{ position: relative; }
+  .quick-select-box{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    min-width: 112px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: var(--text);
+    transition: border-color .15s ease, background-color .15s ease;
+  }
+  .quick-select-box:hover,
+  .quick-select-box.open{
+    border-color: var(--gold);
+    background: rgba(212, 168, 79, 0.12);
+  }
+  .quick-select-label{
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+  }
+  .quick-select-value{
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+  }
+  .quick-select-dropdown{
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: 280px;
+    z-index: 30;
+    background: var(--charcoal);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.45);
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .quick-select-dropdown.open{ display: flex; }
+  .quick-select-item{
+    background: transparent;
+    border: none;
+    color: var(--text);
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    width: 100%;
+    white-space: nowrap;
+  }
+  .quick-select-item:hover{
+    background: rgba(212, 168, 79, 0.18);
+    color: var(--gold);
+  }
+  .quick-select-item.selected{
+    color: var(--gold);
+    font-weight: 700;
+  }
 
   /* Mini-toggle reutilizable dentro de la controlbar (ej. "Manos") */
   .toggle-mini{
@@ -298,8 +376,8 @@
     align-items: center;
     gap: 6px;
     background: rgba(255,255,255,0.1);
-    border-radius: 4px;
-    padding: 4px 10px;
+    border-radius: 8px;
+    padding: 6px 12px;
     cursor: pointer;
     transition: background .15s ease;
   }
@@ -327,13 +405,14 @@
   .sample-clear-btn{
     display: none;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     background: rgba(163,55,42,0.35);
     border: none;
-    border-radius: 4px;
-    padding: 4px 10px;
+    border-radius: 8px;
+    padding: 6px 12px;
     color: #f3b3a8;
     font-size: 0.78rem;
+    font-weight: 600;
     cursor: pointer;
     transition: background .15s ease;
   }
@@ -478,13 +557,14 @@
   .pdf-clear-btn{
     display: none;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     background: var(--panel-danger-bg);
     border: none;
-    border-radius: 4px;
-    padding: 4px 10px;
+    border-radius: 8px;
+    padding: 6px 12px;
     color: var(--panel-danger-text);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 600;
     cursor: pointer;
     transition: background .15s ease;
   }
@@ -521,9 +601,9 @@
   .web-controls input{
     width: 160px;
     max-width: 40vw;
-    font-size: 0.7rem;
-    padding: 3px 7px;
-    border-radius: 4px;
+    font-size: 0.72rem;
+    padding: 6px 10px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.3);
     background: rgba(255,255,255,0.08);
     color: var(--panel-text);
@@ -533,13 +613,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 5px;
     background: var(--panel-btn-bg);
     border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
+    border-radius: 8px;
+    padding: 6px 10px;
     color: var(--panel-text);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 600;
     cursor: pointer;
     transition: background .15s ease;
   }
@@ -604,20 +685,26 @@
     display: flex;
   }
   .score-play-btn{
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+    display: inline-grid;
+    place-items: center;
+    aspect-ratio: 1;
+    height: 34px;
+    min-width: 34px;
     background: var(--panel-accent-bg);
     border: none;
-    border-radius: 4px;
-    padding: 4px 8px;
+    border-radius: 8px;
+    padding: 0;
     color: var(--panel-accent-text);
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: background .15s ease;
+    transition: background .15s ease, transform .1s ease;
   }
   .score-play-btn:hover{
     background: var(--panel-accent-bg-hover);
+  }
+  .score-play-btn:active{
+    transform: scale(0.94);
   }
   .score-play-btn.secondary{
     background: var(--panel-btn-bg);
@@ -645,50 +732,54 @@
     cursor: not-allowed;
   }
   .score-play-btn svg{
-    width: 13px;
-    height: 13px;
+    width: 17px;
+    height: 17px;
     stroke: currentColor;
+    stroke-width: 2.1;
     fill: none;
   }
   .score-tempo{
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     background: rgba(255,255,255,0.06);
-    border-radius: 4px;
-    padding: 3px 5px;
+    border-radius: 8px;
+    padding: 4px 6px;
+    height: 34px;
+    box-sizing: border-box;
   }
   .score-tempo-label{
-    font-size: 0.62rem;
-    font-weight: 900;
+    font-size: 0.65rem;
+    font-weight: 700;
     color: #eee;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.03em;
   }
   .score-tempo-btn{
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 24px;
+    height: 24px;
     min-height: 0;
     flex: 0 0 auto;
-    border-radius: 4px;
+    border-radius: 6px;
     border: none;
     background: rgba(255,255,255,0.16);
     color: #fff;
-    font-size: 0.75rem;
-    font-weight: 900;
+    font-size: 0.85rem;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
     padding: 0;
+    transition: background .15s ease, transform .1s ease;
   }
   .score-tempo-btn:hover{ background: rgba(255,255,255,0.3); }
   .score-tempo-btn:active{ transform: scale(0.92); }
   .score-tempo input{
-    width: 32px;
-    font-size: 0.65rem;
-    padding: 1px 2px;
-    border-radius: 4px;
+    width: 36px;
+    font-size: 0.72rem;
+    padding: 3px 2px;
+    border-radius: 6px;
     border: 1px solid rgba(255,255,255,0.3);
     background: transparent;
     color: #eee;
@@ -875,11 +966,10 @@
 <header class="topbar">
   <h1 class="brand">
     <span>Piano Virtual</span>
-    <span class="mode-switch">
-      <span class="mode-label" id="modeLabelBeginner">Beginners</span>
-      <input type="checkbox" id="modeToggle">
-      <span class="mode-label active" id="modeLabelPro">Pro</span>
-    </span>
+    <div class="mode-toggle" role="tablist" aria-label="Modo del piano">
+      <button type="button" class="mode-toggle-btn" id="modeBeginnerBtn" role="tab" aria-selected="true">Beginners</button>
+      <button type="button" class="mode-toggle-btn" id="modeProBtn" role="tab" aria-selected="false">Pro</button>
+    </div>
   </h1>
 
   <div id="chordDisplay">
@@ -936,26 +1026,38 @@
 <main class="app-content">
 
   <div class="controlbar">
-    <div class="field">
-      <label for="noteDisplay">Notas</label>
-      <select id="noteDisplay">
+    <div class="quick-select" id="qsNotes">
+      <button type="button" class="quick-select-box" id="qsNotesBox" aria-haspopup="listbox" aria-expanded="false">
+        <span class="quick-select-label">Notas</span>
+        <span class="quick-select-value" id="qsNotesValue">Mostrar notas</span>
+      </button>
+      <div class="quick-select-dropdown" id="qsNotesDropdown" role="listbox"></div>
+      <select id="noteDisplay" class="file-input-hidden" tabindex="-1" aria-hidden="true">
         <option value="ocultar">Ocultar notas</option>
         <option value="mostrar" selected>Mostrar notas</option>
         <option value="solfeo">Modo solfeo</option>
       </select>
     </div>
 
-    <div class="field">
-      <label for="noteLang">Idioma</label>
-      <select id="noteLang" title="Idioma de los nombres de nota (independiente del modo Beginner/Pro)">
+    <div class="quick-select" id="qsLang">
+      <button type="button" class="quick-select-box" id="qsLangBox" aria-haspopup="listbox" aria-expanded="false" title="Idioma de los nombres de nota (independiente del modo Beginner/Pro)">
+        <span class="quick-select-label">Idioma</span>
+        <span class="quick-select-value" id="qsLangValue">Do Re Mi</span>
+      </button>
+      <div class="quick-select-dropdown" id="qsLangDropdown" role="listbox"></div>
+      <select id="noteLang" class="file-input-hidden" tabindex="-1" aria-hidden="true">
         <option value="es" selected>Do Re Mi</option>
         <option value="en">C D E</option>
       </select>
     </div>
 
-    <div class="field">
-      <label for="keySelect">Tonalidad</label>
-      <select id="keySelect" title="Fija una tonalidad: se usa para el grado del acorde (I, IV, V...) y para dibujar la armadura de clave (sostenidos/bemoles) en el pentagrama">
+    <div class="quick-select" id="qsKey">
+      <button type="button" class="quick-select-box" id="qsKeyBox" aria-haspopup="listbox" aria-expanded="false" title="Fija una tonalidad: se usa para el grado del acorde (I, IV, V...) y para dibujar la armadura de clave (sostenidos/bemoles) en el pentagrama">
+        <span class="quick-select-label">Tonalidad</span>
+        <span class="quick-select-value" id="qsKeyValue">— (sin armadura)</span>
+      </button>
+      <div class="quick-select-dropdown" id="qsKeyDropdown" role="listbox"></div>
+      <select id="keySelect" class="file-input-hidden" tabindex="-1" aria-hidden="true">
         <option value="">— (sin armadura)</option>
         <option value="0">Do mayor / La menor (0 #/b)</option>
         <option value="7">Sol mayor / Mi menor (1#)</option>
@@ -1047,15 +1149,12 @@
         </button>
         <button type="button" class="score-play-btn" id="scorePlayBtn" title="Reproducir partitura (o barra espaciadora)" aria-label="Reproducir partitura">
           <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Play
         </button>
         <button type="button" class="score-play-btn" id="scorePauseBtn" title="Pausar (o barra espaciadora)" aria-label="Pausar partitura">
           <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
-          Pausa
         </button>
         <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener" aria-label="Detener partitura">
           <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></svg>
-          Stop
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota" aria-label="Avanzar una nota">
           <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
@@ -1077,7 +1176,6 @@
         <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)" aria-label="Marcar fin del tramo a repetir">B</button>
         <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" aria-label="Repetir en bucle el tramo marcado" disabled>
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
-          Loop
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo" aria-label="Quitar marcas del tramo">
           <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -1193,12 +1291,69 @@
 
   // ---------- DOM REFS ----------
   const keyboardEl = document.getElementById('keyboard');
-  const modeToggle = document.getElementById('modeToggle');
-  const modeLabelBeginner = document.getElementById('modeLabelBeginner');
-  const modeLabelPro = document.getElementById('modeLabelPro');
+  const modeBeginnerBtn = document.getElementById('modeBeginnerBtn');
+  const modeProBtn = document.getElementById('modeProBtn');
   const noteDisplaySelect = document.getElementById('noteDisplay');
   const noteLangSelect = document.getElementById('noteLang');
   const keySelect = document.getElementById('keySelect');
+
+  // ---------- SELECTORES RÁPIDOS (caja + desplegable, estilo metrónomo) ----------
+  // Construye el desplegable a partir de las <option> del <select> oculto
+  // correspondiente, así el <select> sigue siendo la única fuente de verdad
+  // y todo el código existente (addEventListener('change', ...) y las
+  // asignaciones directas de .value) sigue funcionando sin cambios: solo
+  // hay que llamar a .sync() después de cada asignación directa.
+  function initQuickSelect(select, box, valueEl, dropdown) {
+    function labelFor(val) {
+      const opt = Array.from(select.options).find(o => o.value === val);
+      return opt ? opt.textContent : '';
+    }
+    function sync() {
+      valueEl.textContent = labelFor(select.value);
+      dropdown.querySelectorAll('.quick-select-item').forEach(item => {
+        item.classList.toggle('selected', item.dataset.value === select.value);
+      });
+    }
+    Array.from(select.options).forEach(opt => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = 'quick-select-item';
+      item.setAttribute('role', 'option');
+      item.dataset.value = opt.value;
+      item.textContent = opt.textContent;
+      item.addEventListener('click', () => {
+        select.value = opt.value;
+        sync();
+        closeAllQuickSelects();
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      dropdown.appendChild(item);
+    });
+    box.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const willOpen = !dropdown.classList.contains('open');
+      closeAllQuickSelects();
+      if (willOpen) {
+        box.classList.add('open');
+        dropdown.classList.add('open');
+        box.setAttribute('aria-expanded', 'true');
+      }
+    });
+    sync();
+    return { sync };
+  }
+  function closeAllQuickSelects() {
+    document.querySelectorAll('.quick-select-box.open').forEach(b => {
+      b.classList.remove('open');
+      b.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('.quick-select-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+  document.addEventListener('click', closeAllQuickSelects);
+
+  const qsNotes = initQuickSelect(noteDisplaySelect, document.getElementById('qsNotesBox'), document.getElementById('qsNotesValue'), document.getElementById('qsNotesDropdown'));
+  const qsLang = initQuickSelect(noteLangSelect, document.getElementById('qsLangBox'), document.getElementById('qsLangValue'), document.getElementById('qsLangDropdown'));
+  const qsKey = initQuickSelect(keySelect, document.getElementById('qsKeyBox'), document.getElementById('qsKeyValue'), document.getElementById('qsKeyDropdown'));
   const handsToggle = document.getElementById('handsToggle');
   const hintText = document.getElementById('hintText');
 
@@ -2573,22 +2728,26 @@
   });
 
   // ---------- CAMBIO DE MODO (Beginners/Pro) ----------
-  modeToggle.addEventListener('change', function() {
-    const isPro = this.checked;
+  function setMode(isPro) {
     currentMode = isPro ? 'pro' : 'beginner';
     currentMidiRange = RANGES[currentMode];
-    modeLabelBeginner.classList.toggle('active', !isPro);
-    modeLabelPro.classList.toggle('active', isPro);
+    modeBeginnerBtn.classList.toggle('active', !isPro);
+    modeProBtn.classList.toggle('active', isPro);
+    modeBeginnerBtn.setAttribute('aria-selected', String(!isPro));
+    modeProBtn.setAttribute('aria-selected', String(isPro));
     // Valor pedagógico por defecto al cambiar de modo: un principiante se
     // beneficia de ver los nombres de nota; en modo Pro se ocultan por
     // defecto (el idioma de las notas, en cambio, ya no depende del modo).
     currentDisplay = isPro ? 'ocultar' : 'mostrar';
     noteDisplaySelect.value = currentDisplay;
+    qsNotes.sync();
     // Forzar redibujo con requestAnimationFrame para asegurar que el contenedor tenga tamaño
     requestAnimationFrame(() => {
       buildKeyboard(currentMidiRange.min, currentMidiRange.max);
     });
-  });
+  }
+  modeBeginnerBtn.addEventListener('click', () => setMode(false));
+  modeProBtn.addEventListener('click', () => setMode(true));
 
   // ---------- CAMBIO DE VISUALIZACIÓN ----------
   noteDisplaySelect.addEventListener('change', function() {
@@ -2848,18 +3007,22 @@
   currentMode = 'beginner';
   // Beginner arranca mostrando los nombres de nota (más útil para quien
   // recién empieza); Pro arrancará oculto la primera vez que se active
-  // (ver el listener de modeToggle).
+  // (ver setMode).
   currentDisplay = 'mostrar';
   currentLang = 'es';
   currentKeyPc = null;
   showHands = false;
   currentMidiRange = RANGES.beginner;
-  modeToggle.checked = false;
-  modeLabelBeginner.classList.add('active');
-  modeLabelPro.classList.remove('active');
+  modeBeginnerBtn.classList.add('active');
+  modeProBtn.classList.remove('active');
+  modeBeginnerBtn.setAttribute('aria-selected', 'true');
+  modeProBtn.setAttribute('aria-selected', 'false');
   noteDisplaySelect.value = 'mostrar';
   noteLangSelect.value = 'es';
   keySelect.value = '';
+  qsNotes.sync();
+  qsLang.sync();
+  qsKey.sync();
   handsToggle.checked = false;
   // Forzar redibujo inicial
   requestAnimationFrame(() => {
