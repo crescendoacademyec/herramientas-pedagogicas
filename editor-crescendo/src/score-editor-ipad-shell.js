@@ -391,7 +391,7 @@
     const labLink = element("a", "ipad-navigation-button ipad-navigation-exit");
     labLink.href = "https://crescendoacademyec.github.io/herramientas-pedagogicas/";
     labLink.title = "Volver a Herramientas";
-    labLink.append(icon("arrow-left"), element("span", "", "Lab"));
+    labLink.append(icon("arrow-left"), element("span", "", "Crescendo"));
     rail.appendChild(labLink);
 
     const main = element("main", "ipad-app-main");
