@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -651,9 +652,12 @@
     overflow: hidden;
   }
   .staff-left{
-    flex: 0 0 15%;
+    flex: 0 0 18%;
     height: 100%;
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .staff-right{
     flex: 1%;
@@ -668,7 +672,8 @@
     position: relative;
   }
   #staffSvg{
-    width: 100%;
+    width: 96%;
+
     height: 100%;
     display: block;
   }
@@ -1443,8 +1448,9 @@
   const ua = navigator.userAgent.toLowerCase();
   const isMac = /macintosh|mac os x/.test(ua);
   // Parámetros para la clave de sol según el SO
-  const clefOffsetY = isMac ? 40 : 150;
-  const clefScale = isMac ? 1.5 : 1.2;
+  const clefOffsetY = isMac ? 31 : 118;
+  const clefScale = isMac ? 1.5 : 0.95;
+  const CLEF_Y_SHIFT = -20;   // Ajusta este valor (positivo = bajar)
 
   // ---------- CONSTANTES Y UTILIDADES ----------
   const NOTE_NAMES_EN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -1944,10 +1950,10 @@
   // ---------- PENTAGRAMA ----------
   const svg = document.getElementById('staffSvg');
   const SVG_W = 2100, SVG_H = 450;
-  const Y0 = 150, HALF = 140;
+  const Y0 = 150, HALF = 110;
   function stepY(step) { return Y0 - step * HALF; }
 
-  const STAFF_X1 = 90, STAFF_X2 = 2000;
+  const STAFF_X1 = 10, STAFF_X2 = 2090;
 
   function svgEl(tag, attrs) {
     const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -2001,8 +2007,8 @@
     5:  { type: 'flat',  count: 1 }
   };
 
-  const KEYSIG_X_START = 420;
-  const KEYSIG_SPACING = 100;
+  const KEYSIG_X_START = 700; // mover armaduras
+  const KEYSIG_SPACING = 100; // separar armaduras
 
   function drawKeySignature() {
     svg.querySelectorAll('.keysig-el').forEach(e => e.remove());
@@ -2021,13 +2027,13 @@
 
       const stepTreble = diatonicStep(letter, octTreble[letter]);
       const yTreble = stepY(stepTreble);
-      const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': 240, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
       symTreble.textContent = glyph;
       svg.appendChild(symTreble);
 
       const stepBass = diatonicStep(letter, octBass[letter]);
       const yBass = stepY(stepBass);
-      const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': 240, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
       symBass.textContent = glyph;
       svg.appendChild(symBass);
     }
@@ -2045,9 +2051,10 @@
       svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
     });
     // Clave de sol con parámetros según SO
-    placeClef('𝄞', STAFF_X1+5, stepY(14) + clefOffsetY, stepY(3) + clefOffsetY, clefScale);
+    // Clave de sol
+    placeClef('𝄞', STAFF_X1+5, stepY(14) + clefOffsetY + CLEF_Y_SHIFT, stepY(3) + clefOffsetY + CLEF_Y_SHIFT, clefScale);
     // Clave de fa
-    placeClef('𝄢', STAFF_X1+5, stepY(-3)-450, stepY(-10)-450, 1.5);
+    placeClef('𝄢', STAFF_X1+5, stepY(-3)-320, stepY(-10)-354, 1.45);
     svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X1, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
     svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
   }
@@ -2091,7 +2098,7 @@
     svg.querySelectorAll('.note-el').forEach(e => e.remove());
     const active = Object.keys(activeStaffNotes).map(m => midiToInfo(parseInt(m))).sort((a,b) => a.midi - b.midi);
     const cx = (STAFF_X1 + STAFF_X2) / 2;
-    const NOTE_X_OFFSET = 350;
+    const NOTE_X_OFFSET = 500; //cabezas a la derecha
     let prevStep = null, shiftToggle = false;
     const LEDGER_LENGTH = 200;
 
@@ -2123,21 +2130,21 @@
       });
 
       if (n.name.includes('#')) {
-        const sharp = svgEl('text', { class: 'note-el', x: x-22, y: y+6, 'font-size': 18, fill: 'var(--active-color)', 'font-family': 'serif' });
+        const sharp = svgEl('text', { class: 'note-el', x: x-22, y: y+6, 'font-size': 14, fill: 'var(--active-color)', 'font-family': 'serif' });
         sharp.textContent = '♯';
         svg.appendChild(sharp);
       }
 
-      const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 155, ry: 135, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
+      const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 122, ry: 106, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
       svg.appendChild(head);
 
-      const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 200, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
+      const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 157, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
       lbl.textContent = n.name;
       svg.appendChild(lbl);
 
       if (octaveShift) {
-        const offsetY = (octaveShift === '8va') ? -220 : 250;
-        const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 100, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
+        const offsetY = (octaveShift === '8va') ? -173 : 196;
+        const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 79, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
         indicador.textContent = octaveShift;
         svg.appendChild(indicador);
       }
