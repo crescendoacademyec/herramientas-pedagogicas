@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -174,6 +175,7 @@
     min-height:0;
     display:flex;
     flex-direction:column;
+    overflow-y:auto;
   }
 
   .controlbar{
@@ -644,7 +646,7 @@
 
   /* ---------- staff + pdf viewer ---------- */
   .staff-wrap{
-    flex:0 0 52vh;
+    flex:0 0 52vh; /* largo de los visores */
     background: var(--paper);
     border-bottom:5px solid var(--line);
     display: flex;
@@ -962,7 +964,7 @@
   }
 
   .piano-wrap{
-    flex:0 0 18vh;
+    flex:0 0 16vh; /* largo del piano */
     position:relative;
     background: transparent;
     padding:0 6px 4px;
@@ -1449,9 +1451,9 @@
   const ua = navigator.userAgent.toLowerCase();
   const isMac = /macintosh|mac os x/.test(ua);
   // Parámetros para la clave de sol según el SO
-  const clefOffsetY = isMac ? 31 : 118;
+  const clefOffsetY = isMac ? 35 : 100;
   const clefScale = isMac ? 1.5 : 0.95;
-  const CLEF_Y_SHIFT = -20;   // Ajusta este valor (positivo = bajar)
+  const CLEF_Y_SHIFT = isMac ? -20 : 300;   // Ajusta este valor (positivo = bajar). Mac intacto; en Windows se bajó 15 unidades.
 
   // ---------- CONSTANTES Y UTILIDADES ----------
   const NOTE_NAMES_EN = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -2022,20 +2024,22 @@
     const octTreble = sig.type === 'sharp' ? SHARP_OCTAVE_TREBLE : FLAT_OCTAVE_TREBLE;
     const octBass = sig.type === 'sharp' ? SHARP_OCTAVE_BASS : FLAT_OCTAVE_BASS;
     const glyph = sig.type === 'sharp' ? '♯' : '♭';
+    const glyphSize = sig.type === 'flat' ? 420 : 250;
+    const glyphYOffset = sig.type === 'flat' ? -70 : 0; // negativo = sube
 
     for (let i = 0; i < sig.count; i++) {
       const letter = letters[i];
       const x = KEYSIG_X_START + i * KEYSIG_SPACING;
 
       const stepTreble = diatonicStep(letter, octTreble[letter]);
-      const yTreble = stepY(stepTreble);
-      const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      const yTreble = stepY(stepTreble) + glyphYOffset;
+      const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': glyphSize, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
       symTreble.textContent = glyph;
       svg.appendChild(symTreble);
 
       const stepBass = diatonicStep(letter, octBass[letter]);
-      const yBass = stepY(stepBass);
-      const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
+      const yBass = stepY(stepBass) + glyphYOffset;
+      const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': glyphSize, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
       symBass.textContent = glyph;
       svg.appendChild(symBass);
     }
