@@ -1,3 +1,4 @@
+
 (function (global) {
   // Todos los íconos de la app se dibujan en línea, sin depender de ningún
   // archivo externo (sprite, fuente de íconos, etc.). Así los botones
