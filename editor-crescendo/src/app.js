@@ -1,3 +1,4 @@
+
 (function () {
   document.documentElement.dataset.jmlEditorBoot = "start";
   const Geometry = window.ScoreEditorGeometry || {};
