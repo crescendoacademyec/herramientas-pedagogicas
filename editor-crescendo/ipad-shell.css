@@ -74,11 +74,15 @@ main.app-shell {
 
 .ipad-navigation-rail {
   align-items: stretch;
+  align-self: start;
   background: var(--ipad-sidebar);
   border-right: 1px solid var(--ipad-line-soft);
+  border-radius: 0 0 14px 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  height: auto;
+  max-height: calc(100dvh - 188px);
   min-height: 0;
   overflow: hidden;
   padding: 10px 7px;
@@ -1283,12 +1287,16 @@ body.editor-page .editor-workbench.is-ipad-workbench .score-shell {
 
   .ipad-navigation-rail {
     align-items: center;
+    align-self: stretch;
     border-right: 0;
+    border-radius: 0;
     border-top: 1px solid var(--ipad-line-soft);
     flex-direction: row;
     gap: 3px;
     grid-row: 2;
+    height: auto;
     justify-content: space-around;
+    max-height: none;
     overflow-x: auto;
     padding: 5px 6px;
   }
