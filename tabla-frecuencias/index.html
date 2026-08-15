@@ -186,6 +186,7 @@ a { color: inherit; text-decoration: none; }
 }
 .detail-list.cut li { border-left: 3px solid var(--wine); }
 .detail-list.boost li { border-left: 3px solid var(--moss); }
+.detail-list.comp li { border-left: 3px solid var(--gold); }
 .freq-tag { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; margin-right: 4px; }
 .detail-tips { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; background: rgba(255,255,255,0.04); border-radius: 9px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,0.14); }
 .detail-empty { font-size: 0.86rem; color: var(--text-dim); text-align: center; padding: 60px 10px; }
@@ -194,6 +195,113 @@ a { color: inherit; text-decoration: none; }
 /* nota de fuentes */
 .sources-note { margin-top: 26px; font-size: 0.74rem; color: var(--text-dim); line-height: 1.7; }
 .sources-note b { color: var(--text); }
+
+/* búsqueda + botones de modo */
+.search-input {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 0.8rem; min-width: 180px;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus { outline: none; border-color: var(--gold-dim); }
+.mode-btn {
+    border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: var(--text-dim);
+    padding: 7px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: 0.18s;
+}
+.mode-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+.mode-btn.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.link-btn {
+    border: none; background: none; color: var(--gold); font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 7px 4px;
+}
+.link-btn:hover { color: var(--accent-hover); }
+
+/* tabla de sibilancia */
+.sib-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.sib-table td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-dim); }
+.sib-table td:last-child { color: var(--gold); font-weight: 700; text-align: right; }
+
+/* notas persistentes */
+.notes-area {
+    width: 100%; min-height: 70px; resize: vertical; background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 9px; color: var(--text);
+    padding: 10px 12px; font-size: 0.82rem; font-family: inherit; line-height: 1.5;
+}
+.notes-area:focus { outline: none; border-color: var(--gold-dim); }
+
+/* reglas de oro */
+.golden-rules {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px clamp(16px,3vw,26px); margin-top: 22px;
+}
+.golden-rules h3 { font-family: Georgia, serif; font-size: 1.15rem; margin: 0 0 14px; color: var(--cream); }
+.golden-rules ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.golden-rules li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.86rem; color: var(--text-dim); line-height: 1.5; }
+.rule-num {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold-soft);
+    color: var(--gold); font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+
+/* glosario / técnicas — mismo patrón de panel deslizante */
+.glossary-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.glossary-item b { color: var(--gold); font-size: 0.86rem; }
+.glossary-item p { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; }
+
+/* ===== TABS DE MODO (Tabla / Entrenamiento) ===== */
+.mode-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+.mode-tab {
+    flex: 1; text-align: left; padding: 16px 20px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; transition: 0.18s;
+}
+.mode-tab b { display: block; font-family: Georgia, serif; font-size: 1.05rem; color: var(--text); margin-bottom: 3px; }
+.mode-tab span { font-size: 0.78rem; }
+.mode-tab:hover { border-color: var(--gold-dim); }
+.mode-tab.active { background: linear-gradient(135deg, rgba(212,168,79,0.16), rgba(212,168,79,0.05)); border-color: var(--gold-dim); }
+.mode-tab.active b { color: var(--gold); }
+.view-section { display: none; }
+.view-section.active { display: block; }
+
+/* ===== ENTRENAMIENTO AUDITIVO ===== */
+.ear-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: clamp(18px, 3vw, 30px); box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+}
+.ear-intro { color: var(--text-dim); font-size: 0.92rem; line-height: 1.7; margin: 0 0 22px; max-width: 720px; }
+.ear-intro b { color: var(--text); }
+.ear-settings { display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.ear-settings-group label.group-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; font-weight: 700; }
+.ear-settings-group .chip-group { display: flex; gap: 8px; }
+
+.ear-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
+.ear-btn-primary {
+    background: var(--accent); border: none; border-radius: 999px; color: var(--ink);
+    padding: 12px 24px; font-size: 0.86rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.25); transition: 0.18s;
+}
+.ear-btn-primary:hover { background: var(--accent-hover); }
+.ear-btn-ghost {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    border-radius: 999px; padding: 11px 20px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.18s;
+}
+.ear-btn-ghost:hover:not(:disabled) { border-color: var(--gold-dim); color: var(--gold); }
+.ear-btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.ear-score { margin-left: auto; font-size: 0.84rem; color: var(--text-dim); font-weight: 700; }
+
+.ear-question { font-size: 0.9rem; color: var(--text); margin: 0 0 14px; font-weight: 600; }
+.ear-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.ear-opt {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    padding: 12px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    transition: 0.15s; font-variant-numeric: tabular-nums;
+}
+.ear-opt:hover:not(:disabled) { border-color: var(--gold-dim); background: rgba(212,168,79,0.08); }
+.ear-opt:disabled { cursor: default; }
+.ear-opt.correct { background: rgba(71,99,87,0.35); border-color: var(--moss); color: #cdeadb; }
+.ear-opt.wrong { background: rgba(122,59,59,0.35); border-color: var(--wine); color: #f2cfcf; }
+
+.ear-feedback { font-size: 0.88rem; font-weight: 700; min-height: 20px; margin-bottom: 6px; }
+.ear-feedback.ok { color: #8fd6b0; }
+.ear-feedback.bad { color: #e39b9b; }
 
 /* ===== FOOTER ===== */
 .site-footer {
@@ -247,9 +355,21 @@ a { color: inherit; text-decoration: none; }
     <section class="tool-hero">
         <p class="eyebrow">Referencia técnica</p>
         <h1>Tabla de Frecuencias Interactiva</h1>
-        <p>Explora dónde vive cada instrumento y la voz en el espectro audible (20 Hz – 20 kHz), y haz clic sobre cualquier barra para ver qué cortar, qué realzar y por qué.</p>
+        <p>Explora dónde vive cada instrumento y la voz en el espectro audible (20 Hz – 20 kHz), y haz clic sobre cualquier barra para ver qué cortar, qué realzar y por qué — basado en el manual de ecualización, el manual de procesadores dinámicos y la tabla de referencia de Bunker Audio.</p>
     </section>
 
+    <div class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-view="chart">
+            <b>Tabla de referencia</b>
+            <span>Rangos de frecuencia y recomendaciones de EQ por instrumento</span>
+        </button>
+        <button class="mode-tab" data-view="ear">
+            <b>Entrenamiento auditivo</b>
+            <span>Reconoce a oído qué frecuencia fue modificada en ruido rosa</span>
+        </button>
+    </div>
+
+    <section class="view-section active" id="viewChart">
     <div class="controls-bar">
         <div class="chip-group" id="categoryChips">
             <button class="chip active" data-cat="todos">Todos</button>
@@ -259,9 +379,14 @@ a { color: inherit; text-decoration: none; }
             <button class="chip" data-cat="viento">Viento</button>
             <button class="chip" data-cat="teclas">Teclas</button>
         </div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…">
+        <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
+        <button class="mode-btn" id="compareToggle">Comparar dos</button>
+        <button class="link-btn" id="glossaryBtn">Glosario</button>
+        <button class="link-btn" id="techniquesBtn">Serie vs. Paralela</button>
         <label class="toggle-label">
             <input type="checkbox" id="bandsToggle" checked>
-            Mostrar rangos generales (graves, medios, presencia, brillo)
+            Mostrar rangos generales
         </label>
     </div>
 
@@ -279,8 +404,58 @@ a { color: inherit; text-decoration: none; }
     </div>
 
     <p class="sources-note">
-        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b> (capítulo de ecualización), <b>Aprende a Utilizar tu Procesador Dinámico</b>, la <b>Tabla de Frecuencias</b> de referencia de estudio, y la <b>Tabla de Sugerencias de Ecualización</b>. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
+        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b> (capítulo de ecualización), <b>Aprende a Utilizar tu Procesador Dinámico</b>, la <b>Tabla de Frecuencias</b> de referencia de estudio, y la <b>Tabla de Sugerencias de Ecualización</b> de Bunker Audio. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
     </p>
+
+    <div class="golden-rules">
+        <h3>Reglas de oro fáciles de recordar</h3>
+        <ul id="goldenRulesList"></ul>
+    </div>
+    </section>
+
+    <section class="view-section" id="viewEar">
+        <div class="ear-card">
+            <p class="ear-intro">
+                Se reproduce <b>ruido rosa</b> con un <b>filtro paramétrico</b> aplicado en una frecuencia de octava
+                (63 Hz – 16 kHz), con un realce o corte de <b>3, 6, 9 o 12 dB</b>. Escucha, usa el botón A/B para
+                comparar contra la versión sin modificar, y adivina cuál fue la frecuencia alterada.
+            </p>
+
+            <div class="ear-settings">
+                <div class="ear-settings-group">
+                    <label class="group-label">Ganancia (dB)</label>
+                    <div class="chip-group" id="earGainChips">
+                        <button class="chip" data-gain="3">3 dB</button>
+                        <button class="chip active" data-gain="6">6 dB</button>
+                        <button class="chip" data-gain="9">9 dB</button>
+                        <button class="chip" data-gain="12">12 dB</button>
+                    </div>
+                </div>
+                <div class="ear-settings-group">
+                    <label class="group-label">Opciones de respuesta</label>
+                    <div class="chip-group" id="earOptChips">
+                        <button class="chip" data-opt="3">3</button>
+                        <button class="chip active" data-opt="5">5</button>
+                        <button class="chip" data-opt="9">9 (todas)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ear-transport">
+                <button class="ear-btn-primary" id="earPlayBtn">▶ Reproducir ronda</button>
+                <button class="ear-btn-ghost" id="earAbBtn" disabled>A/B: escuchando modificado</button>
+                <button class="ear-btn-ghost" id="earResetScore">Reiniciar puntaje</button>
+                <span class="ear-score" id="earScore">Aciertos: 0 / 0 (0%)</span>
+            </div>
+
+            <p class="ear-question">¿Cuál frecuencia fue modificada?</p>
+            <div class="ear-options" id="earOptions">
+                <span style="color:var(--text-dim);font-size:0.85rem;">Presiona "Reproducir ronda" para empezar.</span>
+            </div>
+            <div class="ear-feedback" id="earFeedback"></div>
+            <button class="ear-btn-primary" id="earNextBtn" style="display:none;">Siguiente ronda →</button>
+        </div>
+    </section>
 </main>
 
 <footer class="site-footer">
@@ -301,8 +476,39 @@ a { color: inherit; text-decoration: none; }
     </div>
 </aside>
 
+<div class="detail-overlay" id="glossaryOverlay"></div>
+<aside class="detail-panel" id="glossaryPanel">
+    <button class="detail-close" id="glossaryClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <p class="detail-eyebrow">Referencia</p>
+    <h3 class="detail-title">Glosario</h3>
+    <div id="glossaryContent"></div>
+</aside>
+
+<div class="detail-overlay" id="techOverlay"></div>
+<aside class="detail-panel" id="techPanel">
+    <button class="detail-close" id="techClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <p class="detail-eyebrow">Técnicas de compresión</p>
+    <h3 class="detail-title">Serie vs. Paralela</h3>
+    <div id="techContent"></div>
+</aside>
+
 <script src="data.js"></script>
 <script src="app.js"></script>
+<script src="ear.js"></script>
+<script>
+document.getElementById('modeTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.mode-tab');
+  if (!btn) return;
+  const view = btn.dataset.view;
+  document.querySelectorAll('.mode-tab').forEach((t) => t.classList.toggle('active', t === btn));
+  document.getElementById('viewChart').classList.toggle('active', view === 'chart');
+  document.getElementById('viewEar').classList.toggle('active', view === 'ear');
+});
+</script>
 <script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
 </body>
 </html>
