@@ -239,15 +239,16 @@ main.app-shell {
 }
 
 .ipad-bpm-step {
+  align-items: center;
   background: transparent;
   border: none;
   border-radius: 5px;
   color: var(--ipad-muted);
   cursor: pointer;
   display: inline-flex;
-  height: 34px;
+  height: 42px;
   justify-content: center;
-  min-width: 34px;
+  min-width: 42px;
   padding: 0;
 }
 
@@ -258,12 +259,12 @@ main.app-shell {
 
 .ipad-bpm-step svg {
   fill: none;
-  height: 16px;
+  height: 20px;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-width: 2.4;
-  width: 16px;
+  width: 20px;
 }
 
 .ipad-screen-heading {
