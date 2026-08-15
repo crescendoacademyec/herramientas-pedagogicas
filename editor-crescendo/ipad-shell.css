@@ -181,35 +181,42 @@ main.app-shell {
   align-items: center;
   background: var(--ipad-canvas);
   border-bottom: 1px solid var(--ipad-line-soft);
-  display: grid;
+  display: flex;
+  flex-wrap: nowrap;
   gap: 14px;
-  grid-template-columns: minmax(250px, 1fr) auto minmax(270px, 1fr);
   min-width: 0;
   padding: 12px 15px;
   position: relative;
   z-index: 25;
 }
 
-.ipad-header-left,
-.ipad-header-center,
-.ipad-header-actions {
+.ipad-header-left {
   align-items: center;
   display: flex;
+  flex: 1 1 0;
+  gap: 12px;
   min-width: 0;
 }
 
-.ipad-header-left {
-  gap: 12px;
-}
-
 .ipad-header-center {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
   gap: 6px;
   justify-content: center;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .ipad-header-actions {
+  align-items: center;
+  display: flex;
+  flex: 1 1 0;
   gap: 7px;
   justify-content: flex-end;
+  min-width: 0;
 }
 
 .ipad-bpm-group {
@@ -1325,12 +1332,6 @@ body.editor-page .editor-workbench.is-ipad-workbench .score-shell {
 
 .ipad-app-main {
   grid-row: 1;
-}
-
-.ipad-workspace-header {
-  gap: 7px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 9px;
 }
 
 .ipad-screen-heading h1 {
