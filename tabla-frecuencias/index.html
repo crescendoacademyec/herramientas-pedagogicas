@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Tabla de frecuencias interactiva: rango de cada instrumento y voz en el espectro audible, con recomendaciones de ecualización al hacer clic.">
+<title>Tabla de Frecuencias Interactiva</title>
+<style>
+:root {
+    --ink: #161514;
+    --charcoal: #24201d;
+    --charcoal2: #1c1916;
+    --paper: #fbf7f0;
+    --cream: #f1e6d2;
+    --gold: #d4a84f;
+    --gold-dim: rgba(212,168,79,0.35);
+    --gold-soft: rgba(212,168,79,0.16);
+    --moss: #476357;
+    --wine: #7a3b3b;
+    --line: rgba(255,255,255,0.14);
+    --text: #fffaf0;
+    --muted: rgba(255,250,240,0.68);
+    --panel: rgba(255, 250, 240, 0.09);
+    --accent: #d4a84f;
+    --accent-hover: #e5bd67;
+    --text-dim: rgba(255, 250, 240, 0.7);
+}
+* { box-sizing: border-box; }
+body {
+    background:
+        radial-gradient(circle at 74% 6%, rgba(212, 168, 79, 0.14), transparent 40%),
+        radial-gradient(circle at 6% 90%, rgba(212, 168, 79, 0.07), transparent 42%),
+        var(--ink);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ===== HEADER (unificado con la suite) ===== */
+.site-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px clamp(20px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+    background: rgba(22, 21, 20, 0.82);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    position: relative; z-index: 3;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; letter-spacing: 0.02em; color: var(--cream); }
+.site-header .tag { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.header-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.social-bar { display: flex; align-items: center; gap: 14px; }
+.social-bar a { color: var(--muted); display: inline-flex; transition: color 0.15s ease, transform 0.15s ease; }
+.social-bar a:hover { color: var(--gold); transform: scale(1.1); }
+.social-bar svg { display: block; width: 19px; height: 19px; }
+.school-logo-link { display: inline-block; line-height: 0; }
+.school-logo { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-dim); }
+@media (max-width: 640px) {
+    .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .header-right { width: 100%; justify-content: space-between; }
+    .site-header .tag { display: none; }
+}
+
+/* ===== HERO ===== */
+.app-shell { margin: 0 auto; max-width: 1440px; padding: clamp(28px, 5vw, 56px) clamp(18px, 4vw, 48px) 70px; position: relative; z-index: 1; }
+.tool-hero { display: grid; gap: 12px; margin-bottom: 30px; max-width: 900px; }
+.eyebrow { color: #9ab8aa; font-size: 0.78rem; font-weight: 1000; letter-spacing: 0.16em; margin: 0; text-transform: uppercase; }
+.tool-hero h1 { color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4.6vw, 3.7rem); line-height: 0.98; margin: 0; }
+.tool-hero p { color: var(--text-dim); font-size: 1rem; line-height: 1.7; margin: 0; max-width: 780px; }
+
+/* ===== CONTROLES ===== */
+.controls-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-bottom: 22px; padding: 14px 16px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.chip {
+    border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05);
+    color: var(--text-dim); padding: 7px 14px; border-radius: 999px; font-size: 0.78rem;
+    font-weight: 600; cursor: pointer; transition: 0.18s; letter-spacing: 0.02em;
+}
+.chip:hover { border-color: var(--gold-dim); color: var(--text); }
+.chip.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.toggle-label {
+    display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-dim);
+    cursor: pointer; user-select: none; white-space: nowrap;
+}
+.toggle-label input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
+/* ===== GRÁFICO ===== */
+.chart-wrap {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 8px clamp(10px,2vw,22px) 18px; overflow-x: auto;
+    box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+}
+.chart-inner { min-width: 1000px; position: relative; }
+
+/* regla de frecuencias */
+.freq-ruler { position: relative; height: 34px; margin-left: var(--label-w, 168px); border-bottom: 1px solid var(--line); }
+.tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.1); }
+.tick span {
+    position: absolute; top: 4px; left: 4px; font-size: 0.68rem; color: var(--muted);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* bandas generales de fondo (subgraves/bajo/medios/presencia/brillo) */
+.band-overlay { position: absolute; top: 34px; bottom: 0; left: var(--label-w, 168px); right: 0; pointer-events: none; z-index: 0; }
+.band {
+    position: absolute; top: 0; bottom: 0;
+    border-left: 1px dashed rgba(255,255,255,0.08); border-right: 1px dashed rgba(255,255,255,0.08);
+}
+.band-label {
+    position: absolute; top: 6px; font-size: 0.62rem; color: rgba(255,250,240,0.45);
+    text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+    background: rgba(22,21,20,0.55); padding: 1px 5px; border-radius: 4px;
+}
+
+/* filas de instrumentos */
+.rows { position: relative; z-index: 1; margin-top: 26px; }
+.row {
+    display: flex; align-items: center; gap: 0; padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.row:last-child { border-bottom: none; }
+.row-label {
+    width: var(--label-w, 168px); flex: none; font-size: 0.8rem; font-weight: 700; color: var(--text);
+    padding-right: 12px; display: flex; align-items: center; gap: 8px;
+}
+.row-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-dim); flex: none; }
+.row-track { position: relative; flex: 1; height: 26px; }
+.bar-harm {
+    position: absolute; top: 8px; height: 10px; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(241,230,210,0.5), rgba(241,230,210,0.16));
+    border: 1px solid rgba(241,230,210,0.28);
+}
+.bar-fund {
+    position: absolute; top: 4px; height: 18px; border-radius: 7px;
+    background: linear-gradient(90deg, #b5893c, var(--gold));
+    cursor: pointer; transition: filter 0.15s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.bar-fund:hover, .bar-fund:focus-visible { filter: brightness(1.18); transform: scaleY(1.08); outline: none; }
+.bar-fund.selected { filter: brightness(1.28); box-shadow: 0 0 0 2px var(--cream), 0 4px 14px rgba(212,168,79,0.5); }
+
+/* leyenda */
+.legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.74rem; color: var(--text-dim); }
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-swatch { width: 20px; height: 10px; border-radius: 4px; flex: none; }
+.legend-swatch.fund { background: linear-gradient(90deg, #b5893c, var(--gold)); }
+.legend-swatch.harm { background: linear-gradient(90deg, rgba(241,230,210,0.5), rgba(241,230,210,0.16)); border: 1px solid rgba(241,230,210,0.28); }
+
+/* ===== PANEL DE DETALLE ===== */
+.detail-overlay {
+    position: fixed; inset: 0; background: rgba(10,9,8,0.55); backdrop-filter: blur(2px);
+    z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+}
+.detail-overlay.open { opacity: 1; pointer-events: auto; }
+.detail-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw);
+    background: linear-gradient(180deg, var(--charcoal), var(--charcoal2));
+    border-left: 1px solid var(--line); z-index: 21;
+    transform: translateX(100%); transition: transform 0.28s cubic-bezier(.2,.7,.3,1);
+    overflow-y: auto; padding: 26px 24px 40px;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-close {
+    position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--line); color: var(--text);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s;
+}
+.detail-close:hover { background: var(--accent); color: var(--ink); }
+.detail-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; color: #9ab8aa; font-weight: 800; margin: 0 0 6px; }
+.detail-title { font-family: Georgia, serif; font-size: 1.7rem; margin: 0 0 4px; padding-right: 40px; }
+.detail-range { font-size: 0.86rem; color: var(--gold); font-weight: 700; margin-bottom: 18px; font-variant-numeric: tabular-nums; }
+.detail-section { margin-bottom: 20px; }
+.detail-section h4 {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim);
+    margin: 0 0 10px; display: flex; align-items: center; gap: 6px;
+}
+.detail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.detail-list li {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px; padding: 9px 12px; font-size: 0.84rem; line-height: 1.5;
+}
+.detail-list.cut li { border-left: 3px solid var(--wine); }
+.detail-list.boost li { border-left: 3px solid var(--moss); }
+.freq-tag { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.detail-tips { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; background: rgba(255,255,255,0.04); border-radius: 9px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,0.14); }
+.detail-empty { font-size: 0.86rem; color: var(--text-dim); text-align: center; padding: 60px 10px; }
+.detail-empty svg { width: 40px; height: 40px; opacity: 0.4; margin-bottom: 12px; }
+
+/* nota de fuentes */
+.sources-note { margin-top: 26px; font-size: 0.74rem; color: var(--text-dim); line-height: 1.7; }
+.sources-note b { color: var(--text); }
+
+/* ===== FOOTER ===== */
+.site-footer {
+    padding: 26px clamp(20px, 6vw, 64px) 40px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    color: var(--muted); font-size: 0.78rem;
+    background: rgba(22, 21, 20, 0.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    margin-top: 20px;
+}
+
+@media (max-width: 720px) {
+    :root { --label-w: 108px; }
+    .row-label { font-size: 0.7rem; }
+    .detail-panel { width: 100vw; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand">Crescendo Academy</div>
+    <div class="header-right">
+        <div class="tag">Herramientas para clases de música</div>
+        <div class="social-bar">
+            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+        </div>
+        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
+            <img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="school-logo" />
+        </a>
+    </div>
+</header>
+
+<main class="app-shell">
+    <section class="tool-hero">
+        <p class="eyebrow">Referencia técnica</p>
+        <h1>Tabla de Frecuencias Interactiva</h1>
+        <p>Explora dónde vive cada instrumento y la voz en el espectro audible (20 Hz – 20 kHz), y haz clic sobre cualquier barra para ver qué cortar, qué realzar y por qué.</p>
+    </section>
+
+    <div class="controls-bar">
+        <div class="chip-group" id="categoryChips">
+            <button class="chip active" data-cat="todos">Todos</button>
+            <button class="chip" data-cat="voz">Voz</button>
+            <button class="chip" data-cat="percusion">Percusión</button>
+            <button class="chip" data-cat="cuerdas">Cuerdas</button>
+            <button class="chip" data-cat="viento">Viento</button>
+            <button class="chip" data-cat="teclas">Teclas</button>
+        </div>
+        <label class="toggle-label">
+            <input type="checkbox" id="bandsToggle" checked>
+            Mostrar rangos generales (graves, medios, presencia, brillo)
+        </label>
+    </div>
+
+    <div class="chart-wrap">
+        <div class="chart-inner" id="chartInner">
+            <div class="band-overlay" id="bandOverlay"></div>
+            <div class="freq-ruler" id="freqRuler"></div>
+            <div class="rows" id="rows"></div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-swatch fund"></span> Frecuencia fundamental</div>
+            <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / cuerpo del sonido</div>
+            <div class="legend-item">Clic sobre una barra → recomendaciones de EQ</div>
+        </div>
+    </div>
+
+    <p class="sources-note">
+        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b> (capítulo de ecualización), <b>Aprende a Utilizar tu Procesador Dinámico</b>, la <b>Tabla de Frecuencias</b> de referencia de estudio, y la <b>Tabla de Sugerencias de Ecualización</b>. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
+    </p>
+</main>
+
+<footer class="site-footer">
+    <span>Crescendo Academy</span>
+    <span id="footerYear"></span>
+</footer>
+
+<div class="detail-overlay" id="detailOverlay"></div>
+<aside class="detail-panel" id="detailPanel">
+    <button class="detail-close" id="detailClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div id="detailContent">
+        <div class="detail-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto;"><path d="M9 7v10l8-5-8-5z"/></svg>
+            Haz clic en cualquier instrumento del gráfico para ver sus recomendaciones de ecualización.
+        </div>
+    </div>
+</aside>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
+</body>
+</html>
