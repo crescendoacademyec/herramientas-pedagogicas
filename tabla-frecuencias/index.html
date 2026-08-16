@@ -327,6 +327,32 @@ a { color: inherit; text-decoration: none; }
 .ear-freq-btn:hover { border-color: var(--gold-dim); color: var(--text); }
 .ear-freq-btn.playing { background: var(--accent); color: var(--ink); border-color: transparent; box-shadow: 0 0 0 2px var(--gold-soft); }
 
+/* ===== ANALIZADOR DE ESPECTRO ===== */
+.analyzer-source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.analyzer-file-label { cursor: pointer; display: inline-flex; align-items: center; }
+.analyzer-filename { font-size: 0.8rem; color: var(--text-dim); }
+.analyzer-canvas-wrap {
+    position: relative; height: 280px; background: rgba(0,0,0,0.35);
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 4px;
+}
+#analyzerCanvas { display: block; width: 100%; height: 100%; }
+.analyzer-empty {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 0 20px; pointer-events: none;
+}
+.analyzer-axis-row {
+    display: flex; justify-content: space-between; font-size: 0.68rem; color: rgba(255,250,240,0.45);
+    margin-top: 6px; font-variant-numeric: tabular-nums;
+}
+.analyzer-ref-wrap { margin-top: 18px; padding: 8px clamp(10px,2vw,22px) 12px; }
+.analyzer-ref-wrap .chart-inner { min-width: 720px; }
+.analyzer-ref-wrap .row { padding: 3px 0; }
+.analyzer-ref-wrap .row-label { font-size: 0.68rem; }
+.analyzer-ref-wrap .row-track { height: 16px; }
+.analyzer-ref-wrap .bar-fund { top: 3px; height: 10px; }
+.analyzer-ref-wrap .bar-harm { top: 6px; height: 5px; }
+.analyzer-ref-wrap.hidden { display: none; }
+
 /* ===== FOOTER ===== */
 .site-footer {
     padding: 26px clamp(20px, 6vw, 64px) 40px; border-top: 1px solid var(--line);
@@ -389,7 +415,11 @@ a { color: inherit; text-decoration: none; }
         </button>
         <button class="mode-tab" data-view="ear">
             <b>Entrenamiento auditivo</b>
-            <span>Reconoce a oído qué frecuencia fue modificada en ruido rosa o tono puro</span>
+            <span>Reconoce a oído qué frecuencia fue modificada en ruido rosa</span>
+        </button>
+        <button class="mode-tab" data-view="analyzer">
+            <b>Analizador de espectro</b>
+            <span>Sube o graba audio y compáralo contra la tabla de instrumentos</span>
         </button>
     </div>
 
@@ -428,7 +458,7 @@ a { color: inherit; text-decoration: none; }
     </div>
 
     <p class="sources-note">
-        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b>y <b>Aprende a Utilizar tu Procesador Dinámico</b>. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
+        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b> y <b>Aprende a Utilizar tu Procesador Dinámico</b>. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
     </p>
 
     <div class="golden-rules">
@@ -538,6 +568,53 @@ a { color: inherit; text-decoration: none; }
             </div>
         </div>
     </section>
+
+    <section class="view-section" id="viewAnalyzer">
+        <div class="ear-card">
+            <p class="ear-intro">
+                Sube un archivo de audio o graba con el micrófono para ver su <b>espectro de frecuencias en vivo</b>,
+                dibujado sobre el mismo eje logarítmico (20 Hz – 20 kHz) de la tabla de referencia. Activa
+                "Mostrar instrumentos" para ver tu mezcla comparada contra dónde vive cada instrumento.
+            </p>
+
+            <div class="analyzer-source-row">
+                <label class="ear-btn-ghost analyzer-file-label">
+                    Elegir archivo de audio
+                    <input type="file" id="analyzerFileInput" accept="audio/*" style="display:none;">
+                </label>
+                <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
+                <span class="analyzer-filename" id="analyzerFileName"></span>
+            </div>
+
+            <audio id="analyzerAudioEl" controls style="display:none; width:100%; margin-bottom:16px;"></audio>
+
+            <div class="ear-settings" style="border-bottom:none;padding-bottom:0;">
+                <label class="toggle-label">
+                    <input type="checkbox" id="analyzerOverlayToggle" checked>
+                    Mostrar instrumentos de referencia
+                </label>
+                <label class="toggle-label">
+                    <input type="checkbox" id="analyzerFreezeToggle">
+                    Congelar espectro (pausar el dibujo)
+                </label>
+            </div>
+
+            <div class="analyzer-canvas-wrap" id="analyzerCanvasWrap">
+                <canvas id="analyzerCanvas"></canvas>
+                <div class="analyzer-empty" id="analyzerEmpty">Elige un archivo o activa el micrófono para ver el espectro.</div>
+            </div>
+            <div class="analyzer-axis-row">
+                <span>20 Hz</span><span>100 Hz</span><span>1 kHz</span><span>10 kHz</span><span>20 kHz</span>
+            </div>
+
+            <div class="chart-wrap analyzer-ref-wrap" id="analyzerRefWrap">
+                <div class="chart-inner">
+                    <div class="freq-ruler" id="analyzerRefRuler"></div>
+                    <div class="rows" id="analyzerRefRows"></div>
+                </div>
+            </div>
+        </div>
+    </section>
 </main>
 
 <footer class="site-footer">
@@ -581,6 +658,7 @@ a { color: inherit; text-decoration: none; }
 <script src="data.js"></script>
 <script src="app.js"></script>
 <script src="ear.js"></script>
+<script src="analyzer.js"></script>
 <script>
 document.getElementById('modeTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.mode-tab');
@@ -589,6 +667,8 @@ document.getElementById('modeTabs').addEventListener('click', (e) => {
   document.querySelectorAll('.mode-tab').forEach((t) => t.classList.toggle('active', t === btn));
   document.getElementById('viewChart').classList.toggle('active', view === 'chart');
   document.getElementById('viewEar').classList.toggle('active', view === 'ear');
+  document.getElementById('viewAnalyzer').classList.toggle('active', view === 'analyzer');
+  window.dispatchEvent(new CustomEvent('crescendo:view-change', { detail: { view } }));
 });
 </script>
 <script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
