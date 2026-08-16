@@ -164,7 +164,7 @@
         selectedIds.push(id);
       }
       renderRows();
-      if (selectedIds.length) openCompare(); else closeDetail();
+      if (selectedIds.length) openCompare(); else closePanel();
       return;
     }
     selectedIds = [id];
@@ -230,6 +230,12 @@
       </div>`;
   }
 
+  function showPanel(withBackdrop) {
+    detailPanel.classList.add('open');
+    if (withBackdrop) detailOverlay.classList.add('open');
+    else detailOverlay.classList.remove('open');
+  }
+
   function openDetail(id) {
     const inst = INSTRUMENTS.find((i) => i.id === id);
     if (!inst) return;
@@ -243,14 +249,23 @@
     `;
     wireTabButtons(inst);
     wireNotes(inst.id);
-    detailOverlay.classList.add('open');
-    detailPanel.classList.add('open');
+    showPanel(true);
   }
 
   function openCompare() {
     const insts = selectedIds.map((id) => INSTRUMENTS.find((i) => i.id === id)).filter(Boolean);
-    if (!insts.length) { closeDetail(); return; }
-    if (insts.length === 1) { openDetail(insts[0].id); return; }
+    if (!insts.length) { closePanel(); return; }
+    if (insts.length === 1) {
+      const a = insts[0];
+      detailContent.innerHTML = `
+        <p class="detail-eyebrow">Comparación</p>
+        <h3 class="detail-title" style="font-size:1.35rem;">${a.name}</h3>
+        <div class="detail-range" style="color:${COMPARE_COLORS[0]};">${fmtHz(a.range[0])} – ${fmtHz(a.range[1])}</div>
+        <div class="detail-tips">Ahora toca <b>otro instrumento</b> en el gráfico para comparar sus rangos de frecuencia.</div>
+      `;
+      showPanel(false);
+      return;
+    }
     const [a, b] = insts;
     const overlapLow = Math.max(a.range[0], b.range[0]);
     const overlapHigh = Math.min(a.range[1], b.range[1]);
@@ -269,9 +284,11 @@
       </div>
       <div class="detail-section"><h4>${a.name}: qué realzar</h4>${a.boosts.length ? '<ul class="detail-list boost">' + a.boosts.slice(0,3).map(x=>`<li><span class="freq-tag">${x.f}</span>${x.r}</li>`).join('') + '</ul>' : '<p class="detail-tips">Sin realces específicos.</p>'}</div>
       <div class="detail-section"><h4>${b.name}: qué realzar</h4>${b.boosts.length ? '<ul class="detail-list boost">' + b.boosts.slice(0,3).map(x=>`<li><span class="freq-tag">${x.f}</span>${x.r}</li>`).join('') + '</ul>' : '<p class="detail-tips">Sin realces específicos.</p>'}</div>
+      <button class="link-btn" id="compareClearBtn" style="margin-top:6px;">Elegir otros dos instrumentos</button>
     `;
-    detailOverlay.classList.add('open');
-    detailPanel.classList.add('open');
+    showPanel(false);
+    const clearBtn = $('compareClearBtn');
+    if (clearBtn) clearBtn.addEventListener('click', () => { selectedIds = []; renderRows(); closePanel(); });
   }
 
   function wireTabButtons(inst) {
@@ -300,6 +317,7 @@
     selectedIds = [];
     renderRows();
   }
+  const closePanel = closeDetail;
 
   detailOverlay.addEventListener('click', closeDetail);
   $('detailClose').addEventListener('click', closeDetail);
