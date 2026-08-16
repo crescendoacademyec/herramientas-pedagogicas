@@ -28,6 +28,7 @@
     const canvasWrap = $('analyzerCanvasWrap');
     const hoverLine = $('analyzerHoverLine');
     const hoverLabel = $('analyzerHoverLabel');
+    const dbAxis = $('analyzerDbAxis');
 
     let audioCtx = null;
     let analyser = null;
@@ -35,6 +36,8 @@
     let micStream = null;
     let rafId = null;
     let hasSignal = false;
+    let lastData = null;      // último frame de bytes (0-255) dibujado, usado para el indicador de hover
+    let lastNyquist = 0;
 
     function ensureAudio() {
       if (audioCtx) return;
@@ -42,6 +45,7 @@
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 8192;
       analyser.smoothingTimeConstant = 0.82;
+      renderDbAxis();
     }
 
     function disconnectSource() {
@@ -51,6 +55,24 @@
 
     // ---------- referencia de instrumentos (mini réplica del gráfico principal) ----------
     const TICKS = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+
+    // ---------- eje de decibeles (mismo rango que usa el AnalyserNode por defecto) ----------
+    const DB_MIN = -100, DB_MAX = -30; // valores por defecto de AnalyserNode.minDecibels/maxDecibels
+    const DB_TICKS = [-30, -40, -50, -60, -70, -80, -90, -100];
+    function dbToFrac(db, minDb, maxDb) {
+      return Math.max(0, Math.min(1, (db - minDb) / (maxDb - minDb)));
+    }
+    function renderDbAxis() {
+      const minDb = (analyser && typeof analyser.minDecibels === 'number') ? analyser.minDecibels : DB_MIN;
+      const maxDb = (analyser && typeof analyser.maxDecibels === 'number') ? analyser.maxDecibels : DB_MAX;
+      dbAxis.innerHTML = DB_TICKS.map((db) => {
+        const frac = dbToFrac(db, minDb, maxDb);
+        const top = (1 - frac) * 100;
+        return `<div class="db-tick" style="top:${top}%;">${db} dB</div>`;
+      }).join('');
+    }
+    renderDbAxis();
+
     function renderRefChart() {
       refRuler.innerHTML = TICKS.map((f) => {
         const p = pct(f);
@@ -108,8 +130,22 @@
         ctx2d.beginPath(); ctx2d.moveTo(x, 0); ctx2d.lineTo(x, h); ctx2d.stroke();
       });
 
+      // rejilla horizontal sutil en las marcas de decibeles
+      const minDb = analyser.minDecibels, maxDb = analyser.maxDecibels;
+      ctx2d.save();
+      ctx2d.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx2d.setLineDash([4, 4]);
+      DB_TICKS.forEach((db) => {
+        const frac = dbToFrac(db, minDb, maxDb);
+        const y = h - frac * h;
+        ctx2d.beginPath(); ctx2d.moveTo(0, y); ctx2d.lineTo(w, y); ctx2d.stroke();
+      });
+      ctx2d.restore();
+
       const sampleRate = audioCtx.sampleRate;
       const nyquist = sampleRate / 2;
+      lastData = data;
+      lastNyquist = nyquist;
 
       // construir el trazado del espectro mapeado a escala logarítmica
       ctx2d.beginPath();
@@ -155,7 +191,15 @@
       hoverLine.style.left = x + 'px';
       hoverLine.style.display = 'block';
 
-      hoverLabel.textContent = fmtHzPrecise(freq);
+      let labelText = fmtHzPrecise(freq);
+      if (lastData && analyser && lastNyquist) {
+        const bin = Math.min(lastData.length - 1, Math.round((freq / lastNyquist) * lastData.length));
+        const byteVal = lastData[bin]; // 0..255
+        const minDb = analyser.minDecibels, maxDb = analyser.maxDecibels;
+        const db = minDb + (byteVal / 255) * (maxDb - minDb);
+        labelText += '  ·  ' + Math.round(db) + ' dB';
+      }
+      hoverLabel.textContent = labelText;
       hoverLabel.style.display = 'block';
       // mantener la etiqueta dentro del recuadro
       const labelHalfWidth = hoverLabel.offsetWidth / 2 || 30;
