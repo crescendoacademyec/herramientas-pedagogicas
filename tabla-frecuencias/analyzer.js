@@ -1,3 +1,4 @@
+
 (function () {
   const $ = (id) => document.getElementById(id);
 
