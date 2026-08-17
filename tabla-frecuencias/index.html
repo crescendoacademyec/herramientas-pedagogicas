@@ -331,6 +331,20 @@ a { color: inherit; text-decoration: none; }
 .analyzer-source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
 .analyzer-file-label { cursor: pointer; display: inline-flex; align-items: center; }
 .analyzer-filename { font-size: 0.8rem; color: var(--text-dim); }
+
+.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.analyzer-link-input { flex: 1; min-width: 220px; }
+.analyzer-embed-block {
+    background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px; margin-bottom: 18px;
+}
+.analyzer-embed-wrap { position: relative; width: 100%; }
+.analyzer-embed-wrap.yt { padding-top: 56.25%; height: 0; border-radius: 8px; overflow: hidden; }
+.analyzer-embed-wrap.yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.analyzer-embed-wrap.sp iframe { width: 100%; height: 152px; border: 0; border-radius: 8px; display: block; }
+.analyzer-embed-wrap.sp.tall iframe { height: 352px; }
+.analyzer-embed-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 14px; }
+.analyzer-embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
 .analyzer-canvas-wrap {
     position: relative; height: 280px; background: rgba(0,0,0,0.35);
     border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 4px;
@@ -593,9 +607,10 @@ a { color: inherit; text-decoration: none; }
     <section class="view-section" id="viewAnalyzer">
         <div class="ear-card">
             <p class="ear-intro">
-                Sube un archivo de audio o graba con el micrófono para ver su <b>espectro de frecuencias en vivo</b>,
-                dibujado sobre el mismo eje logarítmico (20 Hz – 20 kHz) de la tabla de referencia. Activa
-                "Mostrar instrumentos" para ver tu mezcla comparada contra dónde vive cada instrumento.
+                Sube un archivo de audio, pega un link de <b>YouTube</b> o <b>Spotify</b>, o graba con el micrófono
+                para ver el <b>espectro de frecuencias en vivo</b>, dibujado sobre el mismo eje logarítmico
+                (20 Hz – 20 kHz) de la tabla de referencia. Activa "Mostrar instrumentos" para comparar tu mezcla
+                contra dónde vive cada instrumento.
             </p>
 
             <div class="analyzer-source-row">
@@ -605,6 +620,19 @@ a { color: inherit; text-decoration: none; }
                 </label>
                 <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
                 <span class="analyzer-filename" id="analyzerFileName"></span>
+            </div>
+
+            <div class="analyzer-link-row">
+                <input type="text" class="search-input analyzer-link-input" id="analyzerLinkInput" placeholder="Pega un link de YouTube o Spotify…">
+                <button class="ear-btn-ghost" id="analyzerLinkBtn">Cargar</button>
+            </div>
+            <div class="analyzer-embed-block" id="analyzerEmbedBlock" style="display:none;">
+                <div class="analyzer-embed-wrap" id="analyzerEmbedWrap"></div>
+                <div class="analyzer-embed-controls">
+                    <button class="ear-btn-primary" id="analyzerShareTabBtn">🔊 Compartir audio de esta pestaña</button>
+                    <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
+                </div>
+                <p class="analyzer-embed-hint" id="analyzerEmbedHint"></p>
             </div>
 
             <audio id="analyzerAudioEl" controls style="display:none; width:100%; margin-bottom:16px;"></audio>
