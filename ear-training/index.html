@@ -682,6 +682,82 @@
             color: var(--cream);
         }
 
+        .learn-subheading {
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--gold-light);
+            margin: 22px 0 10px;
+        }
+        .subtabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 12px;
+            background: var(--teal-800);
+            border-radius: 6px;
+            padding: 4px;
+            border: 1px solid var(--teal-700);
+        }
+        .subtabs button {
+            flex: 1;
+            min-width: 60px;
+            background: transparent;
+            border: none;
+            color: var(--cream-dim);
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.68rem;
+            letter-spacing: 0.04em;
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background .15s, color .15s;
+        }
+        .subtabs button.active {
+            background: var(--gold);
+            color: var(--teal-950);
+            font-weight: 700;
+        }
+        .subtabs button:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+            color: var(--cream);
+        }
+        .subtabs.degree-tabs button { min-width: 44px; }
+
+        .type-pill-toggle {
+            display: inline-flex;
+            gap: 6px;
+            background: rgba(0,0,0,0.35);
+            border: 1px solid var(--teal-700);
+            border-radius: 999px;
+            padding: 5px;
+            margin-bottom: 16px;
+        }
+        .type-pill-toggle button {
+            background: transparent;
+            border: none;
+            color: var(--cream-dim);
+            font-family: Futura, 'Century Gothic', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 11px 26px;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .15s, color .15s;
+        }
+        .type-pill-toggle button.active {
+            background: var(--gold);
+            color: var(--teal-950);
+        }
+        .type-pill-toggle button:hover:not(.active) {
+            background: rgba(255,255,255,0.06);
+            color: var(--cream);
+        }
+
         .learn-container {
             display: grid;
             grid-template-columns: 1fr;
@@ -878,8 +954,8 @@
           instr: 'Escucha el intervalo y selecciona su nombre.' },
         { id: 2, title: 'Acordes Básicos', short: 'Diccionario de Acordes',
           instr: 'Escucha el acorde y selecciona su tipo.' },
-        { id: 3, title: 'Acordes Diatónicos', short: 'Cuatriadas diatónicas',
-          instr: 'Imaj7 (tónica) → acorde diatónico. ¿Qué grado sonó?' },
+        { id: 3, title: 'Acordes Diatónicos', short: 'Tríadas/Cuatríadas diatónicas',
+          instr: 'Grado de referencia → grado objetivo (tríadas o cuatríadas diatónicas). ¿Qué grado sonó?' },
         { id: 4, title: 'Dominantes Secundarios', short: 'Dominantes Secundarios',
           instr: 'Tónica → dominante secundario → resolución. ¿A qué grado resolvió?' },
         { id: 5, title: 'Disminuidos Secundarios', short: 'Disminuidos secundarios',
@@ -915,16 +991,29 @@
         return map[d];
     }
 
+    // ---- Nivel 3: etiquetas y fórmulas para tríadas y cuatríadas diatónicas ----
+    const TRIAD_ROMAN = ['I','ii','iii','IV','V','vi','vii°'];
+    const TETRAD_ROMAN = ['Imaj7','iim7','iiim7','IVmaj7','V7','vim7','viiø7'];
+    const TRIAD_FORMULA_DESC = ['1-3-5','1-♭3-5','1-♭3-5','1-3-5','1-3-5','1-♭3-5','1-♭3-♭5'];
+    const TETRAD_FORMULA_DESC = ['1-3-5-7','1-♭3-5-♭7','1-♭3-5-♭7','1-3-5-7','1-3-5-♭7','1-♭3-5-♭7','1-♭3-♭5-♭7'];
+    function degreeLabel(d, type) {
+        return (type === 'triad') ? TRIAD_ROMAN[d] : TETRAD_ROMAN[d];
+    }
+    function degreeFormulaDesc(d, type) {
+        return (type === 'triad') ? TRIAD_FORMULA_DESC[d] : TETRAD_FORMULA_DESC[d];
+    }
+
     function pick(arr, n) {
         return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
     }
     function randInt(n) { return Math.floor(Math.random() * n); }
 
-    function diatonicChordMidis(rootPc, degree, baseOctaveMidi) {
+    function diatonicChordMidis(rootPc, degree, baseOctaveMidi, chordType) {
         baseOctaveMidi = baseOctaveMidi || 60;
         const root = baseOctaveMidi + rootPc;
+        const ks = (chordType === 'triad') ? [0,2,4] : [0,2,4,6];
         const tones = [];
-        [0,2,4,6].forEach(k => {
+        ks.forEach(k => {
             const idx = (degree + k) % 7;
             const octShift = Math.floor((degree + k) / 7);
             tones.push(root + 12 * octShift + MAJOR_SCALE[idx]);
@@ -1337,8 +1426,19 @@
         localStorage.setItem(STORAGE_KEY_INTERVALS, JSON.stringify(ids));
     }
 
-    // ---- Nivel 3: grados diatónicos objetivo (frente a la referencia Imaj7) ----
-    const ALL_LEVEL3_TARGETS = [0,1,2,3,4,5,6].map(d => ({ d, label: prettyLabel(d) }));
+    // ---- Nivel 3: grados diatónicos (tríadas / cuatríadas) — referencia y objetivo ----
+    const ALL_LEVEL3_TARGETS = [0,1,2,3,4,5,6].map(d => ({ d }));
+
+    // Tipo de acorde activo en el nivel 3: 'triad' o 'tetrad'. Compartido entre Aprender y Practicar.
+    const STORAGE_KEY_LEVEL3TYPE = 'earTraining_level3type';
+    let level3ChordType = localStorage.getItem(STORAGE_KEY_LEVEL3TYPE) === 'triad' ? 'triad' : 'tetrad';
+    function setLevel3ChordType(t) {
+        level3ChordType = (t === 'triad') ? 'triad' : 'tetrad';
+        localStorage.setItem(STORAGE_KEY_LEVEL3TYPE, level3ChordType);
+    }
+    // Grado de referencia activo en la pestaña "Saltos entre grados" del modo Aprender (nivel 3)
+    let learnLevel3ActiveRefTab = 0;
+
     let selectedLevel3Degrees = [];
     function initLevel3Selection() {
         const saved = localStorage.getItem(STORAGE_KEY_LEVEL3);
@@ -1358,11 +1458,34 @@
         localStorage.setItem(STORAGE_KEY_LEVEL3, JSON.stringify(ids));
     }
 
+    // ---- Nivel 3: grados de referencia (el primer acorde que suena) ----
+    const STORAGE_KEY_LEVEL3REF = 'earTraining_level3refs';
+    let selectedLevel3RefDegrees = [];
+    function initLevel3RefSelection() {
+        const saved = localStorage.getItem(STORAGE_KEY_LEVEL3REF);
+        if (saved) {
+            try {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    const valid = parsed.filter(id => ALL_LEVEL3_TARGETS.some(t => t.d === id));
+                    if (valid.length > 0) { selectedLevel3RefDegrees = valid; return; }
+                }
+            } catch(e) {}
+        }
+        selectedLevel3RefDegrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+        localStorage.setItem(STORAGE_KEY_LEVEL3REF, JSON.stringify(selectedLevel3RefDegrees));
+    }
+    function saveLevel3RefSelection(ids) {
+        localStorage.setItem(STORAGE_KEY_LEVEL3REF, JSON.stringify(ids));
+    }
+
     function resetAllStats() {
         localStorage.removeItem(STORAGE_KEY_STATS);
         localStorage.removeItem(STORAGE_KEY_CHORDS);
         localStorage.removeItem(STORAGE_KEY_INTERVALS);
         localStorage.removeItem(STORAGE_KEY_LEVEL3);
+        localStorage.removeItem(STORAGE_KEY_LEVEL3REF);
+        localStorage.removeItem(STORAGE_KEY_LEVEL3TYPE);
         location.reload();
     }
 
@@ -1377,15 +1500,6 @@
             { title: 'Disminuido', desc: '1-♭3-♭5', steps: [{notes:[60,63,66], start:0, dur:2}], ref: '"Maria" (West Side Story)' },
             { title: 'sus2', desc: '1-2-5', steps: [{notes:[60,62,67], start:0, dur:2}], ref: '"The Sound of Silence" - Simon & Garfunkel' },
             { title: 'sus4', desc: '1-4-5', steps: [{notes:[60,65,67], start:0, dur:2}], ref: '"Oye Como Va" - Santana' },
-        ],
-        3: [
-            { title: 'Imaj7 (Cmaj7)', desc: '1-3-5-7', steps: [{notes:[60,64,67,71], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'ii7 (Dm7)', desc: '1-♭3-5-♭7', steps: [{notes:[62,65,69,72], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'iii7 (Em7)', desc: '1-♭3-5-♭7', steps: [{notes:[64,67,71,74], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'IVmaj7 (Fmaj7)', desc: '1-3-5-7', steps: [{notes:[65,69,72,76], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'V7 (G7)', desc: '1-3-5-♭7', steps: [{notes:[67,71,74,77], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'vi7 (Am7)', desc: '1-♭3-5-♭7', steps: [{notes:[69,72,76,79], start:0, dur:2}], ref: '"Time After Time"' },
-            { title: 'viiø7 (Bm7b5)', desc: '1-♭3-♭5-♭7', steps: [{notes:[71,74,78,81], start:0, dur:2}], ref: '"Time After Time"' },
         ],
         4: [
             { title: 'V7/ii (A7) → ii (Dm7)',
@@ -1550,29 +1664,37 @@
     }
 
     function genLevel3() {
-        const available = ALL_LEVEL3_TARGETS.filter(t => selectedLevel3Degrees.includes(t.d));
-        if (available.length === 0) {
+        const type = level3ChordType;
+        const availableTargets = ALL_LEVEL3_TARGETS.filter(t => selectedLevel3Degrees.includes(t.d));
+        const availableRefs = ALL_LEVEL3_TARGETS.filter(t => selectedLevel3RefDegrees.includes(t.d));
+        if (availableTargets.length === 0 || availableRefs.length === 0) {
             return {
-                options: ['Selecciona al menos un acorde objetivo'],
+                options: ['Selecciona al menos un grado de referencia y un acorde objetivo'],
                 correctIdx: 0,
                 seq: [],
-                feedback: () => 'Por favor, selecciona al menos un acorde objetivo en el panel de abajo.'
+                feedback: () => 'Por favor, selecciona al menos un grado de referencia y un acorde objetivo en el panel de abajo.'
             };
         }
         const keyPc = randInt(12);
-        const target = available[randInt(available.length)];
+        const refDegree = availableRefs[randInt(availableRefs.length)].d;
+        // Preferimos que el objetivo sea distinto de la referencia (para que sea un salto real)
+        let targetPool = availableTargets.filter(t => t.d !== refDegree);
+        if (targetPool.length === 0) targetPool = availableTargets;
+        const target = targetPool[randInt(targetPool.length)];
         const degree = target.d;
-        let candidates = pick(available, 4);
+        let candidatePool = availableTargets.filter(t => t.d !== refDegree);
+        if (candidatePool.length === 0) candidatePool = availableTargets;
+        let candidates = pick(candidatePool, Math.min(4, candidatePool.length));
         if (!candidates.some(c => c.d === degree)) candidates[0] = target;
         candidates = candidates.sort(() => Math.random() - 0.5);
-        const options = candidates.map(c => c.label);
+        const options = candidates.map(c => degreeLabel(c.d, type));
         const correctIdx = candidates.findIndex(c => c.d === degree);
         const seq = [
-            { notes: diatonicChordMidis(keyPc, 0, BASE), start: 0.05, dur: 1.8, vel: 0.75 },
-            { notes: diatonicChordMidis(keyPc, degree, BASE), start: 2.0, dur: 3.0, vel: 0.85 },
+            { notes: diatonicChordMidis(keyPc, refDegree, BASE, type), start: 0.05, dur: 1.8, vel: 0.75 },
+            { notes: diatonicChordMidis(keyPc, degree, BASE, type), start: 2.0, dur: 3.0, vel: 0.85 },
         ];
         const feedback = ok =>
-            `${ok?'Correcto':'Era'} — <b>${prettyLabel(degree)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b> (referencia: Imaj7).`;
+            `${ok?'Correcto':'Era'} — <b>${degreeLabel(degree, type)}</b> en la tonalidad de <b>${PITCH_NAMES[keyPc]}</b> (referencia: ${degreeLabel(refDegree, type)}).`;
         return { options, correctIdx, seq, feedback };
     }
 
@@ -1934,6 +2056,19 @@
                         selectedLevel3Degrees = ALL_LEVEL3_TARGETS.map(t => t.d);
                         localStorage.setItem(STORAGE_KEY_LEVEL3, JSON.stringify(selectedLevel3Degrees));
                     }
+                    const savedRef = localStorage.getItem(STORAGE_KEY_LEVEL3REF);
+                    if (savedRef) {
+                        try {
+                            const parsedRef = JSON.parse(savedRef);
+                            if (Array.isArray(parsedRef) && parsedRef.length > 0) {
+                                const validRef = parsedRef.filter(id => ALL_LEVEL3_TARGETS.some(t => t.d === id));
+                                if (validRef.length > 0) selectedLevel3RefDegrees = validRef;
+                            }
+                        } catch(e) {}
+                    } else {
+                        selectedLevel3RefDegrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+                        localStorage.setItem(STORAGE_KEY_LEVEL3REF, JSON.stringify(selectedLevel3RefDegrees));
+                    }
                 }
                 if (challengeActive) cancelChallenge();
                 renderLevels();
@@ -1946,8 +2081,8 @@
     function renderCard() {
         const lv = LEVELS.find(l => l.id === activeLevel);
         const card = document.getElementById('card');
-        // Nivel 1 siempre tiene contenido de aprendizaje (intervalos)
-        const hasLearnContent = (activeLevel === 1) || !!LEARN_CONTENT[activeLevel];
+        // Nivel 1 (intervalos) y nivel 3 (tríadas/cuatríadas) siempre tienen contenido de aprendizaje generado dinámicamente
+        const hasLearnContent = (activeLevel === 1) || (activeLevel === 3) || !!LEARN_CONTENT[activeLevel];
 
         // Si learnMode está activo pero no hay contenido, forzar práctica
         if (learnMode && !hasLearnContent) learnMode = false;
@@ -2025,14 +2160,46 @@
             `;
         }
 
-        // Selector de acordes objetivo (nivel 3)
+        // Selector de tipo de acorde + referencia + objetivo (nivel 3)
         let level3Picker = '';
         if (activeLevel === 3) {
+            const typeToggle = `
+                <div class="type-pill-toggle" id="level3TypeToggle">
+                    <button type="button" data-type="triad" class="${level3ChordType === 'triad' ? 'active' : ''}">Tríadas</button>
+                    <button type="button" data-type="tetrad" class="${level3ChordType === 'tetrad' ? 'active' : ''}">Cuatríadas</button>
+                </div>
+            `;
             level3Picker = `
+                ${typeToggle}
                 <div class="chord-picker">
                     <details class="picker-dropdown">
                         <summary>
-                            <span class="picker-summary-label">Acordes objetivo a practicar (Imaj7 → ...)</span>
+                            <span class="picker-summary-label">Grados de referencia (1er acorde)</span>
+                            <span class="picker-summary-right">
+                                <span class="picker-summary-count" id="level3RefPickerCount">${selectedLevel3RefDegrees.length}/${ALL_LEVEL3_TARGETS.length}</span>
+                                <span class="picker-summary-arrow">▾</span>
+                            </span>
+                        </summary>
+                        <div class="picker-panel">
+                            <div class="picker-buttons">
+                                <button type="button" id="selectAllLevel3Ref">Todos</button>
+                                <button type="button" id="deselectAllLevel3Ref">Ninguno</button>
+                            </div>
+                            <div class="picker-grid" id="level3RefPickerGrid">
+                                ${ALL_LEVEL3_TARGETS.map(t => `
+                                    <label>
+                                        <input type="checkbox" value="${t.d}" ${selectedLevel3RefDegrees.includes(t.d) ? 'checked' : ''}>
+                                        ${degreeLabel(t.d, level3ChordType)}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </details>
+                </div>
+                <div class="chord-picker">
+                    <details class="picker-dropdown">
+                        <summary>
+                            <span class="picker-summary-label">Acordes objetivo (2º acorde)</span>
                             <span class="picker-summary-right">
                                 <span class="picker-summary-count" id="level3PickerCount">${selectedLevel3Degrees.length}/${ALL_LEVEL3_TARGETS.length}</span>
                                 <span class="picker-summary-arrow">▾</span>
@@ -2047,7 +2214,7 @@
                                 ${ALL_LEVEL3_TARGETS.map(t => `
                                     <label>
                                         <input type="checkbox" value="${t.d}" ${selectedLevel3Degrees.includes(t.d) ? 'checked' : ''}>
-                                        Imaj7 → ${t.label}
+                                        ${degreeLabel(t.d, level3ChordType)}
                                     </label>
                                 `).join('')}
                             </div>
@@ -2175,6 +2342,87 @@
                         });
                     }, 0);
                 }
+            } else if (activeLevel === 3) {
+                // Nivel 3: tríadas/cuatríadas diatónicas — escucha cada grado y todos los saltos entre grados
+                const type = level3ChordType;
+                const typeToggleHtml = `
+                    <div class="type-pill-toggle" id="level3LearnTypeToggle">
+                        <button type="button" data-type="triad" class="${type === 'triad' ? 'active' : ''}">Tríadas</button>
+                        <button type="button" data-type="tetrad" class="${type === 'tetrad' ? 'active' : ''}">Cuatríadas</button>
+                    </div>
+                `;
+                const chordItems = ALL_LEVEL3_TARGETS.map(t => ({
+                    d: t.d,
+                    title: degreeLabel(t.d, type),
+                    desc: degreeFormulaDesc(t.d, type)
+                }));
+                const refTab = ALL_LEVEL3_TARGETS.some(t => t.d === learnLevel3ActiveRefTab) ? learnLevel3ActiveRefTab : 0;
+                const degreeTabsHtml = `
+                    <div class="subtabs degree-tabs" id="level3RefTabs">
+                        ${ALL_LEVEL3_TARGETS.map(t => `<button type="button" data-ref="${t.d}" class="${refTab === t.d ? 'active' : ''}">${degreeLabel(t.d, type)}</button>`).join('')}
+                    </div>
+                `;
+                const jumpTargets = ALL_LEVEL3_TARGETS.filter(t => t.d !== refTab);
+                mainContent = `
+                    <div class="stage">
+                        <div class="stage-label">${lv.instr}</div>
+                        ${typeToggleHtml}
+                    </div>
+                    <h3 class="learn-subheading">1. Escucha cada grado (${type === 'triad' ? 'tríadas' : 'cuatríadas'} diatónicas)</h3>
+                    <div class="learn-container">
+                        ${chordItems.map((item, idx) => `
+                            <div class="learn-item">
+                                <span class="item-title">${item.title}</span>
+                                <span class="item-desc">${item.desc}</span>
+                                <button class="play-sample" data-chord-idx="${idx}" title="Escuchar acorde">▶</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <h3 class="learn-subheading">2. Escucha el salto — elige el grado de referencia</h3>
+                    ${degreeTabsHtml}
+                    <div class="learn-container">
+                        ${jumpTargets.map((t, idx) => `
+                            <div class="learn-item">
+                                <span class="item-title">${degreeLabel(refTab, type)} → ${degreeLabel(t.d, type)}</span>
+                                <button class="play-sample" data-jump-idx="${idx}" title="Escuchar salto">▶</button>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                setTimeout(() => {
+                    card.querySelectorAll('#level3LearnTypeToggle button').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            if (this.dataset.type === level3ChordType) return;
+                            setLevel3ChordType(this.dataset.type);
+                            renderCard();
+                        });
+                    });
+                    card.querySelectorAll('#level3RefTabs button').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            learnLevel3ActiveRefTab = parseInt(this.dataset.ref, 10);
+                            renderCard();
+                        });
+                    });
+                    card.querySelectorAll('.play-sample[data-chord-idx]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const idx = parseInt(this.dataset.chordIdx, 10);
+                            const item = chordItems[idx];
+                            const ctx = ensureCtx();
+                            const t0 = ctx.currentTime;
+                            playChord(diatonicChordMidis(0, item.d, BASE, type), t0, 2.0, 1.0);
+                        });
+                    });
+                    card.querySelectorAll('.play-sample[data-jump-idx]').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const idx = parseInt(this.dataset.jumpIdx, 10);
+                            const t = jumpTargets[idx];
+                            const ctx = ensureCtx();
+                            const t0 = ctx.currentTime;
+                            playChord(diatonicChordMidis(0, refTab, BASE, type), t0, 1.8, 1.0);
+                            playChord(diatonicChordMidis(0, t.d, BASE, type), t0 + 2.0, 2.5, 1.0);
+                        });
+                    });
+                }, 0);
             } else {
                 // Otros niveles: usar LEARN_CONTENT (contenido fijo curado)
                 const items = LEARN_CONTENT[activeLevel];
@@ -2397,6 +2645,53 @@
             });
         }
 
+        // Picker de grados de referencia (nivel 3)
+        const level3RefGrid = document.getElementById('level3RefPickerGrid');
+        const level3RefCountEl = document.getElementById('level3RefPickerCount');
+        const updateLevel3RefCount = () => { if (level3RefCountEl) level3RefCountEl.textContent = `${selectedLevel3RefDegrees.length}/${ALL_LEVEL3_TARGETS.length}`; };
+        if (level3RefGrid) {
+            const refCheckboxes = level3RefGrid.querySelectorAll('input[type="checkbox"]');
+            refCheckboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const degree = parseInt(this.value, 10);
+                    if (this.checked) {
+                        if (!selectedLevel3RefDegrees.includes(degree)) selectedLevel3RefDegrees.push(degree);
+                    } else {
+                        selectedLevel3RefDegrees = selectedLevel3RefDegrees.filter(id => id !== degree);
+                    }
+                    saveLevel3RefSelection(selectedLevel3RefDegrees);
+                    updateLevel3RefCount();
+                    afterPickerChange();
+                });
+            });
+            document.getElementById('selectAllLevel3Ref')?.addEventListener('click', function() {
+                refCheckboxes.forEach(cb => cb.checked = true);
+                selectedLevel3RefDegrees = ALL_LEVEL3_TARGETS.map(t => t.d);
+                saveLevel3RefSelection(selectedLevel3RefDegrees);
+                updateLevel3RefCount();
+                afterPickerChange();
+            });
+            document.getElementById('deselectAllLevel3Ref')?.addEventListener('click', function() {
+                refCheckboxes.forEach(cb => cb.checked = false);
+                selectedLevel3RefDegrees = [];
+                saveLevel3RefSelection(selectedLevel3RefDegrees);
+                updateLevel3RefCount();
+                afterPickerChange();
+            });
+        }
+
+        // Interruptor Tríadas / Cuatríadas (nivel 3, práctica)
+        const level3TypeToggleEl = document.getElementById('level3TypeToggle');
+        if (level3TypeToggleEl) {
+            level3TypeToggleEl.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.dataset.type === level3ChordType) return;
+                    setLevel3ChordType(this.dataset.type);
+                    renderCard();
+                });
+            });
+        }
+
         // --- Event listeners para modo práctica ---
         if (!learnMode) {
             playBtn = document.getElementById('playBtn');
@@ -2479,6 +2774,7 @@
     initChordSelection();
     initIntervalSelection();
     initLevel3Selection();
+    initLevel3RefSelection();
 
     // Por defecto, nivel 1 en modo práctica
     learnMode = false;
