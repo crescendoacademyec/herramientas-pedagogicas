@@ -347,9 +347,7 @@ a { color: inherit; text-decoration: none; }
 .analyzer-embed-wrap.sp { max-width: 100%; }
 .analyzer-embed-wrap.sp iframe { width: 100%; height: 152px; border: 0; border-radius: 8px; display: block; }
 .analyzer-embed-wrap.sp.tall iframe { height: 352px; }
-.analyzer-embed-controls { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 12px; }
-.analyzer-embed-controls .ear-btn-primary { width: 100%; text-align: center; padding: 10px 14px; font-size: 0.8rem; }
-.analyzer-embed-controls .link-btn { align-self: center; }
+.analyzer-player-btns { display: flex; align-items: center; gap: 12px; }
 .analyzer-embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
 @media (max-width: 680px) {
     .analyzer-intro-row { flex-direction: column; }
@@ -628,10 +626,6 @@ a { color: inherit; text-decoration: none; }
                 </p>
                 <div class="analyzer-embed-block" id="analyzerEmbedBlock" style="display:none;">
                     <div class="analyzer-embed-wrap" id="analyzerEmbedWrap"></div>
-                    <div class="analyzer-embed-controls">
-                        <button class="ear-btn-primary" id="analyzerShareTabBtn">🔊 Compartir audio de esta pestaña</button>
-                        <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
-                    </div>
                     <p class="analyzer-embed-hint" id="analyzerEmbedHint"></p>
                 </div>
             </div>
@@ -642,6 +636,10 @@ a { color: inherit; text-decoration: none; }
                     <input type="file" id="analyzerFileInput" accept="audio/*" style="display:none;">
                 </label>
                 <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
+                <div class="analyzer-player-btns" id="analyzerPlayerBtns" style="display:none;">
+                    <button class="ear-btn-ghost" id="analyzerShareTabBtn">🔊 Analizar audio del reproductor</button>
+                    <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
+                </div>
                 <span class="analyzer-filename" id="analyzerFileName"></span>
             </div>
 
