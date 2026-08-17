@@ -359,9 +359,12 @@ a { color: inherit; text-decoration: none; }
     color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 0 20px; pointer-events: none;
 }
 .analyzer-axis-row {
-    display: flex; justify-content: space-between; font-size: 0.68rem; color: rgba(255,250,240,0.45);
-    margin-top: 6px; font-variant-numeric: tabular-nums;
+    position: relative; height: 18px; margin-top: 6px;
+    font-size: 0.68rem; color: rgba(255,250,240,0.45); font-variant-numeric: tabular-nums;
 }
+.analyzer-axis-row .axis-tick { position: absolute; top: 0; white-space: nowrap; transform: translateX(-50%); }
+.analyzer-axis-row .axis-tick:first-child { transform: translateX(0); }
+.analyzer-axis-row .axis-tick:last-child { transform: translateX(-100%); }
 .analyzer-ref-wrap { margin-top: 18px; padding: 8px clamp(10px,2vw,22px) 12px; }
 .analyzer-ref-wrap .chart-inner { min-width: 720px; }
 .analyzer-ref-wrap .row { padding: 3px 0; }
@@ -659,9 +662,7 @@ a { color: inherit; text-decoration: none; }
                 <div class="analyzer-hover-line" id="analyzerHoverLine"></div>
                 <div class="analyzer-hover-label" id="analyzerHoverLabel"></div>
             </div>
-            <div class="analyzer-axis-row">
-                <span>20 Hz</span><span>100 Hz</span><span>1 kHz</span><span>10 kHz</span><span>20 kHz</span>
-            </div>
+            <div class="analyzer-axis-row" id="analyzerAxisRow"></div>
 
             <div class="chart-wrap analyzer-ref-wrap" id="analyzerRefWrap">
                 <div class="chart-inner">
