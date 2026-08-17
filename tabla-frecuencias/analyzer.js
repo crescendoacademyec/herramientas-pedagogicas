@@ -265,7 +265,7 @@
       tabShareActive = false;
       micBtn.textContent = '🎙 Usar micrófono';
       const shareBtn = $('analyzerShareTabBtn');
-      if (shareBtn) shareBtn.textContent = '🔊 Compartir audio de esta pestaña';
+      if (shareBtn) shareBtn.textContent = '🔊 Analizar audio del reproductor';
     }
 
     micBtn.addEventListener('click', async () => {
@@ -305,6 +305,7 @@
     const embedHint = $('analyzerEmbedHint');
     const shareTabBtn = $('analyzerShareTabBtn');
     const embedRemoveBtn = $('analyzerEmbedRemoveBtn');
+    const playerBtns = $('analyzerPlayerBtns');
 
     function parseYouTube(url) {
       const patterns = [
@@ -337,16 +338,19 @@
       if (ytId) {
         embedWrap.className = 'analyzer-embed-wrap yt';
         embedWrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?enablejsapi=1" title="YouTube" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-        embedHint.textContent = 'Dale play al video y luego toca "Compartir audio de esta pestaña" — en el diálogo del navegador, elige esta misma pestaña con audio incluido.';
+        embedHint.textContent = '';
         embedBlock.style.display = '';
+        playerBtns.style.display = 'flex';
       } else if (sp) {
         const tall = sp.type === 'playlist' || sp.type === 'album' || sp.type === 'show';
         embedWrap.className = 'analyzer-embed-wrap sp' + (tall ? ' tall' : '');
         embedWrap.innerHTML = `<iframe src="https://open.spotify.com/embed/${sp.type}/${sp.id}" title="Spotify" allow="autoplay; encrypted-media" loading="lazy"></iframe>`;
-        embedHint.textContent = 'Sin sesión Premium iniciada en este reproductor, Spotify solo reproduce un avance de 30 segundos — suficiente para ver el espectro. Dale play y luego toca "Compartir audio de esta pestaña".';
+        embedHint.textContent = 'Sin sesión Premium iniciada en este reproductor, Spotify solo reproduce un avance de 30 segundos — suficiente para ver el espectro.';
         embedBlock.style.display = '';
+        playerBtns.style.display = 'flex';
       } else {
         embedBlock.style.display = 'none';
+        playerBtns.style.display = 'none';
         fileNameEl.textContent = 'Ese link no parece ser de YouTube ni de Spotify.';
         return;
       }
@@ -358,6 +362,7 @@
 
     embedRemoveBtn.addEventListener('click', () => {
       embedBlock.style.display = 'none';
+      playerBtns.style.display = 'none';
       embedWrap.innerHTML = '';
       linkInput.value = '';
       if (tabShareActive) { disconnectSource(); resetCaptureUI(); stopLoopIfIdle(); }
