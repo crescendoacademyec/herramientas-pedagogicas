@@ -78,6 +78,17 @@
     }
     renderRefChart();
 
+    // ---------- eje de frecuencias bajo el espectro (mismas marcas log que la rejilla) ----------
+    function renderAxisRow() {
+        const axisRow = $('analyzerAxisRow');
+        if (!axisRow) return;
+        axisRow.innerHTML = TICKS.map((f) => {
+            const p = pct(f);
+            return `<span class="axis-tick" style="left:${p}%;">${fmtHz(f)}</span>`;
+        }).join('');
+    }
+    renderAxisRow();
+
     function updateOverlayVisibility() {
       refWrap.classList.toggle('hidden', !overlayToggle.checked);
     }
