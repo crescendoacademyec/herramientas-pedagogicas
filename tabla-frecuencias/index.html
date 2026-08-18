@@ -328,18 +328,19 @@ a { color: inherit; text-decoration: none; }
 .ear-freq-btn.playing { background: var(--accent); color: var(--ink); border-color: transparent; box-shadow: 0 0 0 2px var(--gold-soft); }
 
 /* ===== ANALIZADOR DE ESPECTRO ===== */
-.analyzer-intro-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; margin-bottom: 22px; }
-.analyzer-intro-row .ear-intro { flex: 1 1 280px; margin: 0; }
-.analyzer-source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.analyzer-top-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
+.analyzer-left-col { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.analyzer-left-col .ear-intro { margin: 0; }
+.analyzer-source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .analyzer-file-label { cursor: pointer; display: inline-flex; align-items: center; }
 .analyzer-filename { font-size: 0.8rem; color: var(--text-dim); }
 
-.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; }
 .analyzer-link-input { flex: 1; min-width: 220px; }
 .analyzer-embed-block {
-    flex: 0 0 300px; width: 300px; max-width: 100%;
+    flex: 0 0 300px; width: 300px; max-width: 100%; margin-left: auto;
     background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 12px;
-    padding: 14px; margin: 0;
+    padding: 14px;
 }
 .analyzer-embed-wrap { position: relative; width: 100%; max-width: 100%; margin: 0; }
 .analyzer-embed-wrap.yt { padding-top: 56.25%; height: 0; border-radius: 8px; overflow: hidden; }
@@ -350,8 +351,8 @@ a { color: inherit; text-decoration: none; }
 .analyzer-player-btns { display: flex; align-items: center; gap: 12px; }
 .analyzer-embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
 @media (max-width: 680px) {
-    .analyzer-intro-row { flex-direction: column; }
-    .analyzer-embed-block { flex-basis: auto; width: 100%; }
+    .analyzer-top-row { flex-direction: column; }
+    .analyzer-embed-block { flex-basis: auto; width: 100%; margin-left: 0; }
 }
 .analyzer-canvas-wrap {
     position: relative; height: 280px; background: rgba(0,0,0,0.35);
@@ -617,36 +618,40 @@ a { color: inherit; text-decoration: none; }
 
     <section class="view-section" id="viewAnalyzer">
         <div class="ear-card">
-            <div class="analyzer-intro-row">
-                <p class="ear-intro">
-                    Sube un archivo de audio, pega un link de <b>YouTube</b> o <b>Spotify</b>, o graba con el micrófono
-                    para ver el <b>espectro de frecuencias en vivo</b>, dibujado sobre el mismo eje logarítmico
-                    (20 Hz – 20 kHz) de la tabla de referencia. Activa "Mostrar instrumentos" para comparar tu mezcla
-                    contra dónde vive cada instrumento.
-                </p>
+            <div class="analyzer-top-row">
+                <div class="analyzer-left-col">
+                    <p class="ear-intro">
+                        Sube un archivo de audio, pega un link de <b>YouTube</b> o <b>Spotify</b>, o graba con el micrófono
+                        para ver el <b>espectro de frecuencias en vivo</b>, dibujado sobre el mismo eje logarítmico
+                        (20 Hz – 20 kHz) de la tabla de referencia. Activa "Mostrar instrumentos" para comparar tu mezcla
+                        contra dónde vive cada instrumento.
+                    </p>
+
+                    <div class="analyzer-source-row">
+                        <label class="ear-btn-ghost analyzer-file-label">
+                            Elegir archivo de audio
+                            <input type="file" id="analyzerFileInput" accept="audio/*" style="display:none;">
+                        </label>
+                        <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
+                        <div class="analyzer-player-btns" id="analyzerPlayerBtns" style="display:none;">
+                            <button class="ear-btn-ghost" id="analyzerShareTabBtn">🔊 Analizar audio del reproductor</button>
+                            <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
+                        </div>
+                        <span class="analyzer-filename" id="analyzerFileName"></span>
+                    </div>
+
+                    <div class="analyzer-link-row">
+                        <input type="text" class="search-input analyzer-link-input" id="analyzerLinkInput" placeholder="Pega un link de YouTube o Spotify…">
+                        <button class="ear-btn-ghost" id="analyzerLinkBtn">Cargar</button>
+                    </div>
+                </div>
+
                 <div class="analyzer-embed-block" id="analyzerEmbedBlock" style="display:none;">
                     <div class="analyzer-embed-wrap" id="analyzerEmbedWrap"></div>
                     <p class="analyzer-embed-hint" id="analyzerEmbedHint"></p>
                 </div>
             </div>
 
-            <div class="analyzer-source-row">
-                <label class="ear-btn-ghost analyzer-file-label">
-                    Elegir archivo de audio
-                    <input type="file" id="analyzerFileInput" accept="audio/*" style="display:none;">
-                </label>
-                <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
-                <div class="analyzer-player-btns" id="analyzerPlayerBtns" style="display:none;">
-                    <button class="ear-btn-ghost" id="analyzerShareTabBtn">🔊 Analizar audio del reproductor</button>
-                    <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
-                </div>
-                <span class="analyzer-filename" id="analyzerFileName"></span>
-            </div>
-
-            <div class="analyzer-link-row">
-                <input type="text" class="search-input analyzer-link-input" id="analyzerLinkInput" placeholder="Pega un link de YouTube o Spotify…">
-                <button class="ear-btn-ghost" id="analyzerLinkBtn">Cargar</button>
-            </div>
             <audio id="analyzerAudioEl" controls style="display:none; width:100%; margin-bottom:16px;"></audio>
 
             <div class="ear-settings" style="border-bottom:none;padding-bottom:0;">
