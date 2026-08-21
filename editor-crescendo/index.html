@@ -223,6 +223,8 @@
             <span>BPM</span>
             <input id="playbackBpmInput" type="number" min="20" max="320" step="1" value="140" inputmode="numeric" aria-label="BPM de reproducción">
           </label>
+          <div id="recordingPanelHost" class="exercise-app-menu__panel exercise-app-menu__panel--recording" role="menu" aria-label="Grabación sincronizada" hidden></div>
+          <div id="versionHistoryHost" class="exercise-app-menu__panel exercise-app-menu__panel--versions" role="menu" aria-label="Historial de versiones" hidden></div>
           <button class="icon-chip music-icon palette-trigger jazz-mode-button" id="jazzModeButton" data-palette="jazz" type="button" aria-label="Jazz mode" aria-expanded="false" aria-controls="durationDrawer" title="Jazz mode"><span aria-hidden="true">Jazz</span></button>
           <button class="icon-chip music-icon" id="playbackButton" type="button" aria-label="Reproducir MIDI local desde la selección" title="Reproducir MIDI local desde la selección">
             <span aria-hidden="true">Reproducir</span>
