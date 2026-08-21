@@ -93,6 +93,31 @@ a { color: inherit; text-decoration: none; }
 .format-note { margin-top: 14px; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
 .format-note b { color: var(--gold); }
 
+.link-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; color: var(--text-dim); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.link-divider::before, .link-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.link-input {
+    flex: 1; min-width: 220px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.16);
+    color: var(--text); border-radius: 999px; padding: 10px 16px; font-size: 0.84rem;
+}
+.link-input::placeholder { color: var(--text-dim); }
+.link-input:focus { outline: none; border-color: var(--gold-dim); }
+.embed-block { background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 14px; }
+.embed-wrap { position: relative; width: 100%; }
+.embed-wrap.yt { max-width: 440px; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; }
+.embed-wrap.yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.embed-wrap.sp iframe { width: 100%; height: 152px; border: 0; border-radius: 8px; display: block; }
+.embed-wrap.sp.tall iframe { height: 352px; }
+.embed-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 14px; }
+.embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
+.record-status {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px;
+    background: rgba(122,59,59,0.18); border: 1px solid rgba(122,59,59,0.4); border-radius: 9px;
+    font-size: 0.84rem; color: #f2cfcf;
+}
+.record-dot { width: 9px; height: 9px; border-radius: 50%; background: #e35d5d; flex: none; animation: recPulse 1s ease-in-out infinite; }
+@keyframes recPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
 /* ===== ESTADO / CARGA ===== */
 .status-row { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-dim); margin-top: 14px; min-height: 20px; }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(212,168,79,0.25); border-top-color: var(--gold); animation: spin 0.8s linear infinite; flex: none; }
@@ -294,6 +319,21 @@ a { color: inherit; text-decoration: none; }
             <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.wave,.aiff,.aif,.aifc,.m4a,.aac,.ogg,.oga,.opus,.flac,.wma,.amr,.3gp,.3gpp,.webm,.caf,.au,.mp4,.m4v,.mov,.mkv,.avi,.wmv,.flv,.f4v,.mpg,.mpeg,.mpe,.m2ts,.mts,.ts,.3g2,.ogv,.vob,.mxf,.asf,.rm,.rmvb,.divx,.dv,.qt" style="display:none">
             <div class="format-note">Acepta la mayoría de formatos de <b>audio</b> y prácticamente cualquier <b>video</b> (MP4, MOV, MKV, AVI, WEBM y más) — se extrae y analiza solo el audio.</div>
             <div class="status-row" id="statusRow" style="display:none;"><span class="spinner"></span><span id="statusText"></span></div>
+
+            <div class="link-divider"><span>o desde un link</span></div>
+            <div class="analyzer-link-row">
+                <input type="text" class="link-input" id="linkInput" placeholder="Pega un link de YouTube o Spotify…">
+                <button class="btn-ghost" id="linkBtn">Cargar</button>
+            </div>
+            <div class="embed-block" id="embedBlock" style="display:none;">
+                <div class="embed-wrap" id="embedWrap"></div>
+                <div class="embed-controls">
+                    <button class="btn-primary" id="recordTabBtn">⏺ Grabar audio de esta pestaña</button>
+                    <button class="btn-ghost" id="embedRemoveBtn">Quitar reproductor</button>
+                </div>
+                <div class="record-status" id="recordStatus" style="display:none;"></div>
+                <p class="embed-hint" id="embedHint"></p>
+            </div>
         </div>
 
         <div class="card" id="resultsCard" style="display:none;">
