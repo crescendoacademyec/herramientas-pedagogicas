@@ -3,6 +3,17 @@
 // El bug del archivo original era llamar essentia.delete() (que destruye TODA la instancia de Essentia)
 // después de cada análisis — aquí solo se liberan los vectores temporales de cada llamada, nunca la instancia.
 
+// El bundle de Essentia (essentia-wasm.web.js) fue compilado para navegador con detección de entorno
+// fija (asume que SIEMPRE hay `document`/`window`, sin chequeo real de si está en un Worker). Dentro de
+// un Worker esos globals no existen y el simple hecho de importar el script lanzaba
+// "ReferenceError: document is not defined", abortando toda la carga en silencio.
+// Este shim los simula como alias del propio contexto del Worker (self) para que esas referencias
+// no truenen, sin alterar el resto del comportamiento.
+if (typeof window === 'undefined') { self.window = self; }
+if (typeof document === 'undefined') {
+  self.document = { currentScript: null, title: '', createElement: function () { return {}; } };
+}
+
 importScripts('essentia-wasm.web.js', 'essentia.js-core.js');
 
 let essentia = null;
