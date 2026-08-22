@@ -120,18 +120,6 @@ a { color: inherit; text-decoration: none; }
 
 /* ===== ESTADO / CARGA ===== */
 .status-row { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-dim); margin-top: 14px; min-height: 20px; }
-.error-banner {
-    display: none; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 12px 14px;
-    background: rgba(122,59,59,0.18); border: 1px solid rgba(122,59,59,0.45); border-radius: 10px;
-    font-size: 0.82rem; color: #f2cfcf; line-height: 1.6;
-}
-.error-banner.show { display: flex; }
-.error-banner .msg { flex: 1; }
-.error-banner button {
-    flex: none; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff;
-    border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; cursor: pointer;
-}
-.error-banner button:hover { background: rgba(255,255,255,0.2); }
 .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(212,168,79,0.25); border-top-color: var(--gold); animation: spin 0.8s linear infinite; flex: none; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -187,8 +175,16 @@ a { color: inherit; text-decoration: none; }
 .play-btn:hover { background: var(--accent-hover); }
 .play-btn svg { width: 20px; height: 20px; }
 .progress-wrap { flex: 1; }
-.progress-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); cursor: pointer; position: relative; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #b5893c, var(--gold)); width: 0%; }
+.progress-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); cursor: pointer; position: relative; touch-action: none; padding: 8px 0; margin: -8px 0; }
+.progress-bar::before { content: ''; position: absolute; top: 8px; left: 0; right: 0; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+.progress-fill { position: absolute; top: 8px; left: 0; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #b5893c, var(--gold)); width: 0%; pointer-events: none; }
+.progress-fill::after {
+    content: ''; position: absolute; top: 50%; right: 0; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--gold-hover, #e5bd67); border: 2px solid var(--ink, #17140f); transform: translate(50%, -50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: transform 0.12s, width 0.12s, height 0.12s;
+}
+.progress-bar:hover .progress-fill::after { transform: translate(50%, -50%) scale(1.15); }
+.progress-bar.scrubbing .progress-fill::after { transform: translate(50%, -50%) scale(1.3); }
 .time-display { font-size: 0.76rem; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
 
 .now-playing { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
@@ -327,16 +323,10 @@ a { color: inherit; text-decoration: none; }
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                 <p class="big">Arrastra un archivo aquí o haz clic para elegirlo</p>
                 <p>Audio o video — se analizará solo el audio</p>
-                <p style="font-size:0.72rem;opacity:0.7;">El resultado (tonalidad, acordes, tempo) aparecerá en una tarjeta debajo, cuando el análisis termine.</p>
             </div>
             <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.wave,.aiff,.aif,.aifc,.m4a,.aac,.ogg,.oga,.opus,.flac,.wma,.amr,.3gp,.3gpp,.webm,.caf,.au,.mp4,.m4v,.mov,.mkv,.avi,.wmv,.flv,.f4v,.mpg,.mpeg,.mpe,.m2ts,.mts,.ts,.3g2,.ogv,.vob,.mxf,.asf,.rm,.rmvb,.divx,.dv,.qt" style="display:none">
             <div class="format-note">Acepta la mayoría de formatos de <b>audio</b> y prácticamente cualquier <b>video</b> (MP4, MOV, MKV, AVI, WEBM y más) — se extrae y analiza solo el audio.</div>
             <div class="status-row" id="statusRow" style="display:none;"><span class="spinner"></span><span id="statusText"></span></div>
-            <div class="error-banner" id="errorBanner">
-                <span class="msg" id="errorBannerMsg"></span>
-                <button id="errorBannerCopy">Copiar</button>
-                <button id="errorBannerClose">✕</button>
-            </div>
 
             <div class="link-divider"><span>o desde un link</span></div>
             <div class="analyzer-link-row">
@@ -401,6 +391,7 @@ a { color: inherit; text-decoration: none; }
                 </div>
                 <div class="diagrams-row">
                     <div class="diagram-box"><div id="guitarDiagram"></div><div class="cap">Guitarra</div></div>
+                    <div class="diagram-box"><div id="ukuleleDiagram"></div><div class="cap">Ukelele</div></div>
                     <div class="diagram-box"><div id="pianoDiagram"></div><div class="cap">Notas del acorde</div></div>
                 </div>
             </div>
@@ -433,6 +424,7 @@ a { color: inherit; text-decoration: none; }
             <div class="live-chord" id="liveChordText">—</div>
             <div class="diagrams-row" style="justify-content:center;margin-bottom:16px;">
                 <div class="diagram-box"><div id="liveGuitarDiagram"></div><div class="cap">Guitarra</div></div>
+                <div class="diagram-box"><div id="liveUkuleleDiagram"></div><div class="cap">Ukelele</div></div>
                 <div class="diagram-box"><div id="livePianoDiagram"></div><div class="cap">Notas del acorde</div></div>
             </div>
             <div class="live-meta">
