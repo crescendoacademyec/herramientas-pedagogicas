@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ChordSync Pro: detecta tonalidad, acordes y tempo de una canción automáticamente, con línea de tiempo sincronizada, modo en vivo por micrófono y exportación a ChordPro.">
+<title>ChordSync Pro</title>
+<style>
+:root {
+    --ink: #161514; --charcoal: #24201d; --charcoal2: #1c1916;
+    --paper: #fbf7f0; --cream: #f1e6d2;
+    --gold: #d4a84f; --gold-hover: #e5bd67; --gold-dim: rgba(212,168,79,0.35); --gold-soft: rgba(212,168,79,0.16);
+    --moss: #476357; --wine: #7a3b3b;
+    --line: rgba(255,255,255,0.14);
+    --text: #fffaf0; --muted: rgba(255,250,240,0.68); --text-dim: rgba(255, 250, 240, 0.7);
+    --panel: rgba(255, 250, 240, 0.09);
+    --accent: #d4a84f; --accent-hover: #e5bd67;
+}
+* { box-sizing: border-box; }
+body {
+    background:
+        radial-gradient(circle at 74% 6%, rgba(212, 168, 79, 0.14), transparent 40%),
+        radial-gradient(circle at 6% 90%, rgba(212, 168, 79, 0.07), transparent 42%),
+        var(--ink);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh; margin: 0;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ===== HEADER (unificado con la suite) ===== */
+.site-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px clamp(20px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+    background: rgba(22, 21, 20, 0.82);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    position: relative; z-index: 3;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; letter-spacing: 0.02em; color: var(--cream); }
+.site-header .tag { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.header-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.social-bar { display: flex; align-items: center; gap: 14px; }
+.social-bar a { color: var(--muted); display: inline-flex; transition: color 0.15s ease, transform 0.15s ease; }
+.social-bar a:hover { color: var(--gold); transform: scale(1.1); }
+.social-bar svg { display: block; width: 19px; height: 19px; }
+.school-logo-link { display: inline-block; line-height: 0; }
+.school-logo { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-dim); }
+@media (max-width: 640px) {
+    .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .header-right { width: 100%; justify-content: space-between; }
+    .site-header .tag { display: none; }
+}
+
+/* ===== HERO ===== */
+.app-shell { margin: 0 auto; max-width: 1180px; padding: clamp(28px, 5vw, 56px) clamp(18px, 4vw, 48px) 70px; position: relative; z-index: 1; }
+.tool-hero { display: grid; gap: 12px; margin-bottom: 26px; max-width: 900px; }
+.eyebrow { color: #9ab8aa; font-size: 0.78rem; font-weight: 1000; letter-spacing: 0.16em; margin: 0; text-transform: uppercase; }
+.tool-hero h1 { color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4.6vw, 3.6rem); line-height: 0.98; margin: 0; }
+.tool-hero p { color: var(--text-dim); font-size: 1rem; line-height: 1.7; margin: 0; max-width: 780px; }
+.tool-hero p b { color: var(--text); }
+
+/* ===== TABS DE MODO ===== */
+.mode-tabs { display: flex; gap: 10px; margin-bottom: 22px; }
+.mode-tab {
+    flex: 1; text-align: left; padding: 14px 20px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; transition: 0.18s; font-family: inherit;
+}
+.mode-tab b { display: block; font-family: Georgia, serif; font-size: 1rem; color: var(--text); margin-bottom: 2px; }
+.mode-tab span { font-size: 0.76rem; }
+.mode-tab:hover { border-color: var(--gold-dim); }
+.mode-tab.active { background: linear-gradient(135deg, rgba(212,168,79,0.16), rgba(212,168,79,0.05)); border-color: var(--gold-dim); }
+.mode-tab.active b { color: var(--gold); }
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+
+/* ===== TARJETA GENERAL ===== */
+.card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: clamp(18px, 3vw, 28px); box-shadow: 0 22px 60px rgba(0,0,0,0.28); margin-bottom: 22px;
+}
+
+/* ===== DROPZONE ===== */
+.dropzone {
+    border: 2px dashed rgba(255,255,255,0.2); border-radius: 14px; padding: 44px 20px;
+    text-align: center; cursor: pointer; transition: 0.18s;
+}
+.dropzone:hover, .dropzone.dragover { border-color: var(--gold); background: rgba(212,168,79,0.05); }
+.dropzone svg { width: 40px; height: 40px; color: var(--gold); margin-bottom: 12px; }
+.dropzone p { margin: 4px 0; color: var(--text-dim); font-size: 0.9rem; }
+.dropzone p.big { color: var(--text); font-weight: 700; font-size: 1rem; }
+.format-note { margin-top: 14px; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
+.format-note b { color: var(--gold); }
+
+.link-divider { display: flex; align-items: center; gap: 12px; margin: 18px 0 14px; color: var(--text-dim); font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.link-divider::before, .link-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.link-input {
+    flex: 1; min-width: 220px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.16);
+    color: var(--text); border-radius: 999px; padding: 10px 16px; font-size: 0.84rem;
+}
+.link-input::placeholder { color: var(--text-dim); }
+.link-input:focus { outline: none; border-color: var(--gold-dim); }
+.embed-block { background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 14px; }
+.embed-wrap { position: relative; width: 100%; }
+.embed-wrap.yt { max-width: 440px; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; }
+.embed-wrap.yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.embed-wrap.sp iframe { width: 100%; height: 152px; border: 0; border-radius: 8px; display: block; }
+.embed-wrap.sp.tall iframe { height: 352px; }
+.embed-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 14px; }
+.embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
+.record-status {
+    display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 10px 14px;
+    background: rgba(122,59,59,0.18); border: 1px solid rgba(122,59,59,0.4); border-radius: 9px;
+    font-size: 0.84rem; color: #f2cfcf;
+}
+.record-dot { width: 9px; height: 9px; border-radius: 50%; background: #e35d5d; flex: none; animation: recPulse 1s ease-in-out infinite; }
+@keyframes recPulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+/* ===== ESTADO / CARGA ===== */
+.status-row { display: flex; align-items: center; gap: 10px; font-size: 0.86rem; color: var(--text-dim); margin-top: 14px; min-height: 20px; }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(212,168,79,0.25); border-top-color: var(--gold); animation: spin 0.8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== RESULTADOS: STATS ===== */
+.results-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.file-title { font-family: Georgia, serif; font-size: 1.2rem; color: var(--text); }
+.file-title span { display: block; font-size: 0.76rem; color: var(--text-dim); font-family: Inter, sans-serif; margin-top: 2px; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.stat-box { background: rgba(0,0,0,0.28); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; }
+.stat-box .label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 4px; }
+.stat-box .value { font-size: 1.15rem; font-weight: 800; color: var(--gold); font-variant-numeric: tabular-nums; }
+.stat-box .value.small-note { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); display: block; margin-top: 2px; }
+
+/* ===== TOGGLES ===== */
+.toolbar-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+.toggle-label { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-dim); cursor: pointer; user-select: none; }
+.toggle-label input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+.chip { border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: var(--text-dim); padding: 7px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: 0.18s; }
+.chip:hover { border-color: var(--gold-dim); color: var(--text); }
+.chip.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+
+/* ===== BEAT GRID ===== */
+.beat-grid { display: flex; gap: 6px; margin-bottom: 14px; }
+.beat-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.14); transition: 0.1s; }
+.beat-dot.downbeat { background: rgba(212,168,79,0.3); }
+.beat-dot.active { background: var(--gold); box-shadow: 0 0 8px rgba(212,168,79,0.7); }
+
+/* ===== TIMELINE ===== */
+.timeline-wrap { position: relative; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,0.3); margin-bottom: 18px; }
+.timeline-track { position: relative; height: 64px; min-width: 300px; cursor: copy; }
+.playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--gold-hover); z-index: 3; pointer-events: none; box-shadow: 0 0 8px rgba(212,168,79,0.8); }
+.chord-segment {
+    position: absolute; top: 6px; bottom: 6px; border-radius: 7px;
+    background: rgba(212,168,79,0.14); border: 1px solid rgba(212,168,79,0.3);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.82rem;
+    color: var(--gold); cursor: pointer; transition: 0.15s; overflow: hidden; white-space: nowrap; min-width: 30px;
+}
+.chord-segment:hover { background: rgba(212,168,79,0.24); }
+.chord-segment.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.chord-segment .seg-tools { position: absolute; top: -1px; right: 2px; display: none; gap: 3px; z-index: 2; }
+.chord-segment:hover .seg-tools { display: flex; }
+.seg-tool-btn { width: 15px; height: 15px; border-radius: 3px; background: rgba(0,0,0,0.5); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.seg-tool-btn:hover { background: var(--wine); }
+.seg-tool-btn.loop-on { background: var(--moss); }
+.seg-tool-danger:hover { background: #a33636; }
+.seg-resize-handle {
+    position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 3;
+}
+.seg-resize-handle[data-handle="left"] { left: 0; }
+.seg-resize-handle[data-handle="right"] { right: 0; }
+.seg-resize-handle::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 60%;
+    transform: translate(-50%, -50%); border-radius: 2px; background: transparent; transition: 0.15s;
+}
+.chord-segment:hover .seg-resize-handle::after { background: rgba(212,168,79,0.5); }
+.seg-resize-handle:hover::after { background: var(--gold-hover); width: 4px; }
+body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; user-select: none !important; }
+
+/* ===== REPRODUCTOR ===== */
+.player-row { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+.play-btn {
+    width: 50px; height: 50px; border-radius: 50%; background: var(--accent); color: var(--ink);
+    border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.25); flex: none; transition: 0.18s;
+}
+.play-btn:hover { background: var(--accent-hover); }
+.play-btn svg { width: 20px; height: 20px; }
+.progress-wrap { flex: 1; }
+.progress-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); cursor: pointer; position: relative; touch-action: none; padding: 8px 0; margin: -8px 0; }
+.progress-bar::before { content: ''; position: absolute; top: 8px; left: 0; right: 0; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.1); }
+.progress-fill { position: absolute; top: 8px; left: 0; height: 8px; border-radius: 4px; background: linear-gradient(90deg, #b5893c, var(--gold)); width: 0%; pointer-events: none; }
+.progress-fill::after {
+    content: ''; position: absolute; top: 50%; right: 0; width: 14px; height: 14px; border-radius: 50%;
+    background: var(--gold-hover, #e5bd67); border: 2px solid var(--ink, #17140f); transform: translate(50%, -50%);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4); transition: transform 0.12s, width 0.12s, height 0.12s;
+}
+.progress-bar:hover .progress-fill::after { transform: translate(50%, -50%) scale(1.15); }
+.progress-bar.scrubbing .progress-fill::after { transform: translate(50%, -50%) scale(1.3); }
+.time-display { font-size: 0.76rem; color: var(--text-dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+.now-playing { display: flex; flex-wrap: wrap; gap: 22px; align-items: center; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); }
+.chord-now { text-align: center; }
+.chord-now .big { font-family: Georgia, serif; font-size: 2.6rem; color: var(--gold); line-height: 1; }
+.chord-now .conf-label { font-size: 0.7rem; color: var(--text-dim); margin-top: 6px; }
+.conf-bar { width: 100px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.12); margin-top: 4px; overflow: hidden; }
+.conf-fill { height: 100%; background: var(--moss); width: 0%; }
+.diagrams-row { display: flex; gap: 18px; flex-wrap: wrap; }
+.diagram-box { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 8px 10px; min-width: 130px; }
+.diagram-box .cap { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); text-align: center; margin-top: 2px; }
+
+/* ===== EXPORTAR / SESIONES ===== */
+.export-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.btn-primary {
+    background: var(--accent); border: none; border-radius: 999px; color: var(--ink);
+    padding: 11px 20px; font-size: 0.82rem; font-weight: 800; cursor: pointer; transition: 0.18s;
+    display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-ghost {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    border-radius: 999px; padding: 10px 18px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.18s;
+    display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-ghost:hover { border-color: var(--gold-dim); color: var(--gold); }
+.session-list { display: grid; gap: 8px; margin-top: 14px; }
+.session-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.08); border-radius: 9px; padding: 9px 12px;
+}
+.session-item .name { font-size: 0.84rem; font-weight: 600; }
+.session-item .meta { font-size: 0.72rem; color: var(--text-dim); }
+.session-item .actions { display: flex; gap: 6px; }
+.session-item button { font-size: 0.72rem; }
+
+/* ===== MODO EN VIVO ===== */
+.live-panel { text-align: center; padding: 30px 10px; }
+.mic-btn {
+    width: 84px; height: 84px; border-radius: 50%; background: var(--accent); color: var(--ink);
+    border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.3); transition: 0.18s; margin-bottom: 18px;
+}
+.mic-btn:hover { background: var(--accent-hover); }
+.mic-btn.recording { background: var(--wine); animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(122,59,59,0.5); } 50% { box-shadow: 0 0 0 14px rgba(122,59,59,0); } }
+.mic-btn svg { width: 32px; height: 32px; }
+.live-status { color: var(--text-dim); font-size: 0.88rem; margin-bottom: 22px; }
+.live-chord { font-family: Georgia, serif; font-size: 3.6rem; color: var(--gold); margin-bottom: 10px; min-height: 70px; }
+.live-chord.detecting { animation: fadeDetect 1.2s ease-in-out infinite; }
+@keyframes fadeDetect { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+.live-meta { display: flex; justify-content: center; gap: 24px; font-size: 0.82rem; color: var(--text-dim); }
+
+/* ===== NOTAS EDUCATIVAS ===== */
+.info-note { font-size: 0.78rem; color: var(--text-dim); line-height: 1.7; background: rgba(255,255,255,0.04); border-radius: 9px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,0.14); margin-top: 4px; }
+.info-note b { color: var(--text); }
+
+/* ===== TOAST ===== */
+.toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--charcoal); border: 1px solid var(--gold-dim); color: var(--text);
+    padding: 12px 22px; border-radius: 999px; font-size: 0.84rem; opacity: 0; pointer-events: none;
+    transition: 0.25s; z-index: 50; box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===== FOOTER ===== */
+.site-footer {
+    padding: 26px clamp(20px, 6vw, 64px) 40px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    color: var(--muted); font-size: 0.78rem;
+    background: rgba(22, 21, 20, 0.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+    .now-playing { flex-direction: column; align-items: stretch; }
+    .diagrams-row { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand">Crescendo Academy</div>
+    <div class="header-right">
+        <div class="tag">Herramientas para clases de música</div>
+        <div class="social-bar">
+            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+        </div>
+        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
+            <img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="school-logo" />
+        </a>
+    </div>
+</header>
+
+<main class="app-shell">
+    <section class="tool-hero">
+        <p class="eyebrow">Análisis musical</p>
+        <h1>ChordSync Pro</h1>
+        <p>Sube una canción (o un video) y detecta automáticamente su <b>tonalidad</b>, <b>progresión de acordes</b>, <b>tempo</b> y <b>compás</b>, sincronizados con la reproducción — o activa el micrófono para reconocer acordes en vivo. Motor de análisis: <b>Essentia.js</b>, corriendo por completo en tu navegador.</p>
+    </section>
+
+    <div class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-mode="file">
+            <b>Analizar archivo</b>
+            <span>Sube audio o video y obtén la progresión completa</span>
+        </button>
+        <button class="mode-tab" data-mode="live">
+            <b>Micrófono en vivo</b>
+            <span>Reconoce acordes en tiempo real mientras tocas</span>
+        </button>
+    </div>
+
+    <!-- ============ MODO ARCHIVO ============ -->
+    <section class="mode-panel active" id="panelFile">
+        <div class="card" id="uploadCard">
+            <div class="dropzone" id="dropZone">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <p class="big">Arrastra un archivo aquí o haz clic para elegirlo</p>
+                <p>Audio o video — se analizará solo el audio</p>
+            </div>
+            <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.wave,.aiff,.aif,.aifc,.m4a,.aac,.ogg,.oga,.opus,.flac,.wma,.amr,.3gp,.3gpp,.webm,.caf,.au,.mp4,.m4v,.mov,.mkv,.avi,.wmv,.flv,.f4v,.mpg,.mpeg,.mpe,.m2ts,.mts,.ts,.3g2,.ogv,.vob,.mxf,.asf,.rm,.rmvb,.divx,.dv,.qt" style="display:none">
+            <div class="format-note">Acepta la mayoría de formatos de <b>audio</b> y prácticamente cualquier <b>video</b> (MP4, MOV, MKV, AVI, WEBM y más) — se extrae y analiza solo el audio.</div>
+            <div class="status-row" id="statusRow" style="display:none;"><span class="spinner"></span><span id="statusText"></span></div>
+
+            <div class="link-divider"><span>o desde un link</span></div>
+            <div class="analyzer-link-row">
+                <input type="text" class="link-input" id="linkInput" placeholder="Pega un link de YouTube o Spotify…">
+                <button class="btn-ghost" id="linkBtn">Cargar</button>
+            </div>
+            <div class="embed-block" id="embedBlock" style="display:none;">
+                <div class="embed-wrap" id="embedWrap"></div>
+                <div class="embed-controls">
+                    <button class="btn-primary" id="recordTabBtn">⏺ Grabar audio de esta pestaña</button>
+                    <button class="btn-ghost" id="embedRemoveBtn">Quitar reproductor</button>
+                </div>
+                <div class="record-status" id="recordStatus" style="display:none;"></div>
+                <p class="embed-hint" id="embedHint"></p>
+            </div>
+        </div>
+
+        <div class="card" id="resultsCard" style="display:none;">
+            <div class="results-head">
+                <div class="file-title" id="fileTitleEl">—<span id="fileMetaEl"></span></div>
+                <button class="btn-ghost" id="openAnotherBtn">Analizar otro archivo</button>
+            </div>
+
+            <div class="stat-grid">
+                <div class="stat-box"><div class="label">Tonalidad</div><div class="value" id="keyValue">—</div></div>
+                <div class="stat-box"><div class="label">Escala</div><div class="value" id="scaleValue">—</div></div>
+                <div class="stat-box"><div class="label">Tempo</div><div class="value" id="bpmValue">—</div></div>
+                <div class="stat-box"><div class="label">Compás</div><div class="value" id="meterValue">—<span class="value small-note">experimental</span></div></div>
+                <div class="stat-box"><div class="label">Fuerza tonal</div><div class="value" id="strengthValue">—</div></div>
+                <div class="stat-box"><div class="label">Duración</div><div class="value" id="durationValue">—</div></div>
+                <div class="stat-box"><div class="label">Acordes distintos</div><div class="value" id="chordCountValue">—</div></div>
+            </div>
+
+            <div class="toolbar-row">
+                <label class="toggle-label"><input type="checkbox" id="nashvilleToggle"> Números de Nashville</label>
+                <span style="color:var(--text-dim);font-size:0.78rem;">Pasa el mouse sobre un acorde: ✎ corregir · ✂ dividir en dos · ↻ loop · 🗑 eliminar. Arrastra el borde izq./der. para ajustar la duración. Haz clic en un espacio vacío para añadir un acorde ahí.</span>
+            </div>
+
+            <div class="beat-grid" id="beatGrid"></div>
+
+            <div class="timeline-wrap">
+                <div class="timeline-track" id="timelineTrack"></div>
+            </div>
+
+            <div class="player-row">
+                <button class="play-btn" id="playBtn">
+                    <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l12-7Z"/></svg>
+                    <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                </button>
+                <div class="progress-wrap">
+                    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="time-display" id="timeDisplay">0:00 / 0:00</div>
+                </div>
+            </div>
+            <div id="loopIndicator" class="info-note" style="display:none;"></div>
+
+            <div class="now-playing">
+                <div class="chord-now">
+                    <div class="big" id="currentChordName">—</div>
+                    <div class="conf-label">Confianza de detección</div>
+                    <div class="conf-bar"><div class="conf-fill" id="confidenceFill"></div></div>
+                </div>
+                <div class="diagrams-row">
+                    <div class="diagram-box"><div id="guitarDiagram"></div><div class="cap">Guitarra</div></div>
+                    <div class="diagram-box"><div id="ukuleleDiagram"></div><div class="cap">Ukelele</div></div>
+                    <div class="diagram-box"><div id="pianoDiagram"></div><div class="cap">Notas del acorde</div></div>
+                </div>
+            </div>
+
+            <div class="export-row">
+                <button class="btn-primary" id="exportJsonBtn">⬇ Exportar JSON</button>
+                <button class="btn-primary" id="exportChordProBtn">⬇ Exportar ChordPro</button>
+                <button class="btn-ghost" id="saveSessionBtn">💾 Guardar sesión</button>
+            </div>
+
+            <div class="info-note" style="margin-top:14px;">
+                La detección de acordes reconoce tríadas mayores y menores — puede simplificar séptimas, acordes suspendidos u otras extensiones. El compás es una estimación experimental; confía en tu oído para confirmarlo.
+            </div>
+        </div>
+
+        <div class="card" id="sessionsCard">
+            <div class="file-title" style="margin-bottom:4px;">Sesiones guardadas</div>
+            <div class="session-list" id="sessionList"><span style="color:var(--text-dim);font-size:0.82rem;">Todavía no has guardado ninguna sesión.</span></div>
+        </div>
+    </section>
+
+    <!-- ============ MODO EN VIVO ============ -->
+    <section class="mode-panel" id="panelLive">
+        <div class="card live-panel">
+            <button class="mic-btn" id="micBtn">
+                <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V5a4 4 0 0 0-4-4z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                <svg id="stopIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            </button>
+            <div class="live-status" id="liveStatus">Toca el micrófono para comenzar</div>
+            <div class="live-chord" id="liveChordText">—</div>
+            <div class="diagrams-row" style="justify-content:center;margin-bottom:16px;">
+                <div class="diagram-box"><div id="liveGuitarDiagram"></div><div class="cap">Guitarra</div></div>
+                <div class="diagram-box"><div id="liveUkuleleDiagram"></div><div class="cap">Ukelele</div></div>
+                <div class="diagram-box"><div id="livePianoDiagram"></div><div class="cap">Notas del acorde</div></div>
+            </div>
+            <div class="live-meta">
+                <span>Tonalidad: <b id="liveKeyValue" style="color:var(--gold);">—</b></span>
+            </div>
+            <div class="info-note" style="text-align:left;margin-top:22px;">
+                El modo en vivo analiza fragmentos cortos de audio de tu micrófono en tiempo real. Funciona mejor con un instrumento armónico sonando claro y sin demasiado ruido de fondo.
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <span>Crescendo Academy</span>
+    <span id="footerYear"></span>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script src="chorddata.js"></script>
+<script src="app.js"></script>
+<script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
+</body>
+</html>
