@@ -149,7 +149,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ===== TIMELINE ===== */
 .timeline-wrap { position: relative; overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,0.3); margin-bottom: 18px; }
-.timeline-track { position: relative; height: 64px; min-width: 100%; }
+.timeline-track { position: relative; height: 64px; min-width: 100%; cursor: copy; }
 .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--gold-hover); z-index: 3; pointer-events: none; box-shadow: 0 0 8px rgba(212,168,79,0.8); }
 .chord-segment {
     position: absolute; top: 6px; bottom: 6px; border-radius: 7px;
@@ -159,11 +159,24 @@ a { color: inherit; text-decoration: none; }
 }
 .chord-segment:hover { background: rgba(212,168,79,0.24); }
 .chord-segment.active { background: var(--accent); color: var(--ink); border-color: transparent; }
-.chord-segment .seg-tools { position: absolute; top: -1px; right: 2px; display: none; gap: 3px; }
+.chord-segment .seg-tools { position: absolute; top: -1px; right: 2px; display: none; gap: 3px; z-index: 2; }
 .chord-segment:hover .seg-tools { display: flex; }
 .seg-tool-btn { width: 15px; height: 15px; border-radius: 3px; background: rgba(0,0,0,0.5); color: #fff; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .seg-tool-btn:hover { background: var(--wine); }
 .seg-tool-btn.loop-on { background: var(--moss); }
+.seg-tool-danger:hover { background: #a33636; }
+.seg-resize-handle {
+    position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; z-index: 3;
+}
+.seg-resize-handle[data-handle="left"] { left: 0; }
+.seg-resize-handle[data-handle="right"] { right: 0; }
+.seg-resize-handle::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 3px; height: 60%;
+    transform: translate(-50%, -50%); border-radius: 2px; background: transparent; transition: 0.15s;
+}
+.chord-segment:hover .seg-resize-handle::after { background: rgba(212,168,79,0.5); }
+.seg-resize-handle:hover::after { background: var(--gold-hover); width: 4px; }
+body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; user-select: none !important; }
 
 /* ===== REPRODUCTOR ===== */
 .player-row { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
@@ -362,7 +375,7 @@ a { color: inherit; text-decoration: none; }
 
             <div class="toolbar-row">
                 <label class="toggle-label"><input type="checkbox" id="nashvilleToggle"> Números de Nashville</label>
-                <span style="color:var(--text-dim);font-size:0.78rem;">Pasa el mouse sobre un acorde para editarlo (✎) o ponerlo en loop (↻)</span>
+                <span style="color:var(--text-dim);font-size:0.78rem;">Pasa el mouse sobre un acorde: ✎ corregir · ✂ dividir en dos · ↻ loop · 🗑 eliminar. Arrastra el borde izq./der. para ajustar la duración. Haz clic en un espacio vacío para añadir un acorde ahí.</span>
             </div>
 
             <div class="beat-grid" id="beatGrid"></div>
