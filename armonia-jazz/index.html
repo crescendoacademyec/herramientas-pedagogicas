@@ -21,6 +21,7 @@
 <link rel="icon" href="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" type="image/png">
 <link rel="stylesheet" href="./styles.css">
 <script defer src="./data.js"></script>
+<script defer src="./chords-ref.js"></script>
 <script defer src="./app.js"></script>
 </head>
 <body>
@@ -133,15 +134,15 @@
         <div>
           <p class="kicker">Teoría</p>
           <h2 id="theoryTitle">Nivel 1 · Fundamentos</h2>
-          <p id="theoryDesc">Revisa cada tema en orden. Puedes marcar los temas como estudiados.</p>
+          <div id="theoryDesc">Revisa cada tema en orden. Puedes marcar los temas como estudiados.</div>
         </div>
       </div>
-      <div id="topicsList" class="topics-list"></div>
-      <footer class="theory-actions">
+      <div class="theory-actions theory-actions-top">
         <button class="ghost-btn" id="prevTopicBtn" data-topic-step="-1">Tema anterior</button>
         <button class="soft-btn study-toggle" id="studyToggleBtn">Marcar tema como estudiado</button>
         <button class="ghost-btn" id="nextTopicBtn" data-topic-step="1">Tema siguiente</button>
-      </footer>
+      </div>
+      <div id="topicsList" class="topics-list"></div>
     </section>
 
     <!-- VISTA: CUESTIONARIO -->
