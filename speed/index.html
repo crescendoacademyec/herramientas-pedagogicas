@@ -739,6 +739,16 @@
         (function() {
             'use strict';
 
+            // Registrar el polyfill de AAC para poder exportar M4A
+            // (sin esto, el codec 'aac' no está disponible en la mayoría de navegadores)
+            try {
+                if (window.MediabunnyAacEncoder && typeof MediabunnyAacEncoder.registerAacEncoder === 'function') {
+                    MediabunnyAacEncoder.registerAacEncoder();
+                }
+            } catch (e) {
+                console.warn('No se pudo registrar el encoder AAC:', e);
+            }
+
             // --- DOM refs ---
             const loaderScreen = document.getElementById('loaderScreen');
             const player = document.getElementById('player');
@@ -898,23 +908,23 @@
 
                 setStatus('Decodificando audio…');
                 try {
-                    const source = new Mediabunny.UrlSource(URL.createObjectURL(file));
+                    const source = new Mediabunny.BlobSource(file);
                     const input = new Mediabunny.Input({ source, formats: Mediabunny.ALL_FORMATS });
-                    await input.canRead(); // espera que se pueda leer
 
                     const tracks = await input.getAudioTracks();
                     if (tracks.length === 0) throw new Error('No se encontró pista de audio en el archivo.');
 
                     const track = tracks[0];
                     const decoder = new Mediabunny.AudioBufferSink(track);
-                    const samples = [];
-                    for await (const sample of decoder.samples(0, Infinity)) {
-                        samples.push(sample);
+                    const wrapped = [];
+                    for await (const wrappedBuffer of decoder.buffers(0, Infinity)) {
+                        wrapped.push(wrappedBuffer);
                     }
+                    if (wrapped.length === 0) throw new Error('No se pudo decodificar audio del archivo.');
 
                     // Combinar todos los buffers en uno solo
                     let totalLen = 0;
-                    const buffers = samples.map(s => s.toAudioBuffer());
+                    const buffers = wrapped.map(w => w.buffer);
                     buffers.forEach(b => totalLen += b.length);
                     const finalBuffer = new AudioBuffer({
                         numberOfChannels: buffers[0].numberOfChannels,
