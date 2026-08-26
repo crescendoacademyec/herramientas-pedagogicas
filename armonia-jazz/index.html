@@ -22,6 +22,10 @@
 <link rel="stylesheet" href="./styles.css">
 <script defer src="./data.js"></script>
 <script defer src="./chords-ref.js"></script>
+<script defer src="./instrument-lab.js"></script>
+<script defer src="./blues-form.js"></script>
+<script defer src="./ata-library-index.js"></script>
+<script defer src="./ata-library.js"></script>
 <script defer src="./app.js"></script>
 </head>
 <body>
@@ -87,6 +91,7 @@
       <nav class="main-nav" aria-label="Navegación principal">
         <button class="nav-btn active" data-view="home" type="button">Inicio</button>
         <button class="nav-btn" data-view="theory" type="button">Módulo teórico</button>
+        <button class="nav-btn" data-view="library" type="button">Standards ATA</button>
         <button class="nav-btn" data-view="quiz" type="button">Cuestionario</button>
       </nav>
     </div>
@@ -126,6 +131,11 @@
         <h3>Los 4 niveles de Armonía Jazz</h3>
         <div class="levels-grid" id="levelsOverviewGrid"></div>
       </div>
+    </section>
+
+    <section id="libraryView" class="view hidden">
+      <div class="view-title"><div><p class="kicker">Repertorio aplicado</p><h2>Biblioteca de análisis ATA</h2><p>Charts armónicos interactivos: acordes, modos, grados, escalas de origen y conducción entre funciones.</p></div></div>
+      <div id="ataLibraryMount"></div>
     </section>
 
     <!-- VISTA: MÓDULO TEÓRICO -->
