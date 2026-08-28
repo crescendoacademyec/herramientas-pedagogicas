@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Cambiador de Velocidad y Tono – cambia tempo y tono de audio, loop A/B, exporta a WAV, AIFF, MP3 y M4A." />
+    <meta name="description" content="Cambiador de Velocidad y Tono – cambia tempo y tono de audio, loop A/B, exporta a WAV, MOV, MP3 y M4A." />
     <title>Cambiador de Velocidad y Tono</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='47' fill='none' stroke='%23d4a84f' stroke-width='2'/><path d='M33 30 L33 70 L60 50 Z' fill='%23d4a84f'/><path d='M58 34 v32 M67 38 v24 M76 42 v16' stroke='%23d4a84f' stroke-width='4.5' stroke-linecap='round'/></svg>" />
 
@@ -600,7 +600,7 @@
         <section class="tool-hero">
             <p class="eyebrow">Aplicación musical</p>
             <h1>Cambiador de Velocidad y Tono</h1>
-            <p>Reproduce un audio con otro tempo y otro tono de forma independiente, marca un tramo en loop para estudiarlo, y exporta el resultado a WAV, AIFF, MP3 o M4A. Todo en tu navegador, sin subir archivos a ningún servidor.</p>
+            <p>Reproduce un audio con otro tempo y otro tono de forma independiente, marca un tramo en loop para estudiarlo, y exporta el resultado a WAV, MOV, MP3 o M4A. Todo en tu navegador, sin subir archivos a ningún servidor.</p>
         </section>
 
         <div class="tool-card" id="appContainer">
@@ -707,7 +707,7 @@
                         <div class="export-label" style="margin-bottom:8px;">Formato de exportación</div>
                         <div class="mode-toggle" role="tablist" aria-label="Formato de exportación">
                             <button type="button" class="mode-toggle-btn active" id="fmtWavBtn" role="tab" aria-selected="true">WAV</button>
-                            <button type="button" class="mode-toggle-btn" id="fmtAiffBtn" role="tab" aria-selected="false">AIFF</button>
+                            <button type="button" class="mode-toggle-btn" id="fmtAiffBtn" role="tab" aria-selected="false">MOV</button>
                             <button type="button" class="mode-toggle-btn" id="fmtMp3Btn" role="tab" aria-selected="false">MP3</button>
                             <button type="button" class="mode-toggle-btn" id="fmtM4aBtn" role="tab" aria-selected="false">M4A</button>
                         </div>
@@ -737,15 +737,18 @@
             'use strict';
 
             // --- Cargar Mediabunny y el encoder AAC ---
-            let Mediabunny, registerAacEncoder;
+            let Mediabunny, registerAacEncoder, registerMp3Encoder;
             try {
-                const [mb, aac] = await Promise.all([
+                const [mb, aac, mp3] = await Promise.all([
                     import('https://cdn.jsdelivr.net/npm/mediabunny@1/+esm'),
-                    import('https://cdn.jsdelivr.net/npm/@mediabunny/aac-encoder@1/+esm')
+                    import('https://cdn.jsdelivr.net/npm/@mediabunny/aac-encoder@1/+esm'),
+                    import('https://cdn.jsdelivr.net/npm/@mediabunny/mp3-encoder@1/+esm')
                 ]);
                 Mediabunny = mb;
                 registerAacEncoder = aac.registerAacEncoder;
+                registerMp3Encoder = mp3.registerMp3Encoder;
                 registerAacEncoder();
+                registerMp3Encoder();
             } catch (e) {
                 console.error('No se pudo cargar Mediabunny:', e);
                 const statusRowEl = document.getElementById('statusRow');
@@ -809,9 +812,12 @@
             // --- Estado ---
             let audioFile = null;
             let audioBuffer = null;
+            let audioCtx = null;
             let currentSource = null;
             let isPlaying = false;
             let currentTime = 0;
+            let startedAt = 0;
+            let startedOffset = 0;
             let duration = 0;
             let loopA = null;
             let loopB = null;
@@ -837,6 +843,72 @@
             function updateTimeDisplay() {
                 timeNow.textContent = formatTime(currentTime);
                 timeTotal.textContent = formatTime(duration);
+            }
+
+            function refreshCurrentTime() {
+                if (!isPlaying || !audioCtx) return;
+                const rate = parseFloat(tempoSlider.value) / 100;
+                currentTime = startedOffset + (audioCtx.currentTime - startedAt) * rate;
+
+                if (loopActive && loopA !== null && loopB !== null && loopB > loopA) {
+                    const loopLength = loopB - loopA;
+                    if (currentTime >= loopB) currentTime = loopA + ((currentTime - loopA) % loopLength);
+                } else if (currentTime >= duration) {
+                    currentTime = duration;
+                    isPlaying = false;
+                    playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
+                }
+            }
+
+            function disposeSource() {
+                if (!currentSource) return;
+                currentSource.onended = null;
+                try { currentSource.stop(); } catch (_) { /* aún no se había iniciado */ }
+                try { currentSource.disconnect(); } catch (_) { /* ya desconectado */ }
+                currentSource = null;
+            }
+
+            function createSource() {
+                if (!audioCtx || !audioBuffer) return null;
+                const source = audioCtx.createBufferSource();
+                source.buffer = audioBuffer;
+                source.playbackRate.value = parseFloat(tempoSlider.value) / 100;
+                source.detune.value = parseFloat(pitchSlider.value) * 100;
+                source.loop = loopActive;
+                source.loopStart = loopA ?? 0;
+                source.loopEnd = loopB ?? duration;
+                source.connect(audioCtx.destination);
+                return source;
+            }
+
+            async function startPlayback(offset = currentTime) {
+                if (!audioBuffer) return;
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                await audioCtx.resume();
+                disposeSource();
+                currentSource = createSource();
+                const safeOffset = Math.max(0, Math.min(offset, Math.max(0, duration - 0.001)));
+                startedOffset = safeOffset;
+                currentTime = safeOffset;
+                startedAt = audioCtx.currentTime;
+                isPlaying = true;
+                currentSource.onended = () => {
+                    if (!currentSource || currentSource.loop) return;
+                    refreshCurrentTime();
+                    if (currentTime >= duration - 0.05) currentTime = duration;
+                    isPlaying = false;
+                    playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
+                    updateTimeDisplay();
+                };
+                currentSource.start(0, safeOffset);
+                playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+            }
+
+            function pausePlayback() {
+                refreshCurrentTime();
+                isPlaying = false;
+                disposeSource();
+                playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
             }
 
             // --- Dibujar forma de onda ---
@@ -977,20 +1049,10 @@
                     player.classList.add('active');
 
                     // Crear source de audio
-                    if (currentSource) {
-                        currentSource.disconnect();
-                        currentSource = null;
-                    }
-                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    currentSource = audioCtx.createBufferSource();
-                    currentSource.buffer = audioBuffer;
-                    currentSource.connect(audioCtx.destination);
-                    // configuración de velocidad y tono usando playbackRate y detune
-                    currentSource.playbackRate.value = parseFloat(tempoSlider.value) / 100;
-                    currentSource.detune.value = parseFloat(pitchSlider.value) * 100;
-                    currentSource.loop = loopActive;
-                    currentSource.loopStart = loopA || 0;
-                    currentSource.loopEnd = loopB || duration;
+                    isPlaying = false;
+                    disposeSource();
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    currentSource = createSource();
 
                     updateTimeDisplay();
                     drawWaveform();
@@ -999,11 +1061,7 @@
                     // Conectar eventos de tiempo
                     if (currentSource) {
                         const updateInterval = setInterval(() => {
-                            if (currentSource && currentSource.context && currentSource.context.state === 'running') {
-                                currentTime = currentSource.context.currentTime - (currentSource.context.currentTime - currentSource.context.currentTime); // simplificado
-                                // Para obtener el tiempo correcto, usamos el contexto
-                                // En realidad, necesitamos un osciloscopio o usar el evento de tiempo
-                            }
+                            refreshCurrentTime();
                             updateTimeDisplay();
                             drawWaveform();
                         }, 200);
@@ -1026,10 +1084,8 @@
                 e.target.value = '';
             });
             openAnotherBtn.addEventListener('click', () => {
-                if (currentSource) {
-                    currentSource.disconnect();
-                    currentSource = null;
-                }
+                isPlaying = false;
+                disposeSource();
                 player.classList.remove('active');
                 loaderScreen.style.display = 'block';
                 // limpiar
@@ -1040,10 +1096,8 @@
                 setStatus('');
             });
             removeFileBtn.addEventListener('click', () => {
-                if (currentSource) {
-                    currentSource.disconnect();
-                    currentSource = null;
-                }
+                isPlaying = false;
+                disposeSource();
                 if (window._updateInterval) clearInterval(window._updateInterval);
                 player.classList.remove('active');
                 loaderScreen.style.display = 'block';
@@ -1072,9 +1126,14 @@
 
             // Tempo
             function updateTempo(val) {
+                refreshCurrentTime();
                 const v = parseFloat(val);
                 tempoValue.textContent = Math.round(v) + '%';
-                if (currentSource) currentSource.playbackRate.value = v / 100;
+                if (currentSource) {
+                    startedOffset = currentTime;
+                    startedAt = audioCtx.currentTime;
+                    currentSource.playbackRate.value = v / 100;
+                }
             }
             tempoSlider.addEventListener('input', () => updateTempo(tempoSlider.value));
             tempoMinus.addEventListener('click', () => {
@@ -1159,31 +1218,13 @@
             });
 
             // Reproducción
-            playBtn.addEventListener('click', () => {
-                if (!currentSource) return;
-                const ctx = currentSource.context;
-                if (ctx.state === 'suspended') {
-                    ctx.resume();
-                }
+            playBtn.addEventListener('click', async () => {
+                if (!audioBuffer) return;
                 if (isPlaying) {
-                    // pausar
-                    if (ctx.state === 'running') {
-                        ctx.suspend();
-                    }
-                    isPlaying = false;
-                    playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
+                    pausePlayback();
                 } else {
-                    if (ctx.state === 'suspended') ctx.resume();
-                    if (ctx.state === 'running') {
-                        // ya está corriendo, no hacer nada
-                    } else {
-                        // iniciar
-                        if (currentSource) {
-                            currentSource.start(0, currentTime);
-                            isPlaying = true;
-                            playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
-                        }
-                    }
+                    if (currentTime >= duration) currentTime = 0;
+                    await startPlayback(currentTime);
                 }
             });
 
@@ -1221,40 +1262,19 @@
 
             function recreateSource(startTime, autoPlay) {
                 if (!audioBuffer) return;
-                const ctx = currentSource.context;
-                const newSource = ctx.createBufferSource();
-                newSource.buffer = audioBuffer;
-                newSource.playbackRate.value = parseFloat(tempoSlider.value) / 100;
-                newSource.detune.value = parseFloat(pitchSlider.value) * 100;
-                newSource.loop = loopActive;
-                newSource.loopStart = loopA || 0;
-                newSource.loopEnd = loopB || duration;
-                newSource.connect(ctx.destination);
-                newSource.start(0, startTime);
-                currentSource = newSource;
+                disposeSource();
+                currentTime = startTime;
                 if (autoPlay) {
-                    isPlaying = true;
-                    playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
-                    if (ctx.state === 'suspended') ctx.resume();
+                    startPlayback(startTime);
                 } else {
                     isPlaying = false;
+                    currentSource = createSource();
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                 }
-                // actualizar tiempo
-                const update = () => {
-                    if (currentSource && currentSource.context && currentSource.context.state === 'running') {
-                        currentTime = currentSource.context.currentTime - (currentSource.context.currentTime - currentSource.context.currentTime);
-                    }
-                    updateTimeDisplay();
-                    drawWaveform();
-                    requestAnimationFrame(update);
-                };
                 // limpiar intervalos anteriores
                 if (window._updateInterval) clearInterval(window._updateInterval);
                 window._updateInterval = setInterval(() => {
-                    if (currentSource && currentSource.context && currentSource.context.state === 'running') {
-                        currentTime = currentSource.context.currentTime - (currentSource.context.currentTime - currentSource.context.currentTime);
-                    }
+                    refreshCurrentTime();
                     updateTimeDisplay();
                     drawWaveform();
                 }, 200);
@@ -1309,11 +1329,11 @@
             function setExportFormat(format) {
                 exportFormat = format;
                 document.querySelectorAll('.mode-toggle-btn').forEach(b => b.classList.remove('active'));
-                const map = { wav: fmtWavBtn, aiff: fmtAiffBtn, mp3: fmtMp3Btn, m4a: fmtM4aBtn };
+                const map = { wav: fmtWavBtn, mov: fmtAiffBtn, mp3: fmtMp3Btn, m4a: fmtM4aBtn };
                 if (map[format]) map[format].classList.add('active');
             }
             fmtWavBtn.addEventListener('click', () => setExportFormat('wav'));
-            fmtAiffBtn.addEventListener('click', () => setExportFormat('aiff'));
+            fmtAiffBtn.addEventListener('click', () => setExportFormat('mov'));
             fmtMp3Btn.addEventListener('click', () => setExportFormat('mp3'));
             fmtM4aBtn.addEventListener('click', () => setExportFormat('m4a'));
 
@@ -1327,14 +1347,15 @@
                     // Usar Mediabunny para exportar
                     const sampleRate = audioBuffer.sampleRate;
                     const numChannels = audioBuffer.numberOfChannels;
-                    const length = audioBuffer.length;
+                    const playbackRate = parseFloat(tempoSlider.value) / 100;
+                    const length = Math.ceil(audioBuffer.length / playbackRate);
 
                     // Crear un AudioBufferSource y procesar con los efectos aplicados (tempo y tono)
                     // Para exportar con cambios, usamos OfflineAudioContext
                     const offlineCtx = new OfflineAudioContext(numChannels, length, sampleRate);
                     const source = offlineCtx.createBufferSource();
                     source.buffer = audioBuffer;
-                    source.playbackRate.value = parseFloat(tempoSlider.value) / 100;
+                    source.playbackRate.value = playbackRate;
                     source.detune.value = parseFloat(pitchSlider.value) * 100;
 
                     // Aplicar loop si está activo
@@ -1354,25 +1375,20 @@
                     const renderedBuffer = await offlineCtx.startRendering();
 
                     // Convertir a formato exportable
-                    const formatMap = {
-                        wav: Mediabunny.WavOutputFormat,
-                        aiff: Mediabunny.MovOutputFormat, // AIFF no está directamente, pero MOV puede contener PCM
-                        mp3: Mediabunny.Mp3OutputFormat,
-                        m4a: Mediabunny.Mp4OutputFormat
-                    };
-                    let OutputFormatClass = formatMap[exportFormat];
-                    if (!OutputFormatClass) throw new Error('Formato no soportado');
-
-                    // Para AIFF usamos MOV con codec PCM
+                    let codec;
                     let outputFormat;
-                    if (exportFormat === 'aiff') {
+                    if (exportFormat === 'mov') {
                         outputFormat = new Mediabunny.MovOutputFormat({ fastStart: 'in-memory' });
+                        codec = 'pcm-s16';
                     } else if (exportFormat === 'mp3') {
                         outputFormat = new Mediabunny.Mp3OutputFormat({ xingHeader: true });
+                        codec = 'mp3';
                     } else if (exportFormat === 'm4a') {
                         outputFormat = new Mediabunny.Mp4OutputFormat({ fastStart: 'in-memory' });
+                        codec = 'aac';
                     } else {
                         outputFormat = new Mediabunny.WavOutputFormat({});
+                        codec = 'pcm-s16';
                     }
 
                     const target = new Mediabunny.BufferTarget();
@@ -1382,9 +1398,13 @@
                     });
 
                     // Crear fuente de audio desde el buffer renderizado
-                    const audioSource = new Mediabunny.AudioBufferSource(renderedBuffer);
+                    const audioSource = new Mediabunny.AudioBufferSource({
+                        codec,
+                        bitrate: codec === 'aac' || codec === 'mp3' ? 192000 : undefined
+                    });
                     output.addAudioTrack(audioSource);
                     await output.start();
+                    await audioSource.add(renderedBuffer);
                     await output.finalize();
 
                     // Obtener el buffer final
@@ -1393,7 +1413,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `audio_export.${exportFormat === 'aiff' ? 'aiff' : exportFormat === 'm4a' ? 'm4a' : exportFormat}`;
+                    a.download = `audio_export.${exportFormat}`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
