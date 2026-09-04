@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mi Crescendo · Registro Académico</title>
+<title>Registro Académico - Crescendo</title>
 <style>
 :root{
   --ink:#161514;--charcoal:#24201d;--charcoal-2:#1b1917;--paper:#fbf7f0;--cream:#f1e6d2;
@@ -147,7 +147,7 @@ const CRESCENDO_TOOLS=[
  {title:'Armonía funcional',type:'Teoría',description:'Curso interactivo de escalas, intervalos, acordes, tonalidad, voicings y rearmonización.',url:'https://crescendoacademyec.github.io/herramientas-pedagogicas/armonia-funcional/'}
 ];
 function assertApiConfigured(){
-  if(!API_URL || API_URL==='PEGA_AQUI_TU_URL_EXEC' || !/^https:\/\/script\.google\.com\//.test(API_URL)){
+  if(!API_URL || API_URL==='https://script.google.com/macros/s/AKfycbyjMrd6RKi4QIiU-JS47j-6mIBrPQtvpP5BxzAssvonuhelOofcwHwK2CsNztTUJKDNvQ/exec' || !/^https:\/\/script\.google\.com\//.test(API_URL)){
     throw new Error('Mi Crescendo aún no está conectado al servidor. Configura la URL /exec de Google Apps Script.');
   }
 }
