@@ -159,6 +159,9 @@ async function api(action,payload={}){
   if(!data.ok)throw new Error(data.error||'Error del servidor');
   return data.data;
 }
+function toast(msg){const t=$('#toast');if(!t)return;t.textContent=msg;t.classList.remove('hidden');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.add('hidden'),2600)}
+function setStatus(id,msg,type=''){const e=$(id);if(!e)return;e.textContent=msg;e.className='status '+type}
+function switchRole(next){role=next;$('#roleStudent').classList.toggle('active',next==='student');$('#roleTeacher').classList.toggle('active',next==='teacher');$('#studentLogin').classList.toggle('hidden',next!=='student');$('#teacherLogin').classList.toggle('hidden',next!=='teacher')}
 $('#roleStudent').addEventListener('click',()=>switchRole('student'));$('#roleTeacher').addEventListener('click',()=>switchRole('teacher'));
 $('#studentLoginForm').addEventListener('submit',async e=>{e.preventDefault();setStatus('#studentLoginStatus','Consultando…');try{const data=await api('studentLogin',{code:$('#studentCode').value.trim(),pin:$('#studentPin').value.trim()});session={type:'student',data};openStudent();}catch(err){setStatus('#studentLoginStatus',err.message,'error')}});
 $('#teacherLoginForm').addEventListener('submit',async e=>{e.preventDefault();setStatus('#teacherLoginStatus','Validando…');try{const key=$('#teacherKey').value;const data=await api('teacherLogin',{key});session={type:'teacher',key,teacher:data.teacher};await openTeacher();}catch(err){setStatus('#teacherLoginStatus',err.message,'error')}});
