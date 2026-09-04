@@ -147,7 +147,7 @@ const CRESCENDO_TOOLS=[
  {title:'Armonía funcional',type:'Teoría',description:'Curso interactivo de escalas, intervalos, acordes, tonalidad, voicings y rearmonización.',url:'https://crescendoacademyec.github.io/herramientas-pedagogicas/armonia-funcional/'}
 ];
 function assertApiConfigured(){
-  if(!API_URL || API_URL==='https://script.google.com/macros/s/AKfycbyjMrd6RKi4QIiU-JS47j-6mIBrPQtvpP5BxzAssvonuhelOofcwHwK2CsNztTUJKDNvQ/exec' || !/^https:\/\/script\.google\.com\//.test(API_URL)){
+  if(!API_URL || API_URL.includes('PEGA_AQUI') || !/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(API_URL)){
     throw new Error('Mi Crescendo aún no está conectado al servidor. Configura la URL /exec de Google Apps Script.');
   }
 }
