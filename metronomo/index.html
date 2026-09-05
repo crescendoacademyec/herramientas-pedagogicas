@@ -7,8 +7,9 @@
     <meta name="description" content="Metronomo: herramienta web para estudiar pulso, subdivisiones, swing, clave, polirritmia y polimetria.">
     <base href="/metronomo/">
     <title>Metrónomo</title>
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <style>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%0A%20%20%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2214%22%20fill%3D%22%23161514%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M25%2012h14l8%2038H17l8-38Z%22%20fill%3D%22none%22%20stroke%3D%22%23d4a84f%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M32%2017v25%22%20stroke%3D%22%23fffaf0%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%2232%22%20cy%3D%2217%22%20r%3D%224%22%20fill%3D%22%23d4a84f%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M22%2050h20%22%20stroke%3D%22%23d4a84f%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F%3E%0A%3C%2Fsvg%3E">
+    <link rel="alternate icon" href="favicon.svg" type="image/svg+xml">
+<style>
         /* ===== VARIABLES GLOBALES (unificadas) ===== */
         :root {
             --ink: #161514;
@@ -39,8 +40,7 @@
 
         body {
             background:
-                linear-gradient(120deg, rgba(22, 21, 20, 0.94), rgba(22, 21, 20, 0.74)),
-                url('fondo_metronomo.jpg') center / cover fixed no-repeat;
+                linear-gradient(120deg, rgba(22, 21, 20, 0.98), rgba(28, 25, 22, 0.92));
             color: var(--text);
             display: block;
             font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -59,80 +59,93 @@
 
         a { color: inherit; text-decoration: none; }
 
-        /* ===== HEADER (unificado) ===== */
-        .site-header {
-            display: flex;
+        /* ===== HEADER CRESCENDO · RESPONSIVE ===== */
+        .topbar {
+            width: 100%;
+            min-height: 54px;
+            display: grid;
+            grid-template-columns: minmax(0,1fr) auto;
             align-items: center;
-            justify-content: space-between;
-            padding: 22px clamp(20px, 5vw, 64px);
-            border-bottom: 1px solid var(--line);
-            background: rgba(22, 21, 20, 0.82);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
+            gap: 18px;
+            padding: 7px clamp(14px, 2.5vw, 28px);
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            background: rgba(22,21,20,0.96);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             position: relative;
-            z-index: 2;
+            z-index: 50;
         }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 1.05rem;
-            letter-spacing: 0.02em;
+        .topbar .brand {
+            margin: 0;
+            min-width: 0;
             color: var(--cream);
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(1.05rem, 1.7vw, 1.38rem);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: .01em;
+            white-space: nowrap;
         }
-        .brand-mark {
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            background: var(--gold);
-            color: var(--ink);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Georgia, serif;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-        .site-header .tag {
-            font-size: 0.72rem;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 22px;
-            flex-wrap: wrap;
-        }
+        .topbar .brand span { display: block; }
         .social-bar {
             display: flex;
             align-items: center;
-            gap: 14px;
+            justify-content: flex-end;
+            gap: 7px;
+            min-width: 0;
         }
-        .social-bar a {
-            color: var(--muted);
+        .social-link,
+        .academy-link {
+            width: 31px;
+            height: 31px;
+            flex: 0 0 31px;
             display: inline-flex;
-            transition: color 0.15s ease, transform 0.15s ease;
-        }
-        .social-bar a:hover {
-            color: var(--gold);
-            transform: scale(1.1);
-        }
-        .social-bar svg { display: block; width: 19px; height: 19px; }
-        .school-logo-link { display: inline-block; line-height: 0; }
-        .school-logo {
-            width: 34px; height: 34px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,.15);
             border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid var(--gold-dim);
+            color: rgba(255,250,240,.72);
+            background: rgba(255,255,255,.035);
+            transition: transform .16s ease, color .16s ease, border-color .16s ease, background .16s ease;
         }
-        .school-logo:hover { transform: scale(1.05); }
-
-        @media (max-width: 640px) {
-            .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
-            .header-right { width: 100%; justify-content: space-between; }
-            .site-header .tag { display: none; }
+        .social-link svg { width: 15px; height: 15px; display: block; }
+        .academy-link {
+            width: 35px;
+            height: 35px;
+            flex-basis: 35px;
+            padding: 2px;
+            border-color: rgba(212,168,79,.58);
+            background: rgba(255,250,240,.96);
+        }
+        .academy-link img,
+        .school-logo {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .social-link:hover,
+        .academy-link:hover {
+            transform: translateY(-1px) scale(1.04);
+            color: var(--gold);
+            border-color: rgba(212,168,79,.72);
+            background: rgba(212,168,79,.09);
+        }
+        .social-link:focus-visible,
+        .academy-link:focus-visible {
+            outline: 2px solid var(--gold);
+            outline-offset: 2px;
+        }
+        @media (max-width: 760px) {
+            .topbar { grid-template-columns: 1fr; justify-items: center; gap: 8px; padding: 9px 12px; }
+            .topbar .brand { text-align: center; }
+            .social-bar { justify-content: center; flex-wrap: wrap; }
+        }
+        @media (max-width: 430px) {
+            .social-bar { gap: 5px; }
+            .social-link { width: 29px; height: 29px; flex-basis: 29px; }
+            .academy-link { width: 33px; height: 33px; flex-basis: 33px; }
         }
 
         /* ===== CONTENIDO PRINCIPAL ===== */
@@ -537,59 +550,66 @@
             -webkit-backdrop-filter: blur(18px);
             margin-top: 40px;
         }
+
+
+        /* ===== Lector avanzado de partituras ===== */
+        .score-reader-toolbar {
+            position:absolute; top:72px; left:50%; transform:translateX(-50%); z-index:7;
+            display:none; align-items:center; gap:7px; flex-wrap:wrap; justify-content:center;
+            max-width:94vw; padding:7px 10px; border-radius:16px;
+            background:rgba(20,20,20,.88); border:1px solid rgba(255,255,255,.16);
+            backdrop-filter:blur(10px); box-shadow:0 10px 32px rgba(0,0,0,.38);
+        }
+        .score-reader-toolbar.visible{display:flex}
+        .score-reader-toolbar button,.score-reader-toolbar select,.score-reader-toolbar input[type=number]{
+            width:auto; min-height:34px; padding:6px 9px; border-radius:9px; font-size:.74rem;
+        }
+        .score-reader-toolbar button{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:var(--text);cursor:pointer}
+        .score-reader-toolbar button:hover,.score-reader-toolbar button.active{border-color:var(--accent);color:var(--accent);background:rgba(212,168,79,.12)}
+        .score-reader-toolbar .primary{background:var(--accent);color:var(--ink);border-color:transparent;font-weight:900}
+        .score-reader-toolbar label{display:flex;align-items:center;gap:5px;color:var(--text-dim);font-size:.68rem;white-space:nowrap}
+        .score-reader-toolbar input[type=checkbox]{accent-color:var(--accent)}
+        .score-reader-status{position:absolute;left:18px;bottom:88px;z-index:6;background:rgba(20,20,20,.78);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:7px 10px;color:var(--text-dim);font-size:.7rem;max-width:min(520px,70vw);display:none}
+        .score-reader-status.visible{display:block}
+        #scoreOsmd{display:none;width:100%;min-height:100%;background:#fff;color:#111;border-radius:4px;padding:18px;text-align:left}
+        #scoreOsmd.visible{display:block}
+        #scoreOsmd svg{max-width:none}
+        .score-content.musicxml{background:#ece8e0;text-align:left}
+        .score-content.musicxml #scoreOsmd{margin:0 auto}
+        @media(max-width:820px){
+            .score-reader-toolbar{top:66px;gap:5px;padding:6px;max-height:92px;overflow:auto}
+            .score-reader-toolbar button,.score-reader-toolbar select,.score-reader-toolbar input[type=number]{min-height:30px;padding:5px 7px;font-size:.68rem}
+            .score-content{padding-top:164px}
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
 </head>
 <body>
 
-<header class="site-header">
-    <div class="brand">
-        Crescendo Academy
-    </div>
-    <div class="header-right">
-        <div class="tag">Herramientas para clases de música</div>
-        <div class="social-bar">
-            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-            </a>
-            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
-                </svg>
-            </a>
-            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-            </a>
-            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                    <polyline points="22,6 12,13 2,6"/>
-                </svg>
-            </a>
-            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M6 7V2h12v5"/>
-                    <path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
-                    <path d="M8 12h8"/>
-                </svg>
-            </a>
-            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-            </a>
-        </div>
-        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
-            <img
-                src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png"
-                alt="Logo Crescendo Academy"
-                class="school-logo"
-            />
+<header class="topbar">
+    <h1 class="brand"><span>Metrónomo</span></h1>
+    <div class="social-bar">
+        <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+        </a>
+        <a class="social-link" href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </a>
+        <a class="social-link" href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        </a>
+        <a class="social-link" href="mailto:crescendoacademyec@gmail.com" aria-label="Correo electrónico" title="Correo electrónico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </a>
+        <a class="social-link" href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener noreferrer" aria-label="Hotmart" title="Hotmart">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
+        </a>
+        <a class="social-link" href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+        </a>
+        <a class="academy-link" href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener noreferrer" aria-label="Herramientas pedagógicas de Crescendo Academy" title="Herramientas pedagógicas">
+            <img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="school-logo" />
         </a>
     </div>
 </header>
@@ -619,7 +639,7 @@
                 <span class="basic-box-label">Partitura</span>
                 <span class="basic-box-value" id="scoreBtnValue">📄 Cargar</span>
             </button>
-            <input type="file" id="scoreFileInput" accept="image/*,application/pdf" style="display:none">
+            <input type="file" id="scoreFileInput" accept="image/*,application/pdf,.xml,.musicxml,.mxl" style="display:none">
         </div>
 
         <div class="stage hidden" id="stageArea">
@@ -810,8 +830,24 @@
     <div class="score-beat-bar" id="scoreBeatBar">
         <div class="visualizer score-visualizer" id="scoreBeatVis"></div>
     </div>
+    <div class="score-reader-toolbar" id="scoreReaderToolbar" aria-label="Controles MusicXML">
+        <button type="button" id="scorePrevNote" title="Evento anterior">⏮</button>
+        <button type="button" id="scoreReaderPlay" class="primary" title="Reproducir partitura">▶ Partitura</button>
+        <button type="button" id="scoreReaderPause" title="Pausar">⏸</button>
+        <button type="button" id="scoreReaderStop" title="Detener">■</button>
+        <button type="button" id="scoreNextNote" title="Evento siguiente">⏭</button>
+        <span class="score-bar-sep"></span>
+        <button type="button" id="scoreLoopA" title="Marcar inicio de loop">A</button>
+        <button type="button" id="scoreLoopB" title="Marcar final de loop">B</button>
+        <button type="button" id="scoreLoopClear" title="Limpiar loop">A–B ✕</button>
+        <label>Count-in
+            <select id="scoreCountIn"><option value="0">0</option><option value="1" selected>1 compás</option><option value="2">2 compases</option></select>
+        </label>
+        <label><input type="checkbox" id="scoreSyncMetro" checked> Metrónomo sincronizado</label>
+    </div>
+    <div class="score-reader-status" id="scoreReaderStatus"></div>
     <div class="score-content" id="scoreContent">
-        <div class="score-empty-hint">Carga una imagen o PDF de tu partitura para empezar a practicar.</div>
+        <div class="score-empty-hint">Carga una imagen, PDF, MusicXML o MXL para empezar a practicar.</div>
     </div>
     <div class="score-metro-bar">
         <div class="basic-select-wrap score-mini-wrap">
@@ -918,7 +954,11 @@
         scoreView: document.getElementById('scoreView'), scoreContent: document.getElementById('scoreContent'), scoreCloseBtn: document.getElementById('scoreCloseBtn'),
         scoreZoomRow: document.getElementById('scoreZoomRow'), scoreZoomLabel: document.getElementById('scoreZoomLabel'), scoreZoomOut: document.getElementById('scoreZoomOut'), scoreZoomIn: document.getElementById('scoreZoomIn'),
         scoreBpmVal: document.getElementById('scoreBpmVal'), scorePlayBtn: document.getElementById('scorePlayBtn'), scoreTapBtn: document.getElementById('scoreTapBtn'), scoreMinus: document.getElementById('scoreMinus'), scorePlus: document.getElementById('scorePlus'),
-        scoreBeatVis: document.getElementById('scoreBeatVis'), fsBeatVis: document.getElementById('fsBeatVis')
+        scoreBeatVis: document.getElementById('scoreBeatVis'), fsBeatVis: document.getElementById('fsBeatVis'),
+        scoreReaderToolbar: document.getElementById('scoreReaderToolbar'), scoreReaderStatus: document.getElementById('scoreReaderStatus'),
+        scoreReaderPlay: document.getElementById('scoreReaderPlay'), scoreReaderPause: document.getElementById('scoreReaderPause'), scoreReaderStop: document.getElementById('scoreReaderStop'),
+        scorePrevNote: document.getElementById('scorePrevNote'), scoreNextNote: document.getElementById('scoreNextNote'), scoreLoopA: document.getElementById('scoreLoopA'), scoreLoopB: document.getElementById('scoreLoopB'), scoreLoopClear: document.getElementById('scoreLoopClear'),
+        scoreCountIn: document.getElementById('scoreCountIn'), scoreSyncMetro: document.getElementById('scoreSyncMetro')
     };    const quickBpmRow = document.getElementById('quick-bpm-row');
     for (let i = 40; i <= 400; i += 20) {
         let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
@@ -1125,43 +1165,128 @@
         else if (UI.scoreView.classList.contains('open')) closeScoreView();
     });
 
-    // --- Cargar partitura (imagen o PDF) para practicar con el metrónomo encima ---
-    // Un solo botón (no un panel siempre visible): al tocarlo, si no hay nada cargado abre
-    // el selector de archivo; si ya hay una partitura cargada, reabre directamente la vista
-    // de práctica a pantalla completa con la barra de metrónomo flotante abajo.
-    let loadedScoreURL = null, loadedScoreType = null, scoreZoom = 100;
+    // --- Lector avanzado: imagen, PDF, MusicXML y MXL ---
+    let loadedScoreURL = null, loadedScoreType = null, loadedScoreFileName = '', scoreZoom = 100;
+    let scoreOsmd = null, scoreXmlText = '', scoreEvents = [], scoreEventIndex = 0;
+    let scorePlaybackTimer = null, scorePlaybackPaused = false, scoreLoopStart = null, scoreLoopEnd = null;
+    let scoreMetroStartedByReader = false;
 
     function openScoreView() { UI.scoreView.classList.add('open'); }
-    function closeScoreView() { UI.scoreView.classList.remove('open'); }
-
+    function closeScoreView() { pauseScorePlayback(); UI.scoreView.classList.remove('open'); }
+    function setScoreReaderStatus(msg) {
+        if (!UI.scoreReaderStatus) return;
+        UI.scoreReaderStatus.textContent = msg || '';
+        UI.scoreReaderStatus.classList.toggle('visible', !!msg);
+    }
+    function clearScoreObjectUrl(){
+        if(loadedScoreURL){ try{URL.revokeObjectURL(loadedScoreURL);}catch(_){} loadedScoreURL=null; }
+    }
+    function resetMusicXmlState(){
+        clearTimeout(scorePlaybackTimer); scorePlaybackTimer=null; scorePlaybackPaused=false;
+        scoreEvents=[]; scoreEventIndex=0; scoreLoopStart=null; scoreLoopEnd=null; scoreXmlText=''; scoreOsmd=null;
+        if(UI.scoreReaderToolbar) UI.scoreReaderToolbar.classList.remove('visible');
+        setScoreReaderStatus('');
+    }
+    function parseMusicXmlEvents(xmlText){
+        const doc=new DOMParser().parseFromString(xmlText,'application/xml');
+        if(doc.querySelector('parsererror')) throw new Error('MusicXML no válido');
+        const firstPart=doc.querySelector('part');
+        if(!firstPart) return [];
+        let divisions=1, cursorDiv=0, lastStart=0;
+        const events=[];
+        const measures=[...firstPart.querySelectorAll(':scope > measure')];
+        measures.forEach((measure,mi)=>{
+            const div=measure.querySelector(':scope > attributes > divisions');
+            if(div) divisions=Math.max(1,parseFloat(div.textContent)||1);
+            [...measure.children].forEach(node=>{
+                const tag=node.localName;
+                if(tag==='backup'){cursorDiv-=parseFloat(node.querySelector('duration')?.textContent||0);return;}
+                if(tag==='forward'){cursorDiv+=parseFloat(node.querySelector('duration')?.textContent||0);return;}
+                if(tag!=='note') return;
+                const dur=Math.max(0,parseFloat(node.querySelector(':scope > duration')?.textContent||0));
+                const chord=!!node.querySelector(':scope > chord');
+                const rest=!!node.querySelector(':scope > rest');
+                const startDiv=chord?lastStart:cursorDiv;
+                if(!chord) lastStart=startDiv;
+                let midi=null;
+                if(!rest){
+                    const step=node.querySelector(':scope > pitch > step')?.textContent;
+                    const alter=parseFloat(node.querySelector(':scope > pitch > alter')?.textContent||0);
+                    const octave=parseInt(node.querySelector(':scope > pitch > octave')?.textContent||'4',10);
+                    const pcs={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+                    if(step in pcs) midi=(octave+1)*12+pcs[step]+alter;
+                }
+                let ev=events.find(e=>e.startDiv===startDiv);
+                if(!ev){ ev={startDiv,durationDiv:dur,divisions,measure:mi+1,midis:[],rest:true}; events.push(ev); }
+                ev.durationDiv=Math.max(ev.durationDiv,dur); ev.divisions=divisions;
+                if(midi!==null){ev.midis.push(midi);ev.rest=false;}
+                if(!chord) cursorDiv+=dur;
+            });
+        });
+        events.sort((a,b)=>a.startDiv-b.startDiv);
+        return events.map((e,i)=>({...e,index:i,quarterDuration:e.durationDiv/Math.max(1,e.divisions)}));
+    }
+    async function extractMxl(file){
+        if(!window.JSZip) throw new Error('JSZip no está disponible');
+        const zip=await JSZip.loadAsync(await file.arrayBuffer());
+        let target=null;
+        const container=zip.file('META-INF/container.xml');
+        if(container){
+            const cxml=await container.async('text');
+            const cdoc=new DOMParser().parseFromString(cxml,'application/xml');
+            const path=cdoc.querySelector('rootfile')?.getAttribute('full-path');
+            if(path) target=zip.file(path);
+        }
+        if(!target){
+            target=Object.values(zip.files).find(f=>!f.dir && /\.(musicxml|xml)$/i.test(f.name) && !/META-INF/i.test(f.name));
+        }
+        if(!target) throw new Error('No se encontró MusicXML dentro del archivo MXL');
+        return await target.async('text');
+    }
+    async function loadMusicXml(xmlText){
+        resetMusicXmlState(); scoreXmlText=xmlText;
+        scoreEvents=parseMusicXmlEvents(xmlText);
+        UI.scoreContent.innerHTML=''; UI.scoreContent.classList.add('musicxml');
+        const osmdDiv=document.createElement('div'); osmdDiv.id='scoreOsmd'; osmdDiv.className='visible'; UI.scoreContent.appendChild(osmdDiv);
+        if(!window.opensheetmusicdisplay) throw new Error('OpenSheetMusicDisplay no está disponible');
+        scoreOsmd=new opensheetmusicdisplay.OpenSheetMusicDisplay(osmdDiv,{autoResize:false,drawTitle:true,drawingParameters:'compacttight'});
+        await scoreOsmd.load(xmlText); scoreOsmd.zoom=1; await scoreOsmd.render();
+        if(scoreOsmd.cursor){ scoreOsmd.cursor.show(); try{scoreOsmd.cursor.reset();}catch(_){} }
+        scoreZoom=100; UI.scoreZoomLabel.innerText='100%'; UI.scoreZoomRow.style.display='flex'; UI.scoreReaderToolbar.classList.add('visible');
+        scoreEventIndex=0; setScoreReaderStatus(`MusicXML · ${scoreEvents.length} eventos · listo para practicar`);
+    }
     function buildScoreContent() {
-        UI.scoreContent.innerHTML = '';
+        UI.scoreContent.innerHTML = ''; UI.scoreContent.classList.remove('musicxml');
         scoreZoom = 100; UI.scoreZoomLabel.innerText = '100%';
+        UI.scoreReaderToolbar.classList.remove('visible'); setScoreReaderStatus('');
         if (loadedScoreType === 'image') {
-            const img = document.createElement('img');
-            img.id = 'scoreImg'; img.src = loadedScoreURL; img.style.width = scoreZoom + '%';
-            UI.scoreContent.appendChild(img);
-            UI.scoreZoomRow.style.display = 'flex';
-        } else {
-            const frame = document.createElement('iframe');
-            frame.id = 'scorePdfFrame'; frame.src = loadedScoreURL; frame.title = 'Partitura PDF';
-            UI.scoreContent.appendChild(frame);
-            UI.scoreZoomRow.style.display = 'none'; // el visor de PDF del navegador ya trae su propio zoom
+            const img = document.createElement('img'); img.id = 'scoreImg'; img.src = loadedScoreURL; img.style.width = scoreZoom + '%';
+            UI.scoreContent.appendChild(img); UI.scoreZoomRow.style.display = 'flex';
+        } else if(loadedScoreType==='pdf') {
+            const frame = document.createElement('iframe'); frame.id = 'scorePdfFrame'; frame.src = loadedScoreURL; frame.title = 'Partitura PDF';
+            UI.scoreContent.appendChild(frame); UI.scoreZoomRow.style.display = 'none';
         }
     }
-
+    async function loadScoreFile(file){
+        pauseScorePlayback(); clearScoreObjectUrl(); resetMusicXmlState();
+        loadedScoreFileName=file.name;
+        const ext=(file.name.split('.').pop()||'').toLowerCase();
+        if(ext==='xml'||ext==='musicxml'||ext==='mxl'){
+            loadedScoreType='musicxml';
+            const xml=ext==='mxl'?await extractMxl(file):await file.text();
+            await loadMusicXml(xml);
+        }else{
+            loadedScoreURL=URL.createObjectURL(file); loadedScoreType=file.type==='application/pdf'||ext==='pdf'?'pdf':'image'; buildScoreContent();
+        }
+        UI.scoreBtnValue.innerText=file.name.length>16?file.name.slice(0,14)+'…':file.name; openScoreView();
+    }
     UI.scoreOpenBtn.addEventListener('click', () => {
-        if (loadedScoreURL) openScoreView(); else UI.scoreFileInput.click();
+        if (loadedScoreType) openScoreView(); else UI.scoreFileInput.click();
     });
-    UI.scoreFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0]; if (!file) return;
-        if (loadedScoreURL) URL.revokeObjectURL(loadedScoreURL);
-        loadedScoreURL = URL.createObjectURL(file);
-        loadedScoreType = (file.type === 'application/pdf') ? 'pdf' : 'image';
-        UI.scoreBtnValue.innerText = file.name.length > 16 ? file.name.slice(0, 14) + '…' : file.name;
-        buildScoreContent();
-        openScoreView();
-        UI.scoreFileInput.value = ''; // permite volver a elegir el mismo archivo si hace falta
+    UI.scoreFileInput.addEventListener('change', async (e) => {
+        const file=e.target.files[0]; if(!file)return;
+        try{ await loadScoreFile(file); }catch(err){ console.error(err); setScoreReaderStatus('Error: '+err.message); openScoreView(); }
+        UI.scoreFileInput.value='';
     });
     UI.scoreCloseBtn.addEventListener('click', closeScoreView);
     UI.scoreView.addEventListener('click', (e) => { if (e.target === UI.scoreView) closeScoreView(); });
@@ -1169,17 +1294,71 @@
     function applyScoreZoom() {
         const img = document.getElementById('scoreImg');
         if (img) img.style.width = scoreZoom + '%';
+        if(scoreOsmd){ scoreOsmd.zoom=scoreZoom/100; scoreOsmd.render(); }
         UI.scoreZoomLabel.innerText = scoreZoom + '%';
     }
     UI.scoreZoomOut.addEventListener('click', () => { scoreZoom = Math.max(40, scoreZoom - 15); applyScoreZoom(); });
     UI.scoreZoomIn.addEventListener('click', () => { scoreZoom = Math.min(300, scoreZoom + 15); applyScoreZoom(); });
     UI.scoreZoomLabel.addEventListener('click', () => { scoreZoom = 100; applyScoreZoom(); });
 
-    // La barra de metrónomo flotante dentro de la partitura controla el mismo motor de audio
+    function syncOsmdCursorToIndex(){
+        if(!scoreOsmd?.cursor)return;
+        try{ scoreOsmd.cursor.reset(); for(let i=0;i<scoreEventIndex;i++) scoreOsmd.cursor.next(); scoreOsmd.cursor.show(); }catch(_){}
+        const ev=scoreEvents[scoreEventIndex];
+        if(ev) setScoreReaderStatus(`Compás ${ev.measure} · evento ${scoreEventIndex+1}/${scoreEvents.length}${scoreLoopStart!==null?` · Loop A:${scoreLoopStart+1}${scoreLoopEnd!==null?' B:'+(scoreLoopEnd+1):''}`:''}`);
+    }
+    function stepScore(delta){
+        if(!scoreEvents.length)return;
+        scoreEventIndex=Math.max(0,Math.min(scoreEvents.length-1,scoreEventIndex+delta)); syncOsmdCursorToIndex();
+    }
+    function stopScorePlayback(){
+        clearTimeout(scorePlaybackTimer); scorePlaybackTimer=null; scorePlaybackPaused=false; scoreEventIndex=scoreLoopStart??0; syncOsmdCursorToIndex();
+        if(scoreMetroStartedByReader && isPlaying){toggleMetronome(); scoreMetroStartedByReader=false;}
+    }
+    function pauseScorePlayback(){ clearTimeout(scorePlaybackTimer); scorePlaybackTimer=null; scorePlaybackPaused=true; }
+    function scoreEventMs(ev){ return Math.max(60,(ev?.quarterDuration||1)*(60000/Math.max(20,tempo))); }
+    function scheduleScoreEvent(){
+        if(!scoreEvents.length)return;
+        syncOsmdCursorToIndex();
+        const ev=scoreEvents[scoreEventIndex];
+        scorePlaybackTimer=setTimeout(()=>{
+            if(scoreLoopEnd!==null && scoreEventIndex>=scoreLoopEnd && scoreLoopStart!==null) scoreEventIndex=scoreLoopStart;
+            else if(scoreEventIndex<scoreEvents.length-1) scoreEventIndex++;
+            else { stopScorePlayback(); return; }
+            scheduleScoreEvent();
+        },scoreEventMs(ev));
+    }
+    async function startScorePlayback(){
+        if(!scoreEvents.length)return;
+        clearTimeout(scorePlaybackTimer); scorePlaybackPaused=false;
+        const countInBars=parseInt(UI.scoreCountIn?.value||0,10);
+        if(UI.scoreSyncMetro?.checked && !isPlaying){ toggleMetronome(); scoreMetroStartedByReader=true; }
+        if(countInBars>0){
+            const beats=Math.max(1,parseInt(UI.beatsSel.value)||4); const wait=countInBars*beats*(60000/Math.max(20,tempo));
+            setScoreReaderStatus(`Count-in · ${countInBars} compás${countInBars>1?'es':''}`);
+            scorePlaybackTimer=setTimeout(scheduleScoreEvent,wait);
+        }else scheduleScoreEvent();
+    }
+    UI.scoreReaderPlay?.addEventListener('click',startScorePlayback);
+    UI.scoreReaderPause?.addEventListener('click',pauseScorePlayback);
+    UI.scoreReaderStop?.addEventListener('click',stopScorePlayback);
+    UI.scorePrevNote?.addEventListener('click',()=>stepScore(-1));
+    UI.scoreNextNote?.addEventListener('click',()=>stepScore(1));
+    UI.scoreLoopA?.addEventListener('click',()=>{scoreLoopStart=scoreEventIndex;UI.scoreLoopA.classList.add('active');syncOsmdCursorToIndex();});
+    UI.scoreLoopB?.addEventListener('click',()=>{scoreLoopEnd=scoreEventIndex;if(scoreLoopStart!==null&&scoreLoopEnd<scoreLoopStart)[scoreLoopStart,scoreLoopEnd]=[scoreLoopEnd,scoreLoopStart];UI.scoreLoopB.classList.add('active');syncOsmdCursorToIndex();});
+    UI.scoreLoopClear?.addEventListener('click',()=>{scoreLoopStart=scoreLoopEnd=null;UI.scoreLoopA.classList.remove('active');UI.scoreLoopB.classList.remove('active');syncOsmdCursorToIndex();});
+
+    // La barra de metrónomo flotante controla el mismo motor principal.
     UI.scorePlayBtn.addEventListener('click', toggleMetronome);
     UI.scoreTapBtn.addEventListener('click', () => doTap(UI.scoreTapBtn));
     UI.scoreMinus.addEventListener('click', () => adjustBpm(-1));
     UI.scorePlus.addEventListener('click', () => adjustBpm(1));
+
+    window.addEventListener('keydown',(e)=>{
+        if(!UI.scoreView.classList.contains('open')||!scoreEvents.length)return;
+        const tag=e.target?.tagName;if(['INPUT','SELECT','TEXTAREA','BUTTON'].includes(tag))return;
+        if(e.key==='ArrowRight'){e.preventDefault();stepScore(1);} else if(e.key==='ArrowLeft'){e.preventDefault();stepScore(-1);}
+    });
 
     // --- Estado completo del metrónomo (para Rutinas guardadas y auto-guardado de sesión) ---
     const STATE_SELECT_FIELDS = ['beats-per-measure', 'subdivision', 'snd-accent', 'snd-beat', 'snd-sub', 'snd-swing', 'snd-clave', 'snd-poly', 'snd-pm', 'clave-select', 'train-mode'];
