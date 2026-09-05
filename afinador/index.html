@@ -314,6 +314,20 @@
         user-select:none;
         -webkit-user-drag:none;
     }
+    .headstock-image-missing{
+        min-height:220px;
+        width:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:24px;
+        text-align:center;
+        color:var(--muted);
+        border:1px dashed var(--line);
+        border-radius:12px;
+        background:rgba(255,255,255,.03);
+        font-size:.82rem;
+    }
     .peg-hotspot{
         position:absolute;
         width:23px;
@@ -365,13 +379,39 @@
     .mic-status.err{ color:var(--danger); }
 
     .note-choice{ text-align:center; color:var(--muted); font-size:12px; margin-top:12px; }
+
+    /* ===== Ajustes avanzados del afinador ===== */
+    .tuner-settings{
+        display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;
+        margin:12px 0 4px;
+    }
+    .tuner-setting{
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        padding:9px 11px; border:1px solid var(--line); border-radius:10px;
+        background:rgba(255,255,255,.035);
+    }
+    .tuner-setting label{font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;}
+    .tuner-setting select,.tuner-setting input[type=number]{
+        width:92px; min-width:0; background:rgba(0,0,0,.42); color:var(--text);
+        border:1px solid rgba(255,255,255,.16); border-radius:8px; padding:6px 8px;
+        font:inherit; font-size:12px; outline:none;
+    }
+    .tuner-setting select:focus,.tuner-setting input[type=number]:focus{border-color:var(--gold);}
+    .input-meter-wrap{width:min(420px,100%); display:flex; align-items:center; gap:9px;}
+    .input-meter-label{font-size:10px;color:var(--muted);min-width:38px;text-transform:uppercase;letter-spacing:.08em;}
+    .input-meter{height:6px; flex:1; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.10); position:relative;}
+    .input-meter-fill{height:100%; width:0%; border-radius:inherit; background:var(--moss); transition:width .08s linear;}
+    .input-meter-value{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums;min-width:42px;text-align:right;}
+    .signal-hint{font-size:10px;color:var(--muted);min-height:14px;}
+    @media(max-width:560px){.tuner-settings{grid-template-columns:1fr}.tuner-setting select,.tuner-setting input[type=number]{width:105px;}}
+
 </style>
 </head>
 <body>
 
 <header class="site-header">
     <div class="brand">
-        Crescendo Academy
+        Afinador
     </div>
     <div class="header-right">
         <div class="tag">Herramientas para clases de música</div>
@@ -439,6 +479,20 @@
       </div>
     </div>
 
+    <div class="tuner-settings" aria-label="Ajustes del afinador">
+      <div class="tuner-setting">
+        <label for="a4Calibration">Calibración A4</label>
+        <input id="a4Calibration" type="number" min="438" max="445" step="0.1" value="440" inputmode="decimal" aria-label="Frecuencia de referencia de La 4">
+      </div>
+      <div class="tuner-setting">
+        <label for="spellingMode">Grafía</label>
+        <select id="spellingMode" aria-label="Preferencia de grafía de notas">
+          <option value="sharps">Preferir ♯</option>
+          <option value="flats">Preferir ♭</option>
+        </select>
+      </div>
+    </div>
+
     <div class="dial-wrap">
       <!-- NUEVA FILA: símbolos a los lados del círculo -->
       <div class="dial-row">
@@ -466,6 +520,12 @@
 
     <div class="mic-zone">
       <button class="mic-btn" id="micBtn">🎙️ Activar micrófono</button>
+      <div class="input-meter-wrap" aria-label="Nivel de entrada del micrófono">
+        <span class="input-meter-label">Entrada</span>
+        <div class="input-meter"><div class="input-meter-fill" id="inputMeterFill"></div></div>
+        <span class="input-meter-value" id="inputMeterValue">−∞ dB</span>
+      </div>
+      <div class="signal-hint" id="signalHint"></div>
       <div class="mic-status" id="micStatus">El micrófono solo se usa en tu navegador — el audio nunca se envía a ningún servidor.</div>
     </div>
   </div>
@@ -479,7 +539,7 @@
 <script type="module">
 import { PitchDetector } from "https://esm.sh/pitchy@4.1.0";
 
-document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();
+document.getElementById('footerYear').textContent = new Date().getFullYear();
 
 /* ---------------- Configuración de instrumentos ---------------- */
 const INSTRUMENTS = {
@@ -568,9 +628,21 @@ const INSTRUMENTS = {
   },
 };
 
-let currentInstrumentKey = 'guitarra';
+const STORAGE_KEY = 'crescendoAfinadorPrefsV2';
+function loadPrefs(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; } catch { return {}; }
+}
+const savedPrefs = loadPrefs();
+let currentInstrumentKey = INSTRUMENTS[savedPrefs.instrument] ? savedPrefs.instrument : 'guitarra';
 let selectedStringIndex = null;
-let autoMode = true;
+let autoMode = savedPrefs.autoMode !== false;
+let a4Reference = Math.min(445, Math.max(438, Number(savedPrefs.a4Reference) || 440));
+let spellingMode = savedPrefs.spellingMode === 'flats' ? 'flats' : 'sharps';
+function savePrefs(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({instrument:currentInstrumentKey,autoMode,a4Reference,spellingMode})); } catch {}
+}
+function calibratedFreq(baseFreq){ return baseFreq * (a4Reference / 440); }
+
 
 /* ---------------- UI: selector de instrumentos ---------------- */
 const instrumentSelect = document.getElementById('instrumentSelect');
@@ -586,6 +658,8 @@ Object.entries(INSTRUMENTS).forEach(([key, inst]) => {
 function selectInstrument(key){
   currentInstrumentKey = key;
   selectedStringIndex = null;
+  resetPitchStability();
+  savePrefs();
   [...instrumentSelect.children].forEach(b => b.classList.toggle('active', b.dataset.key === key));
   document.getElementById('tuningLabel').textContent = INSTRUMENTS[key].tuning;
 
@@ -601,10 +675,13 @@ function selectInstrument(key){
 
 /* ---------------- UI: interruptor automático ---------------- */
 const autoSwitch = document.getElementById('autoSwitch');
+autoSwitch.classList.toggle('on', autoMode);
 const noteChoice = document.getElementById('noteChoice');
 autoSwitch.addEventListener('click', () => {
   autoMode = !autoMode;
   autoSwitch.classList.toggle('on', autoMode);
+  resetPitchStability();
+  savePrefs();
   if(autoMode){
     selectedStringIndex = null;
     noteChoice.textContent = 'Modo automático: detectando la cuerda más cercana a lo que suena.';
@@ -647,6 +724,16 @@ function renderHeadstock(){
   img.src = imageMap[currentInstrumentKey];
   img.alt = `Clavijero realista de ${inst.label}`;
   img.draggable = false;
+  img.addEventListener('error', () => {
+    img.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.className = 'headstock-image-missing';
+    msg.textContent = currentInstrumentKey === 'vocal'
+      ? '♪'
+      : 'Imagen del clavijero no disponible';
+    msg.setAttribute('aria-live', 'polite');
+    stage.prepend(msg);
+  }, {once:true});
   stage.appendChild(img);
 
   (hotspotMap[currentInstrumentKey] || []).forEach((pos, idx) => {
@@ -661,6 +748,8 @@ function renderHeadstock(){
       autoMode = false;
       autoSwitch.classList.remove('on');
       selectedStringIndex = idx;
+      resetPitchStability();
+      savePrefs();
       noteChoice.textContent = `Afinando manualmente: ${inst.strings[idx].note}${inst.strings[idx].oct}.`;
       renderHeadstock();
     });
@@ -688,11 +777,13 @@ function buildPegColumn(strings, side){
     const peg = document.createElement('div');
     peg.className = 'peg' + (s.idx === selectedStringIndex ? ' selected' : '');
     peg.dataset.idx = s.idx;
-    peg.innerHTML = `${s.note}<span class="hz">${s.freq.toFixed(1)}Hz</span>`;
+    peg.innerHTML = `${s.note}<span class="hz">${calibratedFreq(s.freq).toFixed(1)}Hz</span>`;
     peg.addEventListener('click', () => {
       autoMode = false;
       autoSwitch.classList.remove('on');
       selectedStringIndex = s.idx;
+      resetPitchStability();
+      savePrefs();
       noteChoice.textContent = `Afinando manualmente: ${s.note}${s.oct}.`;
       renderHeadstock();
     });
@@ -1228,6 +1319,7 @@ const HEADSTOCK_BUILDERS = {
   },
 };
 
+autoSwitch.classList.toggle('on', autoMode);
 renderHeadstock();
 document.getElementById('tuningLabel').textContent = INSTRUMENTS[currentInstrumentKey].tuning;
 
@@ -1238,24 +1330,65 @@ function centsOffFromTarget(freq, targetFreq){
 
 function closestStringIndex(freq){
   const inst = INSTRUMENTS[currentInstrumentKey];
-  let best = 0, bestDiff = Infinity;
+  let best = 0, bestScore = Infinity;
   inst.strings.forEach((s, i) => {
-    const diff = Math.abs(centsOffFromTarget(freq, s.freq));
-    if(diff < bestDiff){ bestDiff = diff; best = i; }
+    const base = calibratedFreq(s.freq);
+    // Compara fundamental y armónicos 2–4. Se penalizan los armónicos para
+    // preferir la cuerda cuya fundamental realmente coincide cuando hay ambigüedad.
+    for(let harmonic=1; harmonic<=4; harmonic++){
+      const target = base * harmonic;
+      const diff = Math.abs(centsOffFromTarget(freq, target));
+      const penalty = (harmonic - 1) * 7;
+      const score = diff + penalty;
+      if(score < bestScore){ bestScore = score; best = i; }
+    }
   });
   return best;
 }
 
-/* Modo Vocal: no hay una afinación fija, así que se busca la nota cromática
-   más cercana (temperamento igual, A4 = 440Hz) en cualquier octava. */
-const CHROMATIC_NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const CHROMATIC_SHARPS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const CHROMATIC_FLATS  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+function displayPitchClass(pc){
+  return (spellingMode === 'flats' ? CHROMATIC_FLATS : CHROMATIC_SHARPS)[((pc%12)+12)%12];
+}
 function closestChromaticNote(freq){
-  const midi = 69 + 12 * Math.log2(freq / 440);
+  const midi = 69 + 12 * Math.log2(freq / a4Reference);
   const rounded = Math.round(midi);
-  const targetFreq = 440 * Math.pow(2, (rounded - 69) / 12);
-  const note = CHROMATIC_NOTES[((rounded % 12) + 12) % 12];
+  const targetFreq = a4Reference * Math.pow(2, (rounded - 69) / 12);
+  const note = displayPitchClass(rounded);
   const oct = Math.floor(rounded / 12) - 1;
   return { note, oct, freq: targetFreq };
+}
+
+/* Estabilización: mediana corta + EMA + histéresis de cuerda. */
+let pitchHistory = [];
+let smoothedFreq = null;
+let stableStringIdx = null;
+let pendingStringIdx = null;
+let pendingStringFrames = 0;
+function resetPitchStability(){
+  pitchHistory = []; smoothedFreq = null; stableStringIdx = null;
+  pendingStringIdx = null; pendingStringFrames = 0;
+}
+function median(values){
+  const a=[...values].sort((x,y)=>x-y); const m=Math.floor(a.length/2);
+  return a.length%2 ? a[m] : (a[m-1]+a[m])/2;
+}
+function stabilizePitch(raw){
+  pitchHistory.push(raw);
+  if(pitchHistory.length > 7) pitchHistory.shift();
+  const med = median(pitchHistory);
+  smoothedFreq = smoothedFreq == null ? med : smoothedFreq + 0.34 * (med - smoothedFreq);
+  return smoothedFreq;
+}
+function stableAutoString(freq){
+  const candidate = closestStringIndex(freq);
+  if(stableStringIdx == null){ stableStringIdx = candidate; return candidate; }
+  if(candidate === stableStringIdx){ pendingStringIdx=null; pendingStringFrames=0; return stableStringIdx; }
+  if(candidate !== pendingStringIdx){ pendingStringIdx=candidate; pendingStringFrames=1; }
+  else pendingStringFrames++;
+  if(pendingStringFrames >= 4){ stableStringIdx=candidate; pendingStringIdx=null; pendingStringFrames=0; }
+  return stableStringIdx;
 }
 
 /* ---------------- Captura de audio + detección de tono ---------------- */
@@ -1267,6 +1400,18 @@ const dialArrow = document.getElementById('dialArrow');
 const centsFill = document.getElementById('centsFill');
 const freqReadout = document.getElementById('freqReadout');
 const centsReadout = document.getElementById('centsReadout');
+const a4Calibration = document.getElementById('a4Calibration');
+const spellingSelect = document.getElementById('spellingMode');
+const inputMeterFill = document.getElementById('inputMeterFill');
+const inputMeterValue = document.getElementById('inputMeterValue');
+const signalHint = document.getElementById('signalHint');
+a4Calibration.value = String(a4Reference);
+spellingSelect.value = spellingMode;
+a4Calibration.addEventListener('change', () => {
+  a4Reference = Math.min(445, Math.max(438, Number(a4Calibration.value) || 440));
+  a4Calibration.value = String(a4Reference); resetPitchStability(); savePrefs(); renderHeadstock();
+});
+spellingSelect.addEventListener('change', () => { spellingMode = spellingSelect.value === 'flats' ? 'flats' : 'sharps'; savePrefs(); });
 
 let audioCtx, analyser, detector, dataArray, rafId, stream;
 let listening = false;
@@ -1312,10 +1457,20 @@ function stopListening(){
 
 function tick(){
   analyser.getFloatTimeDomainData(dataArray);
-  const [pitch, clarity] = detector.findPitch(dataArray, audioCtx.sampleRate);
+  let sum=0;
+  for(let i=0;i<dataArray.length;i++) sum += dataArray[i]*dataArray[i];
+  const rms = Math.sqrt(sum/dataArray.length);
+  const db = rms > 0 ? 20*Math.log10(rms) : -Infinity;
+  const meterPct = Math.max(0, Math.min(100, (db + 60) / 60 * 100));
+  inputMeterFill.style.width = meterPct + '%';
+  inputMeterValue.textContent = Number.isFinite(db) ? `${Math.round(db)} dB` : '−∞ dB';
+  if(db < -48) signalHint.textContent = 'Señal débil: acerca el instrumento al micrófono.';
+  else if(db > -5) signalHint.textContent = 'Señal muy fuerte: aléjate un poco para evitar saturación.';
+  else signalHint.textContent = '';
 
-  if(clarity > 0.85 && pitch > 20 && pitch < 1500){
-    handlePitch(pitch);
+  const [pitch, clarity] = detector.findPitch(dataArray, audioCtx.sampleRate);
+  if(clarity > 0.84 && pitch > 20 && pitch < 1800 && db > -55){
+    handlePitch(stabilizePitch(pitch));
   }
   rafId = requestAnimationFrame(tick);
 }
@@ -1329,9 +1484,9 @@ function handlePitch(freq){
     cents = centsOffFromTarget(freq, target.freq);
   } else {
     const inst = INSTRUMENTS[currentInstrumentKey];
-    idx = autoMode ? closestStringIndex(freq) : selectedStringIndex;
+    idx = autoMode ? stableAutoString(freq) : selectedStringIndex;
     target = inst.strings[idx];
-    cents = centsOffFromTarget(freq, target.freq);
+    cents = centsOffFromTarget(freq, calibratedFreq(target.freq));
 
     if(autoMode){
       document.querySelectorAll('.peg').forEach(p => p.classList.remove('selected','correct'));
@@ -1376,7 +1531,14 @@ function resetDial(){
   centsReadout.textContent = '0';
   centsFill.style.left = '50%';
   document.querySelectorAll('.peg').forEach(p => p.classList.remove('correct'));
+  inputMeterFill.style.width = '0%';
+  inputMeterValue.textContent = '−∞ dB';
+  signalHint.textContent = '';
+  resetPitchStability();
 }
+
+// Aplica las preferencias guardadas una vez inicializados todos los módulos.
+selectInstrument(currentInstrumentKey);
 </script>
 </body>
 </html>
