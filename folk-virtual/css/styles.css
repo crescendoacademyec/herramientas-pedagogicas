@@ -1,0 +1,894 @@
+    /* ===== Variables y estilos base ===== */
+    :root {
+      --ink: #161514;
+      --charcoal: #24201d;
+      --paper: #fbf7f0;
+      --cream: #f1e6d2;
+      --gold: #d4a84f;
+      --moss: #476357;
+      --line: rgba(255, 255, 255, 0.14);
+      --text: #fffaf0;
+      --muted: rgba(255, 250, 240, 0.68);
+      --grid: rgba(243, 224, 187, 0.78);
+      --string: rgba(255, 247, 226, 0.92);
+      --board1: #3a2417;
+      --board2: #20120a;
+      --board3: #0f0704;
+      --fretmetal-light: #f2f2f0;
+      --fretmetal-mid: #9a9a97;
+      --fretmetal-dark: #55534f;
+      --active-color: #66b3ff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(circle at 22% 0%, #221f1b 0%, #131211 46%, #0a0908 100%) fixed;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ===== TOPBAR · identidad Crescendo ===== */
+    .topbar {
+      align-items: center;
+      background: rgba(18, 17, 15, 0.94);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 14px;
+      min-height: 60px;
+      padding: 8px clamp(10px, 2.2vw, 34px);
+      flex: 0 0 auto;
+    }
+
+    .topbar .brand {
+      align-items: center;
+      display: flex;
+      gap: 10px;
+      min-width: 0;
+      margin: 0;
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.28rem, 2.1vw, 1.72rem);
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+    }
+
+    .topbar .brand span { display: block; }
+
+    .social-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 7px;
+      flex-wrap: nowrap;
+      min-width: 0;
+    }
+
+    .social-bar a {
+      text-decoration: none;
+    }
+
+    .social-link,
+    .academy-link {
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      flex: 0 0 36px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 50%;
+      background: rgba(255,255,255,.035);
+      color: rgba(255,250,240,.72);
+      transition: color .18s, border-color .18s, background .18s, transform .12s, box-shadow .18s;
+    }
+
+    .social-link svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .academy-link {
+      overflow: hidden;
+      border-color: rgba(212,168,79,.38);
+      margin-left: 2px;
+    }
+
+    .academy-link img,
+    .school-logo {
+      width: 29px;
+      height: 29px;
+      display: block;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: none;
+    }
+
+    .social-link:hover,
+    .academy-link:hover {
+      color: var(--gold);
+      border-color: rgba(212,168,79,.72);
+      background: rgba(212,168,79,.10);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 18px rgba(0,0,0,.24);
+    }
+
+    .social-link:focus-visible,
+    .academy-link:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 760px) {
+      .topbar {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 9px;
+        padding: 9px 12px;
+      }
+      .topbar .brand { justify-content: center; }
+      .social-bar { justify-content: center; width: 100%; flex-wrap: wrap; }
+    }
+
+
+    /* ===== METRÓNOMO · fase 1 ===== */
+    .header-metronome{display:flex;align-items:center;gap:4px;padding:4px 6px;border:1px solid rgba(212,168,79,.28);border-radius:10px;background:rgba(0,0,0,.22);box-shadow:0 4px 16px rgba(0,0,0,.16);white-space:nowrap}
+    .header-metronome button,.header-metronome select{width:auto;min-width:0;min-height:28px;height:28px;padding:0 7px;border-radius:6px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);color:var(--text);font-size:.66rem;font-weight:800}
+    .header-metronome .metro-play{width:30px;padding:0;color:var(--gold)}
+    .metro-bpm-wrap{display:grid;grid-template-columns:18px 32px 18px;align-items:center;height:28px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.04)}
+    .metro-bpm-wrap button{border:0;border-radius:0;padding:0;height:28px;width:18px}
+    .metro-bpm-readout{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;line-height:1;color:var(--gold);font-weight:900}
+    .metro-bpm-readout small{font-size:.43rem;color:var(--muted);letter-spacing:.08em;margin-bottom:2px}
+    #metroBeat{min-width:14px;text-align:center;color:var(--gold);font-family:Georgia,serif;font-weight:900}
+    .score-practice-options{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;background:rgba(255,255,255,.055);border-radius:6px;padding:3px 5px}
+    .score-practice-options label{font-size:.58rem;text-transform:none;color:#eee;display:inline-flex;align-items:center;gap:3px}
+    .score-practice-options select,.score-practice-options input{min-height:22px;height:22px;width:auto;min-width:42px;padding:0 4px;font-size:.6rem;border-radius:4px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.26);color:#eee}
+    .score-practice-options input[type="checkbox"]{width:14px;min-width:14px;height:14px;min-height:14px;accent-color:var(--gold)}
+    .practice-status{font-size:.62rem;color:#f3d9a8;white-space:nowrap}
+    @media(max-width:1050px){.topbar{grid-template-columns:minmax(0,1fr) auto}.header-metronome{grid-column:1/-1;grid-row:2;justify-self:center}.social-bar{grid-column:2;grid-row:1}}
+    @media(max-width:760px){.topbar{display:flex;flex-direction:column;align-items:stretch}.topbar .brand{justify-content:center}.header-metronome{align-self:center;max-width:100%;overflow:auto}.social-bar{justify-content:center}}
+
+    /* ===== CONTENEDOR PRINCIPAL ===== */
+    .app-shell {
+      margin: 0 auto;
+      max-width: 1240px;
+      width: 100%;
+      padding: clamp(16px, 3vw, 32px) clamp(18px, 4vw, 56px) 16px;
+      flex: 0 0 auto;
+      min-height: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 10px;
+      max-width: 820px;
+    }
+
+    .eyebrow {
+      color: #9ab8aa;
+      font-size: 0.78rem;
+      font-weight: 1000;
+      letter-spacing: 0.16em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.4rem, 6vw, 3rem);
+      letter-spacing: 0;
+      line-height: 0.88;
+      margin: 0;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.5;
+      margin: 4px 0 0;
+    }
+
+    /* ===== PANEL DE CONTROLES ===== */
+    .panel {
+      align-items: end;
+      background: rgba(255, 250, 240, 0.09);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+      display: grid;
+      gap: 16px 24px;
+      grid-template-columns: repeat(7, minmax(100px, 1fr));
+      margin-bottom: 10px;
+      padding: 14px 18px;
+      flex: 0 0 auto;
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+    }
+
+    label {
+      color: rgba(255,250,240,0.72);
+      font-size: 0.7rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    select, button {
+      background: rgba(22,21,20,0.78);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.85rem;
+      min-height: 36px;
+      padding: 0.35rem 0.65rem;
+      width: 100%;
+    }
+
+    select {
+      font-size: 0.75rem;
+      min-height: 32px;
+      padding: 0.25rem 0.5rem;
+      width: auto;
+      min-width: 100px;
+      max-width: 100%;
+      justify-self: start;
+    }
+    select optgroup { background: #161514; color: var(--gold); font-style: normal; font-weight: 900; }
+    select option { background: #161514; color: var(--text); font-weight: 400; }
+
+    button {
+      background: var(--gold);
+      border-color: transparent;
+      color: var(--ink);
+      font-weight: 1000;
+      min-width: 36px;
+      user-select: none;
+      width: auto;
+    }
+    button:active { transform: scale(0.96); }
+
+    .btnBox {
+      align-items: center;
+      background: rgba(22,21,20,0.64);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 6px;
+      display: grid;
+      grid-template-columns: 30px 1fr 30px;
+      min-height: 30px;
+      overflow: hidden;
+      flex: 1;
+      min-width: 80px;
+    }
+    .btnBox button {
+      min-width: 30px; min-height: 30px; height: 30px; padding: 0; font-size: 0.8rem; border-radius: 0;
+    }
+    #fretVal {
+      color: var(--text);
+      font-weight: 900;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    /* ===== FILA SUPERIOR: pentagrama + diapasón ===== */
+    .top-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0;
+      margin-bottom: 10px;
+      background: var(--paper);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      flex: 0 0 auto;
+    }
+
+    .staff-left {
+      flex: 0 0 20%;
+      min-width: 160px;
+      background: var(--paper);
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    #staffSvg {
+      width: 100%;
+      height: auto;
+      max-height: 100%;
+      display: block;
+      background: var(--paper);
+    }
+
+    .board-wrap {
+      flex: 1;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: auto;
+    }
+
+    #board {
+      background: transparent;
+      border-radius: 14px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.28), inset 0 0 18px rgba(0,0,0,0.5);
+      display: block;
+      max-width: 100%;
+      cursor: pointer;
+    }
+
+    /* ===== FILA INFERIOR: carga de partituras (más grande) ===== */
+    .bottom-row {
+      flex: 0 0 auto;
+      min-height: 350px;
+      background: #f0ede6;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .staff-right {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      background: #f0ede6;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      position: relative;
+    }
+
+    .pdf-viewer {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: #e8e4db;
+    }
+
+    .pdf-controls {
+      position: absolute;
+      bottom: 10px;
+      right: 30px;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 0.65rem;
+      color: #eee;
+      z-index: 10;
+    }
+
+    .pdf-controls label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      background: none;
+      padding: 0;
+      border-radius: 0;
+      font-size: 0.65rem;
+      text-transform: none;
+    }
+    .pdf-controls svg { width: 14px; height: 14px; }
+
+    .pdf-clear-btn {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      background: rgba(163,55,42,0.35);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      color: #f3b3a8;
+      font-size: 0.65rem;
+      cursor: pointer;
+      min-height: 0;
+      width: auto;
+    }
+    .pdf-clear-btn.visible { display: inline-flex; }
+    .pdf-clear-btn:hover { background: rgba(163,55,42,0.55); }
+
+    .web-viewer { display: none; }
+    .web-viewer.visible { display: block; }
+
+    .web-controls {
+      position: absolute;
+      top: auto;
+      bottom: 10px;
+      left: 12px;
+      max-width: calc(100% - 32px);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      padding: 4px 8px;
+      border-radius: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      align-items: center;
+      font-size: 0.65rem;
+      color: #eee;
+      z-index: 10;
+    }
+    .web-controls input {
+      width: 140px;
+      max-width: 35vw;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.08);
+      color: #eee;
+    }
+    .web-controls input::placeholder { color: rgba(238,238,238,0.55); }
+    .web-controls button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.12);
+      border: none;
+      border-radius: 4px;
+      padding: 3px 6px;
+      color: #eee;
+      font-size: 0.65rem;
+      cursor: pointer;
+      min-height: 0;
+      width: auto;
+    }
+    .web-controls button:hover { background: rgba(255,255,255,0.22); }
+    .web-controls .pdf-clear-btn { display: none; }
+    .web-controls .pdf-clear-btn.visible { display: inline-flex; }
+    .web-load-note {
+      flex-basis: 100%;
+      font-size: 0.6rem;
+      line-height: 1.3;
+      color: #f3d9a8;
+      padding: 2px 2px 0;
+    }
+
+    .osmd-container {
+      display: none;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background: #fff;
+      padding: 10px 14px;
+      box-sizing: border-box;
+    }
+    .osmd-container.visible { display: block; }
+
+    .score-click-hit {
+      position: absolute;
+      cursor: pointer;
+      background: transparent;
+    }
+    .score-click-hit:hover {
+      background: rgba(102,179,255,0.18);
+      outline: 1px dashed rgba(102,179,255,0.5);
+    }
+
+    .score-play-controls {
+      position: absolute;
+      top: 14px;
+      right: 40px;
+      max-width: calc(100% - 80px);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      padding: 4px 10px;
+      border-radius: 14px;
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
+      font-size: 0.7rem;
+      color: #eee;
+      z-index: 10;
+    }
+    .score-play-controls.visible { display: flex; }
+
+    .score-play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(71,99,87,0.5);
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      color: #bfe0cf;
+      font-size: 0.7rem;
+      cursor: pointer;
+      min-height: 0;
+      min-width: 0;
+      width: auto;
+      transition: background .15s ease;
+    }
+    .score-play-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; }
+    .score-play-btn:hover { background: rgba(71,99,87,0.75); }
+    .score-play-btn.secondary {
+      background: rgba(255,255,255,0.12);
+      color: #eee;
+    }
+    .score-play-btn.secondary:hover { background: rgba(255,255,255,0.22); }
+    .score-play-btn.marked { background: rgba(255,196,64,0.55); color: #2b1d00; }
+    .score-play-btn.marked:hover { background: rgba(255,196,64,0.75); }
+    .score-play-btn.active { background: rgba(255,110,90,0.85); color: #fff; }
+    .score-play-btn.active:hover { background: rgba(255,110,90,1); }
+    .score-play-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .score-tempo {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      padding: 3px 5px;
+    }
+    .score-tempo-label {
+      font-size: 0.62rem;
+      font-weight: 900;
+      color: #eee;
+      letter-spacing: 0.02em;
+    }
+    .score-tempo-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      min-height: 0;
+      min-width: 0;
+      flex: 0 0 auto;
+      border-radius: 4px;
+      border: none;
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+    }
+    .score-tempo-btn:hover { background: rgba(255,255,255,0.3); }
+    .score-tempo-btn:active { transform: scale(0.92); }
+    .score-tempo input {
+      width: 32px;
+      font-size: 0.65rem;
+      padding: 1px 2px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.3);
+      background: transparent;
+      color: #eee;
+      text-align: center;
+      -moz-appearance: textfield;
+    }
+    .score-tempo input::-webkit-outer-spin-button,
+    .score-tempo input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .score-status {
+      font-size: 0.65rem;
+      color: #f3b3a8;
+      padding: 2px 8px;
+    }
+
+    .file-input-hidden {
+      position: absolute;
+      width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    #imageContainer {
+      display: none;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      position: relative;
+      background: #e8e4db;
+      cursor: grab;
+    }
+    #imageContainer:active { cursor: grabbing; }
+    #imageContainer img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transform-origin: 0 0;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ===== LEYENDA ===== */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+      max-width: 1240px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 clamp(18px, 4vw, 56px);
+      flex: 0 0 auto;
+    }
+
+    .legend-item {
+      align-items: center;
+      background: rgba(255,250,240,0.1);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 999px;
+      color: rgba(255,250,240,0.78);
+      display: flex;
+      font-size: 0.82rem;
+      font-weight: 800;
+      gap: 6px;
+      padding: 6px 10px;
+    }
+    .legend-item[aria-pressed="true"] {
+      border-color: rgba(255,250,240,0.32);
+      box-shadow: 0 0 0 1px rgba(255,250,240,0.08), 0 10px 24px rgba(0,0,0,0.16);
+      opacity: 1;
+    }
+    .legend-item[aria-pressed="false"] {
+      background: rgba(255,250,240,0.04);
+      border-color: rgba(255,255,255,0.08);
+      color: rgba(255,250,240,0.38);
+      opacity: 0.46;
+    }
+    .legend-item[aria-pressed="false"] .dot { filter: grayscale(1); opacity: 0.42; }
+
+    .dot { border-radius: 50%; height: 14px; width: 14px; }
+    .g { background: #79c267; }
+    .b { background: #4e86d9; }
+    .o { background: #e0a542; }
+    .r { background: #e4654c; }
+
+    #fretLabel { display: none; }
+
+    /* ===== CAJA DE ACORDES ===== */
+    #chordNameBox {
+      padding: 4px 14px;
+      border: 1px solid rgba(243,224,187,0.35);
+      border-radius: 10px;
+      background: rgba(0,0,0,0.28);
+      text-align: center;
+      user-select: none;
+      min-height: 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1 1 180px;
+      min-width: 160px;
+    }
+    #chordSymbol {
+      display: block;
+      color: var(--gold);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+    #chordQualityLabel {
+      display: block;
+      color: var(--muted);
+      font-size: 0.7rem;
+      margin-top: 0px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== BOTONES ===== */
+    #clearSelectionBtn, #clearAllBtn, #muteBtn {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid transparent;
+      background: var(--gold);
+      color: var(--ink);
+      font-weight: 900;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      min-height: 36px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: transform 0.1s, filter 0.15s;
+    }
+    #clearSelectionBtn:hover, #clearAllBtn:hover, #muteBtn:hover { filter: brightness(1.1); }
+    #clearSelectionBtn:active, #clearAllBtn:active, #muteBtn:active { transform: scale(0.96); }
+    #clearSelectionBtn { background: var(--moss); color: var(--text); }
+    #muteBtn { background: #6a4e3a; color: var(--text); min-width: auto; padding: 6px 12px; font-size: 0.9rem; }
+
+    .fret-control-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .fret-control-row #chordNameBox { flex: 1; }
+
+    .field-frets { min-width: unset; grid-column: 1 / -1; }
+
+    .sound-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .sound-controls label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: none;
+      color: var(--muted);
+    }
+    #volume {
+      width: 70px;
+      accent-color: var(--gold);
+      cursor: pointer;
+      background: transparent;
+    }
+    .sound-source-indicator {
+      font-size: 0.6rem;
+      padding: 2px 6px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .sound-source-indicator.sf { background: rgba(71,99,87,0.3); color: #bfe0cf; }
+    .sound-source-indicator.osc { background: rgba(163,55,42,0.25); color: #f3b3a8; }
+    .sound-source-indicator.loading { background: rgba(212,168,79,0.2); color: #f1e6d2; }
+
+    /* ===== FOOTER ===== */
+    .site-footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.75rem;
+      margin-top: 12px;
+      padding: 16px clamp(18px, 4vw, 56px) 20px;
+      text-align: center;
+      flex: 0 0 auto;
+    }
+    .site-footer p { margin: 2px 0; }
+
+    /* El footer siempre participa del flujo normal: nunca se superpone al lector. */
+    .site-footer {
+      position: static;
+      inset: auto;
+      width: 100%;
+      clear: both;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1080px) {
+      .panel { grid-template-columns: repeat(4, minmax(120px, 1fr)); }
+    }
+    @media (max-width: 860px) {
+      .panel { grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+      .fret-control-row { flex-direction: column; align-items: stretch; }
+      #chordNameBox { min-width: unset; flex: 1; }
+      .sound-controls { justify-content: center; }
+      .top-row { flex-direction: column; }
+      .staff-left { flex: 0 0 auto; width: 100%; min-height: 120px; }
+      .board-wrap { flex: 1; }
+      .bottom-row { min-height: 300px; }
+      .pdf-controls { bottom: 6px; right: 12px; }
+      .web-controls { top: auto; bottom: 6px; left: 8px; flex-wrap: wrap; }
+      .score-play-controls { top: 6px; right: 12px; }
+    }
+    @media (max-width: 480px) {
+      .panel { grid-template-columns: 1fr; }
+      .hero p { font-size: 0.95rem; }
+      .staff-left { min-height: 100px; }
+      .bottom-row { min-height: 250px; }
+    }
+
+/* ===== FASE 2 · Controles instrumentales ===== */
+#capo{min-width:74px}
+#orientation,#labelMode,#pattern,#voicingRange,#tuning{min-width:104px}
+@media (min-width:1180px){
+  .panel{grid-template-columns:repeat(7,minmax(92px,1fr));gap:12px 14px}
+}
+
+/* ===== FASE 3 · Digitación inteligente y tutor ===== */
+.fingering-panel{
+  width:100%; margin-top:8px; padding:8px 10px; display:flex; align-items:center;
+  justify-content:space-between; gap:12px; border:1px solid rgba(255,255,255,.12);
+  border-radius:8px; background:rgba(10,9,8,.78); color:var(--text); min-width:0;
+}
+.fingering-main{display:grid;gap:2px;min-width:0;flex:1}
+.fingering-kicker{font-size:.58rem;font-weight:1000;letter-spacing:.12em;color:var(--gold)}
+#fingeringCurrent{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#fingeringDetail{font-size:.65rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fingering-actions{display:flex;align-items:end;gap:6px;flex:0 0 auto}
+.fingering-actions label{display:grid;gap:2px;font-size:.56rem;text-transform:uppercase;color:var(--muted)}
+.fingering-actions select{min-width:118px;min-height:28px;font-size:.66rem;padding:.15rem .35rem}
+.tutor-btn{min-height:28px;padding:4px 9px;border-radius:6px;font-size:.68rem;background:rgba(255,255,255,.1);color:var(--text);border:1px solid rgba(255,255,255,.16)}
+.tutor-btn.active{background:var(--gold);color:var(--ink)}
+@media(max-width:900px){.fingering-panel{align-items:stretch;flex-direction:column}.fingering-actions{flex-wrap:wrap}.fingering-actions label{flex:1}.fingering-actions select{width:100%}}
+
+
+/* ===== FASE 4 · Planificación de frase y dedos 1–4 ===== */
+.phrase-plan-detail{font-size:.61rem;color:#f3d9a8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fingering-actions #scorePhraseLength{min-width:92px}
+#scoreAnalyzePhraseBtn{white-space:nowrap}
+.finger-badge{font-variant-numeric:tabular-nums}
+@media(max-width:1180px){
+  .fingering-actions{flex-wrap:wrap;justify-content:flex-end}
+  .fingering-actions label{min-width:104px}
+}
+
+/* ===== FASE 5 · interpretación instrumental ===== */
+.technique-detail{font-size:.61rem;color:#bfe0cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fingering-actions #scoreTechniqueMode{min-width:108px}
+.technique-chip{display:inline-flex;align-items:center;gap:3px;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:2px 6px;background:rgba(71,99,87,.25);color:#d7eadf;font-size:.58rem;font-weight:800}
+@media(max-width:900px){.technique-detail{white-space:normal}.fingering-actions #scoreTechniqueMode{width:100%}}
+
+
+/* ===== Revisión profesional · densidad horizontal / 13 pulgadas ===== */
+@media (min-width: 1180px) and (max-width: 1450px) {
+  .app-shell { max-width: 1380px; padding-left: 18px; padding-right: 18px; }
+  .panel { grid-template-columns: repeat(7,minmax(86px,1fr)); gap: 10px 12px; padding: 12px 14px; }
+  .panel label { font-size: .64rem; }
+  .panel select { min-width: 86px; font-size: .69rem; }
+  .fret-control-row { gap: 6px; }
+  #chordNameBox { min-width: 140px; }
+  .fingering-panel { padding: 7px 9px; }
+  .fingering-actions { gap: 4px; }
+  .fingering-actions select { min-width: 102px; }
+}
+@media (max-width: 1180px) and (min-width: 861px) {
+  .app-shell { padding-left: 14px; padding-right: 14px; }
+  .panel { grid-template-columns: repeat(7,minmax(0,1fr)); gap: 9px; padding: 11px 12px; }
+  .panel select { min-width: 0; width: 100%; font-size: .67rem; }
+  .panel label { font-size: .61rem; }
+  .field-frets { grid-column: 1 / -1; }
+}
