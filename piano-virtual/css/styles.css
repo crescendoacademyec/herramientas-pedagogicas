@@ -1208,3 +1208,160 @@
   .tutor-note-list{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.72rem;color:var(--text)}
   .tutor-history{margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:10px}.tutor-history h4{margin:0 0 8px;color:var(--gold)}
   @media(max-width:700px){.tutor-select,.tutor-btn{min-height:40px}.tutor-live{width:100%}}
+
+/* ===== Compact desktop / laptop layout (13-inch screens at 100% zoom) ===== */
+@media (min-width:701px) and (max-width:1366px){
+  .topbar{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    min-height:68px;
+    padding:10px 14px;
+    gap:8px 12px;
+  }
+  .brand{
+    font-size:1.45rem;
+    gap:8px;
+    min-width:0;
+    white-space:nowrap;
+  }
+  .mode-toggle{margin-left:4px;padding:2px;}
+  .mode-toggle-btn{padding:6px 10px;font-size:.61rem;letter-spacing:.035em;}
+  .header-center-tools{gap:8px;min-width:0;flex-wrap:nowrap;}
+  #chordDisplay{min-width:132px;padding:3px 10px;font-size:1.02rem;border-radius:10px;}
+  #chordDisplay .sub{font-size:.60rem;}
+  .header-metronome{gap:4px;padding:4px 5px;min-height:40px;border-radius:10px;}
+  .metro-main{width:30px;min-height:29px;}
+  .metro-tap{padding:0 7px;font-size:.62rem;min-height:29px;}
+  .metro-stepper button{width:21px;height:24px;}
+  .metro-stepper input{width:36px;height:24px;font-size:.68rem;}
+  .metronome select{height:29px;padding:0 5px;font-size:.61rem;}
+  #metroPulse{width:92px;}
+  #metroMeter{width:42px;}
+  .metro-beat{min-width:16px;font-size:.78rem;}
+  .metro-label{font-size:.48rem;}
+  .social-bar{gap:5px;flex-wrap:nowrap;}
+  .social-link,.academy-link{width:32px;height:32px;flex:0 0 32px;}
+  .social-link svg{width:17px;height:17px;}
+  .academy-link .school-logo{width:26px;height:26px;}
+
+  .controlbar{
+    flex-wrap:nowrap;
+    gap:7px;
+    padding:8px 9px;
+    min-width:0;
+  }
+  .field{gap:4px;font-size:.68rem;flex:0 0 auto;}
+  .field-volume{margin-left:0;}
+  input[type=range]{width:72px;}
+  .quick-select{min-width:0;flex:0 1 auto;}
+  .quick-select-box{
+    min-width:78px;
+    max-width:104px;
+    padding:5px 8px;
+    border-radius:9px;
+    gap:1px;
+  }
+  #qsKey .quick-select-box{min-width:105px;max-width:118px;}
+  #qsColor .quick-select-box{min-width:92px;max-width:98px;}
+  .quick-select-label{font-size:.53rem;letter-spacing:.055em;}
+  .quick-select-value{font-size:.72rem;max-width:100px;}
+  .color-value-row{gap:4px;}
+  .color-swatch{width:12px;height:12px;}
+  .hand-toggle-group{gap:4px;flex:0 0 auto;}
+  .hand-btn{min-width:38px;padding:5px 7px;border-radius:9px;}
+  .hand-btn-label{font-size:.53rem;}
+  .hand-btn svg{width:17px;height:17px;}
+  .sample-controls{gap:3px;flex:0 0 auto;}
+  .sample-clear-btn{padding:5px 7px;font-size:.65rem;}
+  .right-indicators{
+    margin-left:auto;
+    gap:5px;
+    flex-wrap:nowrap;
+    min-width:0;
+  }
+  .instrument-box,.icon-badge,.sustain-indicator{
+    min-width:52px;
+    padding:5px 6px;
+    gap:3px;
+    border-radius:9px;
+    font-size:.53rem;
+    letter-spacing:.045em;
+  }
+  .instrument-box-label{font-size:.53rem;letter-spacing:.045em;}
+  .instrument-icon,.icon-badge .badge-icon{width:17px;height:17px;}
+  .indicator-button{min-width:52px;min-height:48px;}
+  .sustain-icon-row{min-height:17px;}
+  .pedal-icon{width:19px;height:14px;}
+}
+
+/* At normal laptop widths keep both top bars strictly on one row. */
+@media (min-width:901px) and (max-width:1280px){
+  .topbar{grid-template-columns:auto minmax(0,1fr) auto;}
+  .brand{grid-column:auto;grid-row:auto;}
+  .header-center-tools{grid-column:auto;grid-row:auto;width:auto;flex-wrap:nowrap;}
+  .social-bar{grid-column:auto;grid-row:auto;}
+}
+
+/* Only stack the desktop controls when the viewport is genuinely narrow. */
+@media (min-width:701px) and (max-width:900px){
+  .topbar{grid-template-columns:1fr auto;}
+  .brand{grid-column:1;grid-row:1;}
+  .social-bar{grid-column:2;grid-row:1;}
+  .header-center-tools{grid-column:1/-1;grid-row:2;width:100%;}
+  .controlbar{overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin;}
+}
+
+/* ===== Right control cluster: unified sizing + MI/MD grouped with device controls ===== */
+@media (min-width:701px){
+  .right-indicators{
+    gap:5px;
+    flex-wrap:nowrap;
+  }
+  .right-indicators .hand-toggle-group{
+    display:flex;
+    gap:5px;
+    flex:0 0 auto;
+  }
+  .right-indicators .hand-btn,
+  .right-indicators .instrument-box,
+  .right-indicators .icon-badge,
+  .right-indicators .sustain-indicator,
+  .right-indicators .indicator-button{
+    width:60px;
+    min-width:60px;
+    max-width:60px;
+    height:50px;
+    min-height:50px;
+    padding:5px 5px;
+    border-radius:9px;
+    gap:3px;
+    box-sizing:border-box;
+    justify-content:center;
+  }
+  .right-indicators .hand-btn-label,
+  .right-indicators .instrument-box-label,
+  .right-indicators .icon-badge,
+  .right-indicators .sustain-indicator{
+    font-size:.53rem;
+    letter-spacing:.045em;
+  }
+  .right-indicators .hand-btn svg,
+  .right-indicators .instrument-icon,
+  .right-indicators .icon-badge .badge-icon{
+    width:17px;
+    height:17px;
+  }
+  .right-indicators .pedal-icon{width:19px;height:14px;}
+}
+
+/* Slightly tighter on common 13-inch laptop widths, without changing the visual size hierarchy. */
+@media (min-width:901px) and (max-width:1280px){
+  .right-indicators .hand-btn,
+  .right-indicators .instrument-box,
+  .right-indicators .icon-badge,
+  .right-indicators .sustain-indicator,
+  .right-indicators .indicator-button{
+    width:56px;
+    min-width:56px;
+    max-width:56px;
+  }
+}
