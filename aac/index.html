@@ -273,6 +273,17 @@
       <button type="submit">Cerrar</button>
     </form>
     <div class="libraryDialogBody">
+      <section class="librarySection ataLibrarySection">
+        <div class="librarySectionHead">
+          <h3>Biblioteca ATA</h3>
+          <span id="libraryCount" class="libraryCount"></span>
+        </div>
+        <input id="librarySearchInput" class="librarySearchInput" type="search"
+               placeholder="Buscar por título, compositor o archivo..."
+               autocomplete="off" spellcheck="false">
+        <div class="libraryLibraryHint">Canciones incluidas en <code>library</code> y <code>library2</code>.</div>
+        <div id="libraryList" class="libraryList ataSongsList"></div>
+      </section>
       <section class="librarySection curatedLibrarySection">
         <div class="curatedStandardsBox">
           <div class="curatedStandardsHead">

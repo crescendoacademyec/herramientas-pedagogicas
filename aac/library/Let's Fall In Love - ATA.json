@@ -3,8 +3,8 @@
   "exportVersion": 44,
   "document": {
     "version": 7,
-    "title": "Pretend",
-    "composer": "Douglas-Parman-Lavere",
+    "title": "Let's Fall In Love",
+    "composer": "Harold Arlen",
     "studentName": "",
     "timeSignature": "4/4",
     "updatedAt": null,
@@ -150,7 +150,7 @@
         "measures": [
           {
             "pageBreakBefore": false,
-            "form": "A",
+            "form": "B",
             "ending": "",
             "jump": "",
             "note": "",
@@ -162,10 +162,10 @@
             "sectionLabel": "C:[",
             "slots": [
               {
-                "chord": "Cmaj7",
+                "chord": "C6",
                 "chordFixed": false,
                 "mode": "Jónico",
-                "degree": "Imaj7",
+                "degree": "I6",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "",
@@ -173,71 +173,12 @@
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "Am7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Eólico",
+                "degree": "VI-7",
                 "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "%",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "%",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
+                "originScale": "C mayor",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -286,77 +227,18 @@
                 "degree": "II-7",
                 "sectionLabel": "",
                 "originScale": "C mayor",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "%",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "%",
-                "sectionLabel": "",
-                "originScale": "",
                 "arrow": "[]",
                 "arrowSpan": 1,
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "G7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Mixolidio",
+                "degree": "V7",
                 "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
+                "originScale": "C mayor",
+                "arrow": "->",
                 "arrowSpan": 1,
                 "offsets": {}
               },
@@ -398,10 +280,21 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "G7",
+                "chord": "C6",
                 "chordFixed": false,
-                "mode": "Mixolidio",
-                "degree": "V7",
+                "mode": "Jónico",
+                "degree": "I6",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Eólico",
+                "degree": "VI-7",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "",
@@ -429,6 +322,113 @@
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Fm6",
+                "chordFixed": false,
+                "mode": "Dórico #7",
+                "degree": "I-6",
+                "sectionLabel": "Fm:[",
+                "originScale": "Fm mel.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "C:[",
+            "slots": [
+              {
+                "chord": "Em7",
+                "chordFixed": false,
+                "mode": "Frigio",
+                "degree": "III-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Eólico",
+                "degree": "VI-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
               },
               {
                 "chord": "",
@@ -457,23 +457,23 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "%",
+                "chord": "Dm7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "%",
+                "mode": "Dórico",
+                "degree": "II-7",
                 "sectionLabel": "",
-                "originScale": "",
-                "arrow": "->",
+                "originScale": "C mayor",
+                "arrow": "[]",
                 "arrowSpan": 1,
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "G7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Mixolidio",
+                "degree": "V7",
                 "sectionLabel": "",
-                "originScale": "",
+                "originScale": "C mayor",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -516,24 +516,24 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "Cmaj7",
+                "chord": "E7",
                 "chordFixed": false,
-                "mode": "Jónico",
-                "degree": "Imaj7",
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
                 "sectionLabel": "",
                 "originScale": "C mayor",
-                "arrow": "",
+                "arrow": "->",
                 "arrowSpan": 1,
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "A7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Mixolidio",
+                "degree": "V7/II",
                 "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
+                "originScale": "C mayor",
+                "arrow": "->",
                 "arrowSpan": 1,
                 "offsets": {}
               },
@@ -575,10 +575,10 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "G7sus4",
+                "chord": "D7",
                 "chordFixed": false,
                 "mode": "Mixolidio",
-                "degree": "V7sus4",
+                "degree": "V7/V",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "->",
@@ -586,12 +586,12 @@
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "G7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Mixolidio",
+                "degree": "V7",
                 "sectionLabel": "",
-                "originScale": "",
+                "originScale": "C mayor",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -634,23 +634,23 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "C6",
+                "chord": "Bø",
                 "chordFixed": false,
-                "mode": "Jónico",
-                "degree": "I6",
+                "mode": "Dórico",
+                "degree": "IIø/VI",
                 "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "",
+                "originScale": "Am arm.",
+                "arrow": "[]",
                 "arrowSpan": 1,
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "E7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
                 "sectionLabel": "",
-                "originScale": "",
+                "originScale": "Am arm.",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -699,305 +699,6 @@
                 "degree": "%",
                 "sectionLabel": "",
                 "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "B",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "||",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "Em7",
-                "chordFixed": false,
-                "mode": "Frigio",
-                "degree": "III-7",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "Dm7",
-                "chordFixed": false,
-                "mode": "Dórico",
-                "degree": "II-7",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "[]",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "G7",
-                "chordFixed": false,
-                "mode": "Mixolidio",
-                "degree": "V7",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "->",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "measures": [
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "C6",
-                "chordFixed": false,
-                "mode": "Jónico",
-                "degree": "I6",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "%",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "%",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "F#ø",
-                "chordFixed": false,
-                "mode": "Dórico",
-                "degree": "IIø/III",
-                "sectionLabel": "",
-                "originScale": "Em arm.",
                 "arrow": "[]",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -1009,183 +710,6 @@
                 "degree": "",
                 "sectionLabel": "",
                 "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "B7b9",
-                "chordFixed": false,
-                "mode": "Mixolidio b2",
-                "degree": "V7b9/III",
-                "sectionLabel": "",
-                "originScale": "Em arm.",
-                "arrow": "->",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "Em7",
-                "chordFixed": false,
-                "mode": "Frigio",
-                "degree": "III-7",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "Eb°7",
-                "chordFixed": false,
-                "mode": "Disminuida WH",
-                "degree": "bII°7/II",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "||",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "Dm7",
-                "chordFixed": false,
-                "mode": "Dórico",
-                "degree": "II-7",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "[]",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "G7sus4",
-                "chordFixed": false,
-                "mode": "Mixolidio",
-                "degree": "V7sus4/VI",
-                "sectionLabel": "",
-                "originScale": "Em arm.",
                 "arrow": "->",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -1228,141 +752,23 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "Cmaj7",
-                "chordFixed": false,
-                "mode": "Lidio #2",
-                "degree": "VImaj7",
-                "sectionLabel": "",
-                "originScale": "Em arm.",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "%",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "%",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "C:[",
-            "slots": [
-              {
-                "chord": "Dm7",
+                "chord": "Am",
                 "chordFixed": false,
                 "mode": "Dórico",
-                "degree": "II-7",
+                "degree": "II-",
                 "sectionLabel": "",
-                "originScale": "C mayor",
+                "originScale": "G mayor",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
               },
               {
-                "chord": "",
+                "chord": "Am(maj7)",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
+                "mode": "Eólico #7",
+                "degree": "Im∆",
+                "sectionLabel": "Am:[",
+                "originScale": "Am arm.",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -1405,131 +811,13 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "%",
+                "chord": "Am7",
                 "chordFixed": false,
-                "mode": "",
-                "degree": "%",
+                "mode": "Eólico",
+                "degree": "I-7",
                 "sectionLabel": "",
-                "originScale": "",
+                "originScale": "Am natural",
                 "arrow": "[]",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "G7",
-                "chordFixed": false,
-                "mode": "Mixolidio",
-                "degree": "V7/VI",
-                "sectionLabel": "",
-                "originScale": "C mayor",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              },
-              {
-                "chord": "",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "",
-                "arrowSpan": 1,
-                "offsets": {}
-              }
-            ]
-          },
-          {
-            "pageBreakBefore": false,
-            "form": "",
-            "ending": "",
-            "jump": "",
-            "note": "",
-            "rhythm": "",
-            "leftBar": "|",
-            "rightBar": "|",
-            "thirdChordPosition": 4,
-            "offsets": {},
-            "sectionLabel": "",
-            "slots": [
-              {
-                "chord": "%",
-                "chordFixed": false,
-                "mode": "",
-                "degree": "%",
-                "sectionLabel": "",
-                "originScale": "",
-                "arrow": "->",
                 "arrowSpan": 1,
                 "offsets": {}
               },
@@ -1586,10 +874,611 @@
             "sectionLabel": "",
             "slots": [
               {
-                "chord": "Cmaj7",
+                "chord": "D7",
                 "chordFixed": false,
-                "mode": "Jónico",
-                "degree": "Imaj7",
+                "mode": "Lidio dominante",
+                "degree": "IV7",
+                "sectionLabel": "",
+                "originScale": "Am mel.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7",
+                "sectionLabel": "G:[",
+                "originScale": "G mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "D7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7",
+                "sectionLabel": "",
+                "originScale": "G mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "D#°7",
+                "chordFixed": false,
+                "mode": "Locrio b4b7",
+                "degree": "#VII°7/VI",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "Em7",
+                "chordFixed": false,
+                "mode": "Eólico",
+                "degree": "VI-7",
+                "sectionLabel": "",
+                "originScale": "G mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Dórico #4",
+                "degree": "IV-7",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "Am:[",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico #4",
+                "degree": "IV-7",
+                "sectionLabel": "",
+                "originScale": "Am arm.",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
+                "sectionLabel": "Em:[",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "C:[",
+            "slots": [
+              {
+                "chord": "Em7",
+                "chordFixed": false,
+                "mode": "Frigio",
+                "degree": "III-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "A7b9",
+                "chordFixed": false,
+                "mode": "Mixo b2b6",
+                "degree": "V7b9/II",
+                "sectionLabel": "",
+                "originScale": "C mayor arm.",
+                "arrow": "->",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "||",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
+                "sectionLabel": "Em:[",
+                "originScale": "Em arm.",
+                "arrow": "->",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "||",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "C6",
+                "chordFixed": false,
+                "mode": "Lidio #2",
+                "degree": "VI6",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Dórico #4",
+                "degree": "IV-7",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "->",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "C6",
+                "chordFixed": false,
+                "mode": "Lidio #2",
+                "degree": "VI6",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Dórico #4",
+                "degree": "IV-7",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Fm6",
+                "chordFixed": false,
+                "mode": "Dórico #7",
+                "degree": "I-6",
+                "sectionLabel": "Fm:[",
+                "originScale": "Fm mel.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "C:[",
+            "slots": [
+              {
+                "chord": "Em7",
+                "chordFixed": false,
+                "mode": "Frigio",
+                "degree": "III-7",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Eólico",
+                "degree": "VI-7",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "",
@@ -1603,6 +1492,117 @@
                 "degree": "",
                 "sectionLabel": "",
                 "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          },
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "Em:[",
+            "slots": [
+              {
+                "chord": "Dm7",
+                "chordFixed": false,
+                "mode": "Dórico",
+                "degree": "II-7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "[]",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "G7",
+                "chordFixed": false,
+                "mode": "Mixolidio",
+                "degree": "V7/VI",
+                "sectionLabel": "",
+                "originScale": "C mayor",
+                "arrow": "->",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "",
+                "chordFixed": false,
+                "mode": "",
+                "degree": "",
+                "sectionLabel": "",
+                "originScale": "",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "measures": [
+          {
+            "pageBreakBefore": false,
+            "form": "",
+            "ending": "",
+            "jump": "",
+            "note": "",
+            "rhythm": "",
+            "leftBar": "|",
+            "rightBar": "|",
+            "thirdChordPosition": 4,
+            "offsets": {},
+            "sectionLabel": "",
+            "slots": [
+              {
+                "chord": "C6",
+                "chordFixed": false,
+                "mode": "Lidio #2",
+                "degree": "VI6",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
+                "arrow": "",
+                "arrowSpan": 1,
+                "offsets": {}
+              },
+              {
+                "chord": "Am7",
+                "chordFixed": false,
+                "mode": "Dórico #4",
+                "degree": "IV-7",
+                "sectionLabel": "",
+                "originScale": "Em arm.",
                 "arrow": "",
                 "arrowSpan": 1,
                 "offsets": {}
@@ -1648,7 +1648,7 @@
                 "chord": "Dm7",
                 "chordFixed": false,
                 "mode": "Dórico",
-                "degree": "II-7",
+                "degree": "II-7/VI",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "[]",
@@ -1656,10 +1656,10 @@
                 "offsets": {}
               },
               {
-                "chord": "G7sus4",
+                "chord": "G7",
                 "chordFixed": false,
                 "mode": "Mixolidio",
-                "degree": "V7sus4",
+                "degree": "V7/VI",
                 "sectionLabel": "",
                 "originScale": "C mayor",
                 "arrow": "",
@@ -1711,7 +1711,7 @@
       "slashCycleTarget": null
     },
     "currentFilename": null,
-    "currentStandardFilename": "pretend.json",
+    "currentStandardFilename": "let-s-fall-in-love.json",
     "assistanceMode": "assisted",
     "analysisVisibility": "visible",
     "chordDetailMode": "basic",
