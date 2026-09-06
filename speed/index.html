@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Cambiador de Velocidad y Tono – cambia tempo y tono de audio, loop A/B, exporta a WAV, MOV, MP3 y M4A." />
     <title>Cambiador de Velocidad y Tono</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='47' fill='none' stroke='%23d4a84f' stroke-width='2'/><path d='M33 30 L33 70 L60 50 Z' fill='%23d4a84f'/><path d='M58 34 v32 M67 38 v24 M76 42 v16' stroke='%23d4a84f' stroke-width='4.5' stroke-linecap='round'/></svg>" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
     <style>
         /* ===== VARIABLES GLOBALES ===== */
@@ -57,18 +57,21 @@
 
         /* ===== HEADER ===== */
         .site-header {
-            width: 100%;
-            max-width: 1200px;
+            width: calc(100% + 32px);
+            margin-left: -16px;
+            margin-right: -16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 20px 0;
+            padding: 20px clamp(20px, 5vw, 64px);
             border-bottom: 1px solid var(--line);
             background: rgba(22, 21, 20, 0.82);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             flex-wrap: wrap;
             gap: 12px;
+            position: relative;
+            z-index: 2;
         }
 
         .brand {
@@ -103,6 +106,9 @@
 
         .social-bar a {
             color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             transition: color 0.15s, transform 0.15s;
         }
         .social-bar a:hover {
@@ -135,14 +141,16 @@
             .site-header {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 14px;
             }
+            .brand { font-size: 1rem; }
             .header-right {
                 width: 100%;
                 justify-content: space-between;
+                gap: 12px;
             }
-            .site-header .tag {
-                display: none;
-            }
+            .social-bar { gap: 12px; flex-wrap: wrap; }
+            .site-header .tag { display: none; }
         }
 
         /* ===== CONTENIDO PRINCIPAL ===== */
@@ -525,6 +533,51 @@
             min-height: 20px;
         }
 
+
+        /* ===== MEJORAS PRO: presets, zoom/pan y alcance de exportación ===== */
+        .preset-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+        .preset-chip {
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.06);
+            color: var(--text-dim);
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: .68rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .15s;
+        }
+        .preset-chip:hover, .preset-chip.active {
+            border-color: var(--accent);
+            color: var(--ink);
+            background: var(--accent);
+        }
+        .export-scope {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 210px;
+        }
+        .engine-badge {
+            margin-top: 8px;
+            font-size: .7rem;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+        .engine-badge b { color: var(--accent); }
+        .zoom-group .step-btn { flex: none; }
+        .wave-help {
+            font-size: .66rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 2px;
+        }
+
         /* ===== FOOTER ===== */
         .site-footer {
             width: 100%;
@@ -566,7 +619,7 @@
 
     <!-- ===== HEADER ===== -->
     <header class="site-header">
-        <div class="brand">Crescendo Academy</div>
+        <div class="brand">Cambiador de Velocidad y Tono</div>
         <div class="header-right">
             <div class="tag">Herramientas para clases de música</div>
             <div class="social-bar">
@@ -651,6 +704,14 @@
                         <button class="step-btn" id="tempoPlus">+</button>
                         <input type="range" id="tempoSlider" min="25" max="200" value="100" step="1" />
                     </div>
+                    <div class="preset-chips" id="tempoPresets" aria-label="Presets de tempo">
+                        <button class="preset-chip" type="button" data-tempo="50">50%</button>
+                        <button class="preset-chip" type="button" data-tempo="75">75%</button>
+                        <button class="preset-chip" type="button" data-tempo="90">90%</button>
+                        <button class="preset-chip active" type="button" data-tempo="100">100%</button>
+                        <button class="preset-chip" type="button" data-tempo="110">110%</button>
+                        <button class="preset-chip" type="button" data-tempo="125">125%</button>
+                    </div>
                 </div>
 
                 <!-- TONO -->
@@ -665,6 +726,16 @@
                         <button class="step-btn" id="pitchPlus">+</button>
                         <input type="range" id="pitchSlider" min="-12" max="12" value="0" step="0.5" />
                     </div>
+                    <div class="preset-chips" id="pitchPresets" aria-label="Presets de tono">
+                        <button class="preset-chip" type="button" data-pitch="-12">−12</button>
+                        <button class="preset-chip" type="button" data-pitch="-7">−7</button>
+                        <button class="preset-chip" type="button" data-pitch="-5">−5</button>
+                        <button class="preset-chip active" type="button" data-pitch="0">0</button>
+                        <button class="preset-chip" type="button" data-pitch="5">+5</button>
+                        <button class="preset-chip" type="button" data-pitch="7">+7</button>
+                        <button class="preset-chip" type="button" data-pitch="12">+12</button>
+                    </div>
+                    <div class="engine-badge"><b>Motor independiente:</b> el tempo cambia la duración sin transponer; el tono cambia la altura sin alterar la duración.</div>
                 </div>
 
                 <!-- LOOP -->
@@ -685,11 +756,14 @@
                 <div class="time-row">
                     <span id="timeNow">00:00</span>
                     <div class="zoom-group">
+                        <button class="step-btn" id="panLeft" style="width:26px;height:26px;font-size:0.75rem;" title="Mover vista a la izquierda">←</button>
                         <button class="step-btn" id="zoomOut" style="width:26px;height:26px;font-size:0.85rem;" title="Alejar">−</button>
                         <button class="step-btn" id="zoomIn" style="width:26px;height:26px;font-size:0.85rem;" title="Acercar">+</button>
+                        <button class="step-btn" id="panRight" style="width:26px;height:26px;font-size:0.75rem;" title="Mover vista a la derecha">→</button>
                     </div>
                     <span id="timeTotal">00:00</span>
                 </div>
+                <div class="wave-help">Clic: saltar · rueda/trackpad: desplazar vista cuando hay zoom · A/B: marcar loop</div>
 
                 <!-- TRANSPORTE -->
                 <div class="transport">
@@ -703,6 +777,13 @@
 
                 <!-- EXPORTAR -->
                 <div class="export-row">
+                    <div class="export-scope">
+                        <div class="export-label">Exportar</div>
+                        <div class="mode-toggle" role="tablist" aria-label="Alcance de exportación">
+                            <button type="button" class="mode-toggle-btn active" id="scopeFullBtn" role="tab" aria-selected="true">Completo</button>
+                            <button type="button" class="mode-toggle-btn" id="scopeLoopBtn" role="tab" aria-selected="false">Loop A–B</button>
+                        </div>
+                    </div>
                     <div>
                         <div class="export-label" style="margin-bottom:8px;">Formato de exportación</div>
                         <div class="mode-toggle" role="tablist" aria-label="Formato de exportación">
@@ -793,6 +874,8 @@
             const timeTotal = document.getElementById('timeTotal');
             const zoomOut = document.getElementById('zoomOut');
             const zoomIn = document.getElementById('zoomIn');
+            const panLeft = document.getElementById('panLeft');
+            const panRight = document.getElementById('panRight');
 
             const playBtn = document.getElementById('playBtn');
             const playIcon = document.getElementById('playIcon');
@@ -805,6 +888,10 @@
             const fmtMp3Btn = document.getElementById('fmtMp3Btn');
             const fmtM4aBtn = document.getElementById('fmtM4aBtn');
             const exportBtn = document.getElementById('exportBtn');
+            const scopeFullBtn = document.getElementById('scopeFullBtn');
+            const scopeLoopBtn = document.getElementById('scopeLoopBtn');
+            const tempoPresets = document.getElementById('tempoPresets');
+            const pitchPresets = document.getElementById('pitchPresets');
 
             const footerYear = document.getElementById('footerYear');
             footerYear.textContent = new Date().getFullYear();
@@ -823,9 +910,18 @@
             let loopB = null;
             let loopActive = false;
             let zoomLevel = 1;
+            let viewStart = 0;
             let waveformData = null; // array de picos normalizados
 
             let exportFormat = 'wav';
+            let exportScope = 'full';
+            let processedBuffer = null;
+            let processedTempo = 1;
+            let processedPitch = 0;
+            let processToken = 0;
+            let processTimer = null;
+            let processingPromise = null;
+            const PREF_KEY = 'crescendo-speed-v2';
 
             // --- UI helpers ---
             function setStatus(msg, isError = false) {
@@ -845,10 +941,18 @@
                 timeTotal.textContent = formatTime(duration);
             }
 
+            function currentTempoRate() {
+                return Math.max(0.25, Math.min(2, parseFloat(tempoSlider.value) / 100 || 1));
+            }
+
+            function currentPitchSemitones() {
+                return Math.max(-12, Math.min(12, parseFloat(pitchSlider.value) || 0));
+            }
+
             function refreshCurrentTime() {
                 if (!isPlaying || !audioCtx) return;
-                const rate = parseFloat(tempoSlider.value) / 100;
-                currentTime = startedOffset + (audioCtx.currentTime - startedAt) * rate;
+                const tempo = processedTempo || currentTempoRate();
+                currentTime = startedOffset + (audioCtx.currentTime - startedAt) * tempo;
 
                 if (loopActive && loopA !== null && loopB !== null && loopB > loopA) {
                     const loopLength = loopB - loopA;
@@ -863,20 +967,128 @@
             function disposeSource() {
                 if (!currentSource) return;
                 currentSource.onended = null;
-                try { currentSource.stop(); } catch (_) { /* aún no se había iniciado */ }
-                try { currentSource.disconnect(); } catch (_) { /* ya desconectado */ }
+                try { currentSource.stop(); } catch (_) {}
+                try { currentSource.disconnect(); } catch (_) {}
                 currentSource = null;
             }
 
-            function createSource() {
-                if (!audioCtx || !audioBuffer) return null;
+            function linearSample(data, pos) {
+                if (pos <= 0) return data[0] || 0;
+                const max = data.length - 1;
+                if (pos >= max) return data[max] || 0;
+                const i = Math.floor(pos);
+                const f = pos - i;
+                return data[i] * (1 - f) + data[i + 1] * f;
+            }
+
+            async function processIndependentBuffer(input, tempo, semitones, token) {
+                if (!input) return null;
+                if (Math.abs(tempo - 1) < 1e-6 && Math.abs(semitones) < 1e-6) return input;
+
+                const pitchFactor = Math.pow(2, semitones / 12);
+                const outLength = Math.max(1, Math.ceil(input.length / tempo));
+                const out = new AudioBuffer({
+                    numberOfChannels: input.numberOfChannels,
+                    length: outLength,
+                    sampleRate: input.sampleRate
+                });
+
+                const grainSize = 2048;
+                const hop = 512;
+                const half = grainSize / 2;
+                const window = new Float32Array(grainSize);
+                for (let i = 0; i < grainSize; i++) window[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (grainSize - 1));
+                const norm = new Float32Array(outLength);
+                const inputs = Array.from({length: input.numberOfChannels}, (_, ch) => input.getChannelData(ch));
+                const outputs = Array.from({length: input.numberOfChannels}, (_, ch) => out.getChannelData(ch));
+
+                let grainCount = 0;
+                for (let outStart = -half; outStart < outLength; outStart += hop) {
+                    if (token !== processToken) throw new Error('__PROCESS_CANCELLED__');
+                    const sourceCenter = Math.max(0, outStart * tempo + half * tempo);
+                    for (let j = 0; j < grainSize; j++) {
+                        const outIdx = outStart + j;
+                        if (outIdx < 0 || outIdx >= outLength) continue;
+                        const w = window[j];
+                        const srcPos = sourceCenter + (j - half) * pitchFactor;
+                        if (srcPos < 0 || srcPos >= input.length - 1) continue;
+                        norm[outIdx] += w;
+                        for (let ch = 0; ch < outputs.length; ch++) {
+                            outputs[ch][outIdx] += linearSample(inputs[ch], srcPos) * w;
+                        }
+                    }
+                    grainCount++;
+                    if (grainCount % 180 === 0) await new Promise(requestAnimationFrame);
+                }
+
+                for (let i = 0; i < outLength; i++) {
+                    const n = norm[i];
+                    if (n > 1e-5) {
+                        for (let ch = 0; ch < outputs.length; ch++) outputs[ch][i] /= n;
+                    }
+                }
+                return out;
+            }
+
+            async function ensureProcessed(force = false) {
+                if (!audioBuffer) return null;
+                const tempo = currentTempoRate();
+                const pitch = currentPitchSemitones();
+                if (!force && processedBuffer && Math.abs(processedTempo - tempo) < 1e-6 && Math.abs(processedPitch - pitch) < 1e-6) return processedBuffer;
+
+                const token = ++processToken;
+                setStatus('Procesando tempo y tono…');
+                const p = processIndependentBuffer(audioBuffer, tempo, pitch, token);
+                processingPromise = p;
+                try {
+                    const buf = await p;
+                    if (token !== processToken) return null;
+                    processedBuffer = buf;
+                    processedTempo = tempo;
+                    processedPitch = pitch;
+                    setStatus(`Listo · tempo ${Math.round(tempo*100)}% · tono ${pitch >= 0 ? '+' : ''}${pitch.toFixed(1)} st`);
+                    return buf;
+                } catch (err) {
+                    if (err && err.message === '__PROCESS_CANCELLED__') return null;
+                    throw err;
+                } finally {
+                    if (processingPromise === p) processingPromise = null;
+                }
+            }
+
+            function invalidateProcessed() {
+                processedBuffer = null;
+                processToken++;
+            }
+
+            function scheduleReprocess(resumeIfPlaying = true) {
+                if (!audioBuffer) return;
+                const wasPlaying = isPlaying;
+                if (wasPlaying) pausePlayback();
+                invalidateProcessed();
+                clearTimeout(processTimer);
+                processTimer = setTimeout(async () => {
+                    try {
+                        const buf = await ensureProcessed(true);
+                        if (buf && wasPlaying && resumeIfPlaying) await startPlayback(currentTime);
+                    } catch (err) {
+                        console.error(err);
+                        setStatus('Error al procesar tempo/tono: ' + err.message, true);
+                    }
+                }, 140);
+            }
+
+            function createSource(buffer) {
+                if (!audioCtx || !buffer) return null;
                 const source = audioCtx.createBufferSource();
-                source.buffer = audioBuffer;
-                source.playbackRate.value = parseFloat(tempoSlider.value) / 100;
-                source.detune.value = parseFloat(pitchSlider.value) * 100;
-                source.loop = loopActive;
-                source.loopStart = loopA ?? 0;
-                source.loopEnd = loopB ?? duration;
+                source.buffer = buffer;
+                source.playbackRate.value = 1;
+                source.detune.value = 0;
+                source.loop = loopActive && loopA !== null && loopB !== null && loopB > loopA;
+                if (source.loop) {
+                    source.loopStart = loopA / processedTempo;
+                    source.loopEnd = loopB / processedTempo;
+                }
                 source.connect(audioCtx.destination);
                 return source;
             }
@@ -885,11 +1097,14 @@
                 if (!audioBuffer) return;
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 await audioCtx.resume();
+                const buffer = await ensureProcessed();
+                if (!buffer) return;
                 disposeSource();
-                currentSource = createSource();
-                const safeOffset = Math.max(0, Math.min(offset, Math.max(0, duration - 0.001)));
-                startedOffset = safeOffset;
-                currentTime = safeOffset;
+                currentSource = createSource(buffer);
+                const safeSourceOffset = Math.max(0, Math.min(offset, Math.max(0, duration - 0.001)));
+                const processedOffset = safeSourceOffset / processedTempo;
+                startedOffset = safeSourceOffset;
+                currentTime = safeSourceOffset;
                 startedAt = audioCtx.currentTime;
                 isPlaying = true;
                 currentSource.onended = () => {
@@ -900,7 +1115,7 @@
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                     updateTimeDisplay();
                 };
-                currentSource.start(0, safeOffset);
+                currentSource.start(0, Math.max(0, Math.min(processedOffset, buffer.duration - 0.001)));
                 playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
             }
 
@@ -912,70 +1127,102 @@
             }
 
             // --- Dibujar forma de onda ---
+            function visibleWindow() {
+                const visibleDuration = duration > 0 ? duration / Math.max(1, zoomLevel) : 0;
+                const maxStart = Math.max(0, duration - visibleDuration);
+                viewStart = Math.max(0, Math.min(viewStart, maxStart));
+                return { start: viewStart, duration: visibleDuration, end: viewStart + visibleDuration };
+            }
+
+            function keepPlayheadInView() {
+                if (!duration || zoomLevel <= 1) return;
+                const v = visibleWindow();
+                if (currentTime < v.start || currentTime > v.end) {
+                    viewStart = Math.max(0, Math.min(duration - v.duration, currentTime - v.duration * 0.2));
+                }
+            }
+
             function drawWaveform() {
                 const rect = waveCanvas.parentElement.getBoundingClientRect();
-                const w = rect.width - 2;
-                const h = waveCanvas.height || 110;
-                waveCanvas.width = w;
-                waveCanvas.height = h;
-
-                if (!waveformData || waveformData.length === 0) {
-                    ctx.fillStyle = 'rgba(255,255,255,0.05)';
-                    ctx.fillRect(0, 0, w, h);
-                    return;
-                }
-
-                const totalSamples = waveformData.length;
-                const visibleSamples = Math.min(totalSamples, Math.floor(w * zoomLevel));
-                const step = Math.max(1, Math.floor(totalSamples / visibleSamples));
-                const startIdx = 0;
+                const w = Math.max(1, Math.floor(rect.width - 2));
+                const h = 110;
+                const dpr = Math.max(1, window.devicePixelRatio || 1);
+                waveCanvas.width = Math.floor(w * dpr);
+                waveCanvas.height = Math.floor(h * dpr);
+                waveCanvas.style.height = h + 'px';
+                ctx.setTransform(dpr,0,0,dpr,0,0);
 
                 ctx.clearRect(0, 0, w, h);
                 ctx.fillStyle = 'rgba(255,255,255,0.03)';
                 ctx.fillRect(0, 0, w, h);
+                if (!waveformData || waveformData.length === 0 || !duration) return;
 
+                if (isPlaying) keepPlayheadInView();
+                const v = visibleWindow();
+                const totalSamples = waveformData.length;
+                const startIdx = Math.floor((v.start / duration) * totalSamples);
+                const endIdx = Math.min(totalSamples, Math.ceil((v.end / duration) * totalSamples));
+                const visibleSamples = Math.max(1, endIdx - startIdx);
+                const step = Math.max(1, Math.floor(visibleSamples / w));
                 const mid = h / 2;
-                ctx.strokeStyle = 'var(--accent)';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
 
-                for (let i = 0; i < visibleSamples && i * step < totalSamples; i++) {
-                    const idx = startIdx + i * step;
-                    const val = waveformData[idx] || 0;
-                    const x = (i / visibleSamples) * w;
-                    const y = mid - val * mid;
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+                ctx.strokeStyle = '#d4a84f';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                let xPix = 0;
+                for (let idx = startIdx; idx < endIdx; idx += step) {
+                    let peak = 0;
+                    const e = Math.min(endIdx, idx + step);
+                    for (let k = idx; k < e; k++) peak = Math.max(peak, waveformData[k] || 0);
+                    const x = ((idx - startIdx) / visibleSamples) * w;
+                    const amp = peak * (h * 0.44);
+                    if (xPix === 0) ctx.moveTo(x, mid - amp);
+                    else ctx.lineTo(x, mid - amp);
+                    xPix++;
                 }
                 ctx.stroke();
 
-                // dibujar loop A/B si están definidos
+                ctx.strokeStyle = 'rgba(212,168,79,.28)';
+                ctx.beginPath();
+                xPix = 0;
+                for (let idx = startIdx; idx < endIdx; idx += step) {
+                    let peak = 0;
+                    const e = Math.min(endIdx, idx + step);
+                    for (let k = idx; k < e; k++) peak = Math.max(peak, waveformData[k] || 0);
+                    const x = ((idx - startIdx) / visibleSamples) * w;
+                    const amp = peak * (h * 0.44);
+                    if (xPix === 0) ctx.moveTo(x, mid + amp);
+                    else ctx.lineTo(x, mid + amp);
+                    xPix++;
+                }
+                ctx.stroke();
+
                 if (loopA !== null && loopB !== null && loopB > loopA) {
-                    const aX = (loopA / duration) * w;
-                    const bX = (loopB / duration) * w;
-                    ctx.fillStyle = 'rgba(212,168,79,0.15)';
-                    ctx.fillRect(aX, 0, bX - aX, h);
-                    ctx.strokeStyle = 'var(--accent)';
+                    const a = Math.max(v.start, loopA);
+                    const b = Math.min(v.end, loopB);
+                    if (b > a) {
+                        const aX = ((a - v.start) / v.duration) * w;
+                        const bX = ((b - v.start) / v.duration) * w;
+                        ctx.fillStyle = 'rgba(212,168,79,0.15)';
+                        ctx.fillRect(aX, 0, bX - aX, h);
+                    }
+                    ctx.strokeStyle = '#d4a84f';
                     ctx.lineWidth = 1;
-                    ctx.setLineDash([4, 4]);
-                    ctx.beginPath();
-                    ctx.moveTo(aX, 0);
-                    ctx.lineTo(aX, h);
-                    ctx.moveTo(bX, 0);
-                    ctx.lineTo(bX, h);
-                    ctx.stroke();
+                    ctx.setLineDash([4,4]);
+                    [loopA, loopB].forEach(t => {
+                        if (t >= v.start && t <= v.end) {
+                            const x = ((t - v.start) / v.duration) * w;
+                            ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+                        }
+                    });
                     ctx.setLineDash([]);
                 }
 
-                // indicador de tiempo actual
-                if (duration > 0) {
-                    const pos = (currentTime / duration) * w;
+                if (currentTime >= v.start && currentTime <= v.end) {
+                    const pos = ((currentTime - v.start) / v.duration) * w;
                     ctx.strokeStyle = '#fff';
                     ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    ctx.moveTo(pos, 0);
-                    ctx.lineTo(pos, h);
-                    ctx.stroke();
+                    ctx.beginPath(); ctx.moveTo(pos,0); ctx.lineTo(pos,h); ctx.stroke();
                 }
             }
 
@@ -1024,6 +1271,11 @@
                     loopA = null;
                     loopB = null;
                     loopActive = false;
+                    zoomLevel = 1;
+                    viewStart = 0;
+                    processedBuffer = null;
+                    processedTempo = currentTempoRate();
+                    processedPitch = currentPitchSemitones();
                     loopATag.classList.remove('set');
                     loopBTag.classList.remove('set');
                     loopHint.textContent = 'Reproduce y toca A / B para marcar un tramo a repetir.';
@@ -1052,7 +1304,7 @@
                     isPlaying = false;
                     disposeSource();
                     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    currentSource = createSource();
+                    currentSource = null;
 
                     updateTimeDisplay();
                     drawWaveform();
@@ -1090,6 +1342,7 @@
                 loaderScreen.style.display = 'block';
                 // limpiar
                 audioBuffer = null;
+                processedBuffer = null;
                 waveformData = null;
                 duration = 0;
                 currentTime = 0;
@@ -1102,6 +1355,7 @@
                 player.classList.remove('active');
                 loaderScreen.style.display = 'block';
                 audioBuffer = null;
+                processedBuffer = null;
                 waveformData = null;
                 duration = 0;
                 currentTime = 0;
@@ -1124,61 +1378,64 @@
                 if (files.length > 0) loadFile(files[0]);
             });
 
-            // Tempo
-            function updateTempo(val) {
-                refreshCurrentTime();
-                const v = parseFloat(val);
-                tempoValue.textContent = Math.round(v) + '%';
-                if (currentSource) {
-                    startedOffset = currentTime;
-                    startedAt = audioCtx.currentTime;
-                    currentSource.playbackRate.value = v / 100;
-                }
+            // Tempo y tono: controles independientes
+            function refreshPresetStates() {
+                const tv = Math.round(parseFloat(tempoSlider.value));
+                tempoPresets.querySelectorAll('[data-tempo]').forEach(b => b.classList.toggle('active', Number(b.dataset.tempo) === tv));
+                const pv = parseFloat(pitchSlider.value);
+                pitchPresets.querySelectorAll('[data-pitch]').forEach(b => b.classList.toggle('active', Number(b.dataset.pitch) === pv));
             }
-            tempoSlider.addEventListener('input', () => updateTempo(tempoSlider.value));
-            tempoMinus.addEventListener('click', () => {
-                tempoSlider.value = Math.max(25, parseFloat(tempoSlider.value) - 1);
-                updateTempo(tempoSlider.value);
-            });
-            tempoPlus.addEventListener('click', () => {
-                tempoSlider.value = Math.min(200, parseFloat(tempoSlider.value) + 1);
-                updateTempo(tempoSlider.value);
-            });
-            tempoReset.addEventListener('click', () => {
-                tempoSlider.value = 100;
-                updateTempo(100);
+
+            function savePrefs() {
+                try { localStorage.setItem(PREF_KEY, JSON.stringify({ tempo: tempoSlider.value, pitch: pitchSlider.value })); } catch (_) {}
+            }
+
+            function updateTempo(val, process = true) {
+                const v = Math.max(25, Math.min(200, parseFloat(val)));
+                tempoSlider.value = v;
+                tempoValue.textContent = Math.round(v) + '%';
+                refreshPresetStates();
+                savePrefs();
+                if (process) scheduleReprocess(true);
+            }
+            tempoSlider.addEventListener('input', () => updateTempo(tempoSlider.value, false));
+            tempoSlider.addEventListener('change', () => scheduleReprocess(true));
+            tempoMinus.addEventListener('click', () => updateTempo(parseFloat(tempoSlider.value) - 1));
+            tempoPlus.addEventListener('click', () => updateTempo(parseFloat(tempoSlider.value) + 1));
+            tempoReset.addEventListener('click', () => updateTempo(100));
+            tempoPresets.addEventListener('click', (e) => {
+                const b = e.target.closest('[data-tempo]');
+                if (b) updateTempo(Number(b.dataset.tempo));
             });
 
-            // Tono
-            function updatePitch(val) {
-                const v = parseFloat(val);
-                pitchValue.textContent = v.toFixed(2);
-                if (currentSource) currentSource.detune.value = v * 100;
+            function updatePitch(val, process = true) {
+                const v = Math.max(-12, Math.min(12, parseFloat(val)));
+                pitchSlider.value = v;
+                pitchValue.textContent = (v > 0 ? '+' : '') + v.toFixed(2);
+                refreshPresetStates();
+                savePrefs();
+                if (process) scheduleReprocess(true);
             }
-            pitchSlider.addEventListener('input', () => updatePitch(pitchSlider.value));
-            pitchMinus.addEventListener('click', () => {
-                pitchSlider.value = Math.max(-12, parseFloat(pitchSlider.value) - 0.5);
-                updatePitch(pitchSlider.value);
-            });
-            pitchPlus.addEventListener('click', () => {
-                pitchSlider.value = Math.min(12, parseFloat(pitchSlider.value) + 0.5);
-                updatePitch(pitchSlider.value);
-            });
-            pitchReset.addEventListener('click', () => {
-                pitchSlider.value = 0;
-                updatePitch(0);
+            pitchSlider.addEventListener('input', () => updatePitch(pitchSlider.value, false));
+            pitchSlider.addEventListener('change', () => scheduleReprocess(true));
+            pitchMinus.addEventListener('click', () => updatePitch(parseFloat(pitchSlider.value) - 0.5));
+            pitchPlus.addEventListener('click', () => updatePitch(parseFloat(pitchSlider.value) + 0.5));
+            pitchReset.addEventListener('click', () => updatePitch(0));
+            pitchPresets.addEventListener('click', (e) => {
+                const b = e.target.closest('[data-pitch]');
+                if (b) updatePitch(Number(b.dataset.pitch));
             });
 
             // Loop
             loopATag.addEventListener('click', () => {
-                if (!currentSource) return;
+                if (!audioBuffer) return;
                 loopA = currentTime;
                 loopATag.classList.add('set');
                 if (loopB !== null && loopB > loopA) {
                     loopHint.textContent = `Loop activo: ${formatTime(loopA)} → ${formatTime(loopB)}`;
                     if (currentSource) {
-                        currentSource.loopStart = loopA;
-                        currentSource.loopEnd = loopB;
+                        currentSource.loopStart = loopA / processedTempo;
+                        currentSource.loopEnd = loopB / processedTempo;
                         currentSource.loop = true;
                         loopActive = true;
                     }
@@ -1188,14 +1445,14 @@
                 drawWaveform();
             });
             loopBTag.addEventListener('click', () => {
-                if (!currentSource) return;
+                if (!audioBuffer) return;
                 loopB = currentTime;
                 loopBTag.classList.add('set');
                 if (loopA !== null && loopB > loopA) {
                     loopHint.textContent = `Loop activo: ${formatTime(loopA)} → ${formatTime(loopB)}`;
                     if (currentSource) {
-                        currentSource.loopStart = loopA;
-                        currentSource.loopEnd = loopB;
+                        currentSource.loopStart = loopA / processedTempo;
+                        currentSource.loopEnd = loopB / processedTempo;
                         currentSource.loop = true;
                         loopActive = true;
                     }
@@ -1268,7 +1525,7 @@
                     startPlayback(startTime);
                 } else {
                     isPlaying = false;
-                    currentSource = createSource();
+                    currentSource = null;
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                 }
                 // limpiar intervalos anteriores
@@ -1285,44 +1542,61 @@
                 if (currentSource) {
                     currentSource.loop = loopActive;
                     if (loopActive && loopA !== null && loopB !== null) {
-                        currentSource.loopStart = loopA;
-                        currentSource.loopEnd = loopB;
+                        currentSource.loopStart = loopA / processedTempo;
+                        currentSource.loopEnd = loopB / processedTempo;
                     } else {
                         currentSource.loopStart = 0;
-                        currentSource.loopEnd = duration;
+                        currentSource.loopEnd = processedBuffer ? processedBuffer.duration : duration / processedTempo;
                     }
                 }
                 repeatBtn.style.color = loopActive ? 'var(--accent)' : 'var(--text-dim)';
             });
 
-            // Zoom
-            zoomIn.addEventListener('click', () => {
-                zoomLevel = Math.min(zoomLevel * 1.5, 10);
+            // Zoom + pan temporal real
+            function panView(fraction) {
+                if (!duration || zoomLevel <= 1) return;
+                const v = visibleWindow();
+                viewStart += v.duration * fraction;
+                visibleWindow();
                 drawWaveform();
+            }
+            zoomIn.addEventListener('click', () => {
+                if (!duration) return;
+                const old = visibleWindow();
+                const center = old.start + old.duration / 2;
+                zoomLevel = Math.min(zoomLevel * 1.5, 24);
+                const nextDur = duration / zoomLevel;
+                viewStart = center - nextDur / 2;
+                visibleWindow(); drawWaveform();
             });
             zoomOut.addEventListener('click', () => {
-                zoomLevel = Math.max(zoomLevel / 1.5, 0.5);
-                drawWaveform();
+                if (!duration) return;
+                const old = visibleWindow();
+                const center = old.start + old.duration / 2;
+                zoomLevel = Math.max(1, zoomLevel / 1.5);
+                const nextDur = duration / zoomLevel;
+                viewStart = center - nextDur / 2;
+                visibleWindow(); drawWaveform();
             });
+            panLeft.addEventListener('click', () => panView(-0.35));
+            panRight.addEventListener('click', () => panView(0.35));
+            waveCanvas.addEventListener('wheel', (e) => {
+                if (zoomLevel <= 1) return;
+                e.preventDefault();
+                panView((e.deltaY || e.deltaX) > 0 ? 0.18 : -0.18);
+            }, {passive:false});
 
-            // Click en waveform para saltar
+            // Click en waveform para saltar dentro de la ventana visible
             waveCanvas.addEventListener('click', (e) => {
                 if (!duration) return;
                 const rect = waveCanvas.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const time = x * duration;
-                currentTime = Math.max(0, Math.min(duration, time));
-                if (currentSource) {
-                    const wasPlaying = isPlaying;
-                    if (wasPlaying) {
-                        currentSource.stop();
-                        isPlaying = false;
-                        playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
-                    }
-                    recreateSource(currentTime, wasPlaying);
-                }
-                updateTimeDisplay();
-                drawWaveform();
+                const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                const v = visibleWindow();
+                currentTime = Math.max(0, Math.min(duration, v.start + x * v.duration));
+                const wasPlaying = isPlaying;
+                if (wasPlaying) pausePlayback();
+                if (wasPlaying) startPlayback(currentTime);
+                updateTimeDisplay(); drawWaveform();
             });
 
             // Exportar
@@ -1332,6 +1606,22 @@
                 const map = { wav: fmtWavBtn, mov: fmtAiffBtn, mp3: fmtMp3Btn, m4a: fmtM4aBtn };
                 if (map[format]) map[format].classList.add('active');
             }
+            function setExportScope(scope) {
+                exportScope = scope;
+                scopeFullBtn.classList.toggle('active', scope === 'full');
+                scopeLoopBtn.classList.toggle('active', scope === 'loop');
+                scopeFullBtn.setAttribute('aria-selected', scope === 'full' ? 'true' : 'false');
+                scopeLoopBtn.setAttribute('aria-selected', scope === 'loop' ? 'true' : 'false');
+            }
+            scopeFullBtn.addEventListener('click', () => setExportScope('full'));
+            scopeLoopBtn.addEventListener('click', () => {
+                if (loopA === null || loopB === null || loopB <= loopA) {
+                    setStatus('Primero marca un loop A–B válido.', true);
+                    return;
+                }
+                setExportScope('loop');
+            });
+
             fmtWavBtn.addEventListener('click', () => setExportFormat('wav'));
             fmtAiffBtn.addEventListener('click', () => setExportFormat('mov'));
             fmtMp3Btn.addEventListener('click', () => setExportFormat('mp3'));
@@ -1344,35 +1634,29 @@
                 }
                 setStatus('Exportando…');
                 try {
-                    // Usar Mediabunny para exportar
-                    const sampleRate = audioBuffer.sampleRate;
-                    const numChannels = audioBuffer.numberOfChannels;
-                    const playbackRate = parseFloat(tempoSlider.value) / 100;
-                    const length = Math.ceil(audioBuffer.length / playbackRate);
+                    // El mismo motor independiente usado en reproducción se usa para exportar.
+                    const fullProcessed = await ensureProcessed();
+                    if (!fullProcessed) throw new Error('No se pudo procesar el audio.');
+                    let renderedBuffer = fullProcessed;
 
-                    // Crear un AudioBufferSource y procesar con los efectos aplicados (tempo y tono)
-                    // Para exportar con cambios, usamos OfflineAudioContext
-                    const offlineCtx = new OfflineAudioContext(numChannels, length, sampleRate);
-                    const source = offlineCtx.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.playbackRate.value = playbackRate;
-                    source.detune.value = parseFloat(pitchSlider.value) * 100;
-
-                    // Aplicar loop si está activo
-                    if (loopActive && loopA !== null && loopB !== null && loopB > loopA) {
-                        source.loop = true;
-                        source.loopStart = loopA;
-                        source.loopEnd = loopB;
-                        // La duración exportada será solo el loop
-                        const loopDuration = loopB - loopA;
-                        // Crear un nuevo buffer de offline con la duración del loop
-                        // Esto es complejo, mejor exportar el audio completo y luego recortar
-                        // Por simplicidad, exportamos todo y el usuario puede recortar después
+                    if (exportScope === 'loop') {
+                        if (loopA === null || loopB === null || loopB <= loopA) throw new Error('No hay un loop A–B válido.');
+                        const tempo = processedTempo;
+                        const startSec = loopA / tempo;
+                        const endSec = loopB / tempo;
+                        const startFrame = Math.max(0, Math.floor(startSec * fullProcessed.sampleRate));
+                        const endFrame = Math.min(fullProcessed.length, Math.ceil(endSec * fullProcessed.sampleRate));
+                        const len = Math.max(1, endFrame - startFrame);
+                        const sliced = new AudioBuffer({
+                            numberOfChannels: fullProcessed.numberOfChannels,
+                            length: len,
+                            sampleRate: fullProcessed.sampleRate
+                        });
+                        for (let ch = 0; ch < fullProcessed.numberOfChannels; ch++) {
+                            sliced.copyToChannel(fullProcessed.getChannelData(ch).subarray(startFrame, endFrame), ch, 0);
+                        }
+                        renderedBuffer = sliced;
                     }
-
-                    source.connect(offlineCtx.destination);
-                    source.start(0);
-                    const renderedBuffer = await offlineCtx.startRendering();
 
                     // Convertir a formato exportable
                     let codec;
@@ -1413,7 +1697,7 @@
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `audio_export.${exportFormat}`;
+                    a.download = `audio_${exportScope === 'loop' ? 'loop' : 'completo'}_${Math.round(processedTempo*100)}pct_${processedPitch >= 0 ? 'p' : 'm'}${Math.abs(processedPitch).toFixed(1)}st.${exportFormat}`;
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -1433,6 +1717,39 @@
 
             // Simular que el usuario puede arrastrar
             console.log('App lista. Arrastra o selecciona un archivo.');
+
+
+
+            // Preferencias y atajos
+            try {
+                const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
+                if (p.tempo) updateTempo(p.tempo, false);
+                if (p.pitch !== undefined) updatePitch(p.pitch, false);
+                refreshPresetStates();
+            } catch (_) { refreshPresetStates(); }
+
+            document.addEventListener('keydown', async (e) => {
+                const tag = (e.target && e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.metaKey || e.ctrlKey || e.altKey) return;
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    if (!audioBuffer) return;
+                    if (isPlaying) pausePlayback(); else await startPlayback(currentTime >= duration ? 0 : currentTime);
+                } else if (e.key.toLowerCase() === 'a' && audioBuffer) {
+                    loopA = currentTime; loopATag.classList.add('set'); drawWaveform();
+                    loopHint.textContent = `Inicio marcado en ${formatTime(loopA)}. Marca el final (B).`;
+                } else if (e.key.toLowerCase() === 'b' && audioBuffer) {
+                    loopB = currentTime; loopBTag.classList.add('set');
+                    if (loopA !== null && loopB > loopA) { loopActive = true; loopHint.textContent = `Loop activo: ${formatTime(loopA)} → ${formatTime(loopB)}`; }
+                    drawWaveform();
+                } else if (e.key.toLowerCase() === 'l' && audioBuffer) {
+                    repeatBtn.click();
+                } else if (e.key === 'ArrowLeft' && audioBuffer) {
+                    e.preventDefault(); rewindBtn.click();
+                } else if (e.key === 'ArrowRight' && audioBuffer) {
+                    e.preventDefault(); forwardBtn.click();
+                }
+            });
 
         })();
     </script>
