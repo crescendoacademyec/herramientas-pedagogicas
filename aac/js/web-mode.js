@@ -568,7 +568,7 @@
   const style = document.createElement("style");
   style.textContent = `
     body.webFullMode #status::before {
-      content: "ATA · ";
+      content: "AAC · ";
       color: #d9781f;
       font-weight: 800;
     }
