@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Tabla de frecuencias interactiva: rango de cada instrumento y voz en el espectro audible, con recomendaciones de ecualización al hacer clic.">
 <title>Tabla de Frecuencias Interactiva</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
 :root {
     --ink: #161514;
@@ -51,7 +52,7 @@ a { color: inherit; text-decoration: none; }
 .site-header .tag { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 .header-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 .social-bar { display: flex; align-items: center; gap: 14px; }
-.social-bar a { color: var(--muted); display: inline-flex; transition: color 0.15s ease, transform 0.15s ease; }
+.social-bar a { color: var(--muted); display: inline-flex; align-items:center; justify-content:center; transition: color 0.15s ease, transform 0.15s ease; }
 .social-bar a:hover { color: var(--gold); transform: scale(1.1); }
 .social-bar svg { display: block; width: 19px; height: 19px; }
 .school-logo-link { display: inline-block; line-height: 0; }
@@ -354,6 +355,15 @@ a { color: inherit; text-decoration: none; }
     .analyzer-top-row { flex-direction: column; }
     .analyzer-embed-block { flex-basis: auto; width: 100%; margin-left: 0; }
 }
+
+.analyzer-setting { display:flex; align-items:center; gap:7px; font-size:.78rem; color:var(--text-dim); }
+.mini-select { background:rgba(0,0,0,.28); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 8px; }
+.analyzer-metrics { display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; margin:8px 0 12px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,.2); }
+.analyzer-metrics div { display:grid; gap:2px; min-width:130px; }
+.analyzer-metrics span,.analyzer-metrics small { font-size:.68rem; color:var(--text-dim); }
+.analyzer-metrics b { color:var(--gold); font-variant-numeric:tabular-nums; font-size:.9rem; }
+.analyzer-metrics small { flex:1 1 240px; line-height:1.45; }
+
 .analyzer-canvas-wrap {
     position: relative; height: 280px; background: rgba(0,0,0,0.35);
     border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 4px;
@@ -414,12 +424,91 @@ a { color: inherit; text-decoration: none; }
     .row-label { font-size: 0.7rem; }
     .detail-panel { width: 100vw; }
 }
+
+.ear-adaptive-status{
+    margin-top:8px; color:var(--muted); font-size:.74rem; line-height:1.4;
+}
+.ear-stats-card{
+    margin-top:18px; padding:14px; border:1px solid var(--line);
+    border-radius:12px; background:rgba(0,0,0,.22);
+}
+.ear-stats-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-bottom:10px; flex-wrap:wrap; font-size:.8rem;
+}
+.ear-stats-summary{ color:var(--text-dim); font-size:.76rem; margin-bottom:10px; line-height:1.5; }
+.ear-stats-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:7px;
+}
+.ear-stats-grid.compact{ grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); }
+.ear-stat{
+    border:1px solid rgba(255,255,255,.09); border-radius:9px;
+    padding:8px 9px; background:rgba(255,255,255,.035);
+}
+.ear-stat strong{ display:block; font-size:.76rem; color:var(--cream); }
+.ear-stat span{ display:block; margin-top:3px; font-size:.68rem; color:var(--muted); }
+.ear-stat.weak{ border-color:rgba(182,101,67,.5); }
+.ear-stat.strong{ border-color:rgba(71,99,87,.65); }
+
+
+.ear-progress-wrap{ margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
+.ear-progress-title{ color:var(--muted); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:7px; }
+.ear-progress-strip{ display:flex; flex-wrap:wrap; gap:4px; min-height:14px; }
+.ear-progress-dot{ width:11px; height:11px; border-radius:3px; background:rgba(255,255,255,.12); }
+.ear-progress-dot.ok{ background:#6ca486; }
+.ear-progress-dot.bad{ background:#a85d52; }
+.ear-progress-dot.boost{ box-shadow:inset 0 0 0 1px rgba(212,168,79,.65); }
+.ear-progress-dot.cut{ box-shadow:inset 0 0 0 1px rgba(154,184,170,.75); }
+#earDirOptions .ear-opt{ min-width:150px; font-weight:800; }
+
+
+.practice-session-card{
+    margin-bottom:20px; padding:16px 18px; border:1px solid var(--line);
+    border-radius:14px; background:linear-gradient(145deg,rgba(212,168,79,.09),rgba(0,0,0,.18));
+    box-shadow:0 16px 44px rgba(0,0,0,.18);
+}
+.practice-session-head{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+.practice-session-kicker{ font-size:.66rem; color:var(--gold); text-transform:uppercase; letter-spacing:.12em; margin-bottom:3px; }
+.practice-session-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.practice-goal-label{ display:flex; align-items:center; gap:7px; color:var(--muted); font-size:.74rem; }
+.practice-goal-label select{
+    background:rgba(0,0,0,.35); color:var(--text); border:1px solid var(--line);
+    border-radius:8px; padding:7px 9px;
+}
+.practice-session-metrics{
+    display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:9px; margin-top:14px;
+}
+.practice-metric{ padding:10px 11px; border:1px solid rgba(255,255,255,.07); border-radius:10px; background:rgba(0,0,0,.2); }
+.practice-metric span{ display:block; color:var(--muted); font-size:.65rem; text-transform:uppercase; letter-spacing:.07em; }
+.practice-metric strong{ display:block; margin-top:4px; font-size:.84rem; color:var(--cream); line-height:1.25; }
+.practice-progress-track{ height:7px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08); margin-top:12px; }
+.practice-progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,#b5893c,var(--gold)); transition:width .22s ease; }
+.practice-session-note{ margin-top:8px; font-size:.72rem; color:var(--text-dim); line-height:1.45; }
+.practice-history{ margin-top:12px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px; }
+.practice-history summary{ cursor:pointer; color:var(--cream); font-size:.76rem; font-weight:700; }
+.practice-history-list{ display:grid; gap:7px; margin-top:10px; }
+.practice-history-row{
+    display:grid; grid-template-columns:minmax(120px,1.5fr) repeat(3,minmax(70px,.7fr));
+    gap:8px; align-items:center; padding:8px 9px; border-radius:9px;
+    background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06);
+    font-size:.7rem; color:var(--muted);
+}
+.practice-history-row strong{ color:var(--cream); font-size:.72rem; }
+.practice-history-actions{ margin-top:9px; }
+@media(max-width:760px){
+    .practice-session-metrics{ grid-template-columns:repeat(2,minmax(120px,1fr)); }
+    .practice-history-row{ grid-template-columns:1fr 1fr; }
+}
+@media(max-width:440px){
+    .practice-session-metrics{ grid-template-columns:1fr; }
+}
+
 </style>
 </head>
 <body>
 
 <header class="site-header">
-    <div class="brand">Crescendo Academy</div>
+    <div class="brand">Tabla de Frecuencias</div>
     <div class="header-right">
         <div class="tag">Herramientas para clases de música</div>
         <div class="social-bar">
@@ -482,6 +571,7 @@ a { color: inherit; text-decoration: none; }
         </div>
         <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…">
         <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
+        <button class="mode-btn active" id="rangeModeToggle" title="Alterna entre registro acústico y zona práctica de mezcla">Rango: Registro real</button>
         <button class="mode-btn" id="compareToggle">Comparar dos</button>
         <button class="link-btn" id="glossaryBtn">Glosario</button>
         <button class="link-btn" id="techniquesBtn">Serie vs. Paralela</button>
@@ -498,14 +588,14 @@ a { color: inherit; text-decoration: none; }
             <div class="rows" id="rows"></div>
         </div>
         <div class="legend">
-            <div class="legend-item"><span class="legend-swatch fund"></span> Frecuencia fundamental</div>
+            <div class="legend-item"><span class="legend-swatch fund"></span> <span id="primaryLegendLabel">Registro fundamental orientativo</span></div>
             <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / cuerpo del sonido</div>
             <div class="legend-item">Clic sobre una barra → recomendaciones de EQ</div>
         </div>
     </div>
 
     <p class="sources-note">
-        Datos sintetizados de: <b>Manual del Ingeniero de Mezclas</b> y <b>Aprende a Utilizar tu Procesador Dinámico</b>. Los rangos son aproximados y siempre dependen del instrumento, micrófono y contexto real de la mezcla — usa tus oídos como referencia final.
+        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos.
     </p>
 
     <div class="golden-rules">
@@ -515,21 +605,73 @@ a { color: inherit; text-decoration: none; }
     </section>
 
     <section class="view-section" id="viewEar">
+
+        <div class="practice-session-card" id="practiceSessionCard">
+            <div class="practice-session-head">
+                <div>
+                    <div class="practice-session-kicker">Sesión de práctica</div>
+                    <strong id="practiceSessionTitle">Sesión actual</strong>
+                </div>
+                <div class="practice-session-actions">
+                    <label class="practice-goal-label">
+                        Meta
+                        <select id="practiceGoalSelect" aria-label="Meta de rondas">
+                            <option value="10">10 rondas</option>
+                            <option value="20" selected>20 rondas</option>
+                            <option value="30">30 rondas</option>
+                            <option value="50">50 rondas</option>
+                        </select>
+                    </label>
+                    <button class="ear-btn-ghost" id="practiceEndBtn" type="button">Terminar sesión</button>
+                </div>
+            </div>
+            <div class="practice-session-metrics">
+                <div class="practice-metric"><span>Rondas</span><strong id="practiceRounds">0 / 20</strong></div>
+                <div class="practice-metric"><span>Precisión</span><strong id="practiceAccuracy">—</strong></div>
+                <div class="practice-metric"><span>Tiempo</span><strong id="practiceTime">00:00</strong></div>
+                <div class="practice-metric"><span>Foco sugerido</span><strong id="practiceFocus">Empieza una ronda</strong></div>
+            </div>
+            <div class="practice-progress-track" aria-hidden="true">
+                <div class="practice-progress-fill" id="practiceProgressFill"></div>
+            </div>
+            <div class="practice-session-note" id="practiceSessionNote">
+                La sesión empieza con tu primera respuesta y se guarda localmente al terminar.
+            </div>
+            <details class="practice-history">
+                <summary>Historial de sesiones</summary>
+                <div id="practiceHistoryList" class="practice-history-list"></div>
+                <div class="practice-history-actions">
+                    <button class="link-btn" id="practiceHistoryClear" type="button">Borrar historial de sesiones</button>
+                </div>
+            </details>
+        </div>
+
         <div class="ear-card">
             <p class="ear-intro">
-                Entrena tu oído en dos formatos: <b>ruido rosa</b> con un filtro paramétrico (el ejercicio real de
-                mezcla) o <b>tono puro</b> (más simple, ideal para empezar). En cada uno, usa <b>Aprender</b> para
-                familiarizarte con cada frecuencia antes de pasar a <b>Examen</b>.
+                Entrena tres habilidades por separado: reconocer <b>frecuencias en ruido rosa</b>, identificar
+                <b>boost vs. cut</b> sin mezclar esa decisión con la frecuencia, y reconocer <b>tono puro</b>.
+                Usa <b>Aprender</b> antes de pasar a <b>Examen</b>.
             </p>
 
             <div class="ear-subtabs" id="earTypeTabs">
                 <button class="ear-subtab active" data-type="noise">Ruido rosa (EQ)</button>
+                <button class="ear-subtab" data-type="direction">Boost vs. Cut</button>
                 <button class="ear-subtab" data-type="tone">Tono puro</button>
             </div>
 
             <!-- ============ RUIDO ROSA ============ -->
             <div class="ear-type-panel active" id="earPanel-noise">
                 <div class="ear-settings">
+                    <div class="ear-settings-group">
+                        <label class="group-label">Dificultad</label>
+                        <div class="chip-group" id="earDifficultyChips">
+                            <button class="chip" data-diff="initial">Inicial · 12 dB</button>
+                            <button class="chip active" data-diff="intermediate">Intermedio · 6 dB</button>
+                            <button class="chip" data-diff="advanced">Avanzado · 3 dB</button>
+                            <button class="chip" data-diff="adaptive">Adaptativo</button>
+                        </div>
+                        <div class="ear-adaptive-status" id="earAdaptiveStatus">Nivel fijo: Intermedio</div>
+                    </div>
                     <div class="ear-settings-group">
                         <label class="group-label">Ganancia (dB)</label>
                         <div class="chip-group" id="earGainChips">
@@ -572,6 +714,90 @@ a { color: inherit; text-decoration: none; }
                     </div>
                     <div class="ear-feedback" id="earFeedback"></div>
                     <button class="ear-btn-primary" id="earNextBtn" style="display:none;">Siguiente ronda →</button>
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Estadísticas por banda</strong>
+                            <button class="ear-btn-ghost" id="earStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid" id="earStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earNoiseProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ============ BOOST VS. CUT ============ -->
+            <div class="ear-type-panel" id="earPanel-direction">
+                <p class="ear-intro" style="margin-bottom:16px;">
+                    Aquí la frecuencia se muestra explícitamente: tu única tarea es decidir si escuchas un
+                    <b>realce (boost)</b> o un <b>corte (cut)</b>. Así entrenas la dirección del cambio sin mezclarla
+                    con la identificación de frecuencia.
+                </p>
+                <div class="ear-settings">
+                    <div class="ear-settings-group">
+                        <label class="group-label">Dificultad</label>
+                        <div class="chip-group" id="earDirGainChips">
+                            <button class="chip" data-gain="12">Inicial · 12 dB</button>
+                            <button class="chip active" data-gain="6">Intermedio · 6 dB</button>
+                            <button class="chip" data-gain="3">Avanzado · 3 dB</button>
+                        </div>
+                    </div>
+                    <div class="ear-settings-group">
+                        <label class="group-label">Selección de banda</label>
+                        <div class="chip-group" id="earDirBandMode">
+                            <button class="chip active" data-mode="adaptive">Adaptativa</button>
+                            <button class="chip" data-mode="random">Aleatoria</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ear-subtabs small" id="earDirectionModeTabs">
+                    <button class="ear-subtab active" data-mode="learn">🎧 Aprender</button>
+                    <button class="ear-subtab" data-mode="quiz">📝 Examen</button>
+                </div>
+
+                <div class="ear-mode-panel active" id="earDirectionLearn">
+                    <p class="ear-question">Elige una banda y alterna Boost / Referencia / Cut para memorizar el contraste.</p>
+                    <div class="ear-freq-grid" id="earDirLearnGrid"></div>
+                    <div class="ear-transport" style="margin-top:16px;">
+                        <button class="ear-btn-ghost" id="earDirLearnBoost">+ Boost</button>
+                        <button class="ear-btn-ghost" id="earDirLearnRef">Referencia</button>
+                        <button class="ear-btn-ghost" id="earDirLearnCut">− Cut</button>
+                    </div>
+                    <div class="ear-adaptive-status" id="earDirLearnStatus">Selecciona una frecuencia.</div>
+                </div>
+
+                <div class="ear-mode-panel" id="earDirectionQuiz">
+                    <div class="ear-transport">
+                        <button class="ear-btn-primary" id="earDirPlayBtn">▶ Reproducir ronda</button>
+                        <button class="ear-btn-ghost" id="earDirAbBtn" disabled>A/B: modificado</button>
+                        <button class="ear-btn-ghost" id="earDirResetScore">Reiniciar puntaje</button>
+                        <span class="ear-score" id="earDirScore">Aciertos: 0 / 0 (0%)</span>
+                    </div>
+                    <p class="ear-question" id="earDirQuestion">La frecuencia aparecerá aquí al iniciar una ronda.</p>
+                    <div class="ear-options" id="earDirOptions">
+                        <button class="ear-opt" data-dir="boost" disabled>+ Realce (Boost)</button>
+                        <button class="ear-opt" data-dir="cut" disabled>− Corte (Cut)</button>
+                    </div>
+                    <div class="ear-feedback" id="earDirFeedback"></div>
+                    <button class="ear-btn-primary" id="earDirNextBtn" style="display:none;">Siguiente ronda →</button>
+
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Progreso Boost vs. Cut</strong>
+                            <button class="ear-btn-ghost" id="earDirStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earDirStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid" id="earDirStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earDirProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -581,6 +807,11 @@ a { color: inherit; text-decoration: none; }
                 <div class="ear-settings">
                     <div class="ear-settings-group">
                         <label class="group-label">Opciones de respuesta (examen)</label>
+                        <div class="chip-group" id="earToneDifficultyChips">
+                            <button class="chip active" data-tone-diff="guided">Guiado</button>
+                            <button class="chip" data-tone-diff="adaptive">Adaptativo</button>
+                        </div>
+                        <div class="ear-adaptive-status" id="earToneAdaptiveStatus">Modo guiado</div>
                         <div class="chip-group" id="earToneOptChips">
                             <button class="chip" data-opt="3">3</button>
                             <button class="chip active" data-opt="5">5</button>
@@ -611,6 +842,18 @@ a { color: inherit; text-decoration: none; }
                     </div>
                     <div class="ear-feedback" id="earToneFeedback"></div>
                     <button class="ear-btn-primary" id="earToneNextBtn" style="display:none;">Siguiente ronda →</button>
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Estadísticas por frecuencia</strong>
+                            <button class="ear-btn-ghost" id="earToneStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earToneStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid compact" id="earToneStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earToneProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -663,6 +906,23 @@ a { color: inherit; text-decoration: none; }
                     <input type="checkbox" id="analyzerFreezeToggle">
                     Congelar espectro (pausar el dibujo)
                 </label>
+                <label class="analyzer-setting">FFT
+                    <select id="analyzerFftSelect" class="mini-select">
+                        <option value="4096">4096</option><option value="8192" selected>8192</option><option value="16384">16384</option>
+                    </select>
+                </label>
+                <label class="analyzer-setting">Suavizado
+                    <select id="analyzerSmoothSelect" class="mini-select">
+                        <option value="0.55">Bajo</option><option value="0.82" selected>Medio</option><option value="0.92">Alto</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="analyzer-metrics" id="analyzerMetrics">
+                <div><span>Pico dominante</span><b id="analyzerPeakNow">—</b></div>
+                <div><span>Peak hold</span><b id="analyzerPeakHold">—</b></div>
+                <button class="ear-btn-ghost" id="analyzerPeakReset" type="button">Reiniciar peak hold</button>
+                <small>Lectura en dBFS aproximados; no equivale a SPL calibrado.</small>
             </div>
 
             <div class="analyzer-canvas-wrap" id="analyzerCanvasWrap">
