@@ -1,0 +1,99 @@
+{
+  "schema": "chordsync-multihead-thresholds-v1",
+  "method": "per-class-validation-fbeta-thresholds",
+  "fitSplit": "validation",
+  "testUsedForFit": false,
+  "beta": 0.7,
+  "minSupport": 20,
+  "defaultThreshold": 0.5,
+  "runtimePolicy": {
+    "triad": [
+      "dim",
+      "aug",
+      "sus2",
+      "sus4"
+    ],
+    "seventh": "all-except-none",
+    "extension": "all-except-none",
+    "bass": "slash-bass-only",
+    "gate": "soft-below-threshold"
+  },
+  "heads": {
+    "triad": {
+      "temperature": 1.12,
+      "labels": {
+        "dim": {
+          "threshold": 0.61,
+          "learned": true,
+          "support": 148,
+          "precision": 0.83,
+          "recall": 0.69,
+          "fbeta": 0.78
+        },
+        "sus4": {
+          "threshold": 0.57,
+          "learned": true,
+          "support": 215,
+          "precision": 0.79,
+          "recall": 0.73,
+          "fbeta": 0.77
+        }
+      }
+    },
+    "seventh": {
+      "temperature": 1.31,
+      "labels": {
+        "b7": {
+          "threshold": 0.54,
+          "learned": true,
+          "support": 502,
+          "precision": 0.86,
+          "recall": 0.78,
+          "fbeta": 0.83
+        },
+        "maj7": {
+          "threshold": 0.63,
+          "learned": true,
+          "support": 224,
+          "precision": 0.88,
+          "recall": 0.7,
+          "fbeta": 0.82
+        }
+      }
+    },
+    "extension": {
+      "temperature": 1.55,
+      "labels": {
+        "9": {
+          "threshold": 0.68,
+          "learned": true,
+          "support": 96,
+          "precision": 0.84,
+          "recall": 0.61,
+          "fbeta": 0.77
+        },
+        "13": {
+          "threshold": 0.74,
+          "learned": true,
+          "support": 41,
+          "precision": 0.87,
+          "recall": 0.51,
+          "fbeta": 0.74
+        }
+      }
+    },
+    "bass": {
+      "temperature": 1.18,
+      "labels": {
+        "C#": {
+          "threshold": 0.59,
+          "learned": true,
+          "support": 288,
+          "precision": 0.85,
+          "recall": 0.76,
+          "fbeta": 0.82
+        }
+      }
+    }
+  }
+}

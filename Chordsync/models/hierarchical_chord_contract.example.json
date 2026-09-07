@@ -1,0 +1,12 @@
+{
+  "schema": "chordsync-hierarchical-chord-model-v1",
+  "description": "Contrato opcional para un futuro modelo multi-head. v29 ya usa estas mismas variables como post-decoder jerárquico sobre probabilidades de etiquetas completas.",
+  "heads": {
+    "root": ["N", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"],
+    "triad": ["none", "major", "minor", "dim", "aug", "sus2", "sus4"],
+    "seventh": ["none", "b7", "maj7", "dim7"],
+    "extension": ["none", "6", "add9", "add11", "9", "11", "13"],
+    "alterations": ["none", "b5", "#5", "b9", "#9", "#11", "b13"],
+    "bass": ["none", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+  }
+}

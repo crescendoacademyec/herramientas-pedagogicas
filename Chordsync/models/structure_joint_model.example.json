@@ -1,0 +1,41 @@
+{
+  "schema": "chordsync-structure-joint-model-v4",
+  "version": 4,
+  "modelName": "ChordSync Joint Structure Transformer v50",
+  "architecture": "shared-logmel-transformer+boundary-head+semantic-head+section-sequence-decoder+multimodal-functional-reharmonization-aware-repeat-consensus",
+  "labels": [
+    "Intro",
+    "Verse",
+    "Pre-Chorus",
+    "Chorus",
+    "Bridge",
+    "Solo",
+    "Outro"
+  ],
+  "sampleRate": 22050,
+  "frames": 128,
+  "nMels": 64,
+  "auxDim": 8,
+  "windowSeconds": 10.0,
+  "scanHopSeconds": 0.75,
+  "boundaryThreshold": 0.55,
+  "nmsSeconds": 2.0,
+  "minEdgeSeconds": 2.0,
+  "sequenceContextWeight": 0.28,
+  "sectionTransitions": "structure_joint_model.onnx.section-transitions.json",
+  "repeatContextWeight": 0.26,
+  "repeatSimilarityThreshold": 0.79,
+  "repeatFeatureWeights": {
+    "acoustic": 0.28,
+    "harmony": 0.18,
+    "functionalHarmony": 0.22,
+    "rhythm": 0.14,
+    "energy": 0.09,
+    "vocalProxy": 0.09
+  },
+  "repeatTranspositionInvariant": true,
+  "repeatFunctionalHarmony": true,
+  "repeatHarmonyMode": "local-key-relative-functional-edit-distance+global-root-shift-fallback-v3",
+  "repeatFunctionalReharmonization": true,
+  "repeatFunctionalReharmWeight": 0.68
+}

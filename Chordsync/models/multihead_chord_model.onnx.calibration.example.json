@@ -1,0 +1,15 @@
+{
+  "schema": "chordsync-multihead-calibration-v1",
+  "method": "per-head-temperature-scaling",
+  "fitSplit": "validation",
+  "testUsedForFit": false,
+  "bins": 15,
+  "temperatureBounds": [0.25, 8.0],
+  "heads": {
+    "root": {"temperature": 1.08},
+    "triad": {"temperature": 1.14},
+    "seventh": {"temperature": 1.37},
+    "extension": {"temperature": 1.62},
+    "bass": {"temperature": 1.21}
+  }
+}
