@@ -10,12 +10,20 @@ import subprocess
 import tempfile
 import uuid
 from pathlib import Path
-from statistics import median
 from typing import Dict, Iterable, List, Optional, Tuple
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+
+try:
+    from .rhythm_utils import infer_meter_from_downbeats as _infer_meter_from_downbeats
+    from .rhythm_utils import regularity_confidence as _regularity_confidence
+    from .rhythm_utils import robust_bpm as _robust_bpm
+except ImportError:
+    from rhythm_utils import infer_meter_from_downbeats as _infer_meter_from_downbeats
+    from rhythm_utils import regularity_confidence as _regularity_confidence
+    from rhythm_utils import robust_bpm as _robust_bpm
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNTIME_ROOT = Path(os.environ.get("CHORDSYNC_RUNTIME_DIR", tempfile.gettempdir())) / "chordsync-v62"
@@ -150,53 +158,6 @@ def _copy_outputs(stem_dir: Path, job_dir: Path) -> Dict[str, str]:
 
 def _beatnet_available() -> bool:
     return importlib.util.find_spec("BeatNet") is not None
-
-
-def _robust_bpm(times: Iterable[float]) -> Optional[float]:
-    ts = [float(x) for x in times if isinstance(x, (int, float)) and math.isfinite(float(x))]
-    if len(ts) < 3:
-        return None
-    diffs = [b - a for a, b in zip(ts, ts[1:]) if 0.18 <= (b - a) <= 2.0]
-    if not diffs:
-        return None
-    bpm = 62.0 / median(diffs)
-    while bpm < 55:
-        bpm *= 2
-    while bpm > 220:
-        bpm /= 2
-    return round(bpm, 3)
-
-
-def _infer_meter_from_downbeats(rows: List[Tuple[float, int]]) -> int:
-    down_indices = [i for i, (_, beat_type) in enumerate(rows) if int(round(beat_type)) == 1]
-    if len(down_indices) >= 2:
-        gaps = [b - a for a, b in zip(down_indices, down_indices[1:]) if 2 <= (b - a) <= 12]
-        if gaps:
-            g = int(round(median(gaps)))
-            if g in (3, 4, 6):
-                return g
-    # Algunos releases de BeatNet entregan el número de beat en la segunda columna.
-    observed = [int(round(x[1])) for x in rows if 1 <= int(round(x[1])) <= 12]
-    if observed:
-        m = max(observed)
-        if m in (3, 4, 6):
-            return m
-    return 4
-
-
-def _regularity_confidence(times: List[float]) -> float:
-    if len(times) < 4:
-        return 0.0
-    diffs = [b - a for a, b in zip(times, times[1:]) if 0.18 <= (b - a) <= 2.0]
-    if len(diffs) < 3:
-        return 0.0
-    med = median(diffs)
-    if med <= 0:
-        return 0.0
-    mad = median([abs(x - med) for x in diffs])
-    regularity = max(0.0, min(1.0, 1.0 - mad / max(0.025, med * 0.22)))
-    count_factor = min(1.0, len(times) / 25.0)
-    return round(0.78 * regularity + 0.22 * count_factor, 4)
 
 
 def _run_beatnet(input_path: Path) -> dict:

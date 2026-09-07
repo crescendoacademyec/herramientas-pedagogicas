@@ -238,7 +238,6 @@
     const cfg = tuning || loadEngineTuning();
     const requested = String(cfg.rhythmProvider || 'auto').toLowerCase();
     if (requested === 'accent') return null;
-    if (file.type && file.type.startsWith('video/')) return null;
     let health;
     try { health = await fetchStemServiceHealth(); } catch (_) { return null; }
     if (!health.beatnetAvailable) return null;
@@ -256,7 +255,6 @@
     const cfg = tuning || loadEngineTuning();
     const requested = String(cfg.acousticProvider || 'auto').toLowerCase();
     if (!['auto','btc','btc-ensemble'].includes(requested) && options.force !== true) return null;
-    if (file.type && file.type.startsWith('video/')) return null;
     let health;
     try { health = await fetchStemServiceHealth(); } catch (_) { return null; }
     if (!health.btcAvailable) return null;
@@ -274,7 +272,6 @@
     const cfg = tuning || loadEngineTuning();
     const requested = String(cfg.noteTranscriptionProvider || 'auto').toLowerCase();
     if (requested === 'off' || requested === 'disabled') return null;
-    if (file.type && file.type.startsWith('video/')) return null;
     let health;
     try { health = await fetchStemServiceHealth(); } catch (_) { return null; }
     if (!health.noteTranscriptionAvailable && !health.basicPitchAvailable) return null;

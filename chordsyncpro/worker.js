@@ -972,12 +972,18 @@ function alignModelLength(model, targetFrames) {
 }
 
 function buildBassRootModel(hpcpRaw, targetFrames, shift = 0) {
-  const chromaFrames = (hpcpRaw || []).map(collapseHpcpTo12).filter(Boolean);
-  if (!chromaFrames.length) return null;
+  // Keep silent frames in place here too; otherwise inversions detected after
+  // a break are attached to the wrong chord segment.
+  const chromaFrames = (hpcpRaw || []).map(collapseHpcpTo12);
+  if (!chromaFrames.some(Boolean)) return null;
   const observations = []; let meanTop = 0;
   for (let i=0;i<Math.max(1,targetFrames);i++) {
     const fi = Math.min(chromaFrames.length-1, Math.round(i*(chromaFrames.length-1)/Math.max(1,targetFrames-1)));
     const c = chromaFrames[fi];
+    if (!c) {
+      observations.push({top:null, confidence:0, probabilities:[]});
+      continue;
+    }
     const probs = []; let sum = 0;
     for (let pc=0;pc<12;pc++) { const v = Math.max(1e-7, c[(pc + shift + 120)%12] || 0); probs.push({root:PC_TO_SHARP[pc], pc, probability:v}); sum += v; }
     for (const x of probs) x.probability /= (sum || 1);
@@ -2383,10 +2389,12 @@ function softmaxScores(entries, temperature=0.28) {
 }
 
 function buildProbabilisticObservations(hpcpRaw, rawChords, rawStrengths) {
-  const chromaFrames = hpcpRaw.map(collapseHpcpTo12).filter(Boolean);
-  if (!chromaFrames.length) return null;
+  // Preserve the original frame positions. Filtering silent/invalid HPCP rows
+  // compressed the chroma timeline and shifted every chord after a pause.
+  const chromaFrames = (hpcpRaw || []).map(collapseHpcpTo12);
+  if (!chromaFrames.some(Boolean)) return null;
   const shift = calibrateHpcpShift(chromaFrames, rawChords);
-  const stateSet = new Set();
+  const stateSet = new Set(['N']);
   for (const c of rawChords) if (parseChordCore(c)) stateSet.add(c);
   // Añadimos las 24 tríadas para que el modelo pueda recuperar una hipótesis que
   // TonalExtractor no haya elegido como etiqueta principal.
@@ -2399,8 +2407,22 @@ function buildProbabilisticObservations(hpcpRaw, rawChords, rawStrengths) {
     const chroma=chromaFrames[fi];
     const obs=rawChords[i];
     const strength=clamp(Math.abs(Number(rawStrengths[i]||0))*2,0,1);
+    // A missing chroma row is silence/invalid analysis, not permission to reuse
+    // a neighbouring harmonic frame. Emit an explicit no-chord posterior.
+    if (!chroma) {
+      const probabilities = states.map(chord => ({chord, probability:chord==='N' ? 1 : 0}));
+      observations.push({top:'N', confidence:1, probabilities:probabilities.slice(0,12)});
+      meanTop += 1;
+      continue;
+    }
     const scores=[];
     for (const chord of states) {
+      if (chord === 'N') {
+        // Low acoustic confidence should be allowed to become N instead of
+        // forcing one of the 24 major/minor triads through the entire track.
+        scores.push({chord, score:-0.55 + (1-strength)*1.05 + (obs==='N'||obs==='X' ? 0.55 : 0)});
+        continue;
+      }
       let score=hpcpTemplateScore(chord,chroma,shift);
       if (chord===obs) score += 0.28 + 0.50*strength;
       else if (parseChordCore(chord) && parseChordCore(obs)) {
