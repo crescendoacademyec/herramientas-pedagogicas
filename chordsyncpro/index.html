@@ -357,6 +357,8 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
     .now-playing { flex-direction: column; align-items: stretch; }
     .diagrams-row { justify-content: center; }
 }
+
+.section-structure-marker{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:1px 5px;white-space:nowrap;transform:translateY(-2px);}
 </style>
 </head>
 <body>
@@ -373,13 +375,13 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
             </a>
             <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 25.027 24 18.062 24 12.073z"/></svg>
             </a>
             <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             </a>
             <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
             </a>
             <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
@@ -395,7 +397,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
     <section class="tool-hero">
         <p class="eyebrow">Análisis musical</p>
         <h1>ChordSync Pro</h1>
-        <p>Sube una canción (o un video) y detecta automáticamente su <b>tonalidad</b>, <b>progresión de acordes</b>, <b>tempo</b> y <b>compás</b>, sincronizados con la reproducción — o activa el micrófono para reconocer acordes en vivo. Motor de análisis: <b>Essentia.js</b>, corriendo por completo en tu navegador.</p>
+        <p>Sube una canción (o un video) y detecta automáticamente su <b>tonalidad</b>, <b>progresión de acordes</b>, <b>tempo</b> y <b>compás</b>, sincronizados con la reproducción — o activa el micrófono para reconocer acordes en vivo. Motor híbrido v62: <b>Essentia.js + HPCP probabilístico + Viterbi + ONNX multi-checkpoint + Demucs opcional + fusión adaptativa de stems + BeatNet opcional + vocabulario avanzado + decodificación jerárquica + contexto armónico + seguimiento de modulaciones + estructura A/B/C + clasificación semántica Intro/Verse/Pre-Chorus/Chorus/Bridge/Solo/Outro + Transformer ONNX neuronal de estructura + detector neuronal de fronteras estructurales + Transformer multi-task conjunto (boundary + label) + contexto secuencial TRAIN-only entre secciones + consenso multimodal de repeticiones con armonía invariante a transposición + grados funcionales relativos a la tonalidad local + matching tolerante a reharmonizaciones + distancia funcional suave + voice-leading/common-tone + voicings aproximados con registro e inversiones + evidencia multi-pitch Basic Pitch fusionada por heads root/triad/seventh/extension/bass antes del Viterbi</b>. El análisis armónico corre principalmente en el navegador; stems, ritmo neuronal y estructura neural usan el backend local cuando están instalados.</p>
     </section>
 
     <div class="mode-tabs" id="modeTabs">
@@ -413,11 +415,15 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
     <section class="mode-panel active" id="panelFile">
         <div class="card" id="uploadCard">
             <div class="dropzone" id="dropZone">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v14m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
                 <p class="big">Arrastra un archivo aquí o haz clic para elegirlo</p>
                 <p>Audio o video — se analizará solo el audio</p>
             </div>
             <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.wave,.aiff,.aif,.aifc,.m4a,.aac,.ogg,.oga,.opus,.flac,.wma,.amr,.3gp,.3gpp,.webm,.caf,.au,.mp4,.m4v,.mov,.mkv,.avi,.wmv,.flv,.f4v,.mpg,.mpeg,.mpe,.m2ts,.mts,.ts,.3g2,.ogv,.vob,.mxf,.asf,.rm,.rmvb,.divx,.dv,.qt" style="display:none">
+            <input type="file" id="autoStemInput" accept="audio/*,.mp3,.wav,.wave,.aiff,.aif,.m4a,.aac,.ogg,.flac,.webm" style="display:none">
+            <input type="file" id="stemInput" accept="audio/*,.mp3,.wav,.wave,.aiff,.aif,.m4a,.aac,.ogg,.flac,.webm" multiple style="display:none">
+            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;"><button class="btn-ghost" id="autoStemBtn">🧬 Separar + analizar automáticamente</button><button class="btn-ghost" id="stemAnalyzeBtn">🎚 Analizar paquete de stems</button></div>
+            <div class="format-note">La separación automática requiere iniciar el backend v62 con <code>python server/start.py</code>. Para activar beat/downbeat neuronal instala además <code>server/requirements-neural-rhythm.txt</code>; para estructura neuronal instala <code>server/requirements-structure-neural.txt</code> y coloca/entrena <code>models/structure_model.onnx</code>, <code>models/structure_boundary_model.onnx</code> o el nuevo <code>models/structure_joint_model.onnx</code>. Para activar evidencia de notas multi-pitch instala además <code>server/requirements-neural-notes.txt</code>. Para multi-stream manual selecciona juntos el <b>MIX</b> y cualquiera de <b>OTHER</b>, <b>BASS</b>, <b>DRUMS</b> o <b>VOCALS</b>. ChordSync reconoce el rol por el nombre del archivo; OTHER aporta armonía, BASS aporta raíz/inversiones, DRUMS se fusiona con el beat map del MIX y VOCALS ayuda al clasificador semántico de secciones cuando está disponible. </div>
             <div class="format-note">Acepta formatos de <b>audio y video que tu navegador pueda decodificar</b>. En video se analiza únicamente la pista de audio. La compatibilidad exacta depende del navegador y del códec.</div>
             <div class="status-row" id="statusRow" style="display:none;"><span class="spinner"></span><span id="statusText"></span></div>
 
@@ -493,6 +499,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
 
             <div class="toolbar-row">
                 <label class="toggle-label"><input type="checkbox" id="nashvilleToggle"> Números de Nashville</label>
+                <label class="toggle-label">Detalle de acorde <select id="chordLevelSelect" class="select-control" aria-label="Nivel de detalle de acordes"><option value="easy">Fácil</option><option value="medium" selected>Medio</option><option value="advanced">Avanzado</option></select></label>
                 <span style="color:var(--text-dim);font-size:0.78rem;">Pasa el mouse sobre un acorde: ✎ corregir · ✂ dividir en dos · ↻ loop · 🗑 eliminar. Arrastra el borde izq./der. para ajustar la duración. Haz clic en un espacio vacío para añadir un acorde ahí.</span>
             </div>
 
@@ -579,6 +586,8 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
 <div class="toast" id="toast"></div>
 
 <script src="chorddata.js"></script>
+<script src="evaluator.js"></script>
+<script src="structure_evaluator.js"></script>
 <script src="app.js"></script>
 <script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
 </body>

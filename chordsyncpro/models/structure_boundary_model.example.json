@@ -1,0 +1,14 @@
+{
+  "schema": "chordsync-structure-boundary-model-v1",
+  "version": 1,
+  "modelName": "ChordSync Structure Boundary Transformer v44",
+  "sampleRate": 22050,
+  "frames": 96,
+  "nMels": 64,
+  "auxDim": 8,
+  "windowSeconds": 8.0,
+  "scanHopSeconds": 0.75,
+  "decisionThreshold": 0.55,
+  "nmsSeconds": 2.0,
+  "minEdgeSeconds": 2.0
+}

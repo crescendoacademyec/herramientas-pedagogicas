@@ -1,0 +1,3 @@
+# Proveedor neuronal opcional de beat/downbeat para ChordSync v24.
+# BeatNet incluye una CRNN preentrenada y decodificación Particle Filter.
+BeatNet>=1.1.3
