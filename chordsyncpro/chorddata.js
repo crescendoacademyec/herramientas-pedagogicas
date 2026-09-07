@@ -3,26 +3,142 @@
 
 const NOTE_TO_SEMITONE = { 'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11 };
 const SEMITONE_TO_NOTE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+const SEMITONE_TO_FLAT_NOTE = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-// Grados de la escala mayor por semitono de distancia respecto a la tónica — base estándar del sistema de números de Nashville.
 const NASHVILLE_DEGREES = ['1', 'b2', '2', 'b3', '3', '4', '#4', '5', 'b6', '6', 'b7', '7'];
+
+const CHORD_SUFFIX_ALIASES = {
+  '': '', 'maj': '', 'M': '',
+  'min': 'm', '-': 'm', 'm': 'm',
+  '7': '7',
+  'maj7': 'maj7', 'M7': 'maj7', 'Δ7': 'maj7', '∆7': 'maj7',
+  'm7': 'm7', 'min7': 'm7', '-7': 'm7',
+  'm7b5': 'm7b5', 'm7♭5': 'm7b5', 'ø': 'm7b5', 'ø7': 'm7b5',
+  'dim': 'dim', '°': 'dim',
+  'dim7': 'dim7', '°7': 'dim7',
+  'sus': 'sus4', 'sus4': 'sus4', 'sus2': 'sus2',
+  '6': '6', 'm6': 'm6', 'min6': 'm6',
+  'add9': 'add9',
+  '9': '9', 'm9': 'm9', 'min9': 'm9',
+  'maj9': 'maj9', 'M9': 'maj9', 'Δ9': 'maj9', '∆9': 'maj9'
+};
+
+const CHORD_INTERVALS = {
+  '': [0,4,7], 'm': [0,3,7],
+  '7': [0,4,7,10], 'maj7': [0,4,7,11], 'm7': [0,3,7,10],
+  'm7b5': [0,3,6,10], 'dim': [0,3,6], 'dim7': [0,3,6,9],
+  'sus4': [0,5,7], 'sus2': [0,2,7],
+  '6': [0,4,7,9], 'm6': [0,3,7,9],
+  'add9': [0,4,7,2], '9': [0,4,7,10,2], 'm9': [0,3,7,10,2], 'maj9': [0,4,7,11,2]
+};
+
+// Grados diatónicos asociados a cada intervalo. Sirven para escribir correctamente
+// E# en C#maj7, Bb en C7, Cb en Dbm7b5, etc., en lugar de elegir solo por semitono.
+const CHORD_DEGREES = {
+  '': [1,3,5], 'm': [1,3,5],
+  '7': [1,3,5,7], 'maj7': [1,3,5,7], 'm7': [1,3,5,7],
+  'm7b5': [1,3,5,7], 'dim': [1,3,5], 'dim7': [1,3,5,7],
+  'sus4': [1,4,5], 'sus2': [1,2,5],
+  '6': [1,3,5,6], 'm6': [1,3,5,6],
+  'add9': [1,3,5,2], '9': [1,3,5,7,2], 'm9': [1,3,5,7,2], 'maj9': [1,3,5,7,2]
+};
+
+const LETTERS = ['C','D','E','F','G','A','B'];
+const NATURAL_SEMITONES = { C:0, D:2, E:4, F:5, G:7, A:9, B:11 };
+
+function accidentalText(offset) {
+  if (offset === 0) return '';
+  if (offset === 1) return '#';
+  if (offset === 2) return '##';
+  if (offset === -1) return 'b';
+  if (offset === -2) return 'bb';
+  return offset > 0 ? '#'.repeat(offset) : 'b'.repeat(-offset);
+}
+
+function signedPitchDiff(target, natural) {
+  let diff = (target - natural + 12) % 12;
+  if (diff > 6) diff -= 12;
+  return diff;
+}
+
+function theoreticalChordToneNames(chord) {
+  const parsed = typeof chord === 'string' ? parseChordLabel(chord) : chord;
+  if (!parsed) return [];
+  const degrees = CHORD_DEGREES[parsed.suffix];
+  if (!degrees) return [];
+
+  const rootLetter = parsed.root[0];
+  const rootLetterIndex = LETTERS.indexOf(rootLetter);
+  if (rootLetterIndex < 0) return [];
+
+  return parsed.intervals.map((interval, i) => {
+    const degree = degrees[i] || 1;
+    const letter = LETTERS[(rootLetterIndex + degree - 1) % 7];
+    const targetPitch = (parsed.semitone + interval) % 12;
+    const accidental = accidentalText(signedPitchDiff(targetPitch, NATURAL_SEMITONES[letter]));
+    return letter + accidental;
+  });
+}
+
+
+function normalizeChordSuffix(rawSuffix) {
+  const cleaned = String(rawSuffix || '').trim().replace(/♭/g, 'b').replace(/\s+/g, '');
+  return Object.prototype.hasOwnProperty.call(CHORD_SUFFIX_ALIASES, cleaned)
+    ? CHORD_SUFFIX_ALIASES[cleaned]
+    : null;
+}
 
 function parseChordLabel(chord) {
   if (!chord || chord === 'N' || chord === 'X') return null;
-  const isMinor = chord.endsWith('m') && chord !== 'N';
-  const root = isMinor ? chord.slice(0, -1) : chord;
+  const cleaned = String(chord).trim();
+  const match = cleaned.match(/^([A-Ga-g])([#b]?)([^/]*?)(?:\/([A-Ga-g])([#b]?))?$/);
+  if (!match) return null;
+
+  const root = match[1].toUpperCase() + (match[2] || '');
   if (!(root in NOTE_TO_SEMITONE)) return null;
-  return { root, semitone: NOTE_TO_SEMITONE[root], quality: isMinor ? 'minor' : 'major' };
+
+  const suffix = normalizeChordSuffix(match[3] || '');
+  if (suffix === null || !CHORD_INTERVALS[suffix]) return null;
+
+  let bassRoot = '';
+  if (match[4]) {
+    bassRoot = match[4].toUpperCase() + (match[5] || '');
+    if (!(bassRoot in NOTE_TO_SEMITONE)) return null;
+  }
+
+  const quality =
+    ['m','m7','m7b5','m6','m9'].includes(suffix) ? 'minor' :
+    ['dim','dim7'].includes(suffix) ? 'diminished' :
+    ['sus2','sus4'].includes(suffix) ? 'suspended' :
+    'major';
+
+  return {
+    root,
+    semitone: NOTE_TO_SEMITONE[root],
+    suffix,
+    quality,
+    bassRoot,
+    intervals: CHORD_INTERVALS[suffix].slice(),
+    normalized: root + suffix + (bassRoot ? '/' + bassRoot : '')
+  };
 }
 
-// ---------- Números de Nashville ----------
+function formatChordLabel(chord) {
+  const parsed = typeof chord === 'string' ? parseChordLabel(chord) : chord;
+  return parsed ? parsed.normalized : String(chord || '');
+}
+
 function chordToNashville(chord, keyRoot) {
   const parsed = parseChordLabel(chord);
   const keySemitone = NOTE_TO_SEMITONE[keyRoot];
   if (!parsed || keySemitone === undefined) return chord;
   const dist = (parsed.semitone - keySemitone + 12) % 12;
-  const degree = NASHVILLE_DEGREES[dist];
-  return degree + (parsed.quality === 'minor' ? 'm' : '');
+  let label = NASHVILLE_DEGREES[dist] + parsed.suffix;
+  if (parsed.bassRoot) {
+    const bassDist = (NOTE_TO_SEMITONE[parsed.bassRoot] - keySemitone + 12) % 12;
+    label += '/' + NASHVILLE_DEGREES[bassDist];
+  }
+  return label;
 }
 
 // ---------- Diagramas de guitarra y ukelele: posiciones fijas, verificadas a mano ----------
@@ -38,61 +154,197 @@ function chordToNashville(chord, keyRoot) {
 // null = cuerda apagada (x). 0 = cuerda al aire.
 
 const GUITAR_CHORD_SHAPES = {
-  // cuerdas, de izquierda a derecha tal como se ve el diagrama: Mi grave, La, Re, Sol, Si, Mi agudo
+  // cuerdas: Mi grave, La, Re, Sol, Si, Mi agudo
   major: {
-    'C':  [null, 3, 2, 0, 1, 0],
-    'C#': [null, 4, 6, 6, 6, 4],   // cejilla forma A, traste 4
-    'D':  [null, null, 0, 2, 3, 2],
-    'D#': [null, 6, 8, 8, 8, 6],   // cejilla forma A, traste 6
-    'E':  [0, 2, 2, 1, 0, 0],
-    'F':  [1, 3, 3, 2, 1, 1],      // cejilla forma E, traste 1
-    'F#': [2, 4, 4, 3, 2, 2],      // cejilla forma E, traste 2
-    'G':  [3, 2, 0, 0, 0, 3],
-    'G#': [4, 6, 6, 5, 4, 4],      // cejilla forma E, traste 4
-    'A':  [null, 0, 2, 2, 2, 0],
-    'A#': [null, 1, 3, 3, 3, 1],   // cejilla forma A, traste 1
-    'B':  [null, 2, 4, 4, 4, 2],   // cejilla forma A, traste 2
+    'C':[null,3,2,0,1,0], 'C#':[null,4,6,6,6,4], 'D':[null,null,0,2,3,2],
+    'D#':[null,6,8,8,8,6], 'E':[0,2,2,1,0,0], 'F':[1,3,3,2,1,1],
+    'F#':[2,4,4,3,2,2], 'G':[3,2,0,0,0,3], 'G#':[4,6,6,5,4,4],
+    'A':[null,0,2,2,2,0], 'A#':[null,1,3,3,3,1], 'B':[null,2,4,4,4,2]
   },
   minor: {
-    'C':  [null, 3, 5, 5, 4, 3],   // cejilla forma Am, traste 3
-    'C#': [null, 4, 6, 6, 5, 4],   // cejilla forma Am, traste 4
-    'D':  [null, null, 0, 2, 3, 1],
-    'D#': [null, 6, 8, 8, 7, 6],   // cejilla forma Am, traste 6
-    'E':  [0, 2, 2, 0, 0, 0],
-    'F':  [1, 3, 3, 1, 1, 1],      // cejilla forma Em, traste 1
-    'F#': [2, 4, 4, 2, 2, 2],      // cejilla forma Em, traste 2
-    'G':  [3, 5, 5, 3, 3, 3],      // cejilla forma Em, traste 3
-    'G#': [4, 6, 6, 4, 4, 4],      // cejilla forma Em, traste 4
-    'A':  [null, 0, 2, 2, 1, 0],
-    'A#': [null, 1, 3, 3, 2, 1],   // cejilla forma Am, traste 1
-    'B':  [null, 2, 4, 4, 3, 2],   // cejilla forma Am, traste 2
+    'C':[null,3,5,5,4,3], 'C#':[null,4,6,6,5,4], 'D':[null,null,0,2,3,1],
+    'D#':[null,6,8,8,7,6], 'E':[0,2,2,0,0,0], 'F':[1,3,3,1,1,1],
+    'F#':[2,4,4,2,2,2], 'G':[3,5,5,3,3,3], 'G#':[4,6,6,4,4,4],
+    'A':[null,0,2,2,1,0], 'A#':[null,1,3,3,2,1], 'B':[null,2,4,4,3,2]
   },
+
+  // Dominantes 7: posiciones estándar compactas / abiertas cuando son pedagógicamente comunes.
+  '7': {
+    'C':[null,3,2,3,1,0],
+    'C#':[null,4,3,4,2,null],
+    'D':[null,null,0,2,1,2],
+    'D#':[null,6,5,6,4,null],
+    'E':[0,2,0,1,0,0],
+    'F':[1,3,1,2,1,1],
+    'F#':[2,4,2,3,2,2],
+    'G':[3,2,0,0,0,1],
+    'G#':[4,6,4,5,4,4],
+    'A':[null,0,2,0,2,0],
+    'A#':[null,1,3,1,3,1],
+    'B':[null,2,1,2,0,2]
+  },
+
+  // Maj7: voicings comunes, con forma abierta o cejilla reconocible.
+  maj7: {
+    'C':[null,3,2,0,0,0],
+    'C#':[null,4,6,5,6,4],
+    'D':[null,null,0,2,2,2],
+    'D#':[null,6,8,7,8,6],
+    'E':[0,2,1,1,0,0],
+    'F':[null,null,3,2,1,0],
+    'F#':[2,4,3,3,2,2],
+    'G':[3,null,0,0,0,2],
+    'G#':[4,6,5,5,4,4],
+    'A':[null,0,2,1,2,0],
+    'A#':[null,1,3,2,3,1],
+    'B':[null,2,4,3,4,2]
+  },
+
+  // m7: formas abiertas o cejillas estándar.
+  m7: {
+    'C':[null,3,5,3,4,3],
+    'C#':[null,4,6,4,5,4],
+    'D':[null,null,0,2,1,1],
+    'D#':[null,6,8,6,7,6],
+    'E':[0,2,0,0,0,0],
+    'F':[1,3,1,1,1,1],
+    'F#':[2,4,2,2,2,2],
+    'G':[3,5,3,3,3,3],
+    'G#':[4,6,4,4,4,4],
+    'A':[null,0,2,0,1,0],
+    'A#':[null,1,3,1,2,1],
+    'B':[null,2,4,2,3,2]
+  },
+
+  // m7b5: forma movible con raíz en quinta cuerda; contiene 1-b3-b5-b7.
+  m7b5: {
+    'C':[null,3,4,3,4,null], 'C#':[null,4,5,4,5,null],
+    'D':[null,5,6,5,6,null], 'D#':[null,6,7,6,7,null],
+    'E':[null,7,8,7,8,null], 'F':[null,8,9,8,9,null],
+    'F#':[null,9,10,9,10,null], 'G':[null,10,11,10,11,null],
+    'G#':[null,11,12,11,12,null], 'A':[null,0,1,0,1,null],
+    'A#':[null,1,2,1,2,null], 'B':[null,2,3,2,3,null]
+  },
+
+  // dim7: voicings simétricos. Se elige una inversión compacta y completa.
+  dim7: {
+    'C':[8,null,7,8,7,null], 'C#':[9,null,8,9,8,null],
+    'D':[10,null,9,10,9,null], 'D#':[11,null,10,11,10,null],
+    'E':[12,null,11,12,11,null], 'F':[1,null,0,1,0,null],
+    'F#':[2,null,1,2,1,null], 'G':[3,null,2,3,2,null],
+    'G#':[4,null,3,4,3,null], 'A':[5,null,4,5,4,null],
+    'A#':[6,null,5,6,5,null], 'B':[7,null,6,7,6,null]
+  },
+
+  // sus4: posiciones abiertas cuando son comunes y formas movibles para cromáticos.
+  sus4: {
+    'C':[null,3,3,0,1,1], 'C#':[null,4,6,6,7,4],
+    'D':[null,null,0,2,3,3], 'D#':[null,6,8,8,9,6],
+    'E':[0,2,2,2,0,0], 'F':[1,3,3,3,1,1],
+    'F#':[2,4,4,4,2,2], 'G':[3,3,0,0,1,3],
+    'G#':[4,6,6,6,4,4], 'A':[null,0,2,2,3,0],
+    'A#':[null,1,3,3,4,1], 'B':[null,2,4,4,5,2]
+  }
 };
 
 // cuerdas, de izquierda a derecha: Sol, Do, Mi, La (afinación reentrante estándar)
 const UKULELE_CHORD_SHAPES = {
+  // cuerdas: Sol, Do, Mi, La (afinación reentrante estándar)
   major: {
-    'A': [2, 1, 0, 0], 'A#': [3, 2, 1, 1], 'B': [4, 3, 2, 2], 'C': [0, 0, 0, 3],
-    'C#': [1, 1, 1, 4], 'D': [2, 2, 2, 0], 'D#': [0, 3, 3, 1], 'E': [4, 4, 4, 2],
-    'F': [2, 0, 1, 0], 'F#': [3, 1, 2, 1], 'G': [0, 2, 3, 2], 'G#': [null, 3, 4, 3],
+    'A':[2,1,0,0], 'A#':[3,2,1,1], 'B':[4,3,2,2], 'C':[0,0,0,3],
+    'C#':[1,1,1,4], 'D':[2,2,2,0], 'D#':[0,3,3,1], 'E':[4,4,4,2],
+    'F':[2,0,1,0], 'F#':[3,1,2,1], 'G':[0,2,3,2], 'G#':[null,3,4,3]
   },
   minor: {
-    'A': [2, 0, 0, 0], 'A#': [3, 1, 1, 1], 'B': [4, 2, 2, 2], 'C': [0, 3, 3, 3],
-    'C#': [1, 1, 0, 4], 'D': [2, 2, 1, 0], 'D#': [3, 3, 2, 1], 'E': [0, 4, 3, 2],
-    'F': [1, 0, 1, 3], 'F#': [2, 1, 2, 0], 'G': [0, 2, 3, 1], 'G#': [1, 3, 4, 2],
+    'A':[2,0,0,0], 'A#':[3,1,1,1], 'B':[4,2,2,2], 'C':[0,3,3,3],
+    'C#':[1,1,0,4], 'D':[2,2,1,0], 'D#':[3,3,2,1], 'E':[0,4,3,2],
+    'F':[1,0,1,3], 'F#':[2,1,2,0], 'G':[0,2,3,1], 'G#':[1,3,4,2]
   },
+
+  '7': {
+    'C':[0,0,0,1], 'C#':[1,1,1,2], 'D':[2,2,2,3], 'D#':[3,3,3,4],
+    'E':[1,2,0,2], 'F':[2,3,1,3], 'F#':[3,4,2,4], 'G':[0,2,1,2],
+    'G#':[1,3,2,3], 'A':[0,1,0,0], 'A#':[1,2,1,1], 'B':[2,3,2,2]
+  },
+
+  maj7: {
+    'C':[0,0,0,2], 'C#':[1,1,1,3], 'D':[2,2,2,4], 'D#':[3,3,3,5],
+    'E':[1,3,0,2], 'F':[2,4,1,3], 'F#':[3,5,2,4], 'G':[0,2,2,2],
+    'G#':[1,3,3,3], 'A':[1,1,0,0], 'A#':[2,2,1,1], 'B':[4,3,2,2]
+  },
+
+  m7: {
+    'C':[3,3,3,3], 'C#':[4,4,4,4], 'D':[2,2,1,3], 'D#':[3,3,2,4],
+    'E':[0,2,0,2], 'F':[1,3,1,3], 'F#':[2,4,2,4], 'G':[0,2,1,1],
+    'G#':[1,3,2,2], 'A':[0,0,0,0], 'A#':[1,1,1,1], 'B':[2,2,2,2]
+  },
+
+  m7b5: {
+    'C':[3,3,2,3],
+    'C#':[0,1,0,2],
+    'D':[5,5,4,5],
+    'D#':[6,6,5,6],
+    'E':[0,2,0,1],
+    'F':[8,8,7,8],
+    'F#':[5,6,0,0],
+    'G':[0,1,1,1],
+    'G#':[1,2,2,2],
+    'A':[2,3,3,3],
+    'A#':[1,1,0,1],
+    'B':[2,2,1,2]
+  },
+
+  dim7: {
+    'C':[2,3,2,3],
+    'C#':[0,1,0,1],
+    'D':[1,2,1,2],
+    'D#':[2,3,2,3],
+    'E':[0,1,0,1],
+    'F':[1,2,1,2],
+    'F#':[2,3,2,3],
+    'G':[0,1,0,1],
+    'G#':[1,2,1,2],
+    'A':[2,3,2,3],
+    'A#':[0,1,0,1],
+    'B':[1,2,1,2]
+  },
+
+  sus4: {
+    'C':[0,0,8,8],
+    'C#':[6,6,4,4],
+    'D':[0,2,3,0],
+    'D#':[8,8,6,6],
+    'E':[4,4,0,0],
+    'F':[3,0,1,1],
+    'F#':[4,1,2,2],
+    'G':[0,2,3,3],
+    'G#':[1,3,4,4],
+    'A':[2,2,0,0],
+    'A#':[3,3,1,1],
+    'B':[4,4,2,2]
+  }
 };
 
 function lookupChordShape(table, chord) {
   const parsed = parseChordLabel(chord);
-  if (!parsed) return null;
-  // usamos la grafía con sostenidos (C#, D#...) como clave canónica, sin importar si el
-  // acorde detectado vino como bemol (Db, Eb...): mismo semitono, misma digitación.
+  if (!parsed || parsed.bassRoot) return null;
+
   const canonicalRoot = SEMITONE_TO_NOTE[parsed.semitone];
-  const frets = (parsed.quality === 'minor' ? table.minor : table.major)[canonicalRoot];
+  const family =
+    parsed.suffix === '' ? 'major' :
+    parsed.suffix === 'm' ? 'minor' :
+    parsed.suffix === '7' ? '7' :
+    parsed.suffix === 'maj7' ? 'maj7' :
+    parsed.suffix === 'm7' ? 'm7' :
+    parsed.suffix === 'm7b5' ? 'm7b5' :
+    parsed.suffix === 'dim7' ? 'dim7' :
+    parsed.suffix === 'sus4' ? 'sus4' :
+    null;
+
+  if (!family || !table[family]) return null;
+  const frets = table[family][canonicalRoot];
   if (!frets) return null;
-  const label = canonicalRoot + (parsed.quality === 'minor' ? 'm' : '');
-  return { label, frets };
+  return { label: parsed.normalized, frets };
 }
 
 // Dibuja un diagrama de mástil genérico (usado por guitarra y ukelele) a partir de una
@@ -164,33 +416,36 @@ function renderUkuleleDiagramSVG(chord) {
 
 // ---------- Notas del acorde para piano (clases de altura, no una octava específica) ----------
 function chordToneNames(chord) {
-  const parsed = parseChordLabel(chord);
-  if (!parsed) return [];
-  const third = parsed.quality === 'minor' ? 3 : 4;
-  const tones = [parsed.semitone, (parsed.semitone + third) % 12, (parsed.semitone + 7) % 12];
-  return tones.map((t) => SEMITONE_TO_NOTE[t]);
+  return theoreticalChordToneNames(chord);
 }
 
 function renderPianoDiagramSVG(chord) {
-  const tones = chordToneNames(chord);
-  if (!tones.length) return '';
+  const parsed = parseChordLabel(chord);
+  if (!parsed) return '';
+  const tones = theoreticalChordToneNames(parsed);
+  const activePcs = new Set(parsed.intervals.map(interval => (parsed.semitone + interval) % 12));
+
   const WHITE_ORDER = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   const BLACK_AFTER = { 'C': 'C#', 'D': 'D#', 'F': 'F#', 'G': 'G#', 'A': 'A#' };
   const keyW = 20, keyH = 70, W = keyW * 7 + 4, H = keyH + 20;
   let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="90">`;
+
   WHITE_ORDER.forEach((n, i) => {
     const x = 2 + i * keyW;
-    const on = tones.includes(n);
+    const on = activePcs.has(NOTE_TO_SEMITONE[n]);
     svg += `<rect x="${x}" y="18" width="${keyW - 1}" height="${keyH}" fill="${on ? 'var(--gold, #d4a84f)' : '#fdfaf3'}" stroke="#332b1a" stroke-width="1"/>`;
   });
+
   WHITE_ORDER.forEach((n, i) => {
     const bn = BLACK_AFTER[n];
     if (!bn) return;
     const x = 2 + i * keyW + keyW * 0.68;
-    const on = tones.includes(bn);
+    const on = activePcs.has(NOTE_TO_SEMITONE[bn]);
     svg += `<rect x="${x}" y="18" width="${keyW * 0.62}" height="${keyH * 0.6}" fill="${on ? 'var(--gold-hover, #e5bd67)' : '#161514'}" stroke="#000" stroke-width="1"/>`;
   });
+
   svg += `<text x="${W / 2}" y="12" text-anchor="middle" font-size="11" fill="var(--text-dim, #999)">${tones.join(' – ')}</text>`;
   svg += `</svg>`;
   return svg;
 }
+

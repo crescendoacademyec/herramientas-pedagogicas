@@ -1,6 +1,8 @@
 (function () {
   const $ = (id) => document.getElementById(id);
-  const SESSIONS_KEY = 'chordsync-pro-sessions';
+  const SESSIONS_KEY = 'chordsync-pro-sessions-v4';
+  const LEGACY_SESSIONS_KEY = 'chordsync-pro-sessions';
+  const MAX_SESSIONS = 40;
 
   // ---------- estado ----------
   let worker = null;
@@ -18,7 +20,10 @@
   let loopSegment = null; // { start, end } o null
 
   // liveMode
-  const liveMode = { active: false, stream: null, ctx: null, processor: null };
+  const liveMode = {
+    active: false, stream: null, ctx: null, processor: null,
+    chordHistory: [], keyHistory: [], displayedChord: '', displayedKey: ''
+  };
   let workletBlobUrl = null;
   let liveBusy = false;
 
@@ -60,7 +65,7 @@
       }
       if (msg.type === 'liveResult') {
         liveBusy = false;
-        renderLiveChord(msg.chord, msg.key, msg.scale);
+        handleStableLiveResult(msg);
         return;
       }
     };
@@ -69,6 +74,10 @@
   function workerRequest(type, payload, transferables, timeoutMs) {
     return new Promise((resolve, reject) => {
       ensureWorker();
+      if (!worker) {
+        reject(new Error('El motor de análisis no está disponible.'));
+        return;
+      }
       const id = ++reqCounter;
       const timeout = timeoutMs
         ? setTimeout(() => {
@@ -416,6 +425,28 @@
     return null;
   }
 
+  const FLAT_KEY_NAMES = new Set(['F','Bb','Eb','Ab','Db','Gb','Cb']);
+  const SHARP_KEY_NAMES = new Set(['G','D','A','E','B','F#','C#']);
+
+  function noteNameForPreference(pc, preferFlats) {
+    const sharps = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    const flats  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+    return (preferFlats ? flats : sharps)[((pc % 12) + 12) % 12];
+  }
+
+  function displayChordForKey(chord, keyRoot) {
+    const parsed = parseChordLabel(chord);
+    if (!parsed) return chord;
+    const preferFlats = FLAT_KEY_NAMES.has(keyRoot) ||
+      (!SHARP_KEY_NAMES.has(keyRoot) && String(keyRoot || '').includes('b'));
+    const root = noteNameForPreference(parsed.semitone, preferFlats);
+    let bass = '';
+    if (parsed.bassRoot) {
+      bass = '/' + noteNameForPreference(NOTE_TO_SEMITONE[parsed.bassRoot], preferFlats);
+    }
+    return root + parsed.suffix + bass;
+  }
+
   let lastDiagramChord = null;
   function updateDisplay(currentTime) {
     if (!analysisResult) return;
@@ -428,13 +459,17 @@
 
     const seg = findCurrentSegment(currentTime);
     if (seg) {
-      const label = showNashville ? chordToNashville(seg.chord, analysisResult.key) : seg.chord;
+      const label = showNashville
+        ? chordToNashville(seg.chord, analysisResult.key)
+        : displayChordForKey(seg.chord, analysisResult.key);
       $('currentChordName').textContent = label;
       const conf = Math.round((seg.confidence || 0) * 100);
       $('confidenceFill').style.width = conf + '%';
       if (seg.chord !== lastDiagramChord) {
-        $('guitarDiagram').innerHTML = renderGuitarDiagramSVG(seg.chord);
-        $('ukuleleDiagram').innerHTML = renderUkuleleDiagramSVG(seg.chord);
+        const guitarSvg = renderGuitarDiagramSVG(seg.chord);
+        const ukuleleSvg = renderUkuleleDiagramSVG(seg.chord);
+        $('guitarDiagram').innerHTML = guitarSvg || '<div class="diagram-unavailable">Digitación no incluida todavía para esta extensión.</div>';
+        $('ukuleleDiagram').innerHTML = ukuleleSvg || '<div class="diagram-unavailable">Digitación no incluida todavía para esta extensión.</div>';
         $('pianoDiagram').innerHTML = renderPianoDiagramSVG(seg.chord);
         lastDiagramChord = seg.chord;
       }
@@ -466,6 +501,7 @@
     $('strengthValue').textContent = analysisResult.strength !== null && analysisResult.strength !== undefined ? analysisResult.strength : '—';
     $('durationValue').textContent = formatTime(analysisResult.duration);
     $('chordCountValue').textContent = analysisResult.totalChords;
+    syncAnalysisCorrectionControls();
 
     buildBeatGrid();
     buildTimeline();
@@ -546,9 +582,11 @@
 
     segs.forEach((seg, idx) => {
       const el = document.createElement('div');
-      el.className = 'chord-segment';
+      el.className = 'chord-segment' + (seg.corrected ? ' corrected' : '');
       el.dataset.index = idx;
-      const label = showNashville ? chordToNashville(seg.chord, analysisResult.key) : seg.chord;
+      const label = showNashville
+        ? chordToNashville(seg.chord, analysisResult.key)
+        : displayChordForKey(seg.chord, analysisResult.key);
       el.innerHTML = `<span class="seg-resize-handle" data-handle="left"></span>
         <span class="seg-label">${label}</span>
         <span class="seg-tools">
@@ -560,7 +598,8 @@
         <span class="seg-resize-handle right" data-handle="right"></span>`;
       el.style.left = positions[idx].left + 'px';
       el.style.width = positions[idx].width + 'px';
-      el.title = `${seg.chord} (${formatTime(seg.start)} - ${formatTime(seg.end)}) — arrastra los bordes para ajustar la duración`;
+      const displayChord = displayChordForKey(seg.chord, analysisResult.key);
+      el.title = `${displayChord} (${formatTime(seg.start)} - ${formatTime(seg.end)}) — arrastra los bordes para ajustar la duración`;
 
       el.addEventListener('click', (e) => {
         if (e.target.closest('.seg-resize-handle')) return; // ya lo maneja el arrastre
@@ -584,16 +623,20 @@
   // ---------- edición de segmentos: corregir, eliminar, dividir, añadir, redimensionar ----------
   function editSegmentChord(idx) {
     const seg = analysisResult.segments[idx];
-    const input = prompt('Corregir acorde (ej: C, C#m, D, F#m)\nTríadas mayores/menores solamente.', seg.chord);
+    const input = prompt(
+      'Corregir acorde\\n\\nEjemplos: C · Cm · Cmaj7 · C7 · Cm7 · C#m7b5 · Bdim7 · Dsus4 · A6 · Cadd9 · G9 · D/F#',
+      seg.chord
+    );
     if (input === null) return;
-    const trimmed = input.trim();
-    if (!trimmed) return;
-    const parsed = parseChordLabel(trimmed) || parseChordLabel(trimmed.replace(/^([A-Ga-g])/, (m) => m.toUpperCase()));
-    if (!parsed) { showToast('Formato de acorde no reconocido — usa algo como "C" o "F#m".'); return; }
-    seg.chord = parsed.quality === 'minor' ? parsed.root + 'm' : parsed.root;
+    const parsed = parseChordLabel(input);
+    if (!parsed) {
+      showToast('Formato no reconocido. Prueba Cmaj7, Dm7, G7, F#m7b5, Bdim7, Dsus4 o D/F#.');
+      return;
+    }
+    seg.chord = parsed.normalized;
     seg.corrected = true;
     refreshAfterEdit();
-    showToast('Acorde corregido.');
+    showToast('Acorde corregido manualmente.');
   }
 
   function deleteSegment(idx) {
@@ -650,15 +693,18 @@
     const gap = findGapAt(clickTime);
     if (!gap || gap.end - gap.start < 0.1) return; // hueco inexistente o insignificante
     const input = prompt(
-      `Añadir un acorde aquí (ej: C, C#m, D, F#m)\nOcupará de ${formatTime(gap.start)} a ${formatTime(gap.end)} — luego puedes ajustar la duración arrastrando sus bordes.`,
+      `Añadir un acorde aquí (ej: Cmaj7, Dm7, G7, F#m7b5)\nOcupará de ${formatTime(gap.start)} a ${formatTime(gap.end)} — luego puedes ajustar la duración arrastrando sus bordes.`,
       'C'
     );
     if (input === null) return;
     const trimmed = input.trim();
     if (!trimmed) return;
-    const parsed = parseChordLabel(trimmed) || parseChordLabel(trimmed.replace(/^([A-Ga-g])/, (m) => m.toUpperCase()));
-    if (!parsed) { showToast('Formato de acorde no reconocido — usa algo como "C" o "F#m".'); return; }
-    const chord = parsed.quality === 'minor' ? parsed.root + 'm' : parsed.root;
+    const parsed = parseChordLabel(trimmed);
+    if (!parsed) {
+      showToast('Formato no reconocido. Prueba C, Cm7, G7, F#m7b5, Bdim7 o D/F#.');
+      return;
+    }
+    const chord = parsed.normalized;
     analysisResult.segments.push({ chord, start: gap.start, end: gap.end, strength: 1, confidence: 1, corrected: true });
     refreshAfterEdit();
     showToast('Acorde añadido.');
@@ -695,24 +741,12 @@
     const { idx, side } = resizingState;
     const seg = segs[idx];
     if (!seg) return;
-    // La mayoría de las veces los acordes están pegados uno a otro (sin espacio entre ellos).
-    // Si solo tope el arrastre en el límite del vecino, alargar un acorde nunca se ve porque
-    // ya está tocando al de al lado — hay que EMPUJAR ese borde compartido, acortando al vecino
-    // (como en un editor de video), y solo dejar de empujar cuando el vecino llega a su propia
-    // duración mínima. Si en cambio hay un hueco (silencio) antes de llegar al vecino, primero
-    // se rellena ese hueco sin tocarlo.
     if (side === 'right') {
-      const next = segs[idx + 1];
-      const hardMax = next ? next.end - MIN_SEGMENT_DURATION : analysisResult.duration;
-      const newEnd = Math.min(Math.max(t, seg.start + MIN_SEGMENT_DURATION), hardMax);
-      seg.end = newEnd;
-      if (next && newEnd > next.start) next.start = newEnd;
+      const maxEnd = idx < segs.length - 1 ? segs[idx + 1].start : analysisResult.duration;
+      seg.end = Math.min(Math.max(t, seg.start + MIN_SEGMENT_DURATION), maxEnd);
     } else {
-      const prev = segs[idx - 1];
-      const hardMin = prev ? prev.start + MIN_SEGMENT_DURATION : 0;
-      const newStart = Math.max(Math.min(t, seg.end - MIN_SEGMENT_DURATION), hardMin);
-      seg.start = newStart;
-      if (prev && newStart < prev.end) prev.end = newStart;
+      const minStart = idx > 0 ? segs[idx - 1].end : 0;
+      seg.start = Math.max(Math.min(t, seg.end - MIN_SEGMENT_DURATION), minStart);
     }
     renderTimelinePositionsOnly();
   }
@@ -758,6 +792,71 @@
     buildTimeline();
   }
 
+  // ---------- correcciones manuales de tonalidad / tempo ----------
+  function syncAnalysisCorrectionControls() {
+    if (!analysisResult) return;
+    if ($('keyCorrectionSelect')) $('keyCorrectionSelect').value = analysisResult.key || 'C';
+    if ($('scaleCorrectionSelect')) $('scaleCorrectionSelect').value = analysisResult.scale === 'minor' ? 'minor' : 'major';
+    if ($('bpmCorrectionInput')) $('bpmCorrectionInput').value =
+      analysisResult.bpm !== null && analysisResult.bpm !== undefined ? analysisResult.bpm : '';
+  }
+
+  function setManualBpm(nextBpm) {
+    if (!analysisResult) return;
+    const value = Number(nextBpm);
+    if (!Number.isFinite(value) || value < 20 || value > 360) {
+      showToast('El BPM debe estar entre 20 y 360.');
+      return;
+    }
+    analysisResult.bpm = Math.round(value * 10) / 10;
+    analysisResult.bpmCorrected = true;
+    $('bpmValue').textContent = analysisResult.bpm;
+    if ($('bpmCorrectionInput')) $('bpmCorrectionInput').value = analysisResult.bpm;
+    buildBeatGrid();
+    updateDisplay(audioElement ? audioElement.currentTime : 0);
+  }
+
+  $('halfBpmBtn')?.addEventListener('click', () => {
+    if (!analysisResult?.bpm) return;
+    setManualBpm(analysisResult.bpm / 2);
+  });
+
+  $('doubleBpmBtn')?.addEventListener('click', () => {
+    if (!analysisResult?.bpm) return;
+    setManualBpm(analysisResult.bpm * 2);
+  });
+
+  $('applyAnalysisCorrectionsBtn')?.addEventListener('click', () => {
+    if (!analysisResult) return;
+    const key = $('keyCorrectionSelect')?.value || analysisResult.key;
+    const scale = $('scaleCorrectionSelect')?.value || analysisResult.scale;
+    const bpmText = $('bpmCorrectionInput')?.value;
+
+    analysisResult.key = key;
+    analysisResult.scale = scale;
+    analysisResult.keyCorrected = true;
+    analysisResult.scaleCorrected = true;
+
+    if (bpmText !== '') {
+      const bpm = Number(bpmText);
+      if (!Number.isFinite(bpm) || bpm < 20 || bpm > 360) {
+        showToast('El BPM debe estar entre 20 y 360.');
+        return;
+      }
+      analysisResult.bpm = Math.round(bpm * 10) / 10;
+      analysisResult.bpmCorrected = true;
+    }
+
+    $('keyValue').textContent = analysisResult.key || '—';
+    $('scaleValue').textContent = analysisResult.scale === 'major' ? 'Mayor' : 'Menor';
+    $('bpmValue').textContent = analysisResult.bpm ?? '—';
+    buildBeatGrid();
+    buildTimeline();
+    lastDiagramChord = null;
+    updateDisplay(audioElement ? audioElement.currentTime : 0);
+    showToast('Tonalidad y tempo actualizados manualmente.');
+  });
+
   // ---------- Nashville ----------
   $('nashvilleToggle').addEventListener('change', (e) => {
     showNashville = e.target.checked;
@@ -767,7 +866,15 @@
   // ---------- exportar ----------
   $('exportJsonBtn').addEventListener('click', () => {
     if (!analysisResult) { showToast('No hay análisis para exportar'); return; }
-    const data = { ...analysisResult, exportedAt: new Date().toISOString(), app: 'ChordSync Pro', version: '3.0' };
+    const data = {
+      schema: 'chordsync-analysis',
+      schemaVersion: 4,
+      ...analysisResult,
+      segments: analysisResult.segments.map(seg => ({ ...seg })),
+      exportedAt: new Date().toISOString(),
+      app: 'ChordSync Pro',
+      version: '4.0'
+    };
     downloadBlob(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }),
       (analysisResult.song || 'chordsync').replace(/\.[^/.]+$/, '') + '_analysis.json');
     showToast('JSON exportado correctamente');
@@ -796,60 +903,177 @@
   function downloadBlob(blob, filename) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   // ---------- sesiones guardadas (localStorage) ----------
-  function loadSessions() { try { return JSON.parse(localStorage.getItem(SESSIONS_KEY) || '[]'); } catch (e) { return []; } }
-  function saveSessions(list) { try { localStorage.setItem(SESSIONS_KEY, JSON.stringify(list)); } catch (e) {} }
+  function normalizeSession(session) {
+    if (!session || typeof session !== 'object') return null;
+    const segments = Array.isArray(session.segments)
+      ? session.segments
+          .filter(seg => seg && Number.isFinite(Number(seg.start)) && Number.isFinite(Number(seg.end)) && seg.end > seg.start)
+          .map(seg => ({
+            chord: String(seg.chord || 'N'),
+            start: Number(seg.start),
+            end: Number(seg.end),
+            strength: Number(seg.strength || 0),
+            confidence: Number(seg.confidence || 0),
+            corrected: Boolean(seg.corrected)
+          }))
+      : [];
+    return {
+      ...session,
+      song: String(session.song || 'Sesión sin título'),
+      key: String(session.key || ''),
+      scale: session.scale === 'minor' ? 'minor' : 'major',
+      bpm: Number.isFinite(Number(session.bpm)) ? Number(session.bpm) : null,
+      meter: Number.isFinite(Number(session.meter)) ? Number(session.meter) : null,
+      duration: Number.isFinite(Number(session.duration)) ? Number(session.duration) : 0,
+      segments,
+      savedAt: session.savedAt || new Date().toISOString()
+    };
+  }
+
+  function loadSessions() {
+    try {
+      let raw = localStorage.getItem(SESSIONS_KEY);
+      if (!raw) {
+        const legacy = localStorage.getItem(LEGACY_SESSIONS_KEY);
+        if (legacy) {
+          raw = legacy;
+          localStorage.setItem(SESSIONS_KEY, legacy);
+        }
+      }
+      const parsed = JSON.parse(raw || '[]');
+      return Array.isArray(parsed) ? parsed.map(normalizeSession).filter(Boolean) : [];
+    } catch (e) {
+      console.warn('No se pudieron leer las sesiones guardadas:', e);
+      return [];
+    }
+  }
+
+  function saveSessions(list) {
+    const trimmed = (Array.isArray(list) ? list : [])
+      .map(normalizeSession)
+      .filter(Boolean)
+      .slice(-MAX_SESSIONS);
+    try {
+      localStorage.setItem(SESSIONS_KEY, JSON.stringify(trimmed));
+      return true;
+    } catch (e) {
+      console.warn('No se pudieron guardar las sesiones:', e);
+      showToast('No hay espacio suficiente para guardar más sesiones en este navegador.');
+      return false;
+    }
+  }
 
   function renderSessionList() {
     const list = loadSessions();
     const el = $('sessionList');
-    if (!list.length) { el.innerHTML = '<span style="color:var(--text-dim);font-size:0.82rem;">Todavía no has guardado ninguna sesión.</span>'; return; }
-    el.innerHTML = list.map((s, i) => `
-      <div class="session-item">
-        <div><div class="name">${s.song}</div><div class="meta">${s.key} ${s.scale === 'major' ? 'Mayor' : 'Menor'} · ${s.bpm || '—'} BPM · ${formatTime(s.duration)}</div></div>
-        <div class="actions">
-          <button class="btn-ghost" data-load="${i}">Cargar</button>
-          <button class="btn-ghost" data-del="${i}">Eliminar</button>
-        </div>
-      </div>`).join('');
-    el.querySelectorAll('[data-load]').forEach((btn) => btn.addEventListener('click', () => loadSession(Number(btn.dataset.load))));
-    el.querySelectorAll('[data-del]').forEach((btn) => btn.addEventListener('click', () => deleteSession(Number(btn.dataset.del))));
+    el.innerHTML = '';
+    if (!list.length) {
+      const empty = document.createElement('span');
+      empty.style.color = 'var(--text-dim)';
+      empty.style.fontSize = '0.82rem';
+      empty.textContent = 'Todavía no has guardado ninguna sesión.';
+      el.appendChild(empty);
+      return;
+    }
+
+    list.forEach((s, i) => {
+      const item = document.createElement('div');
+      item.className = 'session-item';
+
+      const info = document.createElement('div');
+      const name = document.createElement('div');
+      name.className = 'name';
+      name.textContent = s.song || 'Sesión sin título';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `${s.key || '—'} ${s.scale === 'major' ? 'Mayor' : 'Menor'} · ${s.bpm || '—'} BPM · ${formatTime(s.duration || 0)}`;
+
+      info.append(name, meta);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const loadBtn = document.createElement('button');
+      loadBtn.className = 'btn-ghost';
+      loadBtn.type = 'button';
+      loadBtn.textContent = 'Cargar';
+      loadBtn.addEventListener('click', () => loadSession(i));
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-ghost';
+      delBtn.type = 'button';
+      delBtn.textContent = 'Eliminar';
+      delBtn.addEventListener('click', () => deleteSession(i));
+
+      actions.append(loadBtn, delBtn);
+      item.append(info, actions);
+      el.appendChild(item);
+    });
   }
 
   $('saveSessionBtn').addEventListener('click', () => {
-    if (!analysisResult) { showToast('No hay análisis para guardar'); return; }
+    if (!analysisResult) { showToast('No hay análisis para guardar.'); return; }
     const list = loadSessions();
-    const exists = list.findIndex((s) => s.song === analysisResult.song && Math.abs(s.duration - analysisResult.duration) < 0.5);
-    const record = { ...analysisResult, savedAt: new Date().toISOString() };
-    if (exists > -1) list[exists] = record; else list.unshift(record);
-    saveSessions(list.slice(0, 30));
-    renderSessionList();
-    showToast('Sesión guardada — nota: al recargarla no se reproduce audio, solo se restaura el análisis.');
+    const snapshot = normalizeSession({
+      ...analysisResult,
+      segments: analysisResult.segments.map(seg => ({ ...seg })),
+      savedAt: new Date().toISOString()
+    });
+    list.push(snapshot);
+    if (saveSessions(list)) {
+      renderSessionList();
+      showToast(`Sesión guardada localmente (${Math.min(list.length, MAX_SESSIONS)}/${MAX_SESSIONS}).`);
+    }
   });
 
-  function loadSession(i) {
+  function loadSession(index) {
     const list = loadSessions();
-    const record = list[i];
-    if (!record) return;
-    analysisResult = JSON.parse(JSON.stringify(record));
-    loopSegment = null;
-    audioElement = null; // sin archivo original, no hay reproducción disponible hasta subir el archivo de nuevo
-    $('resultsCard').style.display = 'block';
-    displayResults();
-    showToast('Sesión cargada. Sube el mismo archivo de audio para poder reproducirlo sincronizado.');
-    $('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const session = normalizeSession(list[index]);
+    if (!session) { showToast('La sesión guardada no es válida.'); return; }
+
+    stopPlayback();
+    analysisResult = session;
+    currentFile = null;
+    isVideoFile = false;
+
+    $('uploadCard').style.display = 'none';
+    $('resultsCard').style.display = '';
+    $('fileTitleEl').firstChild.textContent = session.song || 'Sesión guardada';
+    $('fileMetaEl').textContent = ' · sesión local (sin audio original)';
+    $('keyValue').textContent = session.key || '—';
+    $('scaleValue').textContent = session.scale === 'major' ? 'Mayor' : 'Menor';
+    $('bpmValue').textContent = session.bpm || '—';
+    $('meterValue').firstChild.textContent = session.meter ? `${session.meter}/4` : '—';
+    $('durationValue').textContent = formatTime(session.duration || 0);
+    $('chordCountValue').textContent = session.totalChords || session.segments.length;
+
+    syncAnalysisCorrectionControls();
+    buildBeatGrid();
+    buildTimeline();
+    lastDiagramChord = null;
+    updateDisplay(0);
+    showToast('Sesión cargada. El audio original no se guarda dentro de la sesión.');
   }
-  function deleteSession(i) {
+
+  function deleteSession(index) {
     const list = loadSessions();
-    list.splice(i, 1);
+    const item = list[index];
+    if (!item) return;
+    if (!confirm(`Eliminar la sesión guardada "${item.song || 'Sin título'}"?`)) return;
+    list.splice(index, 1);
     saveSessions(list);
     renderSessionList();
+    showToast('Sesión eliminada.');
   }
-  renderSessionList();
 
   // ==================== MODO EN VIVO (AudioWorklet) ====================
   const micBtn = $('micBtn');
@@ -865,14 +1089,32 @@
 
       const workletCode = `
         class ChordProcessor extends AudioWorkletProcessor {
-          constructor() { super(); this.buffer = new Float32Array(88200); this.idx = 0; this.windowSize = 88200; }
+          constructor() {
+            super();
+            // Ventana 1.2 s con salto 0.6 s: suficiente contexto armónico sin esperar 2 s completos.
+            this.windowSize = Math.max(4096, Math.round(sampleRate * 1.2));
+            this.hopSize = Math.max(2048, Math.round(sampleRate * 0.6));
+            this.overlap = this.windowSize - this.hopSize;
+            this.buffer = new Float32Array(this.windowSize);
+            this.idx = 0;
+          }
           process(inputs) {
             const input = inputs[0];
             if (!input || !input[0]) return true;
             const channel = input[0];
+
             for (let i = 0; i < channel.length; i++) {
-              this.buffer[this.idx] = channel[i]; this.idx++;
-              if (this.idx >= this.windowSize) { this.port.postMessage({ samples: this.buffer.slice() }); this.idx = 0; }
+              this.buffer[this.idx++] = channel[i];
+
+              if (this.idx >= this.windowSize) {
+                this.port.postMessage({ samples: this.buffer.slice() });
+                if (this.overlap > 0) {
+                  this.buffer.copyWithin(0, this.hopSize, this.windowSize);
+                  this.idx = this.overlap;
+                } else {
+                  this.idx = 0;
+                }
+              }
             }
             return true;
           }
@@ -896,6 +1138,10 @@
       source.connect(processor);
 
       liveMode.active = true;
+      liveMode.chordHistory = [];
+      liveMode.keyHistory = [];
+      liveMode.displayedChord = '';
+      liveMode.displayedKey = '';
       micBtn.classList.add('recording');
       $('micIcon').style.display = 'none';
       $('stopIcon').style.display = 'block';
@@ -908,15 +1154,87 @@
     }
   }
 
-  function renderLiveChord(chord, key, scale) {
+  function majorityValue(items, getter) {
+    const counts = new Map();
+    items.forEach(item => {
+      const value = getter(item);
+      if (!value) return;
+      counts.set(value, (counts.get(value) || 0) + 1);
+    });
+    let best = '', bestCount = 0;
+    counts.forEach((count, value) => {
+      if (count > bestCount) { best = value; bestCount = count; }
+    });
+    return { value: best, count: bestCount };
+  }
+
+  function handleStableLiveResult(msg) {
+    const chord = msg.chord && msg.chord !== 'X' ? msg.chord : 'N';
+    const confidence = Number(msg.confidence || 0);
+
+    liveMode.chordHistory.push({ chord, confidence });
+    if (liveMode.chordHistory.length > 5) liveMode.chordHistory.shift();
+
+    if (msg.key) {
+      liveMode.keyHistory.push({ key: msg.key, scale: msg.scale || 'major' });
+      if (liveMode.keyHistory.length > 7) liveMode.keyHistory.shift();
+    }
+
+    const recent = liveMode.chordHistory.slice(-3);
+    const chordVote = majorityValue(recent.filter(x => x.chord !== 'N'), x => x.chord);
+
+    let stableChord = liveMode.displayedChord || 'N';
+    // Cambia con 2 de las últimas 3 coincidencias, o con una lectura muy clara.
+    if (chordVote.count >= 2) {
+      stableChord = chordVote.value;
+    } else if (chord !== 'N' && confidence >= 0.72) {
+      stableChord = chord;
+    } else if (recent.length >= 3 && recent.every(x => x.chord === 'N')) {
+      stableChord = 'N';
+    }
+
+    const keyVote = majorityValue(liveMode.keyHistory, x => `${x.key}|${x.scale}`);
+    let stableKey = liveMode.displayedKey;
+    if (keyVote.count >= 4) stableKey = keyVote.value;
+
+    liveMode.displayedChord = stableChord;
+    liveMode.displayedKey = stableKey;
+
+    const [key, scale] = stableKey ? stableKey.split('|') : ['', ''];
+    renderLiveChord(stableChord, key, scale, confidence, msg.rmsDb);
+  }
+
+  function renderLiveChord(chord, key, scale, confidence = 0, rmsDb = null) {
     $('liveChordText').classList.remove('detecting');
     const label = chord === 'N' || !chord ? '—' : chord;
     $('liveChordText').textContent = label;
-    $('liveKeyValue').textContent = key ? `${key} ${scale === 'major' ? 'Mayor' : 'Menor'}` : '—';
+
+    $('liveKeyValue').textContent = key
+      ? `${key} ${scale === 'major' ? 'Mayor' : 'Menor'}`
+      : '—';
+
+    const confidenceEl = $('liveConfidenceValue');
+    if (confidenceEl) {
+      confidenceEl.textContent = chord === 'N'
+        ? '—'
+        : `${Math.round(Math.max(0, Math.min(1, confidence)) * 100)}%`;
+    }
+
+    const levelEl = $('liveLevelValue');
+    if (levelEl) {
+      levelEl.textContent = Number.isFinite(Number(rmsDb)) ? `${Number(rmsDb).toFixed(0)} dBFS` : '—';
+    }
+
     if (chord && chord !== 'N') {
-      $('liveGuitarDiagram').innerHTML = renderGuitarDiagramSVG(chord);
-      $('liveUkuleleDiagram').innerHTML = renderUkuleleDiagramSVG(chord);
+      const guitarSvg = renderGuitarDiagramSVG(chord);
+      const ukuleleSvg = renderUkuleleDiagramSVG(chord);
+      $('liveGuitarDiagram').innerHTML = guitarSvg || '<div class="diagram-unavailable">Sin digitación verificada para esta extensión.</div>';
+      $('liveUkuleleDiagram').innerHTML = ukuleleSvg || '<div class="diagram-unavailable">Sin digitación verificada para esta extensión.</div>';
       $('livePianoDiagram').innerHTML = renderPianoDiagramSVG(chord);
+    } else {
+      $('liveGuitarDiagram').innerHTML = '';
+      $('liveUkuleleDiagram').innerHTML = '';
+      $('livePianoDiagram').innerHTML = '';
     }
   }
 
@@ -936,6 +1254,12 @@
     $('liveChordText').textContent = '—';
     $('liveChordText').classList.remove('detecting');
     $('liveKeyValue').textContent = '—';
+    if ($('liveConfidenceValue')) $('liveConfidenceValue').textContent = '—';
+    if ($('liveLevelValue')) $('liveLevelValue').textContent = '—';
+    liveMode.chordHistory = [];
+    liveMode.keyHistory = [];
+    liveMode.displayedChord = '';
+    liveMode.displayedKey = '';
   }
 
   window.addEventListener('beforeunload', () => { stopLive(); if (worker) worker.terminate(); });

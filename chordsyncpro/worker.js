@@ -104,11 +104,81 @@ function mergeAdjacentSameChord(segments) {
   return out;
 }
 
+// Decide qué segmentos breves parecen ruido y cuáles merecen conservarse.
+// La duración por sí sola no basta: un cambio armónico real puede durar menos de medio segundo.
+function refineShortSegments(segments) {
+  if (segments.length < 2) return segments.map(seg => ({ ...seg }));
+
+  const out = segments.map(seg => ({ ...seg }));
+  let i = 0;
+
+  while (i < out.length) {
+    const seg = out[i];
+    const dur = seg.end - seg.start;
+    const confidence = Number(seg.confidence || 0);
+
+    const clearlyReal =
+      dur >= 0.55 ||
+      (dur >= 0.34 && confidence >= 0.46) ||
+      (dur >= 0.22 && confidence >= 0.68);
+
+    if (clearlyReal || out.length === 1) {
+      i++;
+      continue;
+    }
+
+    const prev = i > 0 ? out[i - 1] : null;
+    const next = i < out.length - 1 ? out[i + 1] : null;
+
+    // A - ruido - A: el caso más claro de detección espuria.
+    if (prev && next && prev.chord === next.chord) {
+      prev.end = next.end;
+      prev.strength = Math.max(prev.strength || 0, next.strength || 0);
+      prev.confidence = Math.max(prev.confidence || 0, next.confidence || 0);
+      out.splice(i, 2);
+      i = Math.max(0, i - 1);
+      continue;
+    }
+
+    // En otro caso, absorbe el tramo ambiguo hacia el vecino con mayor confianza,
+    // en lugar de enviarlo siempre al acorde anterior.
+    if (prev && next) {
+      if ((next.confidence || 0) > (prev.confidence || 0)) {
+        next.start = seg.start;
+        out.splice(i, 1);
+      } else {
+        prev.end = seg.end;
+        out.splice(i, 1);
+        i = Math.max(0, i - 1);
+      }
+      continue;
+    }
+
+    if (prev) {
+      prev.end = seg.end;
+      out.splice(i, 1);
+      i = Math.max(0, i - 1);
+      continue;
+    }
+
+    if (next) {
+      next.start = seg.start;
+      out.splice(i, 1);
+      continue;
+    }
+
+    i++;
+  }
+
+  return mergeAdjacentSameChord(out);
+}
+
 // Agrupa la progresión cuadro-a-cuadro de acordes en segmentos de tiempo con inicio/fin/fuerza.
 function buildChordTimeline(chords, strengths, sampleRate, hopSize) {
   const hopTime = hopSize / sampleRate;
-  // ventana de suavizado ≈ 0.3s a cada lado (≈0.6s total), independiente del sample rate
-  const windowSize = Math.max(3, Math.round(0.3 / hopTime) * 2 + 1);
+  // Fase 3: ventana algo más corta para no borrar cambios armónicos reales rápidos.
+  // ≈0.18 s a cada lado (≈0.36 s total), independiente del sample rate.
+  const windowSize = Math.max(3, Math.round(0.18 / hopTime) * 2 + 1);
   const smoothedChords = smoothChordSequence(chords, strengths, windowSize);
 
   const segments = [];
@@ -147,19 +217,9 @@ function buildChordTimeline(chords, strengths, sampleRate, hopSize) {
     });
   }
 
-  // fusiona segmentos espurios muy cortos (< 0.5s — ya con el suavizado previo, lo que sobrevive
-  // y sigue siendo así de corto casi siempre es ruido de detección, no un cambio real de acorde)
-  const MIN_SEG = 0.5;
-  const merged = [];
-  segments.forEach((seg) => {
-    const dur = seg.end - seg.start;
-    if (merged.length && dur < MIN_SEG) merged[merged.length - 1].end = seg.end;
-    else merged.push(seg);
-  });
-
-  // segunda pasada: junta tramos consecutivos que terminaron con el mismo acorde
-  // (ver comentario de mergeAdjacentSameChord más arriba)
-  return mergeAdjacentSameChord(merged);
+  // Ya no eliminamos automáticamente todo lo que dure < 0.5 s.
+  // Se consideran conjuntamente duración, confianza y contexto vecino.
+  return refineShortSegments(segments);
 }
 
 // ---------- Análisis de archivo completo ----------
@@ -220,25 +280,61 @@ function handleAnalyzeFile(id, audioData, sampleRate, duration) {
 
 // ---------- Análisis de un fragmento en vivo (micrófono) ----------
 function handleAnalyzeLiveChunk(id, audioData, sampleRate) {
+  // Nivel RMS para no intentar clasificar silencio/ruido muy débil.
+  let sumSq = 0;
+  for (let i = 0; i < audioData.length; i++) sumSq += audioData[i] * audioData[i];
+  const rms = Math.sqrt(sumSq / Math.max(1, audioData.length));
+  const rmsDb = 20 * Math.log10(Math.max(rms, 1e-8));
+
+  if (rmsDb < -52) {
+    postMessage({
+      type: 'liveResult', id, chord: 'N', key: '', scale: '',
+      confidence: 0, rmsDb: parseFloat(rmsDb.toFixed(1))
+    });
+    return;
+  }
+
   const audioVector = essentia.arrayToVector(audioData);
   const tonal = essentia.TonalExtractor(audioVector, 2048, 1024, 440);
   const chords = vectorToArray(tonal.chords_progression);
   const strengths = vectorToArray(tonal.chords_strength);
 
-  // acorde más frecuente del fragmento, ponderado por fuerza de detección
   const scores = {};
+  let totalScore = 0;
   chords.forEach((c, i) => {
     if (c === 'N' || c === 'X') return;
-    scores[c] = (scores[c] || 0) + Math.abs(strengths[i] || 0);
+    const w = Math.abs(strengths[i] || 0);
+    if (w <= 0) return;
+    scores[c] = (scores[c] || 0) + w;
+    totalScore += w;
   });
+
   let bestChord = 'N', bestScore = 0;
-  Object.keys(scores).forEach((c) => { if (scores[c] > bestScore) { bestScore = scores[c]; bestChord = c; } });
+  Object.keys(scores).forEach((c) => {
+    if (scores[c] > bestScore) { bestScore = scores[c]; bestChord = c; }
+  });
+
+  // Porción del voto armónico que pertenece al ganador. No es una probabilidad calibrada,
+  // pero es útil como confianza relativa para estabilizar la UI.
+  const confidence = totalScore > 0 ? Math.min(1, bestScore / totalScore) : 0;
+  if (confidence < 0.34) bestChord = 'N';
+
+  const key = tonal.key_key || '';
+  const scale = tonal.key_scale || '';
 
   try { audioVector.delete(); } catch (e) {}
   try { tonal.chords_progression.delete(); } catch (e) {}
   try { tonal.chords_strength.delete(); } catch (e) {}
 
-  postMessage({ type: 'liveResult', id, chord: bestChord, key: tonal.key_key, scale: tonal.key_scale });
+  postMessage({
+    type: 'liveResult',
+    id,
+    chord: bestChord,
+    key,
+    scale,
+    confidence: parseFloat(confidence.toFixed(3)),
+    rmsDb: parseFloat(rmsDb.toFixed(1))
+  });
 }
 
 onmessage = (e) => {
