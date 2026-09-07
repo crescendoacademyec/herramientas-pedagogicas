@@ -1,3 +1,0 @@
-# ChordSync v56 — proveedor neuronal de multi-pitch / note transcription
-# Basic Pitch (Spotify) se distribuye bajo Apache-2.0.
-basic-pitch>=0.4.0

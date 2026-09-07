@@ -1,4 +1,0 @@
-# ChordSync v24: el proveedor BTC no se instala con pip.
-# Requiere el binario CrispASR (C++/GGUF) configurado con CHORDSYNC_CRISPASR_BIN.
-# Los pesos BTC públicos usados por la ruta auto son NO COMERCIALES (CC BY-NC-SA 4.0).
-# Para producción comercial usa un checkpoint propio compatible y define CHORDSYNC_BTC_MODEL.
