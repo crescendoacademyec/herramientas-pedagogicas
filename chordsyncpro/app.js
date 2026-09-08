@@ -1,5 +1,6 @@
 (function () {
   const $ = (id) => document.getElementById(id);
+  const runtime = window.ChordSyncRuntime || {mode:'local',backend:true};
   const SESSIONS_KEY = 'chordsync-pro-sessions-v4';
   const LEGACY_SESSIONS_KEY = 'chordsync-pro-sessions';
   const MAX_SESSIONS = 40;
@@ -32,7 +33,9 @@
   function ensureWorker() {
     if (worker) return;
     try {
-      worker = new Worker('worker.js');
+      // Version the worker URL so a corrected analysis engine is never hidden
+      // behind Chromium's dedicated-worker cache after an app reload.
+      worker = new Worker('worker.js?v=63.1.0');
     } catch (err) {
       console.error('No se pudo crear el Worker:', err);
       setStatus('');
@@ -139,6 +142,30 @@
     return mono;
   }
 
+  function encodeMonoWav(samples, sampleRate) {
+    const pcm = samples instanceof Float32Array ? samples : new Float32Array(samples || []);
+    const buffer = new ArrayBuffer(44 + pcm.length * 2);
+    const view = new DataView(buffer);
+    const ascii = (offset, value) => { for (let i=0;i<value.length;i++) view.setUint8(offset+i,value.charCodeAt(i)); };
+    ascii(0,'RIFF'); view.setUint32(4,36+pcm.length*2,true); ascii(8,'WAVE');
+    ascii(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+    view.setUint16(22,1,true); view.setUint32(24,sampleRate,true);
+    view.setUint32(28,sampleRate*2,true); view.setUint16(32,2,true); view.setUint16(34,16,true);
+    ascii(36,'data'); view.setUint32(40,pcm.length*2,true);
+    for(let i=0,offset=44;i<pcm.length;i++,offset+=2){
+      const value=Math.max(-1,Math.min(1,Number(pcm[i])||0));
+      view.setInt16(offset,value<0?Math.round(value*32768):Math.round(value*32767),true);
+    }
+    return new Blob([buffer],{type:'audio/wav'});
+  }
+
+  async function ensureWavForChordBackend(file) {
+    if (/\.wav$/i.test(file?.name||'') || /^(audio\/wav|audio\/x-wav)$/i.test(file?.type||'')) return file;
+    const decoded=await decodeAudioFile(file);
+    const base=String(file?.name||'audio').replace(/\.[^.]+$/,'') || 'audio';
+    return new File([encodeMonoWav(decoded.samples,decoded.sampleRate)],`${base}.wav`,{type:'audio/wav'});
+  }
+
   // ---------- modo (archivo / en vivo) ----------
   $('modeTabs').addEventListener('click', (e) => {
     const btn = e.target.closest('.mode-tab');
@@ -228,6 +255,7 @@
   let activeStemJobId = null;
 
   async function fetchStemServiceHealth() {
+    if (runtime.backend === false) throw new Error('Backend no disponible en esta edición.');
     const r = await fetch('/api/v1/health', {cache:'no-store'});
     if (!r.ok) throw new Error(`Backend de stems no disponible (${r.status}).`);
     return r.json();
@@ -257,10 +285,11 @@
     if (!['auto','btc','btc-ensemble'].includes(requested) && options.force !== true) return null;
     let health;
     try { health = await fetchStemServiceHealth(); } catch (_) { return null; }
-    if (!health.btcAvailable) return null;
-    if (options.status !== false) setStatus(`Analizando acordes con ${health.chordProvider || 'BTC'}…`);
+    if (!health.chordAnalysisAvailable && !health.btcAvailable) return null;
+    if (options.status !== false) setStatus(`Analizando acordes con ${health.chordProvider || 'proveedor neuronal'}…`);
+    const backendFile = health.chordProviderResolved === 'madmom' ? await ensureWavForChordBackend(file) : file;
     const form = new FormData();
-    form.append('file', file, file.name || 'audio.wav');
+    form.append('file', backendFile, backendFile.name || 'audio.wav');
     const r = await fetch('/api/v1/chords', {method:'POST', body:form});
     let payload=null; try{payload=await r.json();}catch(_){}
     if(!r.ok) throw new Error(payload?.detail || `Análisis neuronal de acordes falló (${r.status}).`);
@@ -1944,7 +1973,7 @@
       const available=results.filter(r=>r.validation?.summary?.songs>0);
       const ranked=[...available].sort((a,b)=>(b.validation.summary.score??-1)-(a.validation.summary.score??-1));
       const winner=ranked[0]||null;
-      const providerLabel={essentia:'Essentia labels',hpcp:'HPCP probabilístico',onnx:'ONNX neural web',ensemble:'ONNX + HPCP',btc:'BTC neural backend','btc-ensemble':'BTC + HPCP',multihead:'ONNX multi-head','multihead-ensemble':'Multi-head + HPCP'};
+      const providerLabel={essentia:'Essentia labels',hpcp:'HPCP probabilístico',onnx:'ONNX neural web',ensemble:'ONNX + HPCP',btc:'Backend neuronal','btc-ensemble':'Backend neuronal + HPCP',multihead:'ONNX multi-head','multihead-ensemble':'Multi-head + HPCP'};
       const cell=(v)=>scoreBadge(v);
       providerPanel.innerHTML=`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;"><div><b>Benchmark A/B acústico v62</b><br><span style="font-size:12px;color:var(--text-dim);">Mismos features · mismo tuning · mismo split · TRAIN ${meta.trainSongs} / VAL ${meta.validationSongs} / TEST ${meta.testSongs}</span></div><div style="font-size:18px;color:var(--gold);font-weight:700;">VAL ganador: ${esc(winner?providerLabel[winner.provider]:'—')}</div></div>
       <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;">Esta prueba bloquea el proveedor acústico y mantiene idénticos Viterbi, prior tonal y refinamiento de fronteras. ONNX aparece como no disponible sin runtime/modelo web; BTC aparece como no disponible si el backend CrispASR/modelo no está configurado; Multi-head aparece como no disponible hasta instalar models/multihead_chord_model.json + .onnx. El ganador se determina por VALIDATION; TEST se muestra como holdout y no se usa para ajustar pesos.</div>
@@ -2640,4 +2669,12 @@
 
   // pre-calienta el worker (empieza a cargar Essentia) apenas se abre la página
   ensureWorker();
+  if (runtime.mode === 'pages') {
+    const notice=document.createElement('div');
+    notice.style.cssText='max-width:1180px;margin:12px auto;padding:10px 16px;border:1px solid rgba(212,168,79,.35);border-radius:10px;color:#d4a84f;background:rgba(212,168,79,.08);font-size:13px;text-align:center';
+    notice.textContent='Edición web · análisis HPCP dentro del navegador · no usa Madmom ni sube tu audio';
+    const main=document.querySelector('main');
+    if(main) main.insertBefore(notice,main.firstChild);
+    if(autoStemBtn){autoStemBtn.disabled=true;autoStemBtn.title='Disponible en la edición de escritorio';}
+  }
 })();

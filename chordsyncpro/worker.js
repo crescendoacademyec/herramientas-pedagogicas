@@ -812,7 +812,7 @@ function blendProbabilityModels(primary, secondary, primaryWeight = 0.72) {
     probs.sort((x,y)=>y.probability-x.probability);
     const top = probs[0] || { chord:'N', probability:0 };
     meanTop += top.probability;
-    observations.push({ top: top.chord, confidence: top.probability, probabilities: probs.slice(0,18) });
+    observations.push({ top: top.chord, confidence: top.probability, probabilities: Array.from(probs || []).slice(0,18) });
   }
   return {
     observations,
@@ -886,7 +886,7 @@ function buildBackendChordProbabilityModel(payload, targetFrames, duration, fall
 function observationReliability(obs) {
   const probs = (obs && Array.isArray(obs.probabilities)) ? obs.probabilities : [];
   if (!probs.length) return 0;
-  const sorted = probs.slice().sort((a,b)=>(b.probability||0)-(a.probability||0));
+  const sorted = Array.from(probs).sort((a,b)=>(b.probability||0)-(a.probability||0));
   const p1 = clamp(Number(sorted[0]?.probability || 0), 0, 1);
   const p2 = clamp(Number(sorted[1]?.probability || 0), 0, 1);
   const margin = clamp(p1-p2, 0, 1);
@@ -945,7 +945,7 @@ function adaptiveBlendProbabilityModels(otherModel, mixModel, tuning = DEFAULT_T
     probs.sort((x,y)=>y.probability-x.probability);
     const top=probs[0]||{chord:'N',probability:0};
     meanTop+=top.probability; sumW+=w; minW=Math.min(minW,w); maxW=Math.max(maxW,w);
-    observations.push({top:top.chord,confidence:top.probability,probabilities:probs.slice(0,18),otherWeight:round(w,3)});
+    observations.push({top:top.chord,confidence:top.probability,probabilities:Array.from(probs || []).slice(0,18),otherWeight:round(w,3)});
   }
   return {
     model:{observations,meanTopProbability:N?meanTop/N:0,states:[...new Set(observations.flatMap(o=>o.probabilities.map(p=>p.chord)))],source:'adaptive-other+mix-v20'},
@@ -1388,7 +1388,7 @@ function blendTranscriptionEvidenceModel(noteModel, baseModel, tuning) {
     const z=probs.reduce((x,y)=>x+y.probability,0)||1;for(const x of probs)x.probability/=z;probs.sort((x,y)=>y.probability-x.probability);
     const top=probs[0]||{chord:'N',probability:0};meanTop+=top.probability;
     if(w>0){used++;sumW+=w;if(canonicalChordLabel(a.top)!==canonicalChordLabel(b.top))disagree++;}
-    observations.push({top:top.chord,confidence:top.probability,probabilities:probs.slice(0,24),noteEvidenceWeight:round(w,3)});
+    observations.push({top:top.chord,confidence:top.probability,probabilities:Array.from(probs || []).slice(0,24),noteEvidenceWeight:round(w,3)});
   }
   if(baseModel.observations.length>n) observations.push(...baseModel.observations.slice(n));
   return {model:{...baseModel,observations,meanTopProbability:observations.length?meanTop/observations.length:baseModel.meanTopProbability,source:(baseModel.source||'acoustic')+'+note-evidence-v56'},diagnostics:{available:true,applied:used>0,provider:noteModel.provider,usedFrames:used,frameCount:n,meanWeight:used?round(sumW/used,4):0,disagreementRate:used?round(disagree/used,4):0,minConfidence:tuning.transcriptionHarmonyMinConfidence,baseWeight:tuning.transcriptionHarmonyWeight}};
@@ -2436,7 +2436,7 @@ function buildProbabilisticObservations(hpcpRaw, rawChords, rawStrengths) {
     observations.push({
       top: probs[0]?.chord || obs || 'N',
       confidence: probs[0]?.probability || 0,
-      probabilities: probs.slice(0,12)
+      probabilities: Array.from(probs || []).slice(0,12)
     });
   }
   return { observations, shift, meanTopProbability: observations.length ? meanTop/observations.length : 0, states };
