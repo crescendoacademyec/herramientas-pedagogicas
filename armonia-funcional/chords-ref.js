@@ -65,6 +65,19 @@
     };
   }
 
+  function svgLabel(chordName, instrument, tones) {
+    var notes = tones.map(function (t) { return t.name; }).join(", ");
+    return (chordName ? chordName + ". " : "") + instrument + ". Notas: " + notes + ".";
+  }
+
+  function escapeXmlAttr(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
   function chordTones(root, formulaStr) {
     var seen = {};
     return parseFormula(formulaStr).map(function (t) { return spell(root, t); }).filter(function (tone) {
@@ -160,7 +173,7 @@
     return { keys: keys, whiteCount: whiteCount, whiteW: whiteW, blackW: blackW, margin: margin };
   }
 
-  function pianoSVG(root, tones) {
+  function pianoSVG(root, tones, chordName) {
     var rootAbsolute = root.pc; // el primer Do del teclado corresponde a C4
     var highest = tones.reduce(function (m, t) { return Math.max(m, rootAbsolute + t.semi); }, rootAbsolute);
     // C4 hasta el final de la octava que contiene la nota más aguda.
@@ -174,7 +187,7 @@
     var w = layout.margin + layout.whiteCount * layout.whiteW + 4;
     var h = whiteH + 22;
     var parts = [];
-    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-piano" role="img" aria-label="Diagrama de piano">');
+    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-piano" role="img" aria-label="' + escapeXmlAttr(svgLabel(chordName, "Piano", tones)) + '">');
 
     layout.keys.filter(function (k) { return !k.isBlack; }).forEach(function (k) {
       var tone = matched[k.absoluteStep];
@@ -186,7 +199,7 @@
     });
     layout.keys.filter(function (k) { return k.isBlack; }).forEach(function (k) {
       var tone = matched[k.absoluteStep];
-      var cls = "jz-key jz-key-b" + (tone ? " jz-key-on" : "");
+      var cls = "jz-key jz-key-b" + (tone ? " jz-key-on" : "") + (tone && tone.isRoot ? " jz-key-root" : "");
       parts.push('<rect x="' + k.x + '" y="2" width="' + layout.blackW + '" height="' + blackH + '" rx="2" class="' + cls + '"></rect>');
       if (tone) {
         parts.push('<text x="' + (k.x + layout.blackW / 2) + '" y="' + (blackH - 8) + '" text-anchor="middle" class="jz-piano-label jz-piano-label-b">' + tone.name + '</text>');
@@ -284,7 +297,7 @@
     return search(4, 9) || search(6, 11) || search(11, 11);
   }
 
-  function guitarSVG(root, tones) {
+  function guitarSVG(root, tones, chordName) {
     var voicing = findGuitarVoicing(root, tones);
     var nStrings = 6;
     var stringGap = 34, fretGap = 54;
@@ -305,7 +318,7 @@
     if (voicing) voicing.assignment.forEach(function (a) { byString[a.si] = a; });
 
     var parts = [];
-    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-guitar-h" role="img" aria-label="Diagrama de guitarra">');
+    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-guitar-h" role="img" aria-label="' + escapeXmlAttr(svgLabel(chordName, "Guitarra, voicing sugerido", tones)) + '">');
 
     // etiquetas de cuerdas (izquierda) y líneas horizontales
     for (var s = 0; s < nStrings; s++) {
@@ -364,7 +377,7 @@
     return toneDiatonic - e4Diatonic;
   }
 
-  function staffSVG(root, tones) {
+  function staffSVG(root, tones, chordName) {
     var lineGap = 9; // separación entre líneas del pentagrama (2 staffSteps)
     var stepH = lineGap / 2;
     var withStep = tones.map(function (t) { return { tone: t, step: staffStepOf(root, t) }; })
@@ -383,7 +396,7 @@
     h = yOf(minStep) + 24;
 
     var parts = [];
-    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-staff" role="img" aria-label="Pentagrama">');
+    parts.push('<svg viewBox="0 0 ' + w + ' ' + h + '" class="jz-staff" role="img" aria-label="' + escapeXmlAttr(svgLabel(chordName, "Pentagrama en clave de sol", tones)) + '">');
 
     // 5 líneas del pentagrama (staffSteps 0,2,4,6,8)
     for (var li = 0; li <= 8; li += 2) {
@@ -465,10 +478,12 @@
     rootEl.querySelector('[data-cx="name"]').textContent = symbolName;
     rootEl.querySelector('[data-cx="label"]').textContent = chordType.label;
     rootEl.querySelector('[data-cx="formula"]').textContent = formulaText(tones);
-    rootEl.querySelector('[data-cx="staff"]').innerHTML = staffSVG(root, tones);
-    rootEl.querySelector('[data-cx="guitar"]').innerHTML = guitarSVG(root, tones);
-    rootEl.querySelector('[data-cx="piano"]').innerHTML = pianoSVG(root, tones);
+    rootEl.querySelector('[data-cx="staff"]').innerHTML = staffSVG(root, tones, symbolName);
+    rootEl.querySelector('[data-cx="guitar"]').innerHTML = guitarSVG(root, tones, symbolName);
+    rootEl.querySelector('[data-cx="piano"]').innerHTML = pianoSVG(root, tones, symbolName);
     rootEl.querySelector('[data-cx="legend"]').innerHTML = legendHTML(tones);
+    var live = rootEl.querySelector('[data-cx="live"]');
+    if (live) live.textContent = symbolName + ". " + chordType.label + ". Fórmula: " + formulaText(tones) + ". Notas: " + tones.map(function(t){return t.name;}).join(", ") + ".";
   }
 
   function mount(rootEl) {
@@ -484,20 +499,22 @@
     }).join("");
 
     rootEl.innerHTML =
-      '<div class="chord-explorer">' +
+      '<div class="chord-explorer" aria-label="Referencia interactiva de acordes">' +
+      '<p class="chord-explorer-help">Selecciona una fundamental y un tipo de acorde. La fórmula, el deletreo y los tres diagramas se actualizan juntos. La fundamental se destaca en dorado.</p>' +
       '<div class="chord-explorer-controls">' +
-      '<label class="field-inline">Fundamental<select data-cx="root">' + rootOptions + '</select></label>' +
-      '<label class="field-inline">Tipo de acorde<select data-cx="type">' + typeOptions + '</select></label>' +
+      '<label class="field-inline">Fundamental<select data-cx="root" aria-label="Fundamental del acorde">' + rootOptions + '</select></label>' +
+      '<label class="field-inline">Tipo de acorde<select data-cx="type" aria-label="Tipo de acorde">' + typeOptions + '</select></label>' +
       '</div>' +
       '<div class="chord-explorer-head">' +
       '<div class="chord-explorer-name" data-cx="name">C</div>' +
       '<div class="chord-explorer-sub"><span data-cx="label"></span> &middot; <code data-cx="formula"></code></div>' +
       '<div class="chord-explorer-legend" data-cx="legend"></div>' +
+      '<p class="sr-only" data-cx="live" aria-live="polite"></p>' +
       '</div>' +
       '<div class="chord-explorer-panels">' +
-      '<div class="chord-panel"><div class="diagram-label">Pentagrama</div><div data-cx="staff"></div></div>' +
-      '<div class="chord-panel"><div class="diagram-label">Guitarra (voicing)</div><div data-cx="guitar"></div></div>' +
-      '<div class="chord-panel"><div class="diagram-label">Piano</div><div data-cx="piano"></div></div>' +
+      '<section class="chord-panel" aria-label="Representación en pentagrama"><div class="diagram-label">Pentagrama</div><div class="diagram-scroll" data-cx="staff"></div></section>' +
+      '<section class="chord-panel" aria-label="Representación en guitarra"><div class="diagram-label">Guitarra · voicing sugerido</div><p class="diagram-note">Una disposición práctica posible; no es la única digitación válida.</p><div class="diagram-scroll" data-cx="guitar"></div></section>' +
+      '<section class="chord-panel" aria-label="Representación en piano"><div class="diagram-label">Piano</div><div class="diagram-scroll" data-cx="piano"></div></section>' +
       '</div>' +
       '</div>';
 

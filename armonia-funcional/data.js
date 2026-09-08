@@ -48,7 +48,7 @@ window.APP_DATA = {
           "items": [
             {
               "term": "Consonancias perfectas",
-              "body": "Son 1j, 8j, 5j y 4j."
+              "body": "Según la clasificación empleada en este curso, son 1j, 8j, 5j y 4j. La función perceptiva o contrapuntística de la 4j puede variar según el contexto."
             },
             {
               "term": "Consonancias imperfectas",
@@ -75,7 +75,7 @@ window.APP_DATA = {
           "items": [
             {
               "term": "Acorde",
-              "body": "Un acorde es un conjunto de tres o más notas dispuestas por terceras."
+              "body": "En la armonía estudiada en este curso, un acorde se entiende principalmente como un conjunto de tres o más notas organizadas por terceras. En la práctica, su disposición puede alterar ese orden y también se estudian estructuras suspendidas."
             },
             {
               "term": "Escalas comunes",
@@ -95,7 +95,7 @@ window.APP_DATA = {
             },
             {
               "term": "Uso general de extensiones",
-              "body": "La novena mayor puede usarse en cualquier acorde. La onceava justa se usa en acordes con tercera menor. La onceava aumentada se usa en acordes con tercera mayor. La treceava menor se usa en acordes con quinta disminuida. La treceava mayor se usa en acordes con quinta justa."
+              "body": "Como regla operativa del método de este curso: la novena mayor puede usarse en cualquier acorde; la onceava justa se asocia principalmente a acordes con tercera menor; la onceava aumentada a acordes con tercera mayor; la treceava menor a acordes con quinta disminuida; y la treceava mayor a acordes con quinta justa. Estas son pautas de voicing y color armónico, no prohibiciones absolutas."
             },
             {
               "term": "Dominantes con séptima menor",
@@ -126,11 +126,11 @@ window.APP_DATA = {
             },
             {
               "term": "Duplicaciones y supresiones",
-              "body": "En acordes mayores y menores no se duplica la tercera y puede suprimirse la quinta. En acordes suspendidos no se duplica la nota suspendida y puede suprimirse la quinta. En acordes aumentados y disminuidos no se duplica la quinta y puede suprimirse la tercera."
+              "body": "Como pauta de enlace y voicing en este curso: en acordes mayores y menores se evita duplicar la tercera y puede suprimirse la quinta; en acordes suspendidos se evita duplicar la nota suspendida y puede suprimirse la quinta; en aumentados y disminuidos se evita duplicar la quinta y puede suprimirse la tercera. Son criterios prácticos del método, no reglas universales para todos los estilos."
             },
             {
               "term": "Distribución registral",
-              "body": "La mejor distribución mantiene intervalos amplios hacia el registro grave e intervalos pequeños hacia el agudo."
+              "body": "Como principio general de claridad usado en este curso, se prefieren intervalos más amplios hacia el registro grave e intervalos más pequeños hacia el agudo. La distribución concreta depende del instrumento, el estilo y el efecto buscado."
             },
             {
               "term": "Extensiones en el registro",
@@ -161,15 +161,15 @@ window.APP_DATA = {
             },
             {
               "term": "Función tónica",
-              "body": "Los acordes tónicos tienen la tercera de la escala. Sus grados son I, III y VI."
+              "body": "En el esquema funcional utilizado en este curso, los acordes de función tónica se asocian principalmente con I, III y VI y comparten notas que favorecen la estabilidad tonal, incluida la tercera de la escala en este modelo."
             },
             {
               "term": "Función subdominante",
-              "body": "Los acordes subdominantes tienen la cuarta de la escala. Sus grados son II y IV."
+              "body": "En el esquema funcional utilizado en este curso, los grados II y IV representan la función subdominante y se caracterizan por incluir la cuarta de la escala."
             },
             {
               "term": "Función dominante",
-              "body": "Los acordes dominantes tienen simultáneamente la cuarta de la escala y la sensible tonal, es decir, la séptima mayor de la escala. Sus grados son V7 y VII°."
+              "body": "En el esquema funcional utilizado en este curso, V7 y VII° representan la función dominante porque reúnen la cuarta de la escala y la sensible tonal, generando una fuerte tendencia de resolución."
             }
           ]
         },
@@ -180,7 +180,7 @@ window.APP_DATA = {
           "items": [
             {
               "term": "Rearmonización simple",
-              "body": "Consiste en cambiar acordes tónicos entre sí, subdominantes entre sí y dominantes entre sí."
+              "body": "En su forma básica dentro de este curso, consiste en sustituir acordes por otros de función equivalente: tónicos entre sí, subdominantes entre sí y dominantes entre sí. El resultado depende del contexto melódico y de la conducción de voces."
             },
             {
               "term": "Escalas paralelas",

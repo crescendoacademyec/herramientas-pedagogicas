@@ -98,11 +98,24 @@ const MODULE_3_QUESTION_OVERRIDES = {
       upperMin: 48
     }
   },
+  12: {
+    noteLabels: { "A#2": "Bb2" }
+  },
+  14: {
+    noteLabels: {
+      "C#3": "Db3",
+      "B3": "Cb4",
+      "G#4": "Ab4",
+      "D#4": "Eb4"
+    }
+  },
   15: {
-    keyboardRange: { from: "C3", to: "C6" }
+    keyboardRange: { from: "C3", to: "C6" },
+    answers: ["C#4", "G#4", "B4"]
   },
   16: {
-    keyboardRange: { from: "C3", to: "C6" }
+    keyboardRange: { from: "C3", to: "C6" },
+    answers: ["B3", "F#4"]
   },
   19: {
     acceptMode: "pitchClass",
@@ -214,9 +227,9 @@ const MODULE_3_QUESTION_OVERRIDES = {
     }
   },
   54: {
-    noteLabels: { "C#4": "C#/Db4" },
-    parserCiphers: ["G13(#11)", "G13(b5)"],
-    sampleAnswer: "G2, F3, B3, C#/Db4, E4 y A4."
+    noteLabels: { "C#4": "C#4" },
+    parserCiphers: ["G13(#11)"],
+    sampleAnswer: "G2, F3, B3, C#4, E4 y A4."
   }
 };
 const MODULE_3_ANALYSIS_BASS = {
@@ -253,7 +266,7 @@ const MODULE_3_PARSER_CIPHERS = {
   45: ["E13(b9)"],
   52: ["F#m11"],
   53: ["Em11"],
-  54: ["G13(#11)", "G13(b5)"]
+  54: ["G13(#11)"]
 };
 const MODULE_3_SHELL_ALTERNATIVES = {
   7: [["F3", "A3"]],
@@ -268,7 +281,9 @@ const MODULE_3_SHELL_ALTERNATIVES = {
   16: [["G3", "B3"], ["G3", "F#4"], ["B3", "F#4"], ["F#4", "B4", "D5"]]
 };
 normalizeData();
-const LS_KEY = "teoria_musical_local_app_v1";
+const LS_KEY = "armonia_funcional_crescendo_v2";
+const LEGACY_LS_KEYS = ["teoria_musical_local_app_v1"];
+const STATE_SCHEMA_VERSION = 2;
 let state = loadState();
 let currentView = "home";
 let quizResults = null;
@@ -347,6 +362,7 @@ function normalizePianoSelectQuestions() {
       if (question.type !== "pianoSelect") return;
       const sourceId = question.sourceId || question.id;
       question.keyboardRange = fullPianoRange();
+
       if (module.id === "nivel-3-principios-voicing" && MODULE_3_PIANO_PROMPTS[sourceId]) {
         question.prompt = MODULE_3_PIANO_PROMPTS[sourceId];
       }
@@ -359,10 +375,10 @@ function normalizePianoSelectQuestions() {
       if (module.id === "nivel-3-principios-voicing" && MODULE_3_PARSER_CIPHERS[sourceId]) {
         question.parserCiphers = MODULE_3_PARSER_CIPHERS[sourceId];
       }
-      question.keyboardRange = fullPianoRange();
+
       if (module.id === "nivel-3-principios-voicing" && MODULE_3_SHELL_ALTERNATIVES[sourceId]) {
         question.accept = buildShellAcceptance(sourceId);
-        question.sampleAnswer = shellSampleAnswer(sourceId);
+        question.sampleAnswer = shellSampleAnswer(sourceId, question);
       } else {
         question.accept = question.accept || buildPianoAcceptance(question);
       }
@@ -388,8 +404,9 @@ function buildShellAcceptance(id) {
     }))
   };
 }
-function shellSampleAnswer(id) {
-  const examples = MODULE_3_SHELL_ALTERNATIVES[id].map(notes => notes.join(", "));
+function shellSampleAnswer(id, question) {
+  const examples = MODULE_3_SHELL_ALTERNATIVES[id]
+    .map(notes => notes.map(note => pianoAnswerLabel(question, note)).join(", "));
   return `Cualquier shell válido del acorde. Ejemplos: ${examples.join(" / ")}.`;
 }
 function buildPianoAcceptance(question) {
@@ -560,6 +577,7 @@ function defaultState() {
       submitted: false,
       startedAt: null,
       submittedAt: null,
+      attemptModuleId: null,
       student: { name: "", course: "", date: "" },
       answers: {},
       focusWarnings: 0,
@@ -567,19 +585,89 @@ function defaultState() {
     }
   };
 }
-function loadState() {
-  try {
-    const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return defaultState();
-    const loaded = Object.assign(defaultState(), JSON.parse(raw));
-    if (!DATA.modules.some(module => module.id === loaded.moduleId)) {
-      loaded.moduleId = DATA.modules[0]?.id || defaultState().moduleId;
-      loaded.quiz = defaultState().quiz;
-    }
-    return loaded;
-  } catch (e) { return defaultState(); }
+function normalizeStoredState(value) {
+  const defaults = defaultState();
+  if (!value || typeof value !== "object" || Array.isArray(value)) return defaults;
+
+  const loaded = {
+    ...defaults,
+    ...value,
+    studied: value.studied && typeof value.studied === "object" && !Array.isArray(value.studied)
+      ? value.studied
+      : {},
+    quiz: {
+      ...defaults.quiz,
+      ...(value.quiz && typeof value.quiz === "object" && !Array.isArray(value.quiz) ? value.quiz : {}),
+      student: {
+        ...defaults.quiz.student,
+        ...(value.quiz?.student && typeof value.quiz.student === "object" && !Array.isArray(value.quiz.student)
+          ? value.quiz.student
+          : {})
+      },
+      answers: value.quiz?.answers && typeof value.quiz.answers === "object" && !Array.isArray(value.quiz.answers)
+        ? value.quiz.answers
+        : {}
+    },
+    schemaVersion: STATE_SCHEMA_VERSION
+  };
+
+  if (!DATA.modules.some(module => module.id === loaded.moduleId)) {
+    loaded.moduleId = DATA.modules[0]?.id || defaults.moduleId;
+    loaded.quiz = { ...defaults.quiz };
+  }
+
+  loaded.quiz.focusWarnings = Math.max(0, Number.parseInt(loaded.quiz.focusWarnings, 10) || 0);
+  loaded.quiz.active = Boolean(loaded.quiz.active);
+  loaded.quiz.submitted = Boolean(loaded.quiz.submitted);
+  loaded.quiz.attemptModuleId = typeof loaded.quiz.attemptModuleId === "string"
+    ? loaded.quiz.attemptModuleId
+    : (loaded.quiz.active || loaded.quiz.submitted ? loaded.moduleId : null);
+
+  if ((loaded.quiz.active || loaded.quiz.submitted) &&
+      loaded.quiz.attemptModuleId &&
+      loaded.quiz.attemptModuleId !== loaded.moduleId) {
+    loaded.quiz = { ...defaults.quiz };
+  }
+  return loaded;
 }
-function saveState() { localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+function readStoredState() {
+  const keys = [LS_KEY, ...LEGACY_LS_KEYS];
+  for (const key of keys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      return { key, state: normalizeStoredState(parsed) };
+    } catch (error) {
+      console.warn(`No se pudo leer el estado guardado en ${key}:`, error);
+    }
+  }
+  return { key: null, state: defaultState() };
+}
+
+function loadState() {
+  const stored = readStoredState();
+  if (stored.key && stored.key !== LS_KEY) {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(stored.state));
+    } catch (error) {
+      console.warn("No se pudo migrar el progreso a la nueva versión:", error);
+    }
+  }
+  return stored.state;
+}
+
+function saveState() {
+  try {
+    state.schemaVersion = STATE_SCHEMA_VERSION;
+    localStorage.setItem(LS_KEY, JSON.stringify(state));
+    return true;
+  } catch (error) {
+    console.warn("No se pudo guardar el progreso local:", error);
+    return false;
+  }
+}
 function $(id) { return document.getElementById(id); }
 function setText(id, value) { const el = $(id); if (el) el.textContent = value; }
 
@@ -615,6 +703,13 @@ function termHit(value, term) {
   return groupHit(value, [term]);
 }
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+function prefersReducedMotion() {
+  return !!window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+function scrollPageTop() {
+  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+}
+
 function percent(n) { return Math.round(n * 100); }
 function initialTheoryId() {
   const hashId = decodeURIComponent(location.hash || "").replace(/^#topic-/, "");
@@ -694,9 +789,14 @@ function showView(view) {
   currentView = view;
   ["homeView","theoryView","chordsView","quizView"].forEach(id => $(id).classList.add("hidden"));
   $(`${view}View`).classList.remove("hidden");
-  document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.toggle("active", btn.dataset.view === view));
+  document.querySelectorAll(".nav-btn").forEach(btn => {
+    const active = btn.dataset.view === view;
+    btn.classList.toggle("active", active);
+    if (active) btn.setAttribute("aria-current", "page");
+    else btn.removeAttribute("aria-current");
+  });
   if (view === "quiz") renderQuiz();
-  window.scrollTo({top: 0, behavior: "smooth"});
+  scrollPageTop();
 }
 function applyQuizLock(on) {
   document.body.classList.toggle("quiz-lock", !!on);
@@ -715,7 +815,7 @@ function renderModules() {
   if (!wrap) return;
   wrap.innerHTML = DATA.modules.map(module => {
     const active = module.id === state.moduleId;
-    return `<button class="module-tab ${active ? "active" : ""}" data-module="${escapeAttr(module.id)}" type="button">
+    return `<button class="module-tab ${active ? "active" : ""}" data-module="${escapeAttr(module.id)}" type="button"${active ? ' aria-current="true"' : ""}>
       <em>${escapeHtml(module.level || "Módulo")}</em>
       <span>${escapeHtml(module.title)}</span>
       <small>${module.theory.length} temas · ${module.quiz.length} preguntas</small>
@@ -743,6 +843,23 @@ function selectModule(id) {
   hydrateStudentFields();
   showView("home");
 }
+const METHOD_SPECIFIC_TERMS = new Set([
+  "Consonancias perfectas",
+  "Uso general de extensiones",
+  "Duplicaciones y supresiones",
+  "Distribución registral",
+  "Función tónica",
+  "Función subdominante",
+  "Función dominante",
+  "Rearmonización simple"
+]);
+
+function theoryMethodBadge(term) {
+  return METHOD_SPECIFIC_TERMS.has(term)
+    ? '<span class="method-badge" title="Regla o clasificación operativa propia del método del curso">Método del curso</span>'
+    : "";
+}
+
 function renderTheory() {
   const wrap = $("topicGrid");
   wrap.innerHTML = moduleTheory().map(section => {
@@ -769,6 +886,8 @@ function renderTheory() {
   document.querySelectorAll("[data-topic-step]").forEach(btn => {
     btn.addEventListener("click", () => selectTheoryStep(Number(btn.dataset.topicStep)));
   });
+  mountTheoryVisuals();
+  mountTopicPractices();
 }
 function selectTheoryTopic(id) {
   if (!moduleTheory().some(section => section.id === id)) return;
@@ -806,10 +925,12 @@ function renderTheoryDetail() {
       </header>
       <div class="concept-list">
         ${section.items.map(item => `<section class="concept-item ${item.diagram ? "has-diagram" : ""}">
-          <h4>${escapeHtml(item.term)}</h4>
+          <h4>${escapeHtml(item.term)} ${theoryMethodBadge(item.term)}</h4>
           ${renderConceptBody(item)}
         </section>`).join("")}
       </div>
+      ${renderSectionVisuals(section)}
+      ${renderTopicPractice(section)}
       <footer class="theory-actions">
         <button class="ghost-btn" data-topic-step="-1" ${prev ? "" : "disabled"}>Tema anterior</button>
         <button class="soft-btn study-toggle" data-study="${section.id}">${state.studied[section.id] ? "Marcar como pendiente" : "Marcar tema como estudiado"}</button>
@@ -1143,7 +1264,8 @@ function startQuiz() {
   state.quiz.submitted = false;
   state.quiz.startedAt = new Date().toISOString();
   state.quiz.submittedAt = null;
-  state.quiz.answers = state.quiz.answers || {};
+  state.quiz.attemptModuleId = state.moduleId;
+  state.quiz.answers = {};
   state.quiz.focusWarnings = 0;
   state.quiz.result = null;
   saveState();
@@ -1165,9 +1287,7 @@ function renderQuiz() {
   if (!state.quiz.active) return;
   setText("activeStudent", state.quiz.student.name || "Sin nombre");
   setText("focusWarnings", state.quiz.focusWarnings || 0);
-  const answered = countAnswered();
-  setText("answeredCount", `${answered}/${moduleQuiz().length} respondidas`);
-  $("quizBar").style.width = `${(answered / moduleQuiz().length) * 100}%`;
+  updateQuizProgressUI();
   $("questionList").innerHTML = moduleQuiz().map(renderQuestion).join("");
   bindAnswerEvents();
 }
@@ -1279,8 +1399,7 @@ function saveAnswer(e) {
     state.quiz.answers[key] = e.currentTarget.value;
   }
   saveState();
-  setText("answeredCount", `${countAnswered()}/${moduleQuiz().length} respondidas`);
-  $("quizBar").style.width = `${(countAnswered() / moduleQuiz().length) * 100}%`;
+  updateQuizProgressUI();
 }
 function savePianoToggle(e) {
   const key = e.currentTarget.dataset.answer;
@@ -1291,38 +1410,89 @@ function savePianoToggle(e) {
   e.currentTarget.classList.toggle("selected", selected);
   e.currentTarget.setAttribute("aria-pressed", String(selected));
   saveState();
-  setText("answeredCount", `${countAnswered()}/${moduleQuiz().length} respondidas`);
-  $("quizBar").style.width = `${(countAnswered() / moduleQuiz().length) * 100}%`;
+  updateQuizProgressUI();
+}
+function questionCompletion(q) {
+  if (q.type === "selectBlanks") {
+    const filled = q.answers.filter((_, i) => String(val(q.id, `_${i}`)).trim()).length;
+    return filled === 0 ? "empty" : filled === q.answers.length ? "complete" : "partial";
+  }
+  if (q.type === "classify" || q.type === "match") {
+    const filled = q.items.filter(item => String(val(q.id, `_${item}`)).trim()).length;
+    return filled === 0 ? "empty" : filled === q.items.length ? "complete" : "partial";
+  }
+  if (q.type === "multiSelect") {
+    return q.choices.some((_, i) => String(val(q.id, `_${i}`)).trim()) ? "complete" : "empty";
+  }
+  if (q.type === "pianoSelect") {
+    return pianoSelectedNotes(q).length ? "complete" : "empty";
+  }
+  return String(val(q.id)).trim() ? "complete" : "empty";
 }
 function countAnswered() {
-  return moduleQuiz().filter(q => isAnswered(q)).length;
+  return moduleQuiz().filter(q => questionCompletion(q) !== "empty").length;
+}
+function countCompleted() {
+  return moduleQuiz().filter(q => questionCompletion(q) === "complete").length;
+}
+function countPartialInputs() {
+  return moduleQuiz().filter(q => questionCompletion(q) === "partial").length;
 }
 function isAnswered(q) {
-  if (q.type === "selectBlanks") return q.answers.some((_,i)=> String(val(q.id,`_${i}`)).trim());
-  if (q.type === "multiSelect") return q.choices.some((_,i)=> String(val(q.id,`_${i}`)).trim());
-  if (q.type === "pianoSelect") return pianoSelectedNotes(q).length > 0;
-  if (q.type === "classify" || q.type === "match") return q.items.some(item => String(val(q.id,`_${item}`)).trim());
-  return String(val(q.id)).trim() !== "";
+  return questionCompletion(q) !== "empty";
+}
+function updateQuizProgressUI() {
+  const total = moduleQuiz().length;
+  const completed = countCompleted();
+  const partial = countPartialInputs();
+  const suffix = partial ? ` · ${partial} incompleta${partial === 1 ? "" : "s"}` : "";
+  setText("answeredCount", `${completed}/${total} completas${suffix}`);
+  $("quizBar").style.width = `${total ? (completed / total) * 100 : 0}%`;
 }
 function submitQuiz() {
-  const unanswered = moduleQuiz().length - countAnswered();
-  if (unanswered > 0 && !confirm(`Faltan ${unanswered} preguntas por responder. ¿Entregar de todos modos?`)) return;
-  const result = gradeQuiz();
+  const incomplete = moduleQuiz().filter(q => questionCompletion(q) !== "complete");
+  if (incomplete.length > 0) {
+    const partial = incomplete.filter(q => questionCompletion(q) === "partial").length;
+    const empty = incomplete.length - partial;
+    const detail = [
+      empty ? `${empty} sin respuesta` : "",
+      partial ? `${partial} incompleta${partial === 1 ? "" : "s"}` : ""
+    ].filter(Boolean).join(" y ");
+    if (!confirm(`Quedan ${detail}. Esas preguntas pueden reducir la calificación. ¿Entregar de todos modos?`)) return;
+  }
+
+  const submittedAt = new Date().toISOString();
+  const result = gradeQuiz(submittedAt);
   state.quiz.submitted = true;
   state.quiz.active = false;
-  state.quiz.submittedAt = new Date().toISOString();
+  state.quiz.submittedAt = submittedAt;
   state.quiz.result = result;
   saveState();
   applyQuizLock(false);
   if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
   renderQuizResult(result);
 }
-function gradeQuiz() {
+function gradeQuiz(submittedAt = new Date().toISOString()) {
   const details = moduleQuiz().map(q => gradeQuestion(q));
   const raw = details.reduce((sum, d) => sum + d.points, 0);
   const max = moduleQuiz().length;
-  const score = (raw / max) * 5;
-  return { details, raw, max, score, percent: raw / max, student: state.quiz.student, focusWarnings: state.quiz.focusWarnings || 0, startedAt: state.quiz.startedAt, submittedAt: new Date().toISOString() };
+  const percentValue = max ? raw / max : 0;
+  const score = percentValue * 5;
+  return {
+    schema: "crescendo-armonia-quiz-result",
+    schemaVersion: 2,
+    moduleId: state.moduleId,
+    moduleTitle: activeModule()?.title || "",
+    details,
+    raw,
+    max,
+    score,
+    percent: percentValue,
+    student: { ...state.quiz.student },
+    focusWarnings: state.quiz.focusWarnings || 0,
+    startedAt: state.quiz.startedAt,
+    submittedAt
+  };
 }
 function gradeQuestion(q) {
   let points = 0;
@@ -1332,8 +1502,9 @@ function gradeQuestion(q) {
     given = q.labels.map((l,i)=>`${l}: ${val(q.id,`_${i}`)}`).join(" | ");
     points = scores.reduce((a,b)=>a+b,0) / q.answers.length;
   } else if (q.type === "multipleChoice") {
-    given = choiceLabel(q, val(q.id));
-    points = Number(val(q.id)) === q.answer ? 1 : 0;
+    const selectedValue = String(val(q.id)).trim();
+    given = choiceLabel(q, selectedValue);
+    points = selectedValue !== "" && Number(selectedValue) === q.answer ? 1 : 0;
   } else if (q.type === "multiSelect") {
     const selected = q.choices.filter((_, i) => String(val(q.id,`_${i}`)).trim());
     const expected = q.answers || [];
@@ -1359,7 +1530,16 @@ function gradeQuestion(q) {
     points = String(q.answer) === String(val(q.id)) ? 1 : 0;
   }
   points = Math.round(points * 1000) / 1000;
-  return { id: q.id, prompt: q.prompt, points, given, sampleAnswer: q.sampleAnswer, status: points >= .999 ? "correct" : points > 0 ? "partial" : "wrong" };
+  const completion = questionCompletion(q);
+  return {
+    id: q.id,
+    prompt: q.prompt,
+    points,
+    given,
+    sampleAnswer: q.sampleAnswer,
+    completion,
+    status: completion === "empty" ? "unanswered" : points >= .999 ? "correct" : points > 0 ? "partial" : "wrong"
+  };
 }
 function pianoSelectedNotes(q) {
   const range = pianoQuestionRange(q);
@@ -1368,7 +1548,11 @@ function pianoSelectedNotes(q) {
     .filter(note => String(val(q.id, `_${note}`)).trim());
 }
 function pianoQuestionRange(q) {
-  return fullPianoRange();
+  const requested = q?.keyboardRange || fullPianoRange();
+  const full = fullPianoRange();
+  const from = noteStep(requested.from) >= noteStep(full.from) ? requested.from : full.from;
+  const to = noteStep(requested.to) <= noteStep(full.to) ? requested.to : full.to;
+  return noteStep(from) <= noteStep(to) ? { from, to } : full;
 }
 function gradePianoSelection(q, selected) {
   const accept = q.accept || buildPianoAcceptance(q);
@@ -1386,7 +1570,7 @@ function gradePianoSelection(q, selected) {
       ? gradePianoPitchClasses(q, selected, accept)
       : parserScore;
     const layoutScore = gradePianoLayout(selected, accept.layout);
-    return { points: clamp((identityScore * .7) + (layoutScore * .3), 0, 1) };
+    return { points: clamp(identityScore * (.7 + (.3 * layoutScore)), 0, 1) };
   }
   if (accept.mode === "pitchClass" && parserScore !== null && parserScore >= .999) {
     return { points: 1 };
@@ -1488,7 +1672,13 @@ function renderQuizResult(result) {
   setText("resultWarnings", result.focusWarnings || 0);
   const wrap = $("reviewList");
   wrap.innerHTML = result.details.map(d => {
-    const label = d.status === "correct" ? "Correcta" : d.status === "partial" ? "Parcial" : "Incorrecta";
+    const label = d.status === "correct"
+      ? "Correcta"
+      : d.status === "partial"
+        ? "Parcial"
+        : d.status === "unanswered"
+          ? "Sin respuesta"
+          : "Incorrecta";
     return `<details class="review-item">
       <summary>${d.id}. ${escapeHtml(label)} · ${d.points.toFixed(2)} punto(s)</summary>
       <div class="review-meta"><b>Pregunta:</b> ${escapeHtml(d.prompt)}</div>
@@ -1497,20 +1687,50 @@ function renderQuizResult(result) {
     </details>`;
   }).join("");
 }
+function safeFilename(value) {
+  return String(value || "estudiante")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w.-]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 80) || "estudiante";
+}
 function downloadCSV() {
   const result = state.quiz.result;
   if (!result) return;
-  const rows = [["Estudiante","Curso","Fecha","Calificacion_0_5","Puntos","Maximo","Advertencias_foco"]];
-  rows.push([result.student.name, result.student.course, result.student.date, result.score.toFixed(1), result.raw.toFixed(2), result.max, result.focusWarnings || 0]);
-  rows.push([]);
-  rows.push(["Pregunta","Puntos","Respuesta estudiante","Respuesta esperada"]);
-  result.details.forEach(d => rows.push([d.id, d.points, d.given, d.sampleAnswer]));
-  const csv = rows.map(r => r.map(cell => `"${String(cell ?? "").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const rows = [
+    ["App","Armonía funcional: aspectos esenciales"],
+    ["Modulo", result.moduleTitle || result.moduleId || ""],
+    ["Estudiante", result.student.name],
+    ["Curso", result.student.course],
+    ["Fecha", result.student.date],
+    ["Inicio", result.startedAt || ""],
+    ["Entrega", result.submittedAt || ""],
+    ["Calificacion_0_5", result.score.toFixed(1)],
+    ["Puntos", result.raw.toFixed(3)],
+    ["Maximo", result.max],
+    ["Incidencias_foco_informativas", result.focusWarnings || 0],
+    [],
+    ["Pregunta","Estado","Puntos","Respuesta estudiante","Respuesta esperada"]
+  ];
+  result.details.forEach(d => rows.push([
+    d.id,
+    d.status,
+    d.points.toFixed(3),
+    d.given || "",
+    d.sampleAnswer || ""
+  ]));
+  const csv = "\uFEFF" + rows
+    .map(r => r.map(cell => `"${String(cell ?? "").replace(/"/g,'""')}"`).join(","))
+    .join("\r\n");
   const blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = `resultado_${(result.student.name || "estudiante").replace(/\s+/g,"_")}.csv`;
-  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  a.href = url;
+  a.download = `resultado_${safeFilename(result.student.name)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 function newAttempt() {
   if (!confirm("¿Crear un nuevo intento? Se borrarán las respuestas actuales y el resultado guardado en este navegador.")) return;
@@ -1525,5 +1745,1601 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]));
 }
 function escapeAttr(value) { return escapeHtml(value); }
+
+
+/* ============================ FASE 7 · PEDAGOGÍA VISUAL ============================ */
+
+const THEORY_VISUAL_ROOTS = [
+  { value: "C", label: "C" },
+  { value: "Db", label: "D♭" },
+  { value: "D", label: "D" },
+  { value: "Eb", label: "E♭" },
+  { value: "E", label: "E" },
+  { value: "F", label: "F" },
+  { value: "Gb", label: "G♭" },
+  { value: "G", label: "G" },
+  { value: "Ab", label: "A♭" },
+  { value: "A", label: "A" },
+  { value: "Bb", label: "B♭" },
+  { value: "B", label: "B" }
+];
+const THEORY_VISUAL_SCALE_LIBRARY = [
+  { id: "major", label: "Mayor natural", tokens: ["1","2","3","4","5","6","7","8"], formula: "T–T–S–T–T–T–S" },
+  { id: "minor-natural", label: "Menor natural", tokens: ["1","2","b3","4","5","b6","b7","8"], formula: "T–S–T–T–S–T–T" },
+  { id: "minor-harmonic", label: "Menor armónica", tokens: ["1","2","b3","4","5","b6","7","8"], formula: "T–S–T–T–S–T+S–S" },
+  { id: "minor-melodic", label: "Menor melódica", tokens: ["1","2","b3","4","5","6","7","8"], formula: "T–S–T–T–T–T–S" },
+  { id: "major-pentatonic", label: "Pentatónica mayor", tokens: ["1","2","3","5","6","8"], formula: "1 2 3 5 6" },
+  { id: "minor-pentatonic", label: "Pentatónica menor", tokens: ["1","b3","4","5","b7","8"], formula: "1 ♭3 4 5 ♭7" },
+  { id: "dorian", label: "Dórico", tokens: ["1","2","b3","4","5","6","b7","8"], formula: "1 2 ♭3 4 5 6 ♭7" },
+  { id: "phrygian", label: "Frigio", tokens: ["1","b2","b3","4","5","b6","b7","8"], formula: "1 ♭2 ♭3 4 5 ♭6 ♭7" },
+  { id: "lydian", label: "Lidio", tokens: ["1","2","3","#4","5","6","7","8"], formula: "1 2 3 ♯4 5 6 7" },
+  { id: "mixolydian", label: "Mixolidio", tokens: ["1","2","3","4","5","6","b7","8"], formula: "1 2 3 4 5 6 ♭7" },
+  { id: "locrian", label: "Locrio", tokens: ["1","b2","b3","4","b5","b6","b7","8"], formula: "1 ♭2 ♭3 4 ♭5 ♭6 ♭7" }
+];
+const THEORY_VISUAL_INTERVALS = [
+  { id: "P1", label: "1 justa", token: "1", semitones: 0, family: "Consonancia perfecta" },
+  { id: "m2", label: "2 menor", token: "b2", semitones: 1, family: "Disonancia fuerte" },
+  { id: "M2", label: "2 mayor", token: "2", semitones: 2, family: "Disonancia suave" },
+  { id: "m3", label: "3 menor", token: "b3", semitones: 3, family: "Consonancia imperfecta" },
+  { id: "M3", label: "3 mayor", token: "3", semitones: 4, family: "Consonancia imperfecta" },
+  { id: "P4", label: "4 justa", token: "4", semitones: 5, family: "Consonancia perfecta (según este curso)" },
+  { id: "TT", label: "4 aumentada / 5 disminuida", token: "#4", semitones: 6, family: "Disonancia neutra" },
+  { id: "P5", label: "5 justa", token: "5", semitones: 7, family: "Consonancia perfecta" },
+  { id: "m6", label: "6 menor", token: "b6", semitones: 8, family: "Consonancia imperfecta" },
+  { id: "M6", label: "6 mayor", token: "6", semitones: 9, family: "Consonancia imperfecta" },
+  { id: "m7", label: "7 menor", token: "b7", semitones: 10, family: "Disonancia suave" },
+  { id: "M7", label: "7 mayor", token: "7", semitones: 11, family: "Disonancia fuerte" },
+  { id: "P8", label: "8 justa", token: "8", semitones: 12, family: "Consonancia perfecta" }
+];
+const THEORY_VISUAL_DEGREE_BASE = { 1: 0, 2: 2, 3: 4, 4: 5, 5: 7, 6: 9, 7: 11, 8: 12, 9: 14, 10: 16, 11: 17, 12: 19, 13: 21 };
+const THEORY_VISUAL_NATURAL_LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+const THEORY_VISUAL_NATURAL_PC = [0, 2, 4, 5, 7, 9, 11];
+const THEORY_VISUAL_ACC_VAL = { "": 0, "b": -1, "#": 1, "bb": -2, "##": 2 };
+const THEORY_VISUAL_ACC_SYM = { "-2": "♭♭", "-1": "♭", "0": "", "1": "♯", "2": "♯♯" };
+const THEORY_VISUAL_LABS = {
+  "escalas-intervalos": [
+    { type: "scaleExplorer", title: "Explorador de escalas", description: "Selecciona una tónica y una escala para verla en piano, guitarra y pentagrama." },
+    { type: "intervalExplorer", title: "Explorador de intervalos", description: "Visualiza cualquier intervalo y comprueba su cantidad de semitonos y su familia sonora." }
+  ],
+  "consonancias-disonancias": [
+    { type: "intervalExplorer", title: "Clasificador interválico", description: "Relaciona el intervalo con su categoría: consonancia perfecta, imperfecta o disonancia." }
+  ],
+  "acordes": [
+    { type: "chordExplorer", title: "Constructor visual de acordes", description: "Explora la estructura, el soporte y la superestructura de un acorde con tres representaciones.", options: { categories: ["Triadas", "Séptimas y sextas", "Novenas", "Onceavas y treceavas", "Con #11"], defaultSymbol: "maj7" } }
+  ],
+  "enlace-voces": [
+    { type: "shellLab", title: "Notas guía y shells", description: "Selecciona una fundamental y observa cómo quedan la fundamental y las notas guía en un shell práctico." }
+  ],
+  "tonalidad": [
+    { type: "tonalityLab", title: "Mapa tonal", description: "Elige una tonalidad y revisa su escala, sus grados y sus funciones tónica, subdominante y dominante." }
+  ],
+  "rearmonizacion": [
+    { type: "reharmLab", title: "Laboratorio de rearmonización", description: "Prueba sustituciones funcionales simples y observa cómo cambia una progresión manteniendo la función." }
+  ],
+  "nivel-2-referencia-intervalica": [
+    { type: "scaleExplorer", title: "Referencia interválica", description: "Usa la escala mayor natural como mapa visual de referencia para cada grado." },
+    { type: "intervalExplorer", title: "Relación grado–intervalo", description: "Conecta cada grado con su distancia en semitonos." }
+  ],
+  "nivel-2-sistema-americano-cifrado": [
+    { type: "chordExplorer", title: "Cifrado americano en contexto", description: "Elige un acorde y contrasta el símbolo con sus notas reales.", options: { categories: ["Triadas", "Séptimas y sextas"], defaultSymbol: "" } }
+  ],
+  "nivel-2-triadas": [
+    { type: "chordExplorer", title: "Triadas en tres vistas", description: "Mayor, menor, aumentada, disminuida o suspendida: compáralas en teclado, guitarra y pentagrama.", options: { categories: ["Triadas"], defaultSymbol: "" } }
+  ],
+  "nivel-2-soportes": [
+    { type: "chordExplorer", title: "Soportes: 6 y 7", description: "Comprueba visualmente cómo cambia el acorde al añadir sexta o séptima.", options: { categories: ["Séptimas y sextas"], defaultSymbol: "6" } }
+  ],
+  "nivel-2-septimas": [
+    { type: "chordExplorer", title: "Séptimas menores y mayores", description: "Revisa la diferencia entre maj7, 7 y -7.", options: { categories: ["Séptimas y sextas", "Séptimas alteradas"], defaultSymbol: "7" } }
+  ],
+  "nivel-2-reglas-extensiones": [
+    { type: "chordExplorer", title: "Extensiones y color", description: "Explora cómo las extensiones agregan color armónico.", options: { categories: ["Novenas", "Onceavas y treceavas", "Con #11"], defaultSymbol: "9" } }
+  ],
+  "nivel-2-novenas": [
+    { type: "chordExplorer", title: "Novenas", description: "Compara add9, 9, maj9, b9 y #9.", options: { categories: ["Novenas"], defaultSymbol: "9" } }
+  ],
+  "nivel-2-onceavas": [
+    { type: "chordExplorer", title: "Onceavas", description: "Comprueba cuándo aparece la 11 natural y cuándo la #11.", options: { categories: ["Onceavas y treceavas", "Con #11"], defaultSymbol: "-11" } }
+  ],
+  "nivel-2-treceavas": [
+    { type: "chordExplorer", title: "Treceavas", description: "Visualiza 13, maj13, 13b9, 13#9 y 13#11.", options: { categories: ["Onceavas y treceavas", "Con #11"], defaultSymbol: "13" } }
+  ],
+  "nivel-2-omision-notas": [
+    { type: "constructionLab", title: "Qué mantener y qué omitir", description: "Observa la triada, el soporte y las extensiones para decidir qué notas suelen conservarse." }
+  ],
+  "nivel-2-aplicacion": [
+    { type: "chordExplorer", title: "Aplicación práctica", description: "Explora acordes concretos y transfiere las reglas del tema a ejemplos reales.", options: { categories: ["Triadas", "Séptimas y sextas", "Novenas", "Onceavas y treceavas"], defaultSymbol: "maj9" } }
+  ],
+  "nivel-2-sintesis-reglas": [
+    { type: "constructionLab", title: "Síntesis visual de reglas", description: "Resume visualmente estructura, soporte y extensiones en un solo acorde elegido." }
+  ],
+  "nivel-3-registros-zonas": [
+    { type: "registerLab", title: "Mapa interactivo de registros", description: "Selecciona una zona de trabajo y visualízala inmediatamente sobre el teclado." }
+  ],
+  "nivel-3-shell-voicings": [
+    { type: "shellLab", title: "Shell voicings", description: "Elige una fundamental y un tipo de acorde para ver una realización shell sugerida." }
+  ],
+  "nivel-3-posicion-cerrada-skip-2": [
+    { type: "drop2Lab", title: "Posición cerrada y Skip 2", description: "Compara una disposición cerrada con su transformación tipo Skip 2 / Drop 2." }
+  ],
+  "nivel-3-registro-grave-extensiones": [
+    { type: "extensionPlacementLab", title: "Ubicación de extensiones", description: "Comprueba por qué el grave se reserva al bajo y las extensiones suben al registro agudo." }
+  ],
+  "nivel-3-construccion-acordes-extendidos": [
+    { type: "constructionLab", title: "Construcción de acordes extendidos", description: "Arma un acorde por etapas: triada, soporte y extensiones." }
+  ],
+  "nivel-3-acompanamiento-bajo-acorde": [
+    { type: "bassChordLab", title: "Acompañamiento bajo/acorde", description: "Visualiza una propuesta de reparto entre mano izquierda y mano derecha." }
+  ]
+};
+const THEORY_VISUAL_CHORD_FORMULAS = {
+  "": "1 3 5",
+  "-": "1 b3 5",
+  "+": "1 3 #5",
+  "°": "1 b3 b5",
+  "sus2": "1 2 5",
+  "sus4": "1 4 5",
+  "6": "1 3 5 6",
+  "-6": "1 b3 5 6",
+  "maj7": "1 3 5 7",
+  "7": "1 3 5 b7",
+  "-7": "1 b3 5 b7",
+  "9": "1 3 5 b7 9",
+  "maj9": "1 3 5 7 9",
+  "-9": "1 b3 5 b7 9",
+  "-11": "1 b3 5 b7 9 11",
+  "13": "1 3 5 b7 9 13",
+  "13b9": "1 3 5 b7 b9 13",
+  "13#11": "1 3 5 b7 9 #11 13",
+  "maj9#11": "1 3 5 7 9 #11",
+  "7#11": "1 3 5 b7 #11",
+  "7b9": "1 3 5 b7 b9"
+};
+const THEORY_VISUAL_ROMAN_QUALITIES_MAJOR = [
+  { roman: "I", degree: 1, suffix: "maj7", quality: "Tónica" },
+  { roman: "ii", degree: 2, suffix: "-7", quality: "Subdominante" },
+  { roman: "iii", degree: 3, suffix: "-7", quality: "Tónica" },
+  { roman: "IV", degree: 4, suffix: "maj7", quality: "Subdominante" },
+  { roman: "V", degree: 5, suffix: "7", quality: "Dominante" },
+  { roman: "vi", degree: 6, suffix: "-7", quality: "Tónica" },
+  { roman: "vii°", degree: 7, suffix: "m7♭5", quality: "Dominante" }
+];
+const THEORY_VISUAL_ROMAN_QUALITIES_MINOR = [
+  { roman: "i", degree: 1, suffix: "-7", quality: "Tónica" },
+  { roman: "ii°", degree: 2, suffix: "m7♭5", quality: "Subdominante" },
+  { roman: "III", degree: 3, suffix: "maj7", quality: "Tónica" },
+  { roman: "iv", degree: 4, suffix: "-7", quality: "Subdominante" },
+  { roman: "V", degree: 5, suffix: "7", quality: "Dominante" },
+  { roman: "VI", degree: 6, suffix: "maj7", quality: "Tónica" },
+  { roman: "vii°", degree: 7, suffix: "°7", quality: "Dominante" }
+];
+
+function renderSectionVisuals(section) {
+  const labs = THEORY_VISUAL_LABS[section.id] || [];
+  if (!labs.length) return "";
+  return `<section class="theory-visuals panel" aria-label="Material visual interactivo">
+    <header class="theory-visuals-head">
+      <div>
+        <p class="kicker">Material visual interactivo</p>
+        <h4>Aprender viendo y comparando</h4>
+        <p>Estos apoyos gráficos permiten manipular el contenido del tema y contrastarlo en instrumentos o notación.</p>
+      </div>
+    </header>
+    <div class="visual-lab-grid">
+      ${labs.map((lab, index) => `<article class="visual-lab-card">
+        <div class="visual-lab-copy">
+          <h5>${escapeHtml(lab.title)}</h5>
+          <p>${escapeHtml(lab.description)}</p>
+        </div>
+        <div class="visual-lab-mount" data-theory-widget="${escapeAttr(lab.type)}" data-widget-options="${escapeAttr(JSON.stringify(lab.options || {}))}" data-widget-key="${escapeAttr(section.id)}-${index}"></div>
+      </article>`).join("")}
+    </div>
+  </section>`;
+}
+function mountTheoryVisuals() {
+  document.querySelectorAll("[data-theory-widget]").forEach(el => {
+    const type = el.dataset.theoryWidget;
+    const options = safeJsonParse(el.dataset.widgetOptions || "{}");
+    if (type === "scaleExplorer") mountScaleExplorer(el, options);
+    else if (type === "intervalExplorer") mountIntervalExplorer(el, options);
+    else if (type === "chordExplorer") mountChordExplorerLab(el, options);
+    else if (type === "tonalityLab") mountTonalityLab(el, options);
+    else if (type === "reharmLab") mountReharmLab(el, options);
+    else if (type === "registerLab") mountRegisterLab(el, options);
+    else if (type === "shellLab") mountShellLab(el, options);
+    else if (type === "drop2Lab") mountDrop2Lab(el, options);
+    else if (type === "extensionPlacementLab") mountExtensionPlacementLab(el, options);
+    else if (type === "constructionLab") mountConstructionLab(el, options);
+    else if (type === "bassChordLab") mountBassChordLab(el, options);
+  });
+}
+function safeJsonParse(value) {
+  try { return JSON.parse(value); } catch (error) { return {}; }
+}
+function theorySelectOptions(items, selected, valueKey = "value", labelKey = "label") {
+  return items.map(item => `<option value="${escapeAttr(item[valueKey])}" ${item[valueKey] === selected ? "selected" : ""}>${escapeHtml(item[labelKey])}</option>`).join("");
+}
+function theoryRootInfo(name) {
+  const clean = String(name || "C").replace(/♭/g, "b").replace(/♯/g, "#");
+  const letter = clean[0] || "C";
+  const letterIdx = THEORY_VISUAL_NATURAL_LETTERS.indexOf(letter);
+  const acc = (clean.slice(1).match(/bb|##|b|#/g) || []).reduce((sum, token) => sum + THEORY_VISUAL_ACC_VAL[token], 0);
+  const pc = ((THEORY_VISUAL_NATURAL_PC[letterIdx] + acc) % 12 + 12) % 12;
+  return { name: clean, letter, letterIdx, acc, pc };
+}
+function theoryDegreeInfo(token) {
+  const match = String(token || "1").match(/^(bb|##|b|#)?(\d+)$/);
+  const accTok = match?.[1] || "";
+  const degree = Number(match?.[2] || 1);
+  return {
+    token: String(token || "1"),
+    accTok,
+    degree,
+    accVal: THEORY_VISUAL_ACC_VAL[accTok] || 0,
+    baseSemi: THEORY_VISUAL_DEGREE_BASE[degree] ?? 0
+  };
+}
+function accidentalSymbol(diff) {
+  return THEORY_VISUAL_ACC_SYM[String(diff)] || "";
+}
+function spellTheoryTone(rootName, token) {
+  const root = theoryRootInfo(rootName);
+  const info = theoryDegreeInfo(token);
+  const absPc = ((root.pc + info.baseSemi + info.accVal) % 12 + 12) % 12;
+  const letterStep = info.degree - 1;
+  const letterIdx = (root.letterIdx + letterStep) % 7;
+  const natPc = THEORY_VISUAL_NATURAL_PC[letterIdx];
+  const diff = ((absPc - natPc + 18) % 12) - 6;
+  const clamped = Math.max(-2, Math.min(2, diff));
+  return {
+    token: info.token,
+    degree: info.degree,
+    semi: info.baseSemi + info.accVal,
+    pc: absPc,
+    diatonicStepsFromRoot: letterStep,
+    accSym: accidentalSymbol(clamped),
+    name: THEORY_VISUAL_NATURAL_LETTERS[letterIdx] + accidentalSymbol(clamped),
+    isRoot: info.degree === 1 && info.accVal === 0
+  };
+}
+function buildTheoryTones(rootName, tokens) {
+  return tokens.map(token => spellTheoryTone(rootName, token));
+}
+function midiToSharpNote(step) {
+  const pc = ((step % 12) + 12) % 12;
+  const octave = Math.floor(step / 12) - 1;
+  return `${PIANO_NOTE_NAMES[pc]}${octave}`;
+}
+function theoryRootUnicode(name) {
+  return String(name || "C").replace(/b/g, "♭").replace(/#/g, "♯");
+}
+function theoryRootMidi(rootName, octave) {
+  const root = theoryRootInfo(rootName);
+  return ((Number(octave) + 1) * 12) + root.pc;
+}
+function pianoDiagramForTones(rootName, tones, options = {}) {
+  const baseOctave = Number(options.baseOctave ?? 3);
+  const rootStep = theoryRootMidi(rootName, baseOctave);
+  const keys = {};
+  tones.forEach((tone, index) => {
+    const octaveLift = tone.degree > 7 ? 0 : 0;
+    const step = rootStep + tone.semi + (Number(options.extraOctaveFor?.[tone.token]) || 0) + (tone.degree === 1 && index > 0 ? 12 : 0);
+    const noteId = midiToSharpNote(step);
+    keys[noteId] = {
+      color: tone.isRoot ? "#d4a84f" : (options.colorMap?.[tone.token] || "#91e2af"),
+      opacity: tone.isRoot ? 100 : 86,
+      label: { text: tone.name, fontSize: 12, verticalOffset: 10 }
+    };
+  });
+  return { keys };
+}
+function scalePianoDiagram(rootName, scale) {
+  const tones = buildTheoryTones(rootName, scale.tokens);
+  const rootStep = theoryRootMidi(rootName, 3);
+  const keys = {};
+  tones.forEach((tone, index) => {
+    const step = rootStep + tone.semi;
+    const noteId = midiToSharpNote(step);
+    keys[noteId] = {
+      color: tone.isRoot ? "#d4a84f" : "#91e2af",
+      opacity: tone.isRoot ? 100 : 84,
+      label: { text: tone.name, fontSize: 11, verticalOffset: 10 + ((index % 2) * 2) }
+    };
+  });
+  return { keys };
+}
+function scaleLegend(tones) {
+  return tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+}
+function renderScaleStaff(rootName, tones, label) {
+  const root = theoryRootInfo(rootName);
+  const e4Diatonic = 4 * 7 + THEORY_VISUAL_NATURAL_LETTERS.indexOf("E");
+  function staffStep(tone) {
+    const rootDiatonic = 4 * 7 + root.letterIdx;
+    return (rootDiatonic + tone.diatonicStepsFromRoot) - e4Diatonic;
+  }
+  const placed = tones.map((tone, index) => ({ tone, step: staffStep(tone), x: 56 + (index * 28) }));
+  const minStep = Math.min(0, ...placed.map(item => item.step));
+  const maxStep = Math.max(8, ...placed.map(item => item.step));
+  const lineGap = 10;
+  const stepHeight = lineGap / 2;
+  const topPad = Math.max(0, maxStep - 8) * stepHeight + 18;
+  const bottomPad = Math.max(0, -minStep) * stepHeight + 20;
+  const w = Math.max(280, 88 + (placed.length * 30));
+  const staffTop = topPad;
+  const yOf = step => staffTop + (8 - step) * stepHeight;
+  const h = yOf(minStep) + bottomPad;
+  const lines = [];
+  for (let s = 0; s <= 8; s += 2) {
+    lines.push(`<line x1="18" y1="${yOf(s)}" x2="${w - 18}" y2="${yOf(s)}" class="jz-staff-line"></line>`);
+  }
+  const notes = placed.map(item => {
+    const nx = item.x;
+    const ny = yOf(item.step);
+    const ledger = [];
+    if (item.step > 8) {
+      for (let s = 10; s <= item.step; s += 2) ledger.push(`<line x1="${nx - 11}" y1="${yOf(s)}" x2="${nx + 11}" y2="${yOf(s)}" class="jz-ledger"></line>`);
+    }
+    if (item.step < 0) {
+      for (let s = -2; s >= item.step; s -= 2) ledger.push(`<line x1="${nx - 11}" y1="${yOf(s)}" x2="${nx + 11}" y2="${yOf(s)}" class="jz-ledger"></line>`);
+    }
+    const accidental = item.tone.accSym ? `<text x="${nx - 14}" y="${ny + 4}" text-anchor="middle" class="jz-accidental">${item.tone.accSym}</text>` : "";
+    return `${ledger.join("")}
+      ${accidental}
+      <ellipse cx="${nx}" cy="${ny}" rx="6" ry="4.6" transform="rotate(-18 ${nx} ${ny})" class="jz-notehead ${item.tone.isRoot ? "jz-notehead-root" : ""}"></ellipse>
+      <text x="${nx}" y="${h - 4}" text-anchor="middle" class="visual-staff-degree">${escapeHtml(item.tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 ${w} ${h}" class="jz-staff visual-staff-scale" role="img" aria-label="${escapeAttr(label)}">
+    ${lines.join("")}
+    ${notes}
+  </svg>`;
+}
+function renderScaleGuitar(rootName, tones, label) {
+  const pcs = new Set(tones.map(tone => tone.pc));
+  const rootPc = theoryRootInfo(rootName).pc;
+  const stringData = [
+    { label: "E", pc: 4 }, { label: "B", pc: 11 }, { label: "G", pc: 7 },
+    { label: "D", pc: 2 }, { label: "A", pc: 9 }, { label: "E", pc: 4 }
+  ];
+  const nFrets = 12;
+  const stringGap = 28;
+  const fretGap = 34;
+  const marginL = 28;
+  const marginT = 16;
+  const w = marginL + nFrets * fretGap + 44;
+  const h = marginT + (stringData.length - 1) * stringGap + 28;
+  const dots = [];
+  stringData.forEach((string, row) => {
+    for (let fret = 0; fret <= nFrets; fret += 1) {
+      const pc = (string.pc + fret) % 12;
+      if (!pcs.has(pc)) continue;
+      const x = marginL + 22 + fret * fretGap;
+      const y = marginT + row * stringGap;
+      const isRoot = pc === rootPc;
+      const labelText = isRoot ? "R" : "";
+      dots.push(`<circle cx="${x}" cy="${y}" r="8.7" class="visual-fret-dot ${isRoot ? "root" : ""}"></circle>
+        ${labelText ? `<text x="${x}" y="${y + 3.5}" text-anchor="middle" class="visual-fret-dot-label">${labelText}</text>` : ""}`);
+    }
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" class="visual-guitar-scale" role="img" aria-label="${escapeAttr(label)}">
+    ${stringData.map((string, row) => `<text x="12" y="${marginT + row * stringGap + 4}" text-anchor="middle" class="jz-string-label-h">${string.label}</text>`).join("")}
+    ${stringData.map((_, row) => `<line x1="${marginL}" y1="${marginT + row * stringGap}" x2="${w - 14}" y2="${marginT + row * stringGap}" class="jz-string-h"></line>`).join("")}
+    ${Array.from({ length: nFrets + 1 }, (_, index) => `<line x1="${marginL + 22 + index * fretGap}" y1="${marginT}" x2="${marginL + 22 + index * fretGap}" y2="${marginT + (stringData.length - 1) * stringGap}" class="${index === 0 ? "jz-nut-h" : "jz-fret-h"}"></line>`).join("")}
+    ${Array.from({ length: nFrets + 1 }, (_, index) => `<text x="${marginL + 22 + index * fretGap}" y="${h - 6}" text-anchor="middle" class="jz-fret-num-h">${index}</text>`).join("")}
+    ${dots.join("")}
+  </svg>`;
+}
+function mountScaleExplorer(el) {
+  const defaultScale = "major";
+  el.innerHTML = `<div class="theory-widget theory-widget-scale">
+    <div class="visual-controls">
+      <label>Fundamental<select data-scale-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Escala<select data-scale-type>${theorySelectOptions(THEORY_VISUAL_SCALE_LIBRARY, defaultScale, "id", "label")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-scale-name></strong><div class="small-note" data-scale-formula></div></div>
+      <div class="visual-pill-row" data-scale-notes></div>
+    </div>
+    <div class="visual-panel-grid visual-panel-grid-3">
+      <section class="visual-panel"><div class="diagram-label">Piano</div><div data-scale-piano></div></section>
+      <section class="visual-panel"><div class="diagram-label">Guitarra · mapa de escala</div><div class="diagram-scroll" data-scale-guitar></div></section>
+      <section class="visual-panel"><div class="diagram-label">Pentagrama · grados ascendentes</div><div class="diagram-scroll" data-scale-staff></div></section>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-scale-root]");
+  const typeSel = el.querySelector("[data-scale-type]");
+  const update = () => {
+    const rootName = rootSel.value;
+    const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === typeSel.value) || THEORY_VISUAL_SCALE_LIBRARY[0];
+    const tones = buildTheoryTones(rootName, scale.tokens);
+    el.querySelector("[data-scale-name]").textContent = `${theoryRootUnicode(rootName)} ${scale.label}`;
+    el.querySelector("[data-scale-formula]").textContent = `Patrón: ${scale.formula}`;
+    el.querySelector("[data-scale-notes]").innerHTML = scaleLegend(tones);
+    el.querySelector("[data-scale-piano]").innerHTML = renderPianoDiagram(scalePianoDiagram(rootName, scale));
+    el.querySelector("[data-scale-guitar]").innerHTML = renderScaleGuitar(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en guitarra`);
+    el.querySelector("[data-scale-staff]").innerHTML = renderScaleStaff(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en pentagrama`);
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+function mountIntervalExplorer(el) {
+  const defaultInterval = "M3";
+  el.innerHTML = `<div class="theory-widget theory-widget-interval">
+    <div class="visual-controls">
+      <label>Nota base<select data-interval-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Intervalo<select data-interval-type>${theorySelectOptions(THEORY_VISUAL_INTERVALS, defaultInterval, "id", "label")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-interval-name></strong><div class="small-note" data-interval-meta></div></div>
+      <div class="visual-pill-row" data-interval-notes></div>
+    </div>
+    <div class="visual-panel-grid visual-panel-grid-3">
+      <section class="visual-panel"><div class="diagram-label">Pentagrama</div><div class="diagram-scroll" data-interval-staff></div></section>
+      <section class="visual-panel"><div class="diagram-label">Guitarra · digitación sugerida</div><div class="diagram-scroll" data-interval-guitar></div></section>
+      <section class="visual-panel"><div class="diagram-label">Piano</div><div class="diagram-scroll" data-interval-piano></div></section>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-interval-root]");
+  const intervalSel = el.querySelector("[data-interval-type]");
+  const update = () => {
+    const interval = THEORY_VISUAL_INTERVALS.find(item => item.id === intervalSel.value) || THEORY_VISUAL_INTERVALS[0];
+    const rootName = rootSel.value;
+    const rootTone = spellTheoryTone(rootName, "1");
+    const targetTone = spellTheoryTone(rootName, interval.token);
+    const tones = interval.token === "1" ? [rootTone, { ...targetTone, semi: 12, degree: 8, diatonicStepsFromRoot: 7, name: rootTone.name, token: "8" }] : [rootTone, targetTone];
+    const rootInfo = window.__ChordCore?.rootInfo?.(theoryRootUnicode(rootName)) || null;
+    el.querySelector("[data-interval-name]").textContent = `${theoryRootUnicode(rootName)} → ${targetTone.name} · ${interval.label}`;
+    el.querySelector("[data-interval-meta]").textContent = `${interval.semitones} semitonos · ${interval.family}`;
+    el.querySelector("[data-interval-notes]").innerHTML = tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+    if (rootInfo && window.__ChordCore) {
+      el.querySelector("[data-interval-staff]").innerHTML = window.__ChordCore.staffSVG(rootInfo, tones, `${theoryRootUnicode(rootName)} ${interval.label}`);
+      el.querySelector("[data-interval-guitar]").innerHTML = window.__ChordCore.guitarSVG(rootInfo, tones, `${theoryRootUnicode(rootName)} ${interval.label}`);
+      el.querySelector("[data-interval-piano]").innerHTML = window.__ChordCore.pianoSVG(rootInfo, tones, `${theoryRootUnicode(rootName)} ${interval.label}`);
+    }
+  };
+  rootSel.addEventListener("change", update);
+  intervalSel.addEventListener("change", update);
+  update();
+}
+function mountChordExplorerLab(el, options = {}) {
+  const mountPoint = document.createElement("div");
+  el.innerHTML = "";
+  el.appendChild(mountPoint);
+  ChordRef.mount(mountPoint);
+  const rootSel = mountPoint.querySelector('[data-cx="root"]');
+  const typeSel = mountPoint.querySelector('[data-cx="type"]');
+  if (Array.isArray(options.categories) && options.categories.length) {
+    mountPoint.querySelectorAll('optgroup').forEach(group => {
+      if (!options.categories.includes(group.label)) group.remove();
+    });
+  }
+  if (options.defaultRoot) {
+    const rootIndex = ChordRef.ROOTS.findIndex(name => name === theoryRootUnicode(options.defaultRoot));
+    if (rootIndex >= 0) rootSel.value = String(rootIndex);
+  } else {
+    rootSel.value = "0";
+  }
+  if (options.defaultSymbol) {
+    const typeIndex = ChordRef.CHORD_TYPES.findIndex(type => type.symbol === options.defaultSymbol);
+    if (typeIndex >= 0 && typeSel.querySelector(`option[value="${typeIndex}"]`)) typeSel.value = String(typeIndex);
+  }
+  rootSel.dispatchEvent(new Event("change"));
+}
+function mountTonalityLab(el) {
+  el.innerHTML = `<div class="theory-widget theory-widget-tonality">
+    <div class="visual-controls">
+      <label>Tonalidad<select data-key-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Modo<select data-key-mode>
+        <option value="major">Mayor</option>
+        <option value="minor">Menor</option>
+      </select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-key-title></strong><div class="small-note" data-key-desc></div></div>
+      <div class="visual-pill-row" data-key-notes></div>
+    </div>
+    <div class="visual-panel-grid visual-panel-grid-2">
+      <section class="visual-panel"><div class="diagram-label">Escala de la tonalidad</div><div data-key-piano></div></section>
+      <section class="visual-panel">
+        <div class="diagram-label">Funciones armónicas</div>
+        <div class="function-groups" data-key-functions></div>
+      </section>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-key-root]");
+  const modeSel = el.querySelector("[data-key-mode]");
+  const update = () => {
+    const isMinor = modeSel.value === "minor";
+    const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === (isMinor ? "minor-natural" : "major"));
+    const tones = buildTheoryTones(rootSel.value, scale.tokens);
+    const scaleNotes = tones.slice(0, 7);
+    const families = isMinor ? THEORY_VISUAL_ROMAN_QUALITIES_MINOR : THEORY_VISUAL_ROMAN_QUALITIES_MAJOR;
+    const groups = {
+      "Tónica": families.filter(item => item.quality === "Tónica"),
+      "Subdominante": families.filter(item => item.quality === "Subdominante"),
+      "Dominante": families.filter(item => item.quality === "Dominante")
+    };
+    el.querySelector("[data-key-title]").textContent = `${theoryRootUnicode(rootSel.value)} ${isMinor ? "menor" : "mayor"}`;
+    el.querySelector("[data-key-desc]").textContent = isMinor
+      ? "Escala base: menor natural. La función dominante se refuerza habitualmente con la sensible de la menor armónica."
+      : "Escala base: mayor natural. Los grados se agrupan según su función tónica, subdominante o dominante.";
+    el.querySelector("[data-key-notes]").innerHTML = scaleLegend(scaleNotes);
+    el.querySelector("[data-key-piano]").innerHTML = renderPianoDiagram(scalePianoDiagram(rootSel.value, scale));
+    el.querySelector("[data-key-functions]").innerHTML = Object.entries(groups).map(([title, list]) => `<section class="function-group">
+      <h6>${title}</h6>
+      <div class="function-chip-row">${list.map(item => {
+        const tone = scaleNotes[item.degree - 1];
+        const chordLabel = `${tone?.name || "?"}${item.suffix}`;
+        return `<span class="function-chip"><b>${item.roman}</b> ${escapeHtml(chordLabel)}</span>`;
+      }).join("")}</div>
+    </section>`).join("");
+  };
+  rootSel.addEventListener("change", update);
+  modeSel.addEventListener("change", update);
+  update();
+}
+function mountReharmLab(el) {
+  el.innerHTML = `<div class="theory-widget theory-widget-reharm">
+    <div class="visual-controls">
+      <label>Tonalidad<select data-reharm-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Tónica inicial<select data-slot-t1></select></label>
+      <label>Tónica interna<select data-slot-t2></select></label>
+      <label>Subdominante<select data-slot-s></select></label>
+      <label>Dominante<select data-slot-d></select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-reharm-title></strong><div class="small-note">Progresión funcional ejemplo: tónica → tónica → subdominante → dominante → tónica.</div></div>
+    </div>
+    <div class="function-progressions">
+      <div class="progression-line" data-reharm-progression></div>
+      <div class="function-groups" data-reharm-choices></div>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-reharm-root]");
+  const t1Sel = el.querySelector("[data-slot-t1]");
+  const t2Sel = el.querySelector("[data-slot-t2]");
+  const sSel = el.querySelector("[data-slot-s]");
+  const dSel = el.querySelector("[data-slot-d]");
+  const fillOptions = () => {
+    const scale = buildTheoryTones(rootSel.value, THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === "major").tokens).slice(0, 7);
+    const families = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR;
+    const byQuality = {
+      "Tónica": families.filter(item => item.quality === "Tónica"),
+      "Subdominante": families.filter(item => item.quality === "Subdominante"),
+      "Dominante": families.filter(item => item.quality === "Dominante")
+    };
+    const makeOptions = family => family.map(item => {
+      const tone = scale[item.degree - 1];
+      return { value: item.roman, label: `${item.roman} · ${tone?.name || "?"}${item.suffix}` };
+    });
+    t1Sel.innerHTML = theorySelectOptions(makeOptions(byQuality["Tónica"]), "I");
+    t2Sel.innerHTML = theorySelectOptions(makeOptions(byQuality["Tónica"]), "vi");
+    sSel.innerHTML = theorySelectOptions(makeOptions(byQuality["Subdominante"]), "ii");
+    dSel.innerHTML = theorySelectOptions(makeOptions(byQuality["Dominante"]), "V");
+    return { scale, byQuality };
+  };
+  const update = () => {
+    const { scale, byQuality } = fillOptions();
+    const labelOf = roman => {
+      const item = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.find(entry => entry.roman === roman);
+      const tone = scale[(item?.degree || 1) - 1];
+      return `${roman} · ${tone?.name || "?"}${item?.suffix || ""}`;
+    };
+    el.querySelector("[data-reharm-title]").textContent = `${theoryRootUnicode(rootSel.value)} mayor · sustitución funcional simple`;
+    el.querySelector("[data-reharm-progression]").innerHTML = [t1Sel.value, t2Sel.value, sSel.value, dSel.value, "I"].map(value => `<span class="progression-chord">${escapeHtml(labelOf(value))}</span>`).join('<span class="progression-arrow">→</span>');
+    el.querySelector("[data-reharm-choices]").innerHTML = Object.entries(byQuality).map(([title, list]) => `<section class="function-group">
+      <h6>${title}</h6>
+      <div class="function-chip-row">${list.map(item => {
+        const tone = scale[item.degree - 1];
+        return `<span class="function-chip"><b>${item.roman}</b> ${escapeHtml(tone?.name || "?")}${escapeHtml(item.suffix)}</span>`;
+      }).join("")}</div>
+    </section>`).join("");
+  };
+  [rootSel, t1Sel, t2Sel, sSel, dSel].forEach(sel => sel.addEventListener("change", update));
+  update();
+}
+function registerRangeDiagram(from, to, color, labelText) {
+  const start = noteStep(from);
+  const end = noteStep(to);
+  const keys = {};
+  for (let step = start; step <= end; step += 1) {
+    const noteId = midiToSharpNote(step);
+    keys[noteId] = { color, opacity: 54 };
+  }
+  if (keys[from]) keys[from].label = { text: labelText, fontSize: 11, verticalOffset: 8 };
+  return { keys };
+}
+function mountRegisterLab(el) {
+  const presets = [
+    { id: "bass", label: "Registro de bajo", from: "C2", to: "C3", color: "#91e2af", summary: "La fundamental y el soporte grave se entienden mejor en esta región." },
+    { id: "closed", label: "Posición cerrada", from: "C3", to: "C5", color: "#a5b4fc", summary: "La disposición cerrada suele ubicarse mejor en el registro medio." },
+    { id: "spread", label: "Spread / Drop", from: "G2", to: "C5", color: "#f9a8d4", summary: "Un Spread abre el acorde, separa el bajo y despeja la textura." },
+    { id: "guides", label: "Notas guía", from: "E3", to: "B4", color: "#facc15", summary: "La tercera y la séptima se localizan con claridad en el registro medio." }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-register">
+    <div class="visual-controls">
+      <label>Zona<select data-register-preset>${theorySelectOptions(presets, "bass", "id", "label")}</select></label>
+    </div>
+    <div class="visual-summary"><div><strong data-register-title></strong><div class="small-note" data-register-summary></div></div></div>
+    <section class="visual-panel"><div class="diagram-label">Mapa de registro en el teclado</div><div data-register-diagram></div></section>
+  </div>`;
+  const select = el.querySelector("[data-register-preset]");
+  const update = () => {
+    const preset = presets.find(item => item.id === select.value) || presets[0];
+    el.querySelector("[data-register-title]").textContent = preset.label;
+    el.querySelector("[data-register-summary]").textContent = preset.summary;
+    el.querySelector("[data-register-diagram]").innerHTML = renderPianoDiagram(registerRangeDiagram(preset.from, preset.to, preset.color, preset.label));
+  };
+  select.addEventListener("change", update);
+  update();
+}
+function shellFormula(symbol) {
+  const map = {
+    "maj7": ["1","3","7"],
+    "-7": ["1","b3","b7"],
+    "7": ["1","3","b7"],
+    "6": ["1","3","6"],
+    "-6": ["1","b3","6"],
+    "sus4": ["1","4","b7"]
+  };
+  return map[symbol] || map["maj7"];
+}
+function buildShellDiagram(rootName, symbol) {
+  const tokens = shellFormula(symbol);
+  const keys = {};
+  const bassStep = theoryRootMidi(rootName, 2);
+  const upperStep = theoryRootMidi(rootName, 3);
+  keys[midiToSharpNote(bassStep)] = { color: "#d4a84f", opacity: 100, label: { text: theoryRootUnicode(rootName), fontSize: 11, verticalOffset: 8 } };
+  tokens.slice(1).forEach(token => {
+    const tone = spellTheoryTone(rootName, token);
+    keys[midiToSharpNote(upperStep + tone.semi)] = {
+      color: "#91e2af",
+      opacity: 92,
+      label: { text: `${tone.name}`, fontSize: 11, verticalOffset: 10 }
+    };
+  });
+  return { keys };
+}
+function mountShellLab(el) {
+  const qualities = [
+    { value: "maj7", label: "maj7" }, { value: "-7", label: "-7" }, { value: "7", label: "7" },
+    { value: "6", label: "6" }, { value: "-6", label: "-6" }, { value: "sus4", label: "sus4" }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-shell">
+    <div class="visual-controls">
+      <label>Fundamental<select data-shell-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Tipo<select data-shell-type>${theorySelectOptions(qualities, "maj7")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-shell-name></strong><div class="small-note">La fundamental queda abajo; las notas guía se ubican en el registro medio.</div></div>
+      <div class="visual-pill-row" data-shell-notes></div>
+    </div>
+    <section class="visual-panel"><div class="diagram-label">Shell sugerido</div><div data-shell-diagram></div></section>
+  </div>`;
+  const rootSel = el.querySelector("[data-shell-root]");
+  const typeSel = el.querySelector("[data-shell-type]");
+  const update = () => {
+    const tokens = shellFormula(typeSel.value);
+    const tones = buildTheoryTones(rootSel.value, tokens);
+    el.querySelector("[data-shell-name]").textContent = `${theoryRootUnicode(rootSel.value)}${typeSel.value}`;
+    el.querySelector("[data-shell-notes]").innerHTML = tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+    el.querySelector("[data-shell-diagram]").innerHTML = renderPianoDiagram(buildShellDiagram(rootSel.value, typeSel.value));
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+function closedAndDrop2(rootName, symbol) {
+  const formula = THEORY_VISUAL_CHORD_FORMULAS[symbol] || THEORY_VISUAL_CHORD_FORMULAS["maj7"];
+  const tones = buildTheoryTones(rootName, formula.split(/\s+/));
+  const base = theoryRootMidi(rootName, 4);
+  const closed = tones.map(tone => ({ tone, step: base + tone.semi }));
+  const sorted = closed.slice().sort((a, b) => a.step - b.step);
+  const drop = sorted.map(item => ({ ...item }));
+  if (drop.length >= 2) drop[drop.length - 2].step -= 12;
+  return { closed: sorted, drop: drop.sort((a, b) => a.step - b.step) };
+}
+function diagramFromAbsoluteNotes(notes, color) {
+  const keys = {};
+  notes.forEach(item => {
+    keys[midiToSharpNote(item.step)] = {
+      color: item.tone.isRoot ? "#d4a84f" : color,
+      opacity: item.tone.isRoot ? 100 : 90,
+      label: { text: item.tone.name, fontSize: 11, verticalOffset: 8 }
+    };
+  });
+  return { keys };
+}
+function mountDrop2Lab(el) {
+  const chordChoices = [
+    { value: "maj7", label: "maj7" },
+    { value: "-7", label: "-7" },
+    { value: "7", label: "7" },
+    { value: "maj9", label: "maj9" }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-drop2">
+    <div class="visual-controls">
+      <label>Fundamental<select data-drop-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Acorde<select data-drop-type>${theorySelectOptions(chordChoices, "maj7")}</select></label>
+    </div>
+    <div class="visual-summary"><div><strong data-drop-name></strong><div class="small-note">La segunda voz superior baja una octava para abrir el acorde.</div></div></div>
+    <div class="visual-panel-grid visual-panel-grid-2">
+      <section class="visual-panel"><div class="diagram-label">Posición cerrada</div><div data-drop-closed></div></section>
+      <section class="visual-panel"><div class="diagram-label">Skip 2 / Drop 2</div><div data-drop-open></div></section>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-drop-root]");
+  const typeSel = el.querySelector("[data-drop-type]");
+  const update = () => {
+    const result = closedAndDrop2(rootSel.value, typeSel.value);
+    el.querySelector("[data-drop-name]").textContent = `${theoryRootUnicode(rootSel.value)}${typeSel.value}`;
+    el.querySelector("[data-drop-closed]").innerHTML = renderPianoDiagram(diagramFromAbsoluteNotes(result.closed, "#91e2af"));
+    el.querySelector("[data-drop-open]").innerHTML = renderPianoDiagram(diagramFromAbsoluteNotes(result.drop, "#a5b4fc"));
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+function voicingFormula(symbol) {
+  const map = {
+    "9": ["1","3","b7","9"],
+    "-11": ["1","b3","b7","9","11"],
+    "13": ["1","3","b7","9","13"],
+    "13b9": ["1","3","b7","b9","13"],
+    "13#11": ["1","3","b7","9","#11","13"]
+  };
+  return map[symbol] || map["13"];
+}
+function buildVoicingPlacement(rootName, symbol) {
+  const tones = buildTheoryTones(rootName, voicingFormula(symbol));
+  const bass = theoryRootMidi(rootName, 2);
+  const upper = theoryRootMidi(rootName, 3);
+  const keys = {};
+  keys[midiToSharpNote(bass)] = { color: "#d4a84f", opacity: 100, label: { text: theoryRootUnicode(rootName), fontSize: 11, verticalOffset: 8 } };
+  tones.filter(tone => tone.token !== "1").forEach(tone => {
+    const isGuide = ["3","b3","7","b7","6","4"].includes(tone.token);
+    const step = upper + tone.semi;
+    keys[midiToSharpNote(step)] = {
+      color: isGuide ? "#91e2af" : "#a5b4fc",
+      opacity: 92,
+      label: { text: tone.name, fontSize: 11, verticalOffset: 10 }
+    };
+  });
+  return { keys, tones };
+}
+function mountExtensionPlacementLab(el) {
+  const choices = [
+    { value: "9", label: "9" },
+    { value: "-11", label: "-11" },
+    { value: "13", label: "13" },
+    { value: "13b9", label: "13(b9)" },
+    { value: "13#11", label: "13(#11)" }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-extension">
+    <div class="visual-controls">
+      <label>Fundamental<select data-ext-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Color armónico<select data-ext-type>${theorySelectOptions(choices, "13")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-ext-name></strong><div class="small-note">Dorado = bajo · Verde = notas estructurales y guía · Lila = extensiones.</div></div>
+      <div class="visual-pill-row" data-ext-notes></div>
+    </div>
+    <section class="visual-panel"><div class="diagram-label">Ubicación sugerida</div><div data-ext-diagram></div></section>
+  </div>`;
+  const rootSel = el.querySelector("[data-ext-root]");
+  const typeSel = el.querySelector("[data-ext-type]");
+  const update = () => {
+    const result = buildVoicingPlacement(rootSel.value, typeSel.value);
+    el.querySelector("[data-ext-name]").textContent = `${theoryRootUnicode(rootSel.value)}${typeSel.value}`;
+    el.querySelector("[data-ext-notes]").innerHTML = result.tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+    el.querySelector("[data-ext-diagram]").innerHTML = renderPianoDiagram(result);
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+function buildConstructionData(rootName, symbol) {
+  const formula = THEORY_VISUAL_CHORD_FORMULAS[symbol] || THEORY_VISUAL_CHORD_FORMULAS["maj9"];
+  const tokens = formula.split(/\s+/);
+  const triad = tokens.filter(token => ["1","b3","3","4","5","#5","b5","2"].includes(token));
+  const support = tokens.filter(token => ["6","7","b7"].includes(token));
+  const extensions = tokens.filter(token => ["9","b9","#9","11","#11","13","b13"].includes(token));
+  return {
+    symbol,
+    triad: buildTheoryTones(rootName, triad),
+    support: buildTheoryTones(rootName, support),
+    extensions: buildTheoryTones(rootName, extensions)
+  };
+}
+function buildConstructionDiagram(rootName, data) {
+  const keys = {};
+  const base = theoryRootMidi(rootName, 3);
+  data.triad.forEach(tone => keys[midiToSharpNote(base + tone.semi)] = { color: tone.isRoot ? "#d4a84f" : "#91e2af", opacity: 92, label: { text: tone.name, fontSize: 11, verticalOffset: 8 } });
+  data.support.forEach(tone => keys[midiToSharpNote(base + tone.semi)] = { color: "#a5b4fc", opacity: 92, label: { text: tone.name, fontSize: 11, verticalOffset: 8 } });
+  data.extensions.forEach(tone => keys[midiToSharpNote(base + tone.semi)] = { color: "#f9a8d4", opacity: 92, label: { text: tone.name, fontSize: 11, verticalOffset: 8 } });
+  return { keys };
+}
+function mountConstructionLab(el) {
+  const choices = [
+    { value: "maj9", label: "maj9" },
+    { value: "9", label: "9" },
+    { value: "-11", label: "-11" },
+    { value: "13", label: "13" },
+    { value: "maj9#11", label: "maj9(#11)" }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-construction">
+    <div class="visual-controls">
+      <label>Fundamental<select data-build-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Acorde<select data-build-type>${theorySelectOptions(choices, "maj9")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-build-name></strong><div class="small-note">Verde = triada · Lila = soporte · Rosa = extensiones.</div></div>
+    </div>
+    <div class="construction-steps" data-build-steps></div>
+    <section class="visual-panel"><div class="diagram-label">Acorde completo por capas</div><div data-build-diagram></div></section>
+  </div>`;
+  const rootSel = el.querySelector("[data-build-root]");
+  const typeSel = el.querySelector("[data-build-type]");
+  const update = () => {
+    const data = buildConstructionData(rootSel.value, typeSel.value);
+    el.querySelector("[data-build-name]").textContent = `${theoryRootUnicode(rootSel.value)}${typeSel.value}`;
+    const stepHtml = [
+      { title: "1. Triada", notes: data.triad },
+      { title: "2. Soporte", notes: data.support },
+      { title: "3. Extensiones", notes: data.extensions }
+    ].map(block => `<div class="construction-step">
+      <h6>${block.title}</h6>
+      <div class="visual-pill-row">${block.notes.length ? block.notes.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("") : '<span class="small-note">No aplica</span>'}</div>
+    </div>`).join("");
+    el.querySelector("[data-build-steps]").innerHTML = stepHtml;
+    el.querySelector("[data-build-diagram]").innerHTML = renderPianoDiagram(buildConstructionDiagram(rootSel.value, data));
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+function buildBassChordVoicing(rootName, symbol) {
+  const configs = {
+    "maj7": { left: ["1"], right: ["3","7","9"] },
+    "-7": { left: ["1"], right: ["b3","b7","9"] },
+    "7": { left: ["1"], right: ["3","b7","13"] },
+    "-11": { left: ["1","b7"], right: ["b3","9","11"] },
+    "13": { left: ["1","b7"], right: ["3","9","13"] }
+  };
+  const config = configs[symbol] || configs["maj7"];
+  const keysLeft = {};
+  const keysRight = {};
+  const leftBase = theoryRootMidi(rootName, 2);
+  const rightBase = theoryRootMidi(rootName, 3);
+  buildTheoryTones(rootName, config.left).forEach(tone => {
+    keysLeft[midiToSharpNote(leftBase + tone.semi)] = { color: tone.isRoot ? "#d4a84f" : "#91e2af", opacity: 96, label: { text: tone.name, fontSize: 11, verticalOffset: 8 } };
+  });
+  buildTheoryTones(rootName, config.right).forEach(tone => {
+    keysRight[midiToSharpNote(rightBase + tone.semi)] = { color: "#a5b4fc", opacity: 96, label: { text: tone.name, fontSize: 11, verticalOffset: 8 } };
+  });
+  return { left: { keys: keysLeft }, right: { keys: keysRight }, leftTokens: config.left, rightTokens: config.right };
+}
+function mountBassChordLab(el) {
+  const choices = [
+    { value: "maj7", label: "maj7" },
+    { value: "-7", label: "-7" },
+    { value: "7", label: "7" },
+    { value: "-11", label: "-11" },
+    { value: "13", label: "13" }
+  ];
+  el.innerHTML = `<div class="theory-widget theory-widget-basschord">
+    <div class="visual-controls">
+      <label>Fundamental<select data-bc-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
+      <label>Modelo<select data-bc-type>${theorySelectOptions(choices, "maj7")}</select></label>
+    </div>
+    <div class="visual-summary">
+      <div><strong data-bc-name></strong><div class="small-note">Una guía práctica: izquierda = base / soporte grave · derecha = estructura media y color.</div></div>
+      <div class="visual-pill-row" data-bc-legend></div>
+    </div>
+    <div class="visual-panel-grid visual-panel-grid-2">
+      <section class="visual-panel"><div class="diagram-label">Mano izquierda / bajo</div><div data-bc-left></div></section>
+      <section class="visual-panel"><div class="diagram-label">Mano derecha / acorde</div><div data-bc-right></div></section>
+    </div>
+  </div>`;
+  const rootSel = el.querySelector("[data-bc-root]");
+  const typeSel = el.querySelector("[data-bc-type]");
+  const update = () => {
+    const result = buildBassChordVoicing(rootSel.value, typeSel.value);
+    el.querySelector("[data-bc-name]").textContent = `${theoryRootUnicode(rootSel.value)}${typeSel.value}`;
+    el.querySelector("[data-bc-legend]").innerHTML = result.leftTokens.map(token => spellTheoryTone(rootSel.value, token)).concat(result.rightTokens.map(token => spellTheoryTone(rootSel.value, token))).map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+    el.querySelector("[data-bc-left]").innerHTML = renderPianoDiagram(result.left);
+    el.querySelector("[data-bc-right]").innerHTML = renderPianoDiagram(result.right);
+  };
+  rootSel.addEventListener("change", update);
+  typeSel.addEventListener("change", update);
+  update();
+}
+
+
+
+/* ============================ FASE 8 · AUDIO + PRÁCTICA ============================ */
+
+const THEORY_AUDIO_STATE = {
+  context: null,
+  activeNodes: [],
+  sequenceToken: 0
+};
+
+const TOPIC_PRACTICE_BANK = {
+  "escalas-intervalos": [
+    {
+      prompt: "¿Qué patrón interválico describe la escala mayor natural?",
+      choices: ["T–T–S–T–T–T–S", "T–S–T–T–S–T–T", "S–T–T–S–T–T–T"],
+      answer: 0,
+      explain: "La escala mayor natural sigue T–T–S–T–T–T–S."
+    },
+    {
+      prompt: "¿Cuántos semitonos tiene una 3 mayor?",
+      choices: ["3", "4", "5"],
+      answer: 1,
+      explain: "Una tercera mayor equivale a 4 semitonos."
+    }
+  ],
+  "consonancias-disonancias": [
+    {
+      prompt: "Según la clasificación usada en este curso, ¿qué intervalo se considera disonancia fuerte?",
+      choices: ["3 mayor", "2 menor", "5 justa"],
+      answer: 1,
+      explain: "La 2 menor se clasifica aquí como disonancia fuerte."
+    }
+  ],
+  "acordes": [
+    {
+      prompt: "¿Cuál es la estructura básica de una tríada mayor?",
+      choices: ["1–3–5", "1–♭3–5", "1–3–♭5"],
+      answer: 0,
+      explain: "La tríada mayor contiene fundamental, tercera mayor y quinta justa."
+    }
+  ],
+  "enlace-voces": [
+    {
+      prompt: "¿Qué notas suelen funcionar como notas guía en un acorde con séptima?",
+      choices: ["Fundamental y quinta", "Tercera y séptima", "Novena y treceava"],
+      answer: 1,
+      explain: "La tercera y la séptima son las notas guía más características."
+    }
+  ],
+  "tonalidad": [
+    {
+      prompt: "En el esquema funcional del curso, ¿qué grado representa con mayor claridad la función dominante?",
+      choices: ["I", "IV", "V7"],
+      answer: 2,
+      explain: "V7 concentra la función dominante y su tendencia de resolución."
+    }
+  ],
+  "rearmonizacion": [
+    {
+      prompt: "En una rearmonización funcional simple, ¿qué principio se aplica primero?",
+      choices: ["Sustituir por cualquier acorde cromático", "Sustituir por acordes de función equivalente", "Eliminar la melodía"],
+      answer: 1,
+      explain: "El punto de partida del método es sustituir acordes por otros de función equivalente."
+    }
+  ],
+  "nivel-2-referencia-intervalica": [
+    {
+      prompt: "¿Qué intervalo corresponde al grado 6 de la escala mayor natural?",
+      choices: ["6 menor", "6 mayor", "5 aumentada"],
+      answer: 1,
+      explain: "El sexto grado de la escala mayor está a una sexta mayor de la tónica."
+    }
+  ],
+  "nivel-2-sistema-americano-cifrado": [
+    {
+      prompt: "En el cifrado usado en este curso, ¿qué símbolo representa un acorde menor?",
+      choices: ["-", "+", "°"],
+      answer: 0,
+      explain: "El signo - se usa para indicar acorde menor."
+    }
+  ],
+  "nivel-2-triadas": [
+    {
+      prompt: "¿Qué fórmula corresponde a una tríada disminuida?",
+      choices: ["1–♭3–♭5", "1–3–♯5", "1–4–5"],
+      answer: 0,
+      explain: "La tríada disminuida se construye 1–♭3–♭5."
+    }
+  ],
+  "nivel-2-soportes": [
+    {
+      prompt: "¿Qué elemento se considera soporte de un acorde en este curso?",
+      choices: ["La 6 o la 7", "Solo la 5", "Solo la 9"],
+      answer: 0,
+      explain: "El soporte corresponde a la sexta o la séptima."
+    }
+  ],
+  "nivel-2-septimas": [
+    {
+      prompt: "¿Qué fórmula corresponde a un acorde dominante 7?",
+      choices: ["1–3–5–7", "1–3–5–♭7", "1–♭3–5–♭7"],
+      answer: 1,
+      explain: "El dominante 7 combina tríada mayor con séptima menor."
+    }
+  ],
+  "nivel-2-reglas-extensiones": [
+    {
+      prompt: "En el método del curso, ¿qué extensión se asocia principalmente a acordes con tercera mayor?",
+      choices: ["11 justa", "♯11", "♭13 exclusivamente"],
+      answer: 1,
+      explain: "La ♯11 se asocia principalmente a acordes con tercera mayor."
+    }
+  ],
+  "nivel-2-novenas": [
+    {
+      prompt: "¿Qué intervalo representa una novena mayor?",
+      choices: ["14 semitonos desde la fundamental", "12 semitonos", "10 semitonos"],
+      answer: 0,
+      explain: "La novena mayor es una segunda mayor compuesta: 14 semitonos."
+    }
+  ],
+  "nivel-2-onceavas": [
+    {
+      prompt: "¿Qué grado simple corresponde a la 11?",
+      choices: ["La 4", "La 3", "La 6"],
+      answer: 0,
+      explain: "La onceava corresponde a la cuarta extendida una octava."
+    }
+  ],
+  "nivel-2-treceavas": [
+    {
+      prompt: "¿Qué grado simple corresponde a la 13?",
+      choices: ["La 5", "La 6", "La 7"],
+      answer: 1,
+      explain: "La treceava corresponde a la sexta extendida una octava."
+    }
+  ],
+  "nivel-2-omision-notas": [
+    {
+      prompt: "En un voicing extendido, ¿qué nota suele ser más prescindible que la tercera o la séptima?",
+      choices: ["La quinta justa", "La tercera", "La séptima"],
+      answer: 0,
+      explain: "La quinta justa suele omitirse con mayor facilidad cuando la textura necesita espacio."
+    }
+  ],
+  "nivel-2-aplicacion": [
+    {
+      prompt: "¿Qué conviene comprobar primero al construir un acorde extendido?",
+      choices: ["La estructura básica", "El tempo", "La dinámica"],
+      answer: 0,
+      explain: "La construcción parte de la estructura antes de añadir soporte y extensiones."
+    }
+  ],
+  "nivel-2-sintesis-reglas": [
+    {
+      prompt: "¿Cuál es el orden conceptual del método?",
+      choices: ["Estructura → soporte → superestructura", "Superestructura → estructura → soporte", "Soporte → ritmo → estructura"],
+      answer: 0,
+      explain: "El curso organiza el acorde como estructura, soporte y superestructura."
+    }
+  ],
+  "nivel-3-registros-zonas": [
+    {
+      prompt: "¿Dónde conviene ubicar normalmente las extensiones?",
+      choices: ["En el registro agudo o medio", "Siempre debajo del bajo", "Solo en C2–C3"],
+      answer: 0,
+      explain: "El curso favorece extensiones en registro medio/agudo para conservar claridad."
+    }
+  ],
+  "nivel-3-shell-voicings": [
+    {
+      prompt: "¿Qué información mínima suele conservar un shell de séptima?",
+      choices: ["3 y 7", "1 y 5", "5 y 9"],
+      answer: 0,
+      explain: "La tercera y la séptima definen con claridad la cualidad y función."
+    }
+  ],
+  "nivel-3-posicion-cerrada-skip-2": [
+    {
+      prompt: "En una transformación tipo Drop 2, ¿qué voz se baja una octava?",
+      choices: ["La segunda voz desde arriba", "La voz más grave", "La voz superior"],
+      answer: 0,
+      explain: "Drop 2 baja una octava la segunda voz contando desde arriba."
+    }
+  ],
+  "nivel-3-registro-grave-extensiones": [
+    {
+      prompt: "¿Por qué se evitan demasiadas notas cerradas en el grave?",
+      choices: ["Para reducir turbidez y mejorar claridad", "Porque no existen allí", "Porque cambian de nombre"],
+      answer: 0,
+      explain: "Abrir el registro grave ayuda a evitar acumulación y pérdida de definición."
+    }
+  ],
+  "nivel-3-construccion-acordes-extendidos": [
+    {
+      prompt: "¿Qué se añade después de establecer triada y soporte?",
+      choices: ["Extensiones", "Otra fundamental obligatoria", "Una nueva tonalidad"],
+      answer: 0,
+      explain: "Las extensiones se añaden después de definir estructura y soporte."
+    }
+  ],
+  "nivel-3-acompanamiento-bajo-acorde": [
+    {
+      prompt: "En un modelo bajo/acorde, ¿qué función cumple normalmente la mano izquierda?",
+      choices: ["Base grave o soporte", "Solo extensiones", "Solo melodía"],
+      answer: 0,
+      explain: "La mano izquierda sostiene la base grave; la derecha organiza las voces superiores."
+    }
+  ]
+};
+
+function renderTopicPractice(section) {
+  const bank = TOPIC_PRACTICE_BANK[section.id] || [];
+  if (!bank.length) return "";
+  return `<section class="topic-practice panel" data-topic-practice="${escapeAttr(section.id)}">
+    <header class="topic-practice-head">
+      <div>
+        <p class="kicker">Comprueba lo aprendido</p>
+        <h4>Desafío rápido</h4>
+        <p>Una pregunta breve antes de marcar el tema como estudiado.</p>
+      </div>
+      <span class="practice-score" data-practice-score>0/${bank.length}</span>
+    </header>
+    <div class="practice-question" data-practice-question></div>
+    <div class="practice-feedback" data-practice-feedback aria-live="polite"></div>
+    <div class="practice-actions">
+      <button type="button" class="ghost-btn" data-practice-next>Siguiente pregunta</button>
+      <button type="button" class="soft-btn" data-practice-reset>Reiniciar</button>
+    </div>
+  </section>`;
+}
+
+function mountTopicPractices() {
+  document.querySelectorAll("[data-topic-practice]").forEach(root => {
+    const topicId = root.dataset.topicPractice;
+    const bank = TOPIC_PRACTICE_BANK[topicId] || [];
+    if (!bank.length) return;
+    let index = 0;
+    let correct = 0;
+    let answered = false;
+    const scoreEl = root.querySelector("[data-practice-score]");
+    const questionEl = root.querySelector("[data-practice-question]");
+    const feedbackEl = root.querySelector("[data-practice-feedback]");
+    const nextBtn = root.querySelector("[data-practice-next]");
+    const resetBtn = root.querySelector("[data-practice-reset]");
+
+    function render() {
+      const q = bank[index];
+      answered = false;
+      feedbackEl.textContent = "";
+      questionEl.innerHTML = `<p class="practice-prompt">${escapeHtml(q.prompt)}</p>
+        <div class="practice-options">
+          ${q.choices.map((choice, choiceIndex) => `<button type="button" class="practice-option" data-practice-choice="${choiceIndex}">${escapeHtml(choice)}</button>`).join("")}
+        </div>`;
+      questionEl.querySelectorAll("[data-practice-choice]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (answered) return;
+          answered = true;
+          const picked = Number(btn.dataset.practiceChoice);
+          const isCorrect = picked === q.answer;
+          if (isCorrect) correct += 1;
+          questionEl.querySelectorAll("[data-practice-choice]").forEach(option => {
+            option.disabled = true;
+            const value = Number(option.dataset.practiceChoice);
+            if (value === q.answer) option.classList.add("correct");
+            else if (value === picked) option.classList.add("wrong");
+          });
+          feedbackEl.textContent = `${isCorrect ? "Correcto. " : "Revisa: "}${q.explain}`;
+          scoreEl.textContent = `${correct}/${bank.length}`;
+        });
+      });
+      nextBtn.disabled = bank.length <= 1;
+    }
+    nextBtn.addEventListener("click", () => {
+      index = (index + 1) % bank.length;
+      render();
+    });
+    resetBtn.addEventListener("click", () => {
+      index = 0;
+      correct = 0;
+      scoreEl.textContent = `0/${bank.length}`;
+      render();
+    });
+    render();
+  });
+}
+
+function ensureTheoryAudioContext() {
+  if (!THEORY_AUDIO_STATE.context) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    THEORY_AUDIO_STATE.context = new AudioContextClass();
+  }
+  if (THEORY_AUDIO_STATE.context.state === "suspended") THEORY_AUDIO_STATE.context.resume();
+  return THEORY_AUDIO_STATE.context;
+}
+function stopTheoryAudio() {
+  THEORY_AUDIO_STATE.sequenceToken += 1;
+  THEORY_AUDIO_STATE.activeNodes.forEach(node => {
+    try { node.stop(); } catch (error) {}
+    try { node.disconnect(); } catch (error) {}
+  });
+  THEORY_AUDIO_STATE.activeNodes = [];
+}
+function midiFrequency(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+function playTheoryMidi(midi, options = {}) {
+  const ctx = ensureTheoryAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime + (Number(options.delay) || 0);
+  const duration = Math.max(.08, Number(options.duration) || .55);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = options.type || "triangle";
+  osc.frequency.setValueAtTime(midiFrequency(midi), now);
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(Number(options.volume) || 0.18, now + .018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + duration + .03);
+  THEORY_AUDIO_STATE.activeNodes.push(osc);
+  osc.addEventListener("ended", () => {
+    THEORY_AUDIO_STATE.activeNodes = THEORY_AUDIO_STATE.activeNodes.filter(item => item !== osc);
+    try { osc.disconnect(); gain.disconnect(); } catch (error) {}
+  });
+}
+function playTheoryChord(midis, options = {}) {
+  stopTheoryAudio();
+  midis.forEach((midi, index) => playTheoryMidi(midi, {
+    duration: options.duration || 1.05,
+    volume: 0.105,
+    type: index === 0 ? "triangle" : "sine"
+  }));
+}
+async function playTheorySequence(midis, onStep, options = {}) {
+  stopTheoryAudio();
+  const token = THEORY_AUDIO_STATE.sequenceToken;
+  const gap = Number(options.gap) || 420;
+  for (let index = 0; index < midis.length; index += 1) {
+    if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
+    onStep?.(index);
+    playTheoryMidi(midis[index], { duration: Math.min(.7, gap / 1000 * .88), volume: .15 });
+    await new Promise(resolve => setTimeout(resolve, gap));
+  }
+  onStep?.(-1);
+}
+function theoryToneMidis(rootName, tones, baseOctave = 4) {
+  const rootMidi = theoryRootMidi(rootName, baseOctave);
+  return tones.map(tone => rootMidi + tone.semi);
+}
+function addAudioControls(container, config) {
+  if (!container || container.querySelector("[data-audio-controls]")) return;
+  const bar = document.createElement("div");
+  bar.className = "visual-audio-controls";
+  bar.dataset.audioControls = "true";
+  if (config.sequence) {
+    const seq = document.createElement("button");
+    seq.type = "button";
+    seq.className = "ghost-btn compact-btn";
+    seq.textContent = config.sequenceLabel || "▶ Escuchar ascendente";
+    seq.addEventListener("click", config.sequence);
+    bar.appendChild(seq);
+  }
+  if (config.chord) {
+    const chord = document.createElement("button");
+    chord.type = "button";
+    chord.className = "ghost-btn compact-btn";
+    chord.textContent = config.chordLabel || "▶ Escuchar simultáneo";
+    chord.addEventListener("click", config.chord);
+    bar.appendChild(chord);
+  }
+  const stop = document.createElement("button");
+  stop.type = "button";
+  stop.className = "soft-btn compact-btn";
+  stop.textContent = "■ Detener";
+  stop.addEventListener("click", stopTheoryAudio);
+  bar.appendChild(stop);
+  container.prepend(bar);
+}
+
+function currentScaleSelection(el) {
+  const rootName = el.querySelector("[data-scale-root]")?.value || "C";
+  const typeId = el.querySelector("[data-scale-type]")?.value || "major";
+  const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === typeId) || THEORY_VISUAL_SCALE_LIBRARY[0];
+  const tones = buildTheoryTones(rootName, scale.tokens);
+  return { rootName, scale, tones };
+}
+function addScaleAudio(el) {
+  const host = el.querySelector(".theory-widget-scale");
+  if (!host) return;
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar escala",
+    sequence: () => {
+      const { rootName, tones } = currentScaleSelection(el);
+      const midis = theoryToneMidis(rootName, tones, 4);
+      const pills = [...el.querySelectorAll("[data-scale-notes] .visual-pill")];
+      playTheorySequence(midis, index => {
+        pills.forEach((pill, i) => pill.classList.toggle("audio-active", i === index));
+      }, { gap: 360 });
+    },
+    chordLabel: "▶ Escuchar notas juntas",
+    chord: () => {
+      const { rootName, tones } = currentScaleSelection(el);
+      playTheoryChord(theoryToneMidis(rootName, tones.slice(0, -1), 4), { duration: 1.1 });
+    }
+  });
+}
+function currentIntervalSelection(el) {
+  const rootName = el.querySelector("[data-interval-root]")?.value || "C";
+  const intervalId = el.querySelector("[data-interval-type]")?.value || "M3";
+  const interval = THEORY_VISUAL_INTERVALS.find(item => item.id === intervalId) || THEORY_VISUAL_INTERVALS[0];
+  return { rootName, interval };
+}
+function addIntervalAudio(el) {
+  const host = el.querySelector(".theory-widget-interval");
+  if (!host) return;
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar melódico",
+    sequence: () => {
+      const { rootName, interval } = currentIntervalSelection(el);
+      const base = theoryRootMidi(rootName, 4);
+      playTheorySequence([base, base + interval.semitones], () => {}, { gap: 520 });
+    },
+    chordLabel: "▶ Escuchar armónico",
+    chord: () => {
+      const { rootName, interval } = currentIntervalSelection(el);
+      const base = theoryRootMidi(rootName, 4);
+      playTheoryChord([base, base + interval.semitones], { duration: 1.05 });
+    }
+  });
+}
+function chordExplorerCurrentTones(mountPoint) {
+  const rootSel = mountPoint.querySelector('[data-cx="root"]');
+  const typeSel = mountPoint.querySelector('[data-cx="type"]');
+  const rootName = ChordRef.ROOTS[Number(rootSel?.value || 0)] || "C";
+  const type = ChordRef.CHORD_TYPES[Number(typeSel?.value || 0)] || ChordRef.CHORD_TYPES[0];
+  const root = ChordRef.rootInfo(rootName);
+  const tones = ChordRef.chordTones(root, type.formula);
+  return { rootName, root, type, tones };
+}
+function chordTonesToMidis(rootName, tones) {
+  const asciiRoot = String(rootName).replace(/♭/g, "b").replace(/♯/g, "#");
+  const rootMidi = theoryRootMidi(asciiRoot, 4);
+  return tones.map(tone => rootMidi + tone.semi);
+}
+function addChordExplorerAudio(mountPoint) {
+  const host = mountPoint.querySelector(".chord-explorer");
+  if (!host) return;
+  addAudioControls(host, {
+    sequenceLabel: "▶ Arpegiar",
+    sequence: () => {
+      const current = chordExplorerCurrentTones(mountPoint);
+      playTheorySequence(chordTonesToMidis(current.rootName, current.tones), () => {}, { gap: 340 });
+    },
+    chordLabel: "▶ Escuchar acorde",
+    chord: () => {
+      const current = chordExplorerCurrentTones(mountPoint);
+      playTheoryChord(chordTonesToMidis(current.rootName, current.tones), { duration: 1.15 });
+    }
+  });
+}
+function addGenericPianoAudio(container, getNotes, config = {}) {
+  addAudioControls(container, {
+    sequenceLabel: config.sequenceLabel || "▶ Arpegiar",
+    sequence: () => playTheorySequence(getNotes(), () => {}, { gap: config.gap || 340 }),
+    chordLabel: config.chordLabel || "▶ Escuchar simultáneo",
+    chord: () => playTheoryChord(getNotes(), { duration: 1.1 })
+  });
+}
+
+/* Decoradores Fase 8 sobre los widgets de Fase 7 */
+const _mountScaleExplorerPhase7 = mountScaleExplorer;
+mountScaleExplorer = function(el, options) {
+  _mountScaleExplorerPhase7(el, options);
+  addScaleAudio(el);
+};
+
+const _mountIntervalExplorerPhase7 = mountIntervalExplorer;
+mountIntervalExplorer = function(el, options) {
+  _mountIntervalExplorerPhase7(el, options);
+  addIntervalAudio(el);
+};
+
+const _mountChordExplorerLabPhase7 = mountChordExplorerLab;
+mountChordExplorerLab = function(el, options) {
+  _mountChordExplorerLabPhase7(el, options);
+  addChordExplorerAudio(el);
+};
+
+const _mountTonalityLabPhase7 = mountTonalityLab;
+mountTonalityLab = function(el, options) {
+  _mountTonalityLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-tonality");
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar escala tonal",
+    sequence: () => {
+      const rootName = el.querySelector("[data-key-root]")?.value || "C";
+      const isMinor = el.querySelector("[data-key-mode]")?.value === "minor";
+      const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === (isMinor ? "minor-natural" : "major"));
+      const tones = buildTheoryTones(rootName, scale.tokens);
+      playTheorySequence(theoryToneMidis(rootName, tones, 4), () => {}, { gap: 360 });
+    }
+  });
+};
+
+const _mountReharmLabPhase7 = mountReharmLab;
+mountReharmLab = function(el, options) {
+  _mountReharmLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-reharm");
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar progresión",
+    sequence: async () => {
+      stopTheoryAudio();
+      const token = THEORY_AUDIO_STATE.sequenceToken;
+      const rootName = el.querySelector("[data-reharm-root]")?.value || "C";
+      const scale = buildTheoryTones(rootName, THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === "major").tokens).slice(0, 7);
+      const slots = [
+        el.querySelector("[data-slot-t1]")?.value || "I",
+        el.querySelector("[data-slot-t2]")?.value || "vi",
+        el.querySelector("[data-slot-s]")?.value || "ii",
+        el.querySelector("[data-slot-d]")?.value || "V",
+        "I"
+      ];
+      for (const roman of slots) {
+        if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
+        const item = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.find(entry => entry.roman === roman) || THEORY_VISUAL_ROMAN_QUALITIES_MAJOR[0];
+        const chordRoot = scale[item.degree - 1]?.name || "C";
+        const suffixMap = { "maj7":"maj7", "-7":"-7", "7":"7", "m7♭5":"-7b5" };
+        const type = ChordRef.CHORD_TYPES.find(entry => entry.symbol === (suffixMap[item.suffix] || ""));
+        if (type) {
+          const root = ChordRef.rootInfo(chordRoot);
+          const tones = ChordRef.chordTones(root, type.formula);
+          playTheoryChord(chordTonesToMidis(chordRoot, tones), { duration: .72 });
+        }
+        await new Promise(resolve => setTimeout(resolve, 760));
+      }
+    }
+  });
+};
+
+const _mountRegisterLabPhase7 = mountRegisterLab;
+mountRegisterLab = function(el, options) {
+  _mountRegisterLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-register");
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar zona",
+    sequence: () => {
+      const preset = el.querySelector("[data-register-preset]")?.value || "bass";
+      const ranges = { bass:["C2","C3"], closed:["C3","C5"], spread:["G2","C5"], guides:["E3","B4"] };
+      const [from, to] = ranges[preset] || ranges.bass;
+      const start = noteStep(from), end = noteStep(to);
+      const midis = [];
+      for (let step = start; step <= end; step += 4) midis.push(step);
+      playTheorySequence(midis, () => {}, { gap: 230 });
+    }
+  });
+};
+
+const _mountShellLabPhase7 = mountShellLab;
+mountShellLab = function(el, options) {
+  _mountShellLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-shell");
+  addGenericPianoAudio(host, () => {
+    const rootName = el.querySelector("[data-shell-root]")?.value || "C";
+    const symbol = el.querySelector("[data-shell-type]")?.value || "maj7";
+    const tokens = shellFormula(symbol);
+    const base = theoryRootMidi(rootName, 3);
+    return tokens.map(token => base + spellTheoryTone(rootName, token).semi);
+  });
+};
+
+const _mountDrop2LabPhase7 = mountDrop2Lab;
+mountDrop2Lab = function(el, options) {
+  _mountDrop2LabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-drop2");
+  addAudioControls(host, {
+    sequenceLabel: "▶ Cerrada",
+    sequence: () => {
+      const result = closedAndDrop2(
+        el.querySelector("[data-drop-root]")?.value || "C",
+        el.querySelector("[data-drop-type]")?.value || "maj7"
+      );
+      playTheoryChord(result.closed.map(item => item.step), { duration: 1.05 });
+    },
+    chordLabel: "▶ Skip 2 / Drop 2",
+    chord: () => {
+      const result = closedAndDrop2(
+        el.querySelector("[data-drop-root]")?.value || "C",
+        el.querySelector("[data-drop-type]")?.value || "maj7"
+      );
+      playTheoryChord(result.drop.map(item => item.step), { duration: 1.05 });
+    }
+  });
+};
+
+const _mountExtensionPlacementLabPhase7 = mountExtensionPlacementLab;
+mountExtensionPlacementLab = function(el, options) {
+  _mountExtensionPlacementLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-extension");
+  addGenericPianoAudio(host, () => {
+    const rootName = el.querySelector("[data-ext-root]")?.value || "C";
+    const type = el.querySelector("[data-ext-type]")?.value || "13";
+    const tones = buildTheoryTones(rootName, voicingFormula(type));
+    return theoryToneMidis(rootName, tones, 3);
+  });
+};
+
+const _mountConstructionLabPhase7 = mountConstructionLab;
+mountConstructionLab = function(el, options) {
+  _mountConstructionLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-construction");
+  const controls = document.createElement("div");
+  controls.className = "construction-animation-controls";
+  controls.innerHTML = `<button type="button" class="primary-btn compact-btn" data-build-play>▶ Construir paso a paso</button>
+    <button type="button" class="soft-btn compact-btn" data-build-reset>Reiniciar vista</button>`;
+  host.insertBefore(controls, host.querySelector(".construction-steps"));
+  const diagram = el.querySelector("[data-build-diagram]");
+
+  function currentData() {
+    const rootName = el.querySelector("[data-build-root]")?.value || "C";
+    const type = el.querySelector("[data-build-type]")?.value || "maj9";
+    return { rootName, data: buildConstructionData(rootName, type) };
+  }
+  function showStage(stage) {
+    const { rootName, data } = currentData();
+    const staged = {
+      symbol: data.symbol,
+      triad: data.triad,
+      support: stage >= 2 ? data.support : [],
+      extensions: stage >= 3 ? data.extensions : []
+    };
+    diagram.innerHTML = renderPianoDiagram(buildConstructionDiagram(rootName, staged));
+    const steps = [...el.querySelectorAll(".construction-step")];
+    steps.forEach((step, index) => step.classList.toggle("build-active", index + 1 === stage));
+  }
+  controls.querySelector("[data-build-play]").addEventListener("click", async () => {
+    stopTheoryAudio();
+    for (let stage = 1; stage <= 3; stage += 1) {
+      showStage(stage);
+      const { rootName, data } = currentData();
+      const groups = stage === 1 ? data.triad : stage === 2 ? data.triad.concat(data.support) : data.triad.concat(data.support, data.extensions);
+      playTheoryChord(theoryToneMidis(rootName, groups, 4), { duration: .65 });
+      await new Promise(resolve => setTimeout(resolve, 850));
+    }
+    el.querySelectorAll(".construction-step").forEach(step => step.classList.remove("build-active"));
+  });
+  controls.querySelector("[data-build-reset]").addEventListener("click", () => {
+    const { rootName, data } = currentData();
+    diagram.innerHTML = renderPianoDiagram(buildConstructionDiagram(rootName, data));
+    el.querySelectorAll(".construction-step").forEach(step => step.classList.remove("build-active"));
+  });
+  addGenericPianoAudio(host, () => {
+    const { rootName, data } = currentData();
+    return theoryToneMidis(rootName, data.triad.concat(data.support, data.extensions), 4);
+  }, { sequenceLabel: "▶ Arpegiar acorde" });
+};
+
+const _mountBassChordLabPhase7 = mountBassChordLab;
+mountBassChordLab = function(el, options) {
+  _mountBassChordLabPhase7(el, options);
+  const host = el.querySelector(".theory-widget-basschord");
+  addAudioControls(host, {
+    sequenceLabel: "▶ Escuchar izquierda",
+    sequence: () => {
+      const rootName = el.querySelector("[data-bc-root]")?.value || "C";
+      const type = el.querySelector("[data-bc-type]")?.value || "maj7";
+      const data = buildBassChordVoicing(rootName, type);
+      const midis = data.leftTokens.map(token => theoryRootMidi(rootName, 2) + spellTheoryTone(rootName, token).semi);
+      playTheoryChord(midis, { duration: 1.05 });
+    },
+    chordLabel: "▶ Escuchar reparto completo",
+    chord: () => {
+      const rootName = el.querySelector("[data-bc-root]")?.value || "C";
+      const type = el.querySelector("[data-bc-type]")?.value || "maj7";
+      const data = buildBassChordVoicing(rootName, type);
+      const left = data.leftTokens.map(token => theoryRootMidi(rootName, 2) + spellTheoryTone(rootName, token).semi);
+      const right = data.rightTokens.map(token => theoryRootMidi(rootName, 3) + spellTheoryTone(rootName, token).semi);
+      playTheoryChord(left.concat(right), { duration: 1.1 });
+    }
+  });
+};
+
 
 document.addEventListener("DOMContentLoaded", init);

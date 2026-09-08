@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Curso interactivo de teoría y lectura musical: sonido, ritmo, melodía, armonía, notación, intervalos, escalas y tonalidad.">
+  <meta name="robots" content="index,follow">
+  <meta property="og:locale" content="es_EC">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Crescendo Academy">
+  <meta property="og:title" content="Teoría y Lectura Musical | Crescendo Academy">
+  <meta property="og:description" content="Aprende cómo se organiza la música y cómo se representa: ritmo, melodía, armonía, lectura, intervalos, escalas y tonalidad.">
+  <title>Teoría y Lectura Musical | Crescendo Academy</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="data.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#mainContent">Saltar al contenido</a>
+  <div class="page-bg" aria-hidden="true"></div><noscript><div class="noscript-note">Los laboratorios interactivos y el audio requieren JavaScript.</div></noscript>
+
+  <header class="ca-site-header" aria-label="Crescendo Academy">
+    <div class="ca-brand">Crescendo Academy</div>
+    <div class="ca-header-right">
+      <div class="ca-tag">Herramientas para clases de música</div>
+      <div class="ca-social-bar">
+        <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">IG</a>
+        <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">WA</a>
+        <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">YT</a>
+      </div>
+      <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" target="_blank" rel="noopener" class="ca-school-logo-link" aria-label="Página de Crescendo Academy">
+        <img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="ca-school-logo">
+      </a>
+    </div>
+  </header>
+
+  <header class="topbar">
+    <a class="brand" href="#inicio">
+      <span class="logo">TL</span>
+      <span>
+        <strong>Teoría y Lectura Musical</strong>
+        <small>Comprender · escuchar · leer · conectar</small>
+      </span>
+    </a>
+    <nav class="main-nav" aria-label="Navegación principal">
+      <button class="nav-btn active" data-view="inicio" type="button">Inicio</button>
+      <button class="nav-btn" data-view="curso" type="button">Curso</button>
+      <button class="nav-btn" data-view="mapa" type="button">Mapa conceptual</button>
+      <button class="nav-btn" data-view="evaluacion" type="button">Evaluación</button>
+    </nav>
+  </header>
+
+  <main id="mainContent" tabindex="-1">
+    <section id="inicioView" class="view">
+      <div class="hero">
+        <div>
+          <p class="kicker">Fundamentos del lenguaje musical</p>
+          <h1>Antes de analizar acordes,<br><span>hay que entender la música.</span></h1>
+          <p class="hero-copy">
+            Esta app construye el puente entre escuchar música y comprender cómo se organiza:
+            sonido, pulso, ritmo, melodía, armonía, lectura, intervalos, escalas y tonalidad.
+          </p>
+          <div class="hero-actions">
+            <button id="startCourseBtn" class="primary-btn" type="button">Comenzar el curso</button>
+            <button id="openMapBtn" class="ghost-btn" type="button">Ver el mapa completo</button>
+          </div>
+        </div>
+
+        <aside class="overview-panel">
+          <div class="overview-label">Ruta Crescendo</div>
+          <div class="route-mini">
+            <span>Teoría y lectura</span><b>→</b>
+            <span>Armonía funcional</span><b>→</b>
+            <span>Análisis armónico</span>
+          </div>
+          <p>Esta app funciona como prerrequisito conceptual de Armonía Funcional.</p>
+          <div class="progress-bar"><div id="homeProgressBar"></div></div>
+          <small id="homeProgressText">0/8 niveles explorados</small>
+          <div class="home-progress-detail" id="homeProgressDetail"></div>
+        </aside>
+      </div>
+
+      <section class="concept-intro">
+        <div class="section-heading">
+          <p class="kicker">La pregunta inicial</p>
+          <h2>¿Qué es la música?</h2>
+        </div>
+        <div class="definition-card">
+          <p>
+            La música puede entenderse como una organización intencional de sonidos y silencios en el tiempo.
+            Esa organización puede comunicar, estructurar, acompañar, expresar, provocar movimiento o crear una experiencia estética.
+          </p>
+          <p class="source-note">
+            Para este curso evitamos limitar la música a una sola función emocional: nos interesa comprender
+            <strong>cómo se organiza</strong> y <strong>cómo aprendemos a representarla y reconocerla</strong>.
+          </p>
+        </div>
+
+        <div class="pillars-grid">
+          <article class="pillar-card">
+            <span class="pillar-icon">◷</span>
+            <h3>Ritmo</h3>
+            <p>Organiza los eventos en el tiempo: pulso, duración, acentos, compás, subdivisión y patrones.</p>
+          </article>
+          <article class="pillar-card">
+            <span class="pillar-icon">↗</span>
+            <h3>Melodía</h3>
+            <p>Organiza alturas sucesivas en el tiempo. Crea contorno, dirección, motivos, frases y relaciones interválicas.</p>
+          </article>
+          <article class="pillar-card">
+            <span class="pillar-icon">≋</span>
+            <h3>Armonía</h3>
+            <p>Estudia cómo se relacionan las alturas simultáneamente y cómo producen estabilidad, tensión y movimiento.</p>
+          </article>
+        </div>
+
+        <div class="context-note">
+          <strong>Importante:</strong> ritmo, melodía y armonía son tres ejes muy útiles para comenzar, pero no agotan la música.
+          También estudiaremos timbre, dinámica, textura y forma.
+        </div>
+      </section>
+
+      <section class="why-section">
+        <div class="section-heading">
+          <p class="kicker">La conexión</p>
+          <h2>¿Por qué estudiar escalas, intervalos y tonalidad?</h2>
+        </div>
+        <div class="logic-chain">
+          <div><b>Sonido</b><span>tiene altura y duración</span></div>
+          <i>↓</i>
+          <div><b>Notas</b><span>nombran alturas musicales</span></div>
+          <i>↓</i>
+          <div><b>Intervalos</b><span>miden la relación entre dos alturas</span></div>
+          <i>↓</i>
+          <div><b>Escalas</b><span>organizan familias de alturas</span></div>
+          <i>↓</i>
+          <div><b>Tonalidad</b><span>crea jerarquía alrededor de una tónica</span></div>
+          <i>↓</i>
+          <div><b>Acordes y funciones</b><span>organizan simultaneidad y movimiento armónico</span></div>
+        </div>
+      </section>
+
+      <section class="levels-preview">
+        <div class="section-heading">
+          <p class="kicker">Plan de estudio</p>
+          <h2>Ocho niveles conectados</h2>
+        </div>
+        <div id="levelCards" class="level-cards"></div>
+      </section>
+    </section>
+
+    <section id="cursoView" class="view hidden">
+      <div class="course-layout">
+        <aside class="course-sidebar">
+          <p class="kicker">Ruta de aprendizaje</p>
+          <div id="courseNav"></div>
+        </aside>
+        <section class="lesson-panel">
+          <div id="lessonContent"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="mapaView" class="view hidden">
+      <div class="map-page">
+        <p class="kicker">Visión completa</p>
+        <h2>Del sonido a la armonía funcional</h2>
+        <p class="lead">
+          El objetivo no es memorizar términos aislados. Cada concepto debe explicar por qué el siguiente existe.
+        </p>
+        <div class="map-flow">
+          <div class="map-node"><b>SONIDO</b><span>altura · duración · timbre · intensidad</span></div>
+          <div class="map-arrow">↓</div>
+          <div class="map-split">
+            <div class="map-node"><b>RITMO</b><span>duración organizada</span></div>
+            <div class="map-node"><b>MELODÍA</b><span>alturas sucesivas</span></div>
+            <div class="map-node"><b>ARMONÍA</b><span>alturas simultáneas</span></div>
+          </div>
+          <div class="map-arrow">↓</div>
+          <div class="map-node"><b>LECTURA MUSICAL</b><span>representación horizontal del tiempo + representación vertical de la altura</span></div>
+          <div class="map-arrow">↓</div>
+          <div class="map-split">
+            <div class="map-node"><b>INTERVALOS</b><span>distancias y relaciones</span></div>
+            <div class="map-node"><b>ESCALAS</b><span>colecciones organizadas</span></div>
+            <div class="map-node"><b>TONALIDAD</b><span>centro y jerarquía</span></div>
+          </div>
+          <div class="map-arrow">↓</div>
+          <div class="map-node bridge"><b>ARMONÍA FUNCIONAL</b><span>acordes · funciones · progresiones · voicings · rearmonización</span></div>
+        </div>
+        <a class="external-cta" href="https://crescendoacademyec.github.io/herramientas-pedagogicas/armonia-funcional/" target="_blank" rel="noopener">
+          Continuar a Armonía Funcional →
+        </a>
+      </div>
+    </section>
+  
+    <section id="evaluacionView" class="view hidden">
+      <div class="evaluation-page">
+        <p class="kicker">Evaluación y progreso</p>
+        <h2>Diagnóstico, avance y evaluación final</h2>
+        <p class="lead">Esta sección no sustituye la práctica de lectura: sirve para medir comprensión conceptual y orientar qué nivel conviene reforzar.</p>
+
+        <div class="evaluation-summary" id="evaluationSummary"></div>
+
+        <div class="evaluation-grid">
+          <article class="evaluation-card">
+            <span class="level-number">Antes de estudiar</span>
+            <h3>Diagnóstico inicial</h3>
+            <p>10 preguntas breves para estimar tu punto de partida.</p>
+            <button class="primary-btn" id="startDiagnosticBtn" type="button">Iniciar diagnóstico</button>
+          </article>
+
+          <article class="evaluation-card">
+            <span class="level-number">Al finalizar</span>
+            <h3>Evaluación final</h3>
+            <p>16 preguntas: dos por cada nivel del curso.</p>
+            <button class="primary-btn" id="startFinalEvalBtn" type="button">Iniciar evaluación final</button>
+          </article>
+        </div>
+
+        <div id="evaluationRunner" class="evaluation-runner hidden"></div>
+
+        <section class="badges-section">
+          <div class="section-heading">
+            <p class="kicker">Insignias</p>
+            <h2>Hitos de aprendizaje</h2>
+          </div>
+          <div id="badgeGrid" class="badge-grid"></div>
+        </section>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <strong>Crescendo Academy</strong>
+    <span>Teoría y Lectura Musical · herramienta pedagógica interactiva</span>
+  </footer>
+</body>
+</html>

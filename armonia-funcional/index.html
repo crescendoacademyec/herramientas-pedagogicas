@@ -4,14 +4,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Curso interactivo de armonía funcional con contenidos teóricos por niveles, estudio guiado y cuestionarios autocorregibles.">
   <meta name="robots" content="index,follow,max-image-preview:large">
-  <link rel="canonical" href="https://crescendoacademyec.github.io/armonia-funcional-esencial/">
-  <meta property="og:locale" content="es_EC">
+<meta property="og:locale" content="es_EC">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Crescendo Academy">
   <meta property="og:title" content="Armonía funcional: aspectos esenciales">
   <meta property="og:description" content="Estudia escalas, intervalos, acordes, tonalidad y rearmonización mediante módulos guiados y cuestionarios autocorregibles.">
-  <meta property="og:url" content="https://crescendoacademyec.github.io/armonia-funcional-esencial/">
-  <meta property="og:image" content="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png">
+<meta property="og:image" content="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png">
   <meta property="og:image:secure_url" content="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:alt" content="Logo de Crescendo Academy.">
@@ -24,11 +22,13 @@
   <link rel="icon" href="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" type="image/png">
   <link rel="stylesheet" href="./styles.css">
   <script defer="" src="./data.js"></script>
-  <script defer="" src="./chords-ref.js?v=20260828-3"></script>
+  <script defer="" src="./chords-ref.js"></script>
   <script defer="" src="./app.js"></script>
 </head>
 <body>
+<a class="skip-link" href="#mainContent">Saltar al contenido</a>
   <div class="page-bg" aria-hidden="true"></div>
+<noscript><div class="noscript-note">El contenido teórico puede leerse, pero los cuestionarios, la referencia interactiva de acordes y el progreso requieren JavaScript.</div></noscript>
   <header class="ca-site-header" aria-label="Crescendo Academy">
     <div class="ca-brand">Crescendo Academy</div>
     <div class="ca-header-right">
@@ -98,7 +98,7 @@
     </div>
   </header>
 
-  <main>
+  <main id="mainContent" tabindex="-1">
     <div id="lockBanner" class="panel lock-banner hidden">
       <b>Modo cuestionario activo.</b> El módulo teórico está bloqueado hasta entregar. Si se recarga la página, el intento se reabre automáticamente.
     </div>
@@ -876,7 +876,7 @@
         </div>
         <div class="lock-panel">
           <h3>Bloqueo durante el cuestionario</h3>
-          <p>Mientras el intento esté activo, la app oculta el módulo teórico, bloquea la navegación interna y conserva el intento si se recarga la página. También registra pérdidas de foco de la ventana.</p>
+          <p>Mientras el intento esté activo, la app oculta el módulo teórico, bloquea la navegación interna y conserva el intento si se recarga la página. También registra incidencias de foco de la ventana como dato informativo. Este indicador no determina la calificación ni demuestra por sí solo una conducta indebida.</p>
         </div>
       </div>
 
@@ -885,7 +885,7 @@
           <div class="quiz-status">
             <span class="pill ok">Estudiante: <span id="activeStudent">-</span></span>
             <span class="pill" id="answeredCount">0/64 respondidas</span>
-            <span class="pill warn">Salidas de foco: <span id="focusWarnings">0</span></span>
+            <span class="pill warn" role="status" aria-live="polite" title="Dato informativo; no modifica la nota.">Incidencias de foco: <span id="focusWarnings">0</span></span>
           </div>
           <button id="submitQuizBtn" class="primary-btn" type="button">Entregar y calificar</button>
         </div>
@@ -902,7 +902,7 @@
           <div>
             <h2>Resultado del cuestionario</h2>
             <p class="small-note">Estudiante: <b id="resultStudent">-</b> · Curso: <b id="resultCourse">-</b> · Fecha: <b id="resultDate">-</b></p>
-            <p><b id="rawPoints">0/64 puntos</b> · Salidas de foco registradas: <b id="resultWarnings">0</b></p>
+            <p><b id="rawPoints">0/64 puntos</b> · Incidencias de foco: <b id="resultWarnings">0</b></p>
             <div class="result-actions">
               <button id="downloadCsvBtn" class="soft-btn" type="button">Descargar resultado CSV</button>
               <button id="printResultBtn" class="ghost-btn" type="button">Imprimir / guardar PDF</button>
@@ -910,7 +910,7 @@
             </div>
           </div>
         </div>
-        <div class="footer-note">La corrección automática compara selecciones cerradas, notas, registro y disposición. Las respuestas parciales muestran el criterio de referencia para facilitar su revisión.</div>
+        <div class="footer-note">La corrección automática compara selecciones cerradas, notas, registro y disposición. Las respuestas parciales muestran el criterio de referencia para facilitar su revisión. Las incidencias de foco son únicamente informativas y no modifican la calificación.</div>
         <div id="reviewList" class="review-list"></div>
       </div>
     </section>
