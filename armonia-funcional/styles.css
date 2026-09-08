@@ -2268,3 +2268,24 @@ select:focus-visible,input:focus-visible,textarea:focus-visible{
     display:none!important;
   }
 }
+
+/* ===== CONTINUIDAD PEDAGÓGICA · ARMONÍA JAZZ ===== */
+.next-course-cta{
+  margin:32px auto 8px;
+  padding:22px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:rgba(212,168,79,.06);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+}
+.next-course-cta h2{margin:4px 0 8px;color:var(--ink)}
+.next-course-cta p{margin:0;color:var(--muted);max-width:760px}
+.next-course-link{white-space:nowrap;text-decoration:none}
+@media(max-width:760px){
+  .next-course-cta{display:grid;grid-template-columns:1fr}
+  .next-course-link{width:100%;text-align:center}
+}
+@media print{.next-course-cta{display:none!important}}
