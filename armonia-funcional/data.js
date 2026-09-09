@@ -8914,6 +8914,103 @@ window.APP_DATA = {
           "sampleAnswer": "G2, F3, B3, C#4, E4 y A4."
         }
       ]
+    },
+    {
+      "id": "nivel-4-armonia-diatonica-progresiones",
+      "level": "Nivel 4",
+      "title": "Armonía diatónica y progresiones",
+      "subtitle": "Campo armónico, cadencias, ritmo armónico, inversiones y tonalidad menor como puente hacia Armonía Jazz.",
+      "theory": [
+        {
+          "id": "nivel-4-campo-armonico-mayor",
+          "title": "1. Campo armónico mayor",
+          "subtitle": "Tríadas y tétradas diatónicas construidas sobre cada grado.",
+          "items": [
+            {"term":"Armonización por terceras","body":"El campo armónico se obtiene superponiendo terceras diatónicas sobre cada grado de la escala. Con tres sonidos se forman tríadas; con cuatro, tétradas."},
+            {"term":"Tríadas del modo mayor","body":"El patrón de calidades es I mayor, ii menor, iii menor, IV mayor, V mayor, vi menor y vii disminuido."},
+            {"term":"Tétradas del modo mayor","body":"El patrón es Imaj7, iim7, iiim7, IVmaj7, V7, vim7 y viim7(b5). Se conserva en cualquier tonalidad mayor."},
+            {"term":"Grado y función","body":"I, iii y vi pertenecen principalmente a la familia tónica; ii y IV a la subdominante; V7 y vii semidisminuido a la dominante. La función concreta depende del contexto."}
+          ]
+        },
+        {
+          "id": "nivel-4-progresiones-cadencias",
+          "title": "2. Progresiones y cadencias",
+          "subtitle": "Preparación, tensión, resolución y cierres tonales básicos.",
+          "items": [
+            {"term":"Progresión funcional","body":"Una progresión organiza acordes en el tiempo. El recorrido tónica - subdominante - dominante - tónica produce preparación, tensión y resolución."},
+            {"term":"Cadencia auténtica","body":"V7 - I es la cadencia auténtica fundamental. La sensible asciende a la tónica y la séptima del dominante desciende por grado conjunto."},
+            {"term":"Otras cadencias","body":"IV - I produce cadencia plagal; una frase que termina en V produce semicadencia; V - vi produce cadencia deceptiva o rota."},
+            {"term":"Células frecuentes","body":"I - IV - V - I presenta las tres funciones principales. I - vi - ii - V - I amplía el recorrido y prepara el vocabulario del jazz."}
+          ]
+        },
+        {
+          "id": "nivel-4-ciclo-ritmo-armonico",
+          "title": "3. Ciclo de quintas y ritmo armónico",
+          "subtitle": "Dirección de fundamentales y velocidad de los cambios de acorde.",
+          "items": [
+            {"term":"Quinta descendente","body":"El movimiento de fundamental por quinta descendente, o cuarta ascendente, genera una dirección tonal fuerte. Aparece en ii - V - I y en cadenas más extensas."},
+            {"term":"Ciclo diatónico","body":"En mayor, una cadena como iii - vi - ii - V - I enlaza fundamentales por quintas descendentes y conduce progresivamente a la tónica."},
+            {"term":"Ritmo armónico","body":"El ritmo armónico describe cada cuánto cambia la armonía. Puede haber un acorde por compás, dos por compás o acordes sostenidos durante varios compases."},
+            {"term":"Jerarquía métrica","body":"Los cambios colocados en posiciones métricas fuertes suelen sentirse más estables. Los cambios anticipados o en posiciones débiles pueden aumentar impulso y tensión."}
+          ]
+        },
+        {
+          "id": "nivel-4-inversiones-bajos",
+          "title": "4. Inversiones y bajos cifrados",
+          "subtitle": "Fundamental, bajo real y conducción mediante slash chords.",
+          "items": [
+            {"term":"Fundamental y bajo","body":"La fundamental determina el nombre y la estructura del acorde; el bajo es la nota que realmente suena más grave. Pueden coincidir o ser notas distintas."},
+            {"term":"Inversiones de tríada","body":"Estado fundamental: fundamental en el bajo. Primera inversión: tercera en el bajo. Segunda inversión: quinta en el bajo."},
+            {"term":"Inversiones de tétrada","body":"Una tétrada añade tercera inversión cuando la séptima se encuentra en el bajo."},
+            {"term":"Cifrado slash","body":"C/E significa acorde de C con E en el bajo; C/G significa C con G en el bajo. El símbolo después de la barra nombra siempre el bajo real."},
+            {"term":"Uso musical","body":"Las inversiones suavizan la línea del bajo, conectan acordes por movimiento conjunto y cambian el peso sonoro sin alterar necesariamente la función principal."}
+          ]
+        },
+        {
+          "id": "nivel-4-tonalidad-menor-funcional",
+          "title": "5. Tonalidad menor funcional",
+          "subtitle": "Tres formas de la escala menor y dominante con sensible.",
+          "items": [
+            {"term":"Tres materiales menores","body":"La menor natural aporta el campo básico; la menor armónica eleva el séptimo grado; la menor melódica ascendente eleva sexto y séptimo. No son tres tonalidades separadas, sino recursos del modo menor."},
+            {"term":"Sensible y dominante","body":"Elevar el séptimo grado crea una sensible a semitono de la tónica y transforma el acorde v menor en V o V7, reforzando la resolución hacia i."},
+            {"term":"Acorde ii semidisminuido","body":"En menor, iiø7 contiene 1, tercera menor, quinta disminuida y séptima menor respecto de su fundamental. Prepara al dominante en la progresión iiø7 - V7 - i."},
+            {"term":"Dominante y disminuido","body":"V7 y vii°7 proceden del uso de la sensible de la menor armónica y concentran la función dominante."},
+            {"term":"Conducción menor","body":"En V7 - i, la sensible resuelve ascendentemente a la tónica y la séptima del dominante suele resolver descendiendo."}
+          ]
+        },
+        {
+          "id": "nivel-4-puente-jazz",
+          "title": "6. Puente hacia Armonía Jazz",
+          "subtitle": "ii - V - I, notas guía y criterios de preparación práctica.",
+          "items": [
+            {"term":"ii - V - I mayor","body":"La célula iim7 - V7 - Imaj7 concentra subdominante, dominante y tónica. Es el punto de entrada más importante al lenguaje armónico del jazz."},
+            {"term":"iiø - V - i menor","body":"La variante menor utiliza ii semidisminuido, V7 con sensible e i menor. Su conducción de terceras y séptimas debe escucharse y tocarse como una sola frase armónica."},
+            {"term":"Resolución de notas guía","body":"En un ii - V - I, terceras y séptimas se mueven normalmente por semitono o tono, manteniendo notas comunes cuando es posible. Esa conducción define con claridad la progresión aun sin todas las extensiones."},
+            {"term":"Transposición","body":"Antes de avanzar conviene construir y tocar ambas células en varias tonalidades, primero con fundamentales y luego con shells de tercera y séptima."},
+            {"term":"Frontera del curso","body":"Dominantes secundarios, sustitución tritonal, blues, escalas de acorde e intercambio modal avanzado se desarrollan en Armonía Jazz; aquí se consolida el lenguaje funcional que necesitan."}
+          ]
+        }
+      ],
+      "quiz": [
+        {"id":1,"section":"I. Campo armónico mayor","type":"multipleChoice","prompt":"¿Cuál es el patrón correcto de tétradas en una tonalidad mayor?","sampleAnswer":"Imaj7, iim7, iiim7, IVmaj7, V7, vim7 y viim7(b5).","choices":["Imaj7, iim7, iiim7, IVmaj7, V7, vim7, viim7(b5)","Imaj7, ii7, iii7, IVm7, Vmaj7, vi7, vii°7","Im7, iim7, IIImaj7, ivm7, Vm7, VImaj7, VII7"],"answer":0},
+        {"id":2,"section":"I. Campo armónico mayor","type":"multipleChoice","prompt":"¿Qué grados cumplen principalmente función subdominante en mayor?","sampleAnswer":"ii y IV.","choices":["ii y IV","I y vi","V y vii"],"answer":0},
+        {"id":3,"section":"I. Campo armónico mayor","type":"multipleChoice","prompt":"¿Qué acorde se forma como tétrada sobre el quinto grado mayor?","sampleAnswer":"Un acorde dominante V7.","choices":["V7","Vmaj7","Vm7"],"answer":0},
+        {"id":4,"section":"II. Progresiones y cadencias","type":"multipleChoice","prompt":"¿Qué recorrido funcional describe I - IV - V7 - I?","sampleAnswer":"Tónica - subdominante - dominante - tónica.","choices":["Tónica - subdominante - dominante - tónica","Dominante - tónica - subdominante - dominante","Subdominante - dominante - subdominante - tónica"],"answer":0},
+        {"id":5,"section":"II. Progresiones y cadencias","type":"multipleChoice","prompt":"¿Qué progresión produce una cadencia plagal?","sampleAnswer":"IV - I.","choices":["IV - I","V7 - I","V - vi"],"answer":0},
+        {"id":6,"section":"II. Progresiones y cadencias","type":"multipleChoice","prompt":"¿Cómo se llama una frase que termina sobre V?","sampleAnswer":"Semicadencia.","choices":["Semicadencia","Cadencia plagal","Cadencia deceptiva"],"answer":0},
+        {"id":7,"section":"III. Ciclo y ritmo armónico","type":"multipleChoice","prompt":"¿Qué movimiento de fundamental crea una dirección tonal especialmente fuerte?","sampleAnswer":"Quinta descendente o cuarta ascendente.","choices":["Quinta descendente o cuarta ascendente","Segunda aumentada descendente","Tritono paralelo"],"answer":0},
+        {"id":8,"section":"III. Ciclo y ritmo armónico","type":"multipleChoice","prompt":"¿Qué describe el ritmo armónico?","sampleAnswer":"La frecuencia y ubicación temporal de los cambios de acorde.","choices":["La frecuencia de los cambios de acorde","La velocidad de cada arpegio","La intensidad de la melodía"],"answer":0},
+        {"id":9,"section":"III. Ciclo y ritmo armónico","type":"multipleChoice","prompt":"¿Cuál cadena sigue quintas descendentes hacia I?","sampleAnswer":"iii - vi - ii - V - I.","choices":["iii - vi - ii - V - I","I - iii - IV - ii - vi","I - vii - IV - iii - V"],"answer":0},
+        {"id":10,"section":"IV. Inversiones y bajos","type":"multipleChoice","prompt":"¿Qué significa C/E?","sampleAnswer":"Un acorde de C con E en el bajo.","choices":["C con E en el bajo","E mayor con C en el bajo","C menor con quinta aumentada"],"answer":0},
+        {"id":11,"section":"IV. Inversiones y bajos","type":"multipleChoice","prompt":"¿Qué nota está en el bajo en la segunda inversión de una tríada?","sampleAnswer":"La quinta.","choices":["La quinta","La tercera","La séptima"],"answer":0},
+        {"id":12,"section":"IV. Inversiones y bajos","type":"multipleChoice","prompt":"¿Cuál es la diferencia entre fundamental y bajo?","sampleAnswer":"La fundamental define el acorde; el bajo es la nota más grave que suena.","choices":["La fundamental define el acorde y el bajo es la nota más grave","No existe diferencia","El bajo siempre es la tercera"],"answer":0},
+        {"id":13,"section":"V. Tonalidad menor","type":"multipleChoice","prompt":"¿Qué grado se eleva en la escala menor armónica?","sampleAnswer":"El séptimo grado.","choices":["El séptimo","El tercero","El cuarto"],"answer":0},
+        {"id":14,"section":"V. Tonalidad menor","type":"multipleChoice","prompt":"¿Por qué se eleva el séptimo grado en menor funcional?","sampleAnswer":"Para crear sensible y fortalecer V7 - i.","choices":["Para crear sensible y fortalecer V7 - i","Para eliminar la dominante","Para convertir i en mayor"],"answer":0},
+        {"id":15,"section":"V. Tonalidad menor","type":"multipleChoice","prompt":"¿Cuál es la preparación característica del dominante en menor?","sampleAnswer":"iiø7.","choices":["iiø7","IImaj7","ivmaj7"],"answer":0},
+        {"id":16,"section":"VI. Puente hacia Jazz","type":"multipleChoice","prompt":"¿Cuál es el ii - V - I en Do mayor?","sampleAnswer":"Dm7 - G7 - Cmaj7.","choices":["Dm7 - G7 - Cmaj7","D7 - Gmaj7 - Cm7","Dm7(b5) - Gm7 - C7"],"answer":0},
+        {"id":17,"section":"VI. Puente hacia Jazz","type":"multipleChoice","prompt":"¿Qué voces definen mejor la calidad y conducción de un acorde con séptima?","sampleAnswer":"La tercera y la séptima.","choices":["La tercera y la séptima","La fundamental duplicada","La quinta y la octava"],"answer":0},
+        {"id":18,"section":"VI. Puente hacia Jazz","type":"multipleChoice","prompt":"¿Qué debe practicarse antes de añadir extensiones al ii - V - I?","sampleAnswer":"Fundamentales y shells de tercera y séptima.","choices":["Fundamentales y shells de tercera y séptima","Todas las tensiones alteradas","Solo escalas cromáticas"],"answer":0}
+      ]
     }
   ]
 };

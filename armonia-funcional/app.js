@@ -1870,6 +1870,24 @@ const THEORY_VISUAL_LABS = {
   ],
   "nivel-3-acompanamiento-bajo-acorde": [
     { type: "bassChordLab", title: "Acompañamiento bajo/acorde", description: "Visualiza una propuesta de reparto entre mano izquierda y mano derecha." }
+  ],
+  "nivel-4-campo-armonico-mayor": [
+    { type: "functionalBridgeLab", title: "Campo armónico transponible", description: "Construye y escucha las siete tétradas diatónicas en cualquier tonalidad.", options: { family: "major-field" } }
+  ],
+  "nivel-4-progresiones-cadencias": [
+    { type: "functionalBridgeLab", title: "Comparador de cadencias", description: "Escucha cómo cambia el cierre entre cadencia auténtica, plagal, semicadencia y deceptiva.", options: { family: "cadences" } }
+  ],
+  "nivel-4-ciclo-ritmo-armonico": [
+    { type: "functionalBridgeLab", title: "Ciclo y ritmo armónico", description: "Sigue las fundamentales por quintas y cambia la velocidad armónica.", options: { family: "cycle" } }
+  ],
+  "nivel-4-inversiones-bajos": [
+    { type: "functionalBridgeLab", title: "Bajo real e inversiones", description: "Compara estado fundamental, primera y segunda inversión con cifrado slash.", options: { family: "inversions" } }
+  ],
+  "nivel-4-tonalidad-menor-funcional": [
+    { type: "functionalBridgeLab", title: "Dominante menor funcional", description: "Contrasta menor natural y menor armónica, y escucha iiø7 - V7 - i.", options: { family: "minor" } }
+  ],
+  "nivel-4-puente-jazz": [
+    { type: "functionalBridgeLab", title: "Puente ii - V - I", description: "Escucha las notas guía del ii - V - I mayor y del iiø - V - i menor.", options: { family: "jazz-bridge" } }
   ]
 };
 const THEORY_VISUAL_CHORD_FORMULAS = {
@@ -1951,6 +1969,7 @@ function mountTheoryVisuals() {
     else if (type === "extensionPlacementLab") mountExtensionPlacementLab(el, options);
     else if (type === "constructionLab") mountConstructionLab(el, options);
     else if (type === "bassChordLab") mountBassChordLab(el, options);
+    else if (type === "functionalBridgeLab") mountFunctionalBridgeLab(el, options);
   });
 }
 function safeJsonParse(value) {
@@ -2656,12 +2675,69 @@ function mountBassChordLab(el) {
   update();
 }
 
+const FUNCTIONAL_BRIDGE_FAMILIES = {
+  "major-field": [{id:"field7",label:"Tétradas diatónicas",note:"El patrón de calidades se mantiene al transponer.",steps:[
+    {roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]},{roman:"iim7",name:"Subdominante",offsets:[2,5,9,12]},{roman:"iiim7",name:"Tónica",offsets:[4,7,11,14]},{roman:"IVmaj7",name:"Subdominante",offsets:[5,9,12,16]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"vim7",name:"Tónica",offsets:[9,12,16,19]},{roman:"viiø7",name:"Dominante",offsets:[11,14,17,21]}
+  ]}],
+  cadences: [
+    {id:"authentic",label:"Auténtica · V7 - I",note:"Tensión dominante que resuelve en la tónica.",steps:[{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]}]},
+    {id:"plagal",label:"Plagal · IV - I",note:"Cierre de subdominante hacia tónica.",steps:[{roman:"IVmaj7",name:"Subdominante",offsets:[5,9,12,16]},{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]}]},
+    {id:"half",label:"Semicadencia · ii - V",note:"La frase queda suspendida sobre la dominante.",steps:[{roman:"iim7",name:"Subdominante",offsets:[2,5,9,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]}]},
+    {id:"deceptive",label:"Deceptiva · V7 - vi",note:"La dominante evita I y resuelve en vi.",steps:[{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"vim7",name:"Tónica relativa",offsets:[9,12,16,19]}]}
+  ],
+  cycle: [
+    {id:"long-cycle",label:"iii - vi - ii - V - I",note:"Cadena diatónica de quintas descendentes.",steps:[{roman:"iiim7",name:"Tónica",offsets:[4,7,11,14]},{roman:"vim7",name:"Tónica",offsets:[9,12,16,19]},{roman:"iim7",name:"Subdominante",offsets:[2,5,9,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]}]},
+    {id:"turnaround",label:"I - vi - ii - V - I",note:"Turnaround funcional básico antes del lenguaje jazzístico.",steps:[{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]},{roman:"vim7",name:"Tónica",offsets:[9,12,16,19]},{roman:"iim7",name:"Subdominante",offsets:[2,5,9,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]}]}
+  ],
+  inversions: [
+    {id:"triad-inversions",label:"Inversiones de I",note:"La fundamental no cambia; cambia la nota más grave.",steps:[{roman:"I",name:"Estado fundamental",bass:"1",offsets:[0,4,7]},{roman:"I/3",name:"Primera inversión",bass:"3",offsets:[4,7,12]},{roman:"I/5",name:"Segunda inversión",bass:"5",offsets:[7,12,16]}]},
+    {id:"bass-line",label:"Línea de bajo · I - V/3 - vi",note:"El cifrado slash permite una línea grave más gradual.",steps:[{roman:"I",name:"Tónica",offsets:[0,4,7]},{roman:"V/3",name:"Dominante con 3 en bajo",offsets:[11,14,19]},{roman:"vi",name:"Tónica relativa",offsets:[9,12,16]}]}
+  ],
+  minor: [
+    {id:"minor-cadence",label:"iiø7 - V7 - i",note:"La sensible de la menor armónica fortalece V7 - i.",steps:[{roman:"iiø7",name:"Subdominante",offsets:[2,5,8,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"i",name:"Tónica menor",offsets:[0,3,7]}]},
+    {id:"natural-vs-functional",label:"v menor - i / V7 - i",note:"Compara dominante modal y dominante funcional.",steps:[{roman:"v",name:"Menor natural",offsets:[7,10,14]},{roman:"i",name:"Tónica menor",offsets:[0,3,7]},{roman:"V7",name:"Menor armónica",offsets:[7,11,14,17]},{roman:"i",name:"Tónica menor",offsets:[0,3,7]}]}
+  ],
+  "jazz-bridge": [
+    {id:"major-251",label:"iim7 - V7 - Imaj7",note:"La célula funcional central del repertorio tonal de jazz.",steps:[{roman:"iim7",name:"Subdominante",offsets:[2,5,9,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"Imaj7",name:"Tónica",offsets:[0,4,7,11]}]},
+    {id:"minor-251",label:"iiø7 - V7 - im",note:"La variante menor combina ii semidisminuido y dominante con sensible.",steps:[{roman:"iiø7",name:"Subdominante",offsets:[2,5,8,12]},{roman:"V7",name:"Dominante",offsets:[7,11,14,17]},{roman:"im",name:"Tónica menor",offsets:[0,3,7,10]}]}
+  ]
+};
+
+function mountFunctionalBridgeLab(el, options = {}) {
+  const family=FUNCTIONAL_BRIDGE_FAMILIES[options.family]||FUNCTIONAL_BRIDGE_FAMILIES["jazz-bridge"];
+  el.innerHTML=`<div class="theory-widget theory-widget-functional-bridge"><div class="visual-controls">
+    <label>Tonalidad<select data-bridge-root>${theorySelectOptions(THEORY_VISUAL_ROOTS,"C")}</select></label>
+    ${family.length>1?`<label>Ejemplo<select data-bridge-pattern>${family.map(item=>`<option value="${item.id}">${escapeHtml(item.label)}</option>`).join("")}</select></label>`:""}
+    ${options.family==="cycle"?'<label>Ritmo armónico<select data-bridge-speed><option value="1100">1 acorde por compás</option><option value="650">2 acordes por compás</option></select></label>':""}
+  </div><div class="bridge-progression" data-bridge-progression></div><p class="small-note bridge-note" data-bridge-note></p><div class="visual-audio-controls"><button class="ghost-btn compact-btn" data-bridge-play>▶ Escuchar progresión</button><button class="soft-btn compact-btn" data-bridge-stop>■ Detener</button></div></div>`;
+  const rootSel=el.querySelector("[data-bridge-root]"),patternSel=el.querySelector("[data-bridge-pattern]");
+  const current=()=>family.find(item=>item.id===(patternSel?.value||family[0].id))||family[0];
+  const render=()=>{
+    const pattern=current();el.querySelector("[data-bridge-note]").textContent=pattern.note;
+    el.querySelector("[data-bridge-progression]").innerHTML=pattern.steps.map((step,index)=>`<button type="button" class="bridge-chord-step" data-bridge-step="${index}"><b>${escapeHtml(step.roman)}</b><span>${escapeHtml(step.name)}</span>${step.bass?`<small>Bajo: ${escapeHtml(step.bass)}</small>`:""}</button>${index<pattern.steps.length-1?'<span class="progression-arrow">→</span>':""}`).join("");
+    el.querySelectorAll("[data-bridge-step]").forEach(button=>button.addEventListener("click",()=>{const step=pattern.steps[Number(button.dataset.bridgeStep)],base=theoryRootMidi(rootSel.value,3);playTheoryChord(step.offsets.map(offset=>base+offset),{duration:1.15})}));
+  };
+  rootSel.addEventListener("change",render);patternSel?.addEventListener("change",render);render();
+  el.querySelector("[data-bridge-play]").addEventListener("click",async()=>{
+    const pattern=current(),buttons=[...el.querySelectorAll("[data-bridge-step]")],gap=Number(el.querySelector("[data-bridge-speed]")?.value||850),base=theoryRootMidi(rootSel.value,3);
+    stopTheoryAudio();
+    const token=THEORY_AUDIO_STATE.sequenceToken;
+    for(let index=0;index<pattern.steps.length;index+=1){if(token!==THEORY_AUDIO_STATE.sequenceToken)return;buttons.forEach((button,i)=>button.classList.toggle("audio-active",i===index));playTheoryChord(pattern.steps[index].offsets.map(offset=>base+offset),{duration:Math.max(.45,gap/1000*.82),stop:false});await new Promise(resolve=>setTimeout(resolve,gap))}
+    buttons.forEach(button=>button.classList.remove("audio-active"));
+  });
+  el.querySelector("[data-bridge-stop]").addEventListener("click",()=>{stopTheoryAudio();el.querySelectorAll("[data-bridge-step]").forEach(button=>button.classList.remove("audio-active"))});
+}
+
 
 
 /* ============================ FASE 8 · AUDIO + PRÁCTICA ============================ */
 
 const THEORY_AUDIO_STATE = {
   context: null,
+  masterBus: null,
+  sfPlayer: null,
+  sfPromise: null,
+  sfFailed: false,
   activeNodes: [],
   sequenceToken: 0
 };
@@ -2864,6 +2940,54 @@ const TOPIC_PRACTICE_BANK = {
       answer: 0,
       explain: "La mano izquierda sostiene la base grave; la derecha organiza las voces superiores."
     }
+  ],
+  "nivel-4-campo-armonico-mayor": [
+    {
+      prompt: "¿Qué patrón de séptimas produce la escala mayor?",
+      choices: ["maj7–m7–m7–maj7–7–m7–m7♭5", "m7–maj7–7–m7–maj7–7–m7", "maj7–7–m7–m7♭5–maj7–m7–7"],
+      answer: 0,
+      explain: "Ese patrón diatónico se conserva al transportar el campo armónico mayor."
+    }
+  ],
+  "nivel-4-progresiones-cadencias": [
+    {
+      prompt: "¿Qué movimiento define una cadencia auténtica funcional?",
+      choices: ["V–I", "IV–I", "I–vi"],
+      answer: 0,
+      explain: "La dominante V resuelve su tensión en la tónica I."
+    }
+  ],
+  "nivel-4-ciclo-ritmo-armonico": [
+    {
+      prompt: "¿Qué describe el ritmo armónico?",
+      choices: ["La frecuencia con que cambian los acordes", "La velocidad de la melodía", "El registro del bajo"],
+      answer: 0,
+      explain: "El ritmo armónico indica cada cuánto ocurre un cambio de armonía."
+    }
+  ],
+  "nivel-4-inversiones-bajos": [
+    {
+      prompt: "¿Qué significa C/E?",
+      choices: ["Un acorde de C con E en el bajo", "Un acorde de E mayor", "Dos acordes simultáneos"],
+      answer: 0,
+      explain: "La nota después de la barra indica el bajo real del acorde."
+    }
+  ],
+  "nivel-4-tonalidad-menor-funcional": [
+    {
+      prompt: "¿Por qué se eleva el séptimo grado en la armonía menor funcional?",
+      choices: ["Para crear sensible y fortalecer V–i", "Para convertir i en mayor", "Para eliminar la dominante"],
+      answer: 0,
+      explain: "La sensible queda a semitono de la tónica y refuerza la resolución dominante."
+    }
+  ],
+  "nivel-4-puente-jazz": [
+    {
+      prompt: "¿Cuál es la célula funcional central que enlaza con la armonía jazz?",
+      choices: ["ii–V–I", "I–IV–iii", "vi–I–IV"],
+      answer: 0,
+      explain: "ii–V–I resume preparación, tensión dominante y resolución."
+    }
   ]
 };
 
@@ -2948,9 +3072,33 @@ function ensureTheoryAudioContext() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) return null;
     THEORY_AUDIO_STATE.context = new AudioContextClass();
+    THEORY_AUDIO_STATE.masterBus = THEORY_AUDIO_STATE.context.createGain();
+    THEORY_AUDIO_STATE.masterBus.gain.value = 1.65;
+    THEORY_AUDIO_STATE.masterBus.connect(THEORY_AUDIO_STATE.context.destination);
   }
   if (THEORY_AUDIO_STATE.context.state === "suspended") THEORY_AUDIO_STATE.context.resume();
   return THEORY_AUDIO_STATE.context;
+}
+function ensureTheoryPianoSoundFont() {
+  const ctx = ensureTheoryAudioContext();
+  if (!ctx || THEORY_AUDIO_STATE.sfFailed) return Promise.resolve(null);
+  if (THEORY_AUDIO_STATE.sfPlayer) return Promise.resolve(THEORY_AUDIO_STATE.sfPlayer);
+  if (!window.Soundfont?.instrument) {
+    THEORY_AUDIO_STATE.sfFailed = true;
+    return Promise.resolve(null);
+  }
+  if (!THEORY_AUDIO_STATE.sfPromise) {
+    THEORY_AUDIO_STATE.sfPromise = window.Soundfont.instrument(ctx, "acoustic_grand_piano", {
+      destination: THEORY_AUDIO_STATE.masterBus
+    }).then(player => {
+      THEORY_AUDIO_STATE.sfPlayer = player;
+      return player;
+    }).catch(() => {
+      THEORY_AUDIO_STATE.sfFailed = true;
+      return null;
+    });
+  }
+  return THEORY_AUDIO_STATE.sfPromise;
 }
 function stopTheoryAudio() {
   THEORY_AUDIO_STATE.sequenceToken += 1;
@@ -2963,7 +3111,7 @@ function stopTheoryAudio() {
 function midiFrequency(midi) {
   return 440 * Math.pow(2, (midi - 69) / 12);
 }
-function playTheoryMidi(midi, options = {}) {
+function playTheoryFallbackMidi(midi, options = {}) {
   const ctx = ensureTheoryAudioContext();
   if (!ctx) return;
   const now = ctx.currentTime + (Number(options.delay) || 0);
@@ -2976,7 +3124,7 @@ function playTheoryMidi(midi, options = {}) {
   gain.gain.exponentialRampToValueAtTime(Number(options.volume) || 0.18, now + .018);
   gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
   osc.connect(gain);
-  gain.connect(ctx.destination);
+  gain.connect(THEORY_AUDIO_STATE.masterBus || ctx.destination);
   osc.start(now);
   osc.stop(now + duration + .03);
   THEORY_AUDIO_STATE.activeNodes.push(osc);
@@ -2985,13 +3133,35 @@ function playTheoryMidi(midi, options = {}) {
     try { osc.disconnect(); gain.disconnect(); } catch (error) {}
   });
 }
+function playTheoryPianoSample(player, midi, options = {}) {
+  const ctx = ensureTheoryAudioContext();
+  if (!ctx || !player) return;
+  const duration = Math.max(.08, Number(options.duration) || .55);
+  const node = player.play(midi, ctx.currentTime + (Number(options.delay) || 0), {
+    duration,
+    gain: Math.max(.05, Number(options.volume) || .72)
+  });
+  if (!node) return;
+  THEORY_AUDIO_STATE.activeNodes.push(node);
+  window.setTimeout(() => {
+    THEORY_AUDIO_STATE.activeNodes = THEORY_AUDIO_STATE.activeNodes.filter(item => item !== node);
+  }, (duration + Number(options.delay || 0) + .3) * 1000);
+}
+function playTheoryMidi(midi, options = {}) {
+  ensureTheoryPianoSoundFont().then(player => {
+    if (player) playTheoryPianoSample(player, midi, options);
+    else playTheoryFallbackMidi(midi, options);
+  });
+}
 function playTheoryChord(midis, options = {}) {
-  stopTheoryAudio();
-  midis.forEach((midi, index) => playTheoryMidi(midi, {
+  if (options.stop !== false) stopTheoryAudio();
+  midis.forEach(midi => playTheoryMidi(midi, {
     duration: options.duration || 1.05,
-    volume: 0.105,
-    type: index === 0 ? "triangle" : "sine"
+    volume: options.volume || .58
   }));
+}
+if (typeof window.setTimeout === "function") {
+  window.setTimeout(() => ensureTheoryPianoSoundFont(), 100);
 }
 async function playTheorySequence(midis, onStep, options = {}) {
   stopTheoryAudio();
@@ -3191,7 +3361,7 @@ mountReharmLab = function(el, options) {
         if (type) {
           const root = ChordRef.rootInfo(chordRoot);
           const tones = ChordRef.chordTones(root, type.formula);
-          playTheoryChord(chordTonesToMidis(chordRoot, tones), { duration: .72 });
+          playTheoryChord(chordTonesToMidis(chordRoot, tones), { duration: .72, stop: false });
         }
         await new Promise(resolve => setTimeout(resolve, 760));
       }

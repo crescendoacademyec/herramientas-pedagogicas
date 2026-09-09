@@ -3,6 +3,7 @@ const fs = require("node:fs");
 
 const app = fs.readFileSync(__dirname + "/app.js", "utf8");
 const css = fs.readFileSync(__dirname + "/styles.css", "utf8");
+const html = fs.readFileSync(__dirname + "/index.html", "utf8");
 
 assert.match(app, /FASE 8 · AUDIO \+ PRÁCTICA/);
 assert.match(app, /function ensureTheoryAudioContext/);
@@ -13,6 +14,9 @@ assert.match(app, /function mountTopicPractices/);
 assert.match(app, /data-practice-choice/);
 assert.match(app, /Construir paso a paso/);
 assert.match(app, /AudioContext/);
+assert.match(app, /acoustic_grand_piano/);
+assert.match(app, /ensureTheoryPianoSoundFont/);
+assert.match(html, /soundfont-player@0\.12\.0/);
 assert.match(css, /FASE 8 · AUDIO \+ PRÁCTICA/);
 assert.match(css, /\.practice-option/);
 assert.match(css, /\.audio-active/);
@@ -42,7 +46,13 @@ const expectedTopics = [
   "nivel-3-posicion-cerrada-skip-2",
   "nivel-3-registro-grave-extensiones",
   "nivel-3-construccion-acordes-extendidos",
-  "nivel-3-acompanamiento-bajo-acorde"
+  "nivel-3-acompanamiento-bajo-acorde",
+  "nivel-4-campo-armonico-mayor",
+  "nivel-4-progresiones-cadencias",
+  "nivel-4-ciclo-ritmo-armonico",
+  "nivel-4-inversiones-bajos",
+  "nivel-4-tonalidad-menor-funcional",
+  "nivel-4-puente-jazz"
 ];
 expectedTopics.forEach(id => assert.ok(app.includes(`"${id}"`), `Falta práctica para ${id}`));
 

@@ -23,10 +23,12 @@ vm.createContext(context);
 vm.runInContext(fs.readFileSync(__dirname+"/data.js","utf8"),context);
 const raw=context.APP_DATA;
 assert.ok(raw);
-assert.equal(raw.modules.length,3);
+assert.equal(raw.modules.length,4);
 assert.equal(raw.modules[0].quiz.length,64);
 assert.equal(raw.modules[1].quiz.length,126);
 assert.ok(raw.modules[2].quiz.length>=39);
+assert.equal(raw.modules[3].theory.length,6);
+assert.equal(raw.modules[3].quiz.length,18);
 
 // El conteo activo exacto de Nivel 3 se valida en nivel3-voicing.test.js,
 // porque la normalización pertenece a app.js y no al data.js bruto.
