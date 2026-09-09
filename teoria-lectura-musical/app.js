@@ -37,7 +37,7 @@ const INTERVALS = [
 ];
 const DEGREE_BASE = {1:0,2:2,3:4,4:5,5:7,6:9,7:11,8:12,9:14,11:17,13:21};
 
-const AUDIO = {ctx:null,nodes:[],metroTimer:null,metroBeat:0};
+const AUDIO = {ctx:null,masterBus:null,nodes:[],metroTimer:null,metroBeat:0,sfPlayer:null,sfPromise:null,sfFailed:false};
 
 function $(id){ return document.getElementById(id); }
 function escapeHtml(value){
@@ -157,22 +157,59 @@ function audioContext(){
     const AC=window.AudioContext||window.webkitAudioContext;
     if(!AC) return null;
     AUDIO.ctx=new AC();
+    AUDIO.masterBus=AUDIO.ctx.createGain();
+    AUDIO.masterBus.gain.value=2;
+    AUDIO.masterBus.connect(AUDIO.ctx.destination);
   }
   if(AUDIO.ctx.state==="suspended") AUDIO.ctx.resume();
   return AUDIO.ctx;
 }
 function midiFreq(m){return 440*Math.pow(2,(m-69)/12)}
-function playTone(midi,{duration=.55,volume=.16,type="triangle",delay=0}={}){
+function ensurePianoSoundFont(){
+  if(AUDIO.sfPlayer) return Promise.resolve(AUDIO.sfPlayer);
+  if(AUDIO.sfFailed) return Promise.resolve(null);
+  if(AUDIO.sfPromise) return AUDIO.sfPromise;
+  const ctx=audioContext();
+  if(!ctx||typeof window.Soundfont==="undefined"){
+    AUDIO.sfFailed=true;
+    return Promise.resolve(null);
+  }
+  AUDIO.sfPromise=window.Soundfont.instrument(ctx,"acoustic_grand_piano",{destination:AUDIO.masterBus})
+    .then(player=>{AUDIO.sfPlayer=player;return player})
+    .catch(error=>{AUDIO.sfFailed=true;console.warn("No se pudo cargar el piano acústico; se usará el respaldo sintético.",error);return null})
+    .finally(()=>{AUDIO.sfPromise=null});
+  return AUDIO.sfPromise;
+}
+function playPianoSample(player,midi,{duration,volume,delay}){
+  const ctx=audioContext();if(!ctx||!player) return null;
+  const start=ctx.currentTime+delay;
+  try{
+    const note=player.play(midi,start,{gain:volume,duration});
+    if(note){
+      AUDIO.nodes.push(note);
+      window.setTimeout(()=>{AUDIO.nodes=AUDIO.nodes.filter(node=>node!==note)},Math.max(0,(delay+duration+.5)*1000));
+    }
+    return note;
+  }catch(error){console.warn("No se pudo reproducir la muestra de piano.",error);return null}
+}
+function playOscillatorFallback(midi,{duration,volume,delay}){
   const ctx=audioContext(); if(!ctx) return;
   const t=ctx.currentTime+delay;
   const osc=ctx.createOscillator(),gain=ctx.createGain();
-  osc.type=type;osc.frequency.setValueAtTime(midiFreq(midi),t);
+  osc.type="triangle";osc.frequency.setValueAtTime(midiFreq(midi),t);
   gain.gain.setValueAtTime(.0001,t);
   gain.gain.exponentialRampToValueAtTime(volume,t+.015);
   gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
-  osc.connect(gain);gain.connect(ctx.destination);osc.start(t);osc.stop(t+duration+.03);
+  osc.connect(gain);gain.connect(AUDIO.masterBus||ctx.destination);osc.start(t);osc.stop(t+duration+.03);
   AUDIO.nodes.push(osc);
   osc.addEventListener("ended",()=>{AUDIO.nodes=AUDIO.nodes.filter(n=>n!==osc);try{osc.disconnect();gain.disconnect()}catch(e){}})
+}
+function playTone(midi,{duration=.55,volume=.16,delay=0}={}){
+  if(AUDIO.sfPlayer) return playPianoSample(AUDIO.sfPlayer,midi,{duration,volume,delay});
+  ensurePianoSoundFont().then(player=>{
+    if(player) playPianoSample(player,midi,{duration,volume,delay});
+    else playOscillatorFallback(midi,{duration,volume,delay});
+  });
 }
 function stopAllAudio(){
   AUDIO.nodes.forEach(n=>{try{n.stop()}catch(e){}});
@@ -191,8 +228,10 @@ async function playSequence(midis,gap=360,onStep=()=>{}){
 }
 function playChord(midis){
   stopAllAudio();
-  midis.forEach((m,i)=>playTone(m,{duration:1.05,volume:.10,type:i===0?"triangle":"sine"}));
+  midis.forEach(m=>playTone(m,{duration:1.05,volume:.10}));
 }
+
+window.setTimeout(()=>{ensurePianoSoundFont()},100);
 
 /* ===================== MUSIC HELPERS ===================== */
 function rootInfo(name){
@@ -253,9 +292,9 @@ function staffSVG(rootName,toneList,label="Pentagrama"){
   const root=rootInfo(rootName);
   const baseDiatonic=4*7+root.letterIndex;
   const e4=4*7+NATURAL.indexOf("E");
-  const placed=toneList.map((t,i)=>({t,step:baseDiatonic+(t.degree-1)-e4,x:58+i*34}));
+  const placed=toneList.map((t,i)=>({t,step:baseDiatonic+(t.degree-1)-e4,x:88+i*34}));
   const min=Math.min(0,...placed.map(p=>p.step)),max=Math.max(8,...placed.map(p=>p.step));
-  const sh=5,top=Math.max(0,max-8)*sh+20,y=s=>top+(8-s)*sh,w=Math.max(300,100+placed.length*36),h=y(min)+26;
+  const sh=5,top=Math.max(0,max-8)*sh+20,y=s=>top+(8-s)*sh,w=Math.max(300,128+placed.length*36),h=y(min)+26;
   const lines=[0,2,4,6,8].map(s=>`<line x1="20" x2="${w-18}" y1="${y(s)}" y2="${y(s)}"/>`).join("");
   const notes=placed.map(p=>{
     const ledger=[];
@@ -266,7 +305,7 @@ function staffSVG(rootName,toneList,label="Pentagrama"){
       <ellipse class="note ${p.t.isRoot?"root":""}" cx="${p.x}" cy="${y(p.step)}" rx="6" ry="4.5" transform="rotate(-18 ${p.x} ${y(p.step)})"/>
       <text class="degree" x="${p.x}" y="${h-4}" text-anchor="middle">${escapeHtml(p.t.token.replace(/b/g,"♭").replace(/#/g,"♯"))}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 ${w} ${h}" class="tlm-staff" role="img" aria-label="${escAttr(label)}">${lines}${notes}</svg>`;
+  return `<svg viewBox="0 0 ${w} ${h}" class="tlm-staff" role="img" aria-label="${escAttr(label)}">${lines}<text class="clef-text tlm-clef" x="24" y="${top+39}">${SMUFL_GLYPHS.gClef}</text>${notes}</svg>`;
 }
 function guitarScaleSVG(rootName,toneList){
   const pcs=new Set(toneList.map(t=>t.pc)),rootPc=rootInfo(rootName).pc;
@@ -337,22 +376,21 @@ function mountSoundLab(el){
       <label>Altura <input type="range" min="48" max="84" value="60" data-sound-pitch><span data-sound-pitch-label>C4</span></label>
       <label>Duración <input type="range" min="10" max="160" value="60" data-sound-duration><span data-sound-duration-label>0.60 s</span></label>
       <label>Intensidad <input type="range" min="3" max="30" value="16" data-sound-volume><span data-sound-volume-label>media</span></label>
-      <label>Timbre <select data-sound-wave><option value="sine">Senoidal</option><option value="triangle">Triangular</option><option value="square">Cuadrada</option><option value="sawtooth">Diente de sierra</option></select></label>
+      <label>Instrumento <span class="fixed-control">Piano acústico</span></label>
     </div>
     <div class="sound-visual"><div class="wave-shape" data-wave-shape></div><div><b data-sound-note>C4</b><span>misma nota, propiedades diferentes</span></div></div>
     <div class="lab-actions"><button class="primary-btn" data-play-sound>▶ Escuchar</button><button class="ghost-btn" data-play-pillar>▶ Comparar ritmo/melodía</button></div>
     <div class="compare-copy" data-pillar-copy>Prueba primero el sonido individual.</div>
   </div>`;
-  const pitch=el.querySelector("[data-sound-pitch]"),dur=el.querySelector("[data-sound-duration]"),vol=el.querySelector("[data-sound-volume]"),wave=el.querySelector("[data-sound-wave]");
+  const pitch=el.querySelector("[data-sound-pitch]"),dur=el.querySelector("[data-sound-duration]"),vol=el.querySelector("[data-sound-volume]");
   const update=()=>{
     el.querySelector("[data-sound-pitch-label]").textContent=midiNote(Number(pitch.value));
     el.querySelector("[data-sound-note]").textContent=midiNote(Number(pitch.value));
     el.querySelector("[data-sound-duration-label]").textContent=(Number(dur.value)/100).toFixed(2)+" s";
     el.querySelector("[data-sound-volume-label]").textContent=Number(vol.value)<10?"suave":Number(vol.value)>22?"fuerte":"media";
-    el.querySelector("[data-wave-shape]").dataset.wave=wave.value;
   };
-  [pitch,dur,vol,wave].forEach(x=>x.addEventListener("input",update));update();
-  el.querySelector("[data-play-sound]").addEventListener("click",()=>playTone(Number(pitch.value),{duration:Number(dur.value)/100,volume:Number(vol.value)/100,type:wave.value}));
+  [pitch,dur,vol].forEach(x=>x.addEventListener("input",update));update();
+  el.querySelector("[data-play-sound]").addEventListener("click",()=>playTone(Number(pitch.value),{duration:Number(dur.value)/100,volume:Number(vol.value)/100}));
   let mode=0;
   el.querySelector("[data-play-pillar]").addEventListener("click",()=>{
     mode=(mode+1)%3;
@@ -366,52 +404,75 @@ function mountSoundLab(el){
 /* LECTURA */
 const TREBLE_STAFF_NOTES=["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5"];
 const BASS_STAFF_NOTES=["E2","F2","G2","A2","B2","C3","D3","E3","F3","G3","A3","B3","C4"];
+const SMUFL_GLYPHS=Object.freeze({
+  gClef:String.fromCodePoint(0xE050),
+  fClef:String.fromCodePoint(0xE062),
+  metNoteWhole:String.fromCodePoint(0xECA2),
+  metNoteHalfUp:String.fromCodePoint(0xECA3),
+  metNoteQuarterUp:String.fromCodePoint(0xECA5),
+  metNote8thUp:String.fromCodePoint(0xECA7)
+});
+function smuflTimeDigit(value){const digit=Number(value);return Number.isInteger(digit)&&digit>=0&&digit<=9?String.fromCodePoint(0xE080+digit):String(value)}
 function staffTrainerSVG(note,clef){
-  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES,index=notes.indexOf(note),step=Math.max(0,index-2),w=360,h=130,baseY=82,sh=6;
-  const lines=[0,2,4,6,8].map(s=>`<line x1="70" x2="330" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
+  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES,index=notes.indexOf(note),step=index-2,w=360,h=130,baseY=82,sh=6;
+  const lines=[0,2,4,6,8].map(s=>`<line x1="28" x2="330" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
   const y=baseY-step*sh;
-  return `<svg viewBox="0 0 ${w} ${h}" class="reading-staff" role="img" aria-label="Nota para identificar">
-    ${lines}<text class="clef-text" x="38" y="78">${clef==="treble"?"𝄞":"𝄢"}</text>
+  const ledger=[];
+  if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
+  if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
+  return `<svg viewBox="0 0 ${w} ${h}" class="reading-staff" role="img" aria-label="Nota para identificar en clave de ${clef==="treble"?"sol":"fa"}">
+    ${lines}<text class="clef-text" x="34" y="78">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${ledger.join("")}
     <ellipse class="student-note" cx="190" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 190 ${y})"/>
   </svg>`;
 }
+const NOTE_SOLFEGE={C:"Do",D:"Re",E:"Mi",F:"Fa",G:"Sol",A:"La",B:"Si"};
+function staffReferenceSVG(clef){
+  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES,w=720,h=170,baseY=91,sh=6;
+  const lines=[0,2,4,6,8].map(s=>`<line x1="70" x2="690" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
+  const noteGroups=notes.map((note,index)=>{
+    const step=index-2,x=112+index*44,y=baseY-step*sh,ledger=[];
+    if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line class="ledger" x1="${x-11}" x2="${x+11}" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
+    if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line class="ledger" x1="${x-11}" x2="${x+11}" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
+    const letter=note[0],octave=note.slice(1),spoken=`${NOTE_SOLFEGE[letter]} ${octave}`;
+    return `<g class="reference-note" role="button" tabindex="0" data-reference-note="${note}" aria-label="${spoken}: escuchar">${ledger.join("")}<ellipse cx="${x}" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 ${x} ${y})"/><text x="${x}" y="137" text-anchor="middle">${NOTE_SOLFEGE[letter]}</text><text class="reference-scientific" x="${x}" y="151" text-anchor="middle">${note}</text></g>`;
+  }).join("");
+  const clefName=clef==="treble"?"sol":"fa";
+  return `<div class="staff-reference"><div class="staff-reference-title">Clave de ${clefName}</div><svg viewBox="0 0 ${w} ${h}" class="reading-staff reference-staff" role="img" aria-label="Ubicación de las notas en clave de ${clefName}">${lines}<text class="clef-text" x="25" y="87">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${noteGroups}</svg></div>`;
+}
 function mountReadingLab(el){
-  const figures=[
-    {name:"Redonda",beats:4,symbol:"𝅝"},{name:"Blanca",beats:2,symbol:"𝅗𝅥"},{name:"Negra",beats:1,symbol:"♩"},{name:"Corchea",beats:.5,symbol:"♪"}
-  ];
+  const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
   el.innerHTML=`<div class="visual-two">
-    <section class="lab-card">
-      <div class="diagram-label">Entrenador de pentagrama</div>
-      <div class="controls-row"><label>Clave <select data-clef><option value="treble">Sol</option><option value="bass">Fa</option></select></label><button class="ghost-btn" data-new-note>Nueva nota</button></div>
-      <div data-reading-staff></div>
-      <div class="note-answer-grid">${NATURAL.map(n=>`<button class="note-answer" data-note-answer="${n}">${n}</button>`).join("")}</div>
-      <p class="feedback" data-reading-feedback aria-live="polite"></p>
+    <section class="lab-card staff-map-card">
+      <div class="diagram-label">Mapa de notas en el pentagrama</div>
+      <p class="staff-reference-copy">Observa primero dónde se escribe cada nota. Selecciona una clave y pulsa cualquier nota para escucharla.</p>
+      <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
+      <div class="staff-reference-stack" data-reading-reference></div>
     </section>
     <section class="lab-card">
-      <div class="diagram-label">Valores rítmicos</div>
-      <div class="figure-grid">${figures.map(f=>`<button class="figure-card" data-figure="${f.name}" data-beats="${f.beats}"><span>${f.symbol}</span><b>${f.name}</b><small>${f.beats} pulso${f.beats===1?"":"s"} en 4/4</small></button>`).join("")}</div>
-      <p class="feedback" data-figure-feedback>Selecciona una figura para escuchar su duración relativa.</p>
+      <div class="diagram-label">Audición de duraciones</div>
+      <p class="staff-reference-copy">La referencia gráfica completa está en la tabla superior. Aquí puedes escuchar cuánto dura cada valor si la negra equivale a un pulso.</p>
+      <div class="controls-row"><label>Valor <select data-rhythm-audition>${rhythmValues.map(value=>`<option value="${value.beats}">${value.name} · ${value.beats} pulso${value.beats===1?"":"s"}</option>`).join("")}</select></label><button class="primary-btn" data-play-rhythm-value>▶ Escuchar duración</button></div>
+      <p class="feedback" data-figure-feedback>Selecciona un valor y escúchalo con el piano acústico.</p>
     </section>
   </div>`;
-  let current="";
-  const newNote=()=>{
-    const clef=el.querySelector("[data-clef]").value,arr=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES;
-    current=arr[Math.floor(Math.random()*arr.length)];
-    el.querySelector("[data-reading-staff]").innerHTML=staffTrainerSVG(current,clef);
-    el.querySelector("[data-reading-feedback]").textContent="";
+  const renderReference=()=>{
+    const choice=el.querySelector("[data-reference-clef]").value;
+    const clefs=choice==="both"?["treble","bass"]:[choice];
+    const mount=el.querySelector("[data-reading-reference]");
+    mount.innerHTML=clefs.map(staffReferenceSVG).join("");
+    mount.querySelectorAll("[data-reference-note]").forEach(note=>{
+      const play=()=>{const name=note.dataset.referenceNote;playTone(rootMidi(name.slice(0,-1),Number(name.slice(-1))),{duration:.7,volume:.18})};
+      note.addEventListener("click",play);
+      note.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();play()}});
+    });
   };
-  el.querySelector("[data-clef]").addEventListener("change",newNote);el.querySelector("[data-new-note]").addEventListener("click",newNote);
-  el.querySelectorAll("[data-note-answer]").forEach(btn=>btn.addEventListener("click",()=>{
-    const ok=current.startsWith(btn.dataset.noteAnswer);
-    el.querySelector("[data-reading-feedback]").textContent=ok?`Correcto: ${current}.`:`No. La nota es ${current}.`;
-    playTone(rootMidi(current.slice(0,-1),Number(current.slice(-1))),{duration:.55});
-  }));
-  el.querySelectorAll("[data-figure]").forEach(btn=>btn.addEventListener("click",()=>{
-    const beats=Number(btn.dataset.beats),seconds=beats*.5;
-    playTone(60,{duration:seconds,volume:.12,type:"sine"});
-    el.querySelector("[data-figure-feedback]").textContent=`${btn.dataset.figure}: ${beats} pulso${beats===1?"":"s"} si la negra vale 1 pulso.`;
-  }));
-  newNote();
+  el.querySelector("[data-reference-clef]").addEventListener("change",renderReference);
+  el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
+    const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
+    playTone(60,{duration:seconds,volume:.12});
+    el.querySelector("[data-figure-feedback]").textContent=`${select.options[select.selectedIndex].textContent}: duración relativa con negra = 1 pulso.`;
+  });
+  renderReference();
 }
 
 /* RITMO */
@@ -426,18 +487,18 @@ function mountRhythmLab(el){
     <div class="rhythm-builder"><p><b>Patrón de 8 subdivisiones</b> · activa/desactiva golpes:</p><div class="step-row" data-rhythm-steps>${Array.from({length:8},(_,i)=>`<button class="rhythm-step ${i%2===0?"on":""}" data-step="${i}">${i+1}</button>`).join("")}</div><button class="ghost-btn" data-play-pattern>▶ Escuchar patrón</button></div>
   </div>`;
   const bpm=el.querySelector("[data-bpm]"),meter=el.querySelector("[data-meter]");
-  const renderBeats=()=>{const n=Number(meter.value);el.querySelector("[data-beats]").innerHTML=Array.from({length:n},(_,i)=>`<span class="beat ${i===0?"accent":""}" data-beat="${i}">${i+1}</span>`).join("")};
+  const renderBeats=()=>{const n=Number(meter.value);el.querySelector("[data-beats]").innerHTML=Array.from({length:n},(_,i)=>`<span class="beat ${i===0?"accent":n===6&&i===3?"secondary-accent":""}" data-beat="${i}">${i+1}</span>`).join("")};
   bpm.addEventListener("input",()=>el.querySelector("[data-bpm-label]").textContent=`${bpm.value} BPM`);meter.addEventListener("change",renderBeats);renderBeats();
   el.querySelector("[data-metro]").addEventListener("click",()=>{
     stopAllAudio();AUDIO.metroBeat=0;
-    const tick=()=>{const beats=[...el.querySelectorAll(".beat")];beats.forEach((b,i)=>b.classList.toggle("active",i===AUDIO.metroBeat%beats.length));playTone(AUDIO.metroBeat%beats.length===0?84:79,{duration:.07,volume:.13,type:"square"});AUDIO.metroBeat++};
+    const tick=()=>{const beats=[...el.querySelectorAll(".beat")],position=AUDIO.metroBeat%beats.length;beats.forEach((b,i)=>b.classList.toggle("active",i===position));playTone(position===0?84:beats.length===6&&position===3?82:79,{duration:.07,volume:.13});AUDIO.metroBeat++};
     tick();AUDIO.metroTimer=setInterval(tick,60000/Number(bpm.value));
   });
   el.querySelector("[data-stop-metro]").addEventListener("click",()=>{stopAllAudio();el.querySelectorAll(".beat").forEach(b=>b.classList.remove("active"))});
   el.querySelectorAll(".rhythm-step").forEach(btn=>btn.addEventListener("click",()=>btn.classList.toggle("on")));
   el.querySelector("[data-play-pattern]").addEventListener("click",async()=>{
     stopAllAudio();const steps=[...el.querySelectorAll(".rhythm-step")],gap=(60000/Number(bpm.value))/2;
-    for(let i=0;i<steps.length;i++){steps.forEach((s,j)=>s.classList.toggle("active",i===j));if(steps[i].classList.contains("on"))playTone(i===0?84:79,{duration:.06,volume:.13,type:"square"});await new Promise(r=>setTimeout(r,gap));}
+    for(let i=0;i<steps.length;i++){steps.forEach((s,j)=>s.classList.toggle("active",i===j));if(steps[i].classList.contains("on"))playTone(i===0?84:79,{duration:.06,volume:.13});await new Promise(r=>setTimeout(r,gap));}
     steps.forEach(s=>s.classList.remove("active"));
   });
 }
@@ -693,7 +754,7 @@ async function playAdvancedBasePulse(example,bpm){
   const beatMs=60000/bpm;
   const beats=example.compound?2:4;
   for(let i=0;i<beats;i++){
-    playTone(i===0?84:79,{duration:.06,volume:.14,type:"square"});
+    playTone(i===0?84:79,{duration:.06,volume:.14});
     await new Promise(r=>setTimeout(r,beatMs));
   }
 }
@@ -709,7 +770,7 @@ async function playAdvancedRhythmExample(root,example,bpm){
     const ms=ev.beats*beatMs;
     if(ev.kind!=="rest" && !ev.tied){
       const extra=ev.tieStart && example.events[i+1]?.tied ? example.events[i+1].beats : 0;
-      playTone(79,{duration:Math.max(.05,((ev.beats+extra)*beatMs/1000)*.86),volume:.14,type:"square"});
+      playTone(79,{duration:Math.max(.05,((ev.beats+extra)*beatMs/1000)*.86),volume:.14});
     }
     await new Promise(r=>setTimeout(r,ms));
   }
@@ -849,11 +910,11 @@ mountRhythmSolfege = function(root){
       const [bar,group]=pulses[p].dataset.compoundPulse.split("-").map(Number);
       const events=compoundPattern.filter(ev=>ev.bar===bar&&ev.group===group);
       if(events.length===1){
-        playTone(79,{duration:(pulseMs/1000)*.8,volume:.14,type:"square"});
+        playTone(79,{duration:(pulseMs/1000)*.8,volume:.14});
         await new Promise(r=>setTimeout(r,pulseMs));
       }else{
         for(let i=0;i<3;i++){
-          playTone(i===0?82:79,{duration:.05,volume:.13,type:"square"});
+          playTone(i===0?82:79,{duration:.05,volume:.13});
           await new Promise(r=>setTimeout(r,pulseMs/3));
         }
       }
@@ -1041,10 +1102,10 @@ function mountNoteTrainer(root,onResult){
 }
 
 const RHYTHM_FIGURES=[
-  {name:"negra",beats:1,symbol:"♩"},
-  {name:"corchea",beats:.5,symbol:"♪"},
-  {name:"blanca",beats:2,symbol:"𝅗𝅥"},
-  {name:"redonda",beats:4,symbol:"𝅝"}
+  {name:"negra",beats:1,symbol:SMUFL_GLYPHS.metNoteQuarterUp},
+  {name:"corchea",beats:.5,symbol:SMUFL_GLYPHS.metNote8thUp},
+  {name:"blanca",beats:2,symbol:SMUFL_GLYPHS.metNoteHalfUp},
+  {name:"redonda",beats:4,symbol:SMUFL_GLYPHS.metNoteWhole}
 ];
 function mountRhythmTrainer(root,onResult){
   const body=root.querySelector("[data-trainer-body]");
@@ -1085,7 +1146,7 @@ function mountRhythmTrainer(root,onResult){
   body.querySelector("[data-rt-level]").addEventListener("change",render);
   body.querySelector("[data-rt-play]").addEventListener("click",async()=>{
     stopAllAudio();
-    for(const f of current){playTone(79,{duration:.06,volume:.14,type:"square"});await new Promise(r=>setTimeout(r,f.beats*450))}
+    for(const f of current){playTone(79,{duration:.06,volume:.14});await new Promise(r=>setTimeout(r,f.beats*450))}
   });
   render();
 }
@@ -1190,9 +1251,9 @@ const SOLFEGE_LEVELS = {
 };
 
 const SOLFEGE_DURATIONS = [
-  {id:"q", beats:1, label:"negra", glyph:"♩"},
-  {id:"e", beats:.5, label:"corchea", glyph:"♪"},
-  {id:"h", beats:2, label:"blanca", glyph:"𝅗𝅥"}
+  {id:"q", beats:1, label:"negra", glyph:SMUFL_GLYPHS.metNoteQuarterUp},
+  {id:"e", beats:.5, label:"corchea", glyph:SMUFL_GLYPHS.metNote8thUp},
+  {id:"h", beats:2, label:"blanca", glyph:SMUFL_GLYPHS.metNoteHalfUp}
 ];
 
 function renderSolfege(level){
@@ -1286,8 +1347,8 @@ function phraseStaffSVG(phrase,{clef="treble",meter="4/4"}={}){
     }
     return staffTop+4*lineGap-(idx-baseIndex)*stepH;
   }
-  const lines=Array.from({length:5},(_,i)=>`<line x1="70" x2="${w-25}" y1="${staffTop+i*lineGap}" y2="${staffTop+i*lineGap}" class="sol-staff-line"/>`).join("");
-  let x=110;
+  const lines=Array.from({length:5},(_,i)=>`<line x1="24" x2="${w-25}" y1="${staffTop+i*lineGap}" y2="${staffTop+i*lineGap}" class="sol-staff-line"/>`).join("");
+  let x=124;
   const notes=[];
   let lastBar=-1;
   phrase.forEach((ev,index)=>{
@@ -1296,21 +1357,28 @@ function phraseStaffSVG(phrase,{clef="treble",meter="4/4"}={}){
     }
     lastBar=ev.bar;
     const y=yFor(ev.note);
-    const stem = ev.dur==="h" ? "" : `<line x1="${x+6}" x2="${x+6}" y1="${y}" y2="${y-28}" class="sol-stem"/>`;
+    const noteIndex=noteOrder.indexOf(ev.note),step=noteIndex-baseIndex,ledger=[];
+    if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line x1="${x-11}" x2="${x+11}" y1="${staffTop+4*lineGap-s*stepH}" y2="${staffTop+4*lineGap-s*stepH}" class="sol-ledger-line"/>`);
+    if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line x1="${x-11}" x2="${x+11}" y1="${staffTop+4*lineGap-s*stepH}" y2="${staffTop+4*lineGap-s*stepH}" class="sol-ledger-line"/>`);
+    const stem = `<line x1="${x+6}" x2="${x+6}" y1="${y}" y2="${y-28}" class="sol-stem"/>`;
     const fill=ev.dur==="h" ? "none":"currentColor";
     const flag=ev.dur==="e"?`<path d="M ${x+6} ${y-28} q 18 6 6 18" class="sol-flag"/>`:"";
     notes.push(`<g class="sol-note-group" data-sol-note-index="${index}">
+      ${ledger.join("")}
       <ellipse cx="${x}" cy="${y}" rx="7" ry="5" transform="rotate(-18 ${x} ${y})" class="sol-notehead" style="fill:${fill}"/>
       ${stem}${flag}
       <text x="${x}" y="${h-14}" text-anchor="middle" class="sol-note-label">${escapeHtml(ev.note.replace(/\d/,""))}</text>
     </g>`);
     x+=ev.beats*48;
   });
-  return `<svg viewBox="0 0 ${w} ${h}" class="solfege-staff" role="img" aria-label="Frase musical">
+  const [meterTop="4",meterBottom="4"]=String(meter).split("/");
+  const finalBar=phrase.length?`<line x1="${Math.min(w-25,x-20)}" x2="${Math.min(w-25,x-20)}" y1="${staffTop}" y2="${staffTop+4*lineGap}" class="sol-barline sol-final-barline"/>`:"";
+  return `<svg viewBox="0 0 ${w} ${h}" class="solfege-staff" role="img" aria-label="Frase musical en compás de ${escapeHtml(meter)}">
     ${lines}
-    <text x="26" y="${staffTop+42}" class="sol-clef">${clef==="treble"?"𝄞":"𝄢"}</text>
-    <text x="61" y="${staffTop+25}" class="sol-meter">${meter.replace("/", "\n")}</text>
+    <text x="30" y="${staffTop+42}" class="sol-clef">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>
+    <text x="79" y="${staffTop+17}" class="sol-meter" text-anchor="middle"><tspan x="79">${smuflTimeDigit(meterTop)}</tspan><tspan x="79" dy="18">${smuflTimeDigit(meterBottom)}</tspan></text>
     ${notes.join("")}
+    ${finalBar}
   </svg>`;
 }
 
@@ -1360,7 +1428,7 @@ function mountMelodySolfege(root){
   body.querySelector("[data-ms-count]").addEventListener("click",async()=>{
     stopAllAudio();
     const ms=60000/Number(bpm.value);
-    for(let i=0;i<4;i++){playTone(i===0?84:79,{duration:.07,volume:.14,type:"square"});await new Promise(r=>setTimeout(r,ms))}
+    for(let i=0;i<4;i++){playTone(i===0?84:79,{duration:.07,volume:.14});await new Promise(r=>setTimeout(r,ms))}
   });
   render();
 }
@@ -1398,7 +1466,7 @@ async function playRhythmPattern(root,pattern,bpm){
     const barItems=pattern.filter(x=>x.bar===ev.bar);
     const index=barItems.indexOf(ev);
     measureEvents[index]?.classList.add("playing");
-    playTone(79,{duration:.06,volume:.14,type:"square"});
+    playTone(79,{duration:.06,volume:.14});
     await new Promise(r=>setTimeout(r,ev.beats*ms));
   }
   root.querySelectorAll(".rhythm-symbol").forEach(x=>x.classList.remove("playing"));
@@ -1778,7 +1846,7 @@ function mountExpressionFormLab(el){
         <label>Dinámica <select data-ex-dynamic>${DYNAMICS.map(d=>`<option value="${d.id}" ${d.id==="mf"?"selected":""}>${d.label}</option>`).join("")}</select></label>
         <label>Articulación <select data-ex-articulation>${ARTICULATIONS.map(a=>`<option value="${a.id}">${a.label}</option>`).join("")}</select></label>
         <label>Tempo <input type="range" min="50" max="150" value="88" data-ex-tempo><span data-ex-tempo-label>88 BPM</span></label>
-        <label>Timbre <select data-ex-timbre><option value="sine">Suave / senoidal</option><option value="triangle" selected>Triangular</option><option value="square">Cuadrada</option><option value="sawtooth">Brillante / sierra</option></select></label>
+        <label>Instrumento <span class="fixed-control">Piano acústico</span></label>
       </div>
       <div class="expression-meter">
         <span>pp</span><div class="dynamic-track"><div class="dynamic-fill" data-ex-dynamic-fill></div></div><span>ff</span>
@@ -1815,7 +1883,6 @@ function mountExpressionFormLab(el){
   const dynSel=el.querySelector("[data-ex-dynamic]");
   const artSel=el.querySelector("[data-ex-articulation]");
   const tempo=el.querySelector("[data-ex-tempo]");
-  const timbre=el.querySelector("[data-ex-timbre]");
   const textureSel=el.querySelector("[data-texture]");
   const formSel=el.querySelector("[data-form]");
 
@@ -1825,8 +1892,7 @@ function mountExpressionFormLab(el){
     return {
       dyn:DYNAMICS.find(d=>d.id===dynSel.value)||DYNAMICS[3],
       art:ARTICULATIONS.find(a=>a.id===artSel.value)||ARTICULATIONS[1],
-      bpm:Number(tempo.value),
-      timbre:timbre.value
+      bpm:Number(tempo.value)
     };
   }
 
@@ -1844,18 +1910,17 @@ function mountExpressionFormLab(el){
       const accentGain=config.art.accent && (i===0||i===3) ? 1.35 : 1;
       playTone(phrase[i],{
         duration:(beatMs/1000)*config.art.durationFactor,
-        volume:Math.min(.32,config.dyn.volume*accentGain),
-        type:config.timbre
+        volume:Math.min(.32,config.dyn.volume*accentGain)
       });
       await new Promise(r=>setTimeout(r,beatMs));
     }
   }
 
-  [dynSel,artSel,tempo,timbre].forEach(x=>x.addEventListener("input",updateExpression));
+  [dynSel,artSel,tempo].forEach(x=>x.addEventListener("input",updateExpression));
   el.querySelector("[data-ex-play]").addEventListener("click",()=>playExpressivePhrase());
   el.querySelector("[data-ex-compare]").addEventListener("click",async()=>{
-    const a={dyn:DYNAMICS[1],art:ARTICULATIONS[0],bpm:68,timbre:"sine"};
-    const b={dyn:DYNAMICS[4],art:ARTICULATIONS[2],bpm:118,timbre:"triangle"};
+    const a={dyn:DYNAMICS[1],art:ARTICULATIONS[0],bpm:68};
+    const b={dyn:DYNAMICS[4],art:ARTICULATIONS[2],bpm:118};
     el.querySelector("[data-ex-feedback]").textContent="Primero: suave, legato y lento. Después: fuerte, staccato y rápido.";
     await playExpressivePhrase(a);
     await new Promise(r=>setTimeout(r,500));
@@ -1888,8 +1953,8 @@ function mountExpressionFormLab(el){
       const second=[67,65,64,62,60,62,64,65];
       const ctx=audioContext();
       for(let i=0;i<melody.length;i++){
-        playTone(melody[i],{duration:.26,volume:.10,type:"triangle"});
-        playTone(second[i],{duration:.26,volume:.08,type:"sine"});
+        playTone(melody[i],{duration:.26,volume:.10});
+        playTone(second[i],{duration:.26,volume:.08});
         await new Promise(r=>setTimeout(r,300));
       }
     }

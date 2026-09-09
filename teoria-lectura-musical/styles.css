@@ -10,6 +10,11 @@
   --danger:#d48972;
   --radius:16px;
 }
+@font-face{
+  font-family:"Bravura TLM";
+  src:local("Bravura"),url("../editor-crescendo/assets/fonts/Bravura.otf") format("opentype");
+  font-display:swap;
+}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
@@ -29,17 +34,23 @@ button{cursor:pointer}
     linear-gradient(145deg,#11100f,#181613 50%,#24201d);
 }
 .ca-site-header{
-  min-height:66px;padding:12px 24px;
-  border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;gap:20px;
-  background:rgba(17,16,15,.94);backdrop-filter:blur(12px);
+  min-height:66px;padding:13px clamp(18px,4vw,56px);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;
+  background:rgba(18,17,15,.90);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
 }
-.ca-brand{text-transform:uppercase;letter-spacing:.12em;font-size:.78rem;font-weight:900;color:var(--gold)}
-.ca-header-right{display:flex;align-items:center;gap:16px}
-.ca-tag{font-size:.72rem;color:var(--muted)}
-.ca-social-bar{display:flex;gap:7px}
-.ca-social-bar a{color:var(--muted);text-decoration:none;font-size:.65rem;font-weight:900;border:1px solid var(--line);border-radius:50%;width:30px;height:30px;display:grid;place-items:center}
-.ca-school-logo{height:36px;width:auto;display:block}
+.ca-brand{display:flex;align-items:center;gap:12px;font-family:Georgia,"Times New Roman",serif;font-size:1.28rem;font-weight:900;color:#fffaf0}
+.ca-brand-mark{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(212,168,79,.42);background:rgba(212,168,79,.12);color:var(--gold);font-size:1rem}
+.ca-header-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:nowrap}
+.ca-social-bar{display:flex;align-items:center;gap:7px;flex-wrap:nowrap}
+.ca-social-bar a{display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid rgba(255,255,255,.14);border-radius:50%;background:rgba(255,255,255,.035);color:rgba(255,250,240,.72);text-decoration:none;transition:color .18s,border-color .18s,background .18s,transform .12s,box-shadow .18s}
+.ca-social-bar a:hover{color:#f0b876;border-color:rgba(240,184,118,.62);background:rgba(217,138,61,.10);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.24)}
+.ca-social-bar svg{width:19px;height:19px;display:block}
+.ca-header-nav{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(0,0,0,.28);margin-left:3px}
+.ca-nav-link{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;color:rgba(255,250,240,.68);text-decoration:none;font-size:.70rem;font-weight:750;letter-spacing:.025em;white-space:nowrap;transition:color .18s,background .18s}
+.ca-nav-link svg{width:16px;height:16px;flex:0 0 16px}.ca-nav-link:hover{background:rgba(212,168,79,.13);color:#f0b876}
+.ca-school-logo-link{display:inline-grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border:1px solid rgba(212,168,79,.38);border-radius:50%;overflow:hidden;background:rgba(255,255,255,.035);margin-left:2px;line-height:0;transition:border-color .18s,background .18s,transform .12s,box-shadow .18s}
+.ca-school-logo{width:31px;height:31px;border:0;border-radius:50%;object-fit:cover;display:block}.ca-school-logo-link:hover{border-color:rgba(240,184,118,.68);background:rgba(217,138,61,.10);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.24)}
 .topbar{
   position:sticky;top:0;z-index:50;
   display:flex;align-items:center;justify-content:space-between;gap:20px;
@@ -114,6 +125,15 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
 .lesson-block h3{font-size:1.45rem;margin:0 0 9px}
 .lesson-block p,.lesson-block li{color:#d7cec2}
 .lesson-block li+li{margin-top:7px}
+.reference-panel{padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.018)}
+.reference-panel>p:first-child{margin-top:0}.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+.music-reference-table{width:100%;min-width:590px;border-collapse:collapse;background:#151311}.music-reference-table th,.music-reference-table td{padding:10px 12px;border-bottom:1px solid #332f2a;text-align:left}.music-reference-table th{color:var(--gold);font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;background:#1d1a17}.music-reference-table tr:last-child td{border-bottom:0}.music-reference-table td{color:#ded5c9}.music-reference-table .music-glyph{text-align:center}
+.music-glyph{font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif!important;font-size:2rem!important;font-weight:400!important;line-height:1;color:var(--ink)}
+.rest-glyph-cell{background-image:repeating-linear-gradient(to bottom,transparent 0 7px,rgba(199,192,183,.18) 7px 8px);background-size:74px 40px;background-position:center;background-repeat:no-repeat}
+.reference-note-copy{margin:11px 0 0!important;color:var(--muted)!important;font-size:.82rem}.reference-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.reference-grid.five{grid-template-columns:repeat(5,minmax(0,1fr))}.symbol-guide{display:grid;align-content:start;gap:4px;min-height:112px;padding:12px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.018);text-align:center}.symbol-guide b{color:var(--gold)}.symbol-guide span{font-size:.82rem;font-weight:800}.symbol-guide small{color:var(--muted);font-size:.7rem}.notation-text{font-family:Georgia,"Times New Roman",serif;font-size:1.45rem;line-height:1.2}
+.meter-anatomy{display:flex;align-items:center;gap:22px;padding:16px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.018)}.meter-anatomy p{margin:3px 0}.time-signature-large{display:grid;flex:0 0 62px;line-height:.72;text-align:center;color:var(--gold);font-family:"Bravura TLM","Noto Music",serif;font-size:3.6rem}.tempo-table td:nth-child(2){font-variant-numeric:tabular-nums;font-weight:800;color:var(--gold)}
+.interval-inversion-strip,.enharmonic-examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.interval-inversion-strip span,.enharmonic-examples span{padding:8px 13px;border:1px solid rgba(212,168,79,.38);border-radius:999px;background:rgba(212,168,79,.08);color:#eddfc3;font-weight:800}.expression-reference{display:grid;gap:18px}.expression-reference h4{margin:0 0 10px;color:var(--gold);font-size:1rem}.dynamic-scale{display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden;border:1px solid var(--line);border-radius:12px}.dynamic-scale span{display:grid;gap:2px;padding:12px 6px;border-right:1px solid var(--line);text-align:center;font-family:Georgia,serif;font-size:1.25rem;font-style:italic}.dynamic-scale span:last-child{border-right:0}.dynamic-scale small{font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:.62rem;font-style:normal;color:var(--muted)}.hairpin-guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.hairpin-guide span{padding:8px;border:1px solid var(--line);border-radius:9px;text-align:center;color:#d7cec2}
+.melodic-arrow{font-size:1.55rem}.phrase-shape{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:12px;padding:14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.018);text-align:center}.phrase-shape span{padding:9px;border-radius:9px;background:rgba(212,168,79,.1);color:#ead9b5;font-weight:800}.phrase-shape b{color:var(--gold)}.phrase-shape small{grid-column:1/-1;color:var(--muted)}
 .lesson-example{padding:16px;border-radius:10px;background:#13110f;border:1px solid #312c27;color:var(--muted)}
 .orientation-demo{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .orientation-card{border:1px solid var(--line);border-radius:12px;padding:18px;background:rgba(255,255,255,.025)}
@@ -137,12 +157,13 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   .hero,.course-layout{grid-template-columns:1fr}
   .course-sidebar{position:static}
   .level-cards{grid-template-columns:repeat(2,1fr)}
-  .ca-tag{display:none}
+  .ca-site-header{grid-template-columns:1fr;justify-items:center}
+  .ca-brand{justify-self:center}.ca-header-right{justify-self:center;flex-wrap:wrap;justify-content:center}
 }
 @media(max-width:650px){
   main{width:min(100% - 20px,1240px)}
-  .ca-site-header,.topbar{padding-left:12px;padding-right:12px}
-  .ca-social-bar{display:none}
+  .ca-site-header{display:flex;flex-direction:column;gap:10px;padding:12px 14px}.ca-header-right{width:100%;justify-content:center;gap:7px}.ca-social-bar{max-width:100%;overflow-x:auto;padding:2px;scrollbar-width:none}.ca-social-bar::-webkit-scrollbar{display:none}.ca-nav-link{padding:0 10px}
+  .topbar{padding-left:12px;padding-right:12px}
   .brand small{display:none}
   .topbar{align-items:flex-start;flex-direction:column}
   .main-nav{width:100%;overflow:auto}
@@ -153,6 +174,7 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   .logic-chain i{transform:none;text-align:center}
   .site-footer{flex-direction:column}
 }
+@media(max-width:430px){.ca-social-bar a{width:36px;height:36px;flex-basis:36px}.ca-social-bar svg{width:18px;height:18px}.ca-nav-link span{font-size:.65rem}}
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
@@ -178,6 +200,7 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   display:grid;gap:6px;color:var(--muted);font-size:.78rem;font-weight:700
 }
 .controls-grid label span{color:var(--ink);font-weight:700}
+.controls-grid .fixed-control{display:flex;align-items:center;min-height:42px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#151311;color:var(--ink);font-weight:700}
 .controls-grid input[type="range"]{width:100%}
 .controls-grid select,.controls-row select{
   padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#171513;color:var(--ink)
@@ -220,7 +243,7 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
 .tlm-key.black span{color:#fff}
 .tlm-staff,.tlm-guitar,.reading-staff{width:100%;height:auto;min-width:260px}
 .tlm-staff line,.reading-staff line{stroke:#c7c0b7;stroke-width:1}
-.tlm-staff .ledger{stroke:#c7c0b7}.tlm-staff .note,.reading-staff .student-note{fill:#e7e0d6}
+.tlm-staff .ledger,.reading-staff .ledger{stroke:#c7c0b7}.tlm-staff .note,.reading-staff .student-note{fill:#e7e0d6}
 .tlm-staff .note.root{fill:#d4a84f}.tlm-staff .degree{fill:#aaa;font-size:8px}.tlm-staff .acc{fill:#ddd;font-size:12px}
 .tlm-guitar line{stroke:#8d877f;stroke-width:1}.tlm-guitar text{fill:#b9aea0;font-size:9px}
 .tlm-guitar .fret{font-size:7px}.tlm-guitar .dot{fill:#9ab8aa;stroke:#111;stroke-width:1}.tlm-guitar .dot.root{fill:#d4a84f}.tlm-guitar .dotlabel{fill:#111;font-size:7px;font-weight:900}
@@ -229,10 +252,11 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   border:1px solid var(--line);background:rgba(255,255,255,.025);color:var(--ink);border-radius:9px;padding:9px
 }
 .note-answer:hover,.figure-card:hover,.quick-options button:hover{border-color:rgba(212,168,79,.5)}
-.clef-text{fill:#e9e1d7;font-size:48px}.student-note{fill:#d4a84f!important}
+.clef-text{fill:#e9e1d7;font-size:48px;font-family:"Bravura TLM","Noto Music","Bravura Text","Segoe UI Symbol","Arial Unicode MS",serif}.tlm-clef{font-size:42px}.student-note{fill:#d4a84f!important}
+.staff-map-card{grid-column:1/-1}.staff-reference-copy{margin:7px 0 14px;color:var(--muted);font-size:.9rem}.staff-reference-stack{display:grid;gap:12px;margin-top:12px}.staff-reference{min-width:0;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02);overflow-x:auto}.staff-reference-title{color:var(--gold);font-size:.76rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em}.reference-staff{min-width:620px}.reference-note{cursor:pointer;outline:none}.reference-note ellipse{fill:#d4a84f;stroke:#151311;stroke-width:1}.reference-note text{fill:#f2eadf;font-family:Inter,ui-sans-serif,system-ui,sans-serif;font-size:11px;font-weight:800}.reference-note .reference-scientific{fill:#9f9589;font-size:8px;font-weight:700}.reference-note:hover ellipse,.reference-note:focus ellipse{fill:#f0c76f;stroke:#f2eadf;stroke-width:2}.reference-note:focus-visible{outline:none}
 .figure-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.figure-card{display:grid;gap:4px;text-align:center}.figure-card span{font-size:2rem}.figure-card small{color:var(--muted)}
-.beat-row{display:flex;gap:8px;margin-top:16px}.beat{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}.beat.accent{border-color:var(--gold)}.beat.active{background:var(--gold);color:#111}
+.figure-card{display:grid;gap:4px;text-align:center}.figure-card span{font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;font-size:2.35rem;font-weight:400;line-height:1}.figure-card small{color:var(--muted)}
+.beat-row{display:flex;gap:8px;margin-top:16px}.beat{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}.beat.accent{border-color:var(--gold);border-width:2px}.beat.secondary-accent{border-color:rgba(212,168,79,.62)}.beat.active{background:var(--gold);color:#111}
 .rhythm-builder{margin-top:18px}.step-row{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.rhythm-step.on{background:rgba(154,184,170,.25);border-color:var(--green)}.rhythm-step.active{outline:2px solid var(--gold)}
 .fifths-wheel{width:340px;height:340px;position:relative;margin:0 auto 20px}.fifths-wheel button{--angle:calc(var(--i)*30deg - 90deg);position:absolute;left:50%;top:50%;width:48px;height:48px;border-radius:50%;transform:translate(-50%,-50%) rotate(var(--angle)) translate(126px) rotate(calc(-1*var(--angle)));border:1px solid var(--line);background:#1c1916;color:var(--ink)}.fifths-wheel button.active{background:var(--gold);color:#111}.wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;display:grid;place-items:center;align-content:center;border:1px solid var(--line);background:#151310}.wheel-center b{font-size:1.8rem;color:var(--gold)}.wheel-center span{font-size:.7rem;color:var(--muted)}
 .key-info{text-align:center}.key-info h4{font-size:1.5rem;margin:0}.key-info p{color:var(--muted)}
@@ -363,7 +387,9 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   gap:3px;
 }
 .rhythm-token b{
+  font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;
   font-size:2rem;
+  font-weight:400;
 }
 .rhythm-token small{
   color:var(--muted);
@@ -495,15 +521,17 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   height:auto;
   color:#e7e0d6;
 }
-.sol-staff-line,.sol-barline,.sol-stem{
+.sol-staff-line,.sol-ledger-line,.sol-barline,.sol-stem{
   stroke:#bdb5aa;
   stroke-width:1.2;
 }
 .sol-barline{stroke-width:1.7}
+.sol-ledger-line{stroke-width:1.2}
 .sol-notehead{stroke:#e7e0d6;stroke-width:1.4}
 .sol-flag{fill:none;stroke:#e7e0d6;stroke-width:2}
-.sol-clef{fill:#e7e0d6;font-size:46px}
-.sol-meter{fill:#e7e0d6;font-size:13px;white-space:pre}
+.sol-clef{fill:#e7e0d6;font-size:46px;font-family:"Bravura TLM","Noto Music","Bravura Text","Segoe UI Symbol","Arial Unicode MS",serif}
+.sol-meter{fill:#e7e0d6;font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;font-size:31px}
+.sol-final-barline{stroke-width:2.4}
 .sol-note-label{fill:#8f877d;font-size:9px}
 .sol-note-group{
   transition:filter .15s ease,opacity .15s ease;
@@ -564,7 +592,7 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   border-radius:9px;
   border:1px solid transparent;
 }
-.rhythm-symbol b{font-size:1.8rem}
+.rhythm-symbol b{font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;font-size:2.1rem;font-weight:400}
 .rhythm-symbol small{color:var(--muted);font-size:.65rem}
 .rhythm-symbol.playing{
   border-color:var(--gold);
@@ -677,7 +705,9 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   transition:background .12s ease,border-color .12s ease;
 }
 .advanced-rhythm-event b{
+  font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;
   font-size:1.8rem;
+  font-weight:400;
 }
 .advanced-rhythm-event small{
   color:var(--muted);
@@ -1240,6 +1270,8 @@ button:disabled{
   cursor:default;
 }
 @media(max-width:850px){
+  .reference-grid,.reference-grid.five{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dynamic-scale{grid-template-columns:repeat(3,1fr)}
   .evaluation-summary,
   .badge-grid{
     grid-template-columns:repeat(2,1fr);
@@ -1249,6 +1281,9 @@ button:disabled{
   }
 }
 @media(max-width:560px){
+  .reference-grid,.reference-grid.five,.hairpin-guide{grid-template-columns:1fr}
+  .meter-anatomy{align-items:flex-start}.dynamic-scale{grid-template-columns:repeat(2,1fr)}
+  .phrase-shape{grid-template-columns:1fr}.phrase-shape small{grid-column:1}
   .home-progress-detail,
   .evaluation-summary,
   .badge-grid,
