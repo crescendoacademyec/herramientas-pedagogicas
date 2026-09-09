@@ -215,6 +215,22 @@ const LEVELS = [
         `
       },
       {
+        title: "1.9b Ritmo armónico y peso métrico",
+        html: `
+          <p>El <b>ritmo armónico</b> indica cuántos pulsos dura cada acorde y en qué parte del compás cambia. Un mismo ii–V–I puede sentirse estable con un acorde por compás o mucho más activo con dos acordes por compás.</p>
+          <p>En 4/4, los pulsos 1 y 3 tienen mayor peso estructural; 2 y 4 sostienen el impulso del jazz. Colocar una resolución en un tiempo fuerte afirma la llegada, mientras anticiparla en la última corchea del compás produce continuidad.</p>
+          <div class="theory-tip"><b>Práctica:</b> cuenta 1–2–3–4, primero con un acorde por compás y luego con dos. Escucha cómo cambia la energía aunque los acordes sean los mismos.</div>
+        `
+      },
+      {
+        title: "1.9c Relación melodía–armonía y notas disponibles",
+        html: `
+          <p>Una nota melódica puede ser <b>nota del acorde</b>, <b>tensión disponible</b> o <b>nota de aproximación</b>. La clasificación depende del acorde que suena debajo y de la posición rítmica de la nota.</p>
+          <p>En tiempos fuertes conviene reconocer con claridad 1, 3, 5 y 7, además de tensiones estables como 9 o 13. Las disonancias más fuertes funcionan mejor cuando se preparan o resuelven por grado conjunto.</p>
+          <p>Antes de reharmonizar una melodía, identifica sus notas largas y acentuadas: ellas limitan y, al mismo tiempo, sugieren los acordes posibles.</p>
+        `
+      },
+      {
         title: "1.10 Repertorio recomendado del Real Book — Nivel 1",
         html: `
           <p>Para empezar a leer y tocar standards, elige temas con forma clara y armonía mayormente diatónica.
@@ -260,7 +276,9 @@ const LEVELS = [
       q("¿Qué indica 'D.S. al Coda'?", ["Repetir desde el inicio y terminar en Fine", "Volver al signo % y saltar a la Coda cuando se indique", "Tocar solo la introducción", "Cambiar de tonalidad"], 1),
       q("En la práctica estándar de jazz, ¿cuándo se toca la melodía ('head') de un tema?", ["Solo una vez, al inicio", "Solo durante los solos", "Al inicio y al final, con improvisación en medio", "Nunca, solo se improvisa"], 2),
       q("¿Qué función armónica cumple el grado V7?", ["Tónico", "Subdominante", "Dominante", "Ninguna"], 2),
-      q("¿Cuál de estos acordes cumple función de tónico?", ["IVmaj7", "iiim7", "V7", "iim7"], 1)
+      q("¿Cuál de estos acordes cumple función de tónico?", ["IVmaj7", "iiim7", "V7", "iim7"], 1),
+      q("¿Qué describe el ritmo armónico?", ["La frecuencia de cambio de los acordes", "El volumen del solista", "La digitación de una escala", "La forma del instrumento"], 0),
+      q("Antes de reharmonizar una melodía conviene localizar...", ["Sus notas largas y acentuadas", "Solo la primera nota", "Únicamente el tempo", "La marca del instrumento"], 0)
     ]
   },
 
@@ -463,6 +481,21 @@ const LEVELS = [
         `
       },
       {
+        title: "2.10b Modos completos de la menor melódica",
+        html: `
+          <p>La menor melódica genera siete colores que deben relacionarse con su acorde y no memorizarse como nombres aislados.</p>
+          <table class="jz-table"><tr><th>Grado</th><th>Modo</th><th>Acorde característico</th></tr><tr><td>I</td><td>Menor melódica</td><td>m(maj7)</td></tr><tr><td>II</td><td>Dórico ♭2</td><td>m7(♭9)</td></tr><tr><td>III</td><td>Lidio aumentado</td><td>maj7(#5)</td></tr><tr><td>IV</td><td>Lidio dominante</td><td>7(#11)</td></tr><tr><td>V</td><td>Mixolidio ♭6</td><td>7(♭13)</td></tr><tr><td>VI</td><td>Locrio ♮2</td><td>m7♭5(9)</td></tr><tr><td>VII</td><td>Alterada</td><td>7alt</td></tr></table>
+        `
+      },
+      {
+        title: "2.10c Escala mayor armónica y cuatro centros tonales",
+        html: `
+          <p>La <b>mayor armónica</b> se obtiene bajando el sexto grado de la escala mayor: 1–2–3–4–5–♭6–7. Completa los cuatro materiales tonales de referencia: mayor, mayor armónica, menor armónica y menor melódica.</p>
+          <p>Su color combina una tónica mayor con la atracción de ♭6 hacia 5. Entre sus aplicaciones aparecen maj7(♭13), acordes aumentados y dominantes con ♭9 o ♭13 según el modo derivado.</p>
+          <p>No se trata de asignar una escala por fórmula: primero se analiza la función, luego el acorde y finalmente las tensiones compatibles con la melodía.</p>
+        `
+      },
+      {
         title: "2.11 Repertorio recomendado del Real Book — Nivel 2",
         html: `
           <p>En este nivel busca temas con dominantes secundarios, ii-V encadenados y ii-V-i menor:</p>
@@ -512,7 +545,9 @@ const LEVELS = [
       q("¿Cuántos acordes m7b5 distintos aparecen en el campo armónico de la menor melódica?", ["Ninguno", "Uno", "Dos", "Tres"], 2),
       q("Un acorde °7 puede analizarse funcionalmente como...", ["Un ii-V completo", "Un V7(b9) sin fundamental", "Un acorde tónico", "Un sus4"], 1),
       q("¿Cuál es la resolución deceptiva más clásica de un V7 en mayor?", ["Al ii", "Al vi", "Al IV", "Al iii"], 1),
-      q("Un dominante secundario que resuelve a un acorde menor (V7/ii, V7/iii, V7/vi) usa como tensiones...", ["9 y 13 naturales", "9 y b13", "Solo b9", "Ninguna tensión"], 1)
+      q("Un dominante secundario que resuelve a un acorde menor (V7/ii, V7/iii, V7/vi) usa como tensiones...", ["9 y 13 naturales", "9 y b13", "Solo b9", "Ninguna tensión"], 1),
+      q("¿Cuál es el cuarto modo de la menor melódica?", ["Lidio dominante", "Dórico", "Jónico aumentado", "Frigio dominante"], 0),
+      q("¿Qué fórmula corresponde a la escala mayor armónica?", ["1-2-3-4-5-b6-7", "1-2-b3-4-5-6-7", "1-b2-3-4-5-b6-b7", "1-2-3-#4-5-6-7"], 0)
     ]
   },
 
@@ -707,6 +742,22 @@ const LEVELS = [
         `
       },
       {
+        title: "3.11b Cromatismo modal y sustitución escalar",
+        html: `
+          <p>Una <b>sustitución escalar</b> conserva el acorde pero cambia el conjunto de tensiones para obtener otro color. Sobre un dominante pueden contrastarse mixolidia, lidia dominante, disminuida y alterada según su función y resolución.</p>
+          <p>El cromatismo polimodal combina sonidos característicos de modos relacionados. Debe conservar notas guía claras y resolver las alteraciones con intención; no consiste en añadir notas ajenas al azar.</p>
+          <p>La escucha manda: compara primero el acorde desnudo, después cada escala y finalmente la resolución.</p>
+        `
+      },
+      {
+        title: "3.11c Rearmonización desde la melodía",
+        html: `
+          <p>Para reharmonizar desde una nota melódica, enumera los acordes en los que esa nota puede funcionar como fundamental, nota estructural o tensión disponible. Después filtra las opciones por función y conducción de bajo.</p>
+          <p>Una nota C, por ejemplo, puede ser fundamental de Cmaj7, séptima de Dm7, tercera de Am7, onceava de Gm7 o treceava de E♭maj7. El contexto determina cuál opción sostiene mejor la frase.</p>
+          <p>Las notas largas, los puntos culminantes y los finales de frase necesitan mayor coherencia vertical que las notas breves de paso.</p>
+        `
+      },
+      {
         title: "3.12 Repertorio recomendado del Real Book — Nivel 3",
         html: `
           <p>En este nivel busca bebop, rhythm changes, temas modales y baladas con reharmonización densa:</p>
@@ -756,7 +807,9 @@ const LEVELS = [
       q("¿Por qué intervalo se dividen las tonalidades en el ciclo de Coltrane?", ["5ª justa", "4ª justa", "3ª mayor", "2ª menor"], 2),
       q("¿Qué instrumento asume normalmente la fundamental cuando se usan voicings rootless?", ["El piano", "El contrabajo", "La guitarra", "Ninguno, se omite siempre"], 1),
       q("¿Qué caracteriza a una modulación directa?", ["Se usa un acorde pivote para prepararla", "El cambio de tonalidad es inmediato, sin preparación", "Nunca cambia de tonalidad realmente", "Solo ocurre en baladas"], 1),
-      q("En el 'constant structure', los acordes se encadenan...", ["Por función tensión-resolución", "Todos de la misma calidad, movidos por un intervalo simétrico", "Solo con dominantes secundarios", "Siempre en ciclo de quintas"], 1)
+      q("En el 'constant structure', los acordes se encadenan...", ["Por función tensión-resolución", "Todos de la misma calidad, movidos por un intervalo simétrico", "Solo con dominantes secundarios", "Siempre en ciclo de quintas"], 1),
+      q("Una sustitución escalar cambia principalmente...", ["El color de tensiones sobre un acorde", "La afinación del instrumento", "La métrica del tema", "El nombre del compositor"], 0),
+      q("Al reharmonizar desde la melodía, una nota puede actuar como...", ["Nota estructural o tensión", "Solo fundamental", "Solo nota de paso", "Únicamente séptima"], 0)
     ]
   },
 
@@ -996,6 +1049,21 @@ const LEVELS = [
         `
       },
       {
+        title: "4.12b Triad pairs y permutaciones",
+        html: `
+          <p>Un <b>triad pair</b> combina dos tríadas sin notas comunes tomadas de una misma escala. Alternarlas produce seis sonidos organizados, contornos claros y un vocabulario menos lineal que subir y bajar la escala.</p>
+          <p>Sobre D dórico pueden combinarse Dm y Em; sobre G7 alterado pueden elegirse dos tríadas que destaquen 3, ♭7 y tensiones alteradas. Las permutaciones cambian el orden de las notas —123, 132, 213, 231, 312, 321— sin cambiar el material.</p>
+        `
+      },
+      {
+        title: "4.12c Armonización desde la voz superior y ostinato",
+        html: `
+          <p>En un arreglo, la nota de la melodía debe quedar claramente en la <b>voz superior</b>. Desde ella se construye hacia abajo una disposición que conserve función, registro y movimiento cómodo entre voces.</p>
+          <p>Un <b>ostinato</b> repite un patrón rítmico o melódico mientras la armonía cambia. A diferencia del pedal —una nota sostenida—, el ostinato es una figura completa que actúa como ancla.</p>
+          <p>Combinar melodía superior, bajo dirigido y voces internas cercanas permite escribir acompañamientos coherentes sin duplicar innecesariamente notas.</p>
+        `
+      },
+      {
         title: "4.13 Repertorio recomendado del Real Book — Nivel 4",
         html: `
           <p>Para este nivel, temas con ciclo de Coltrane, armonía modal no funcional avanzada y vocabulario
@@ -1039,7 +1107,111 @@ const LEVELS = [
       q("¿Qué es un pedal de dominante?", ["Sostener la tónica todo el tema", "Sostener la 5ª del tono generando tensión antes de resolver", "Un acorde cuartal", "Una escala simétrica"], 1),
       q("¿En qué consiste la armonía negativa?", ["Usar solo acordes menores", "Reflejar cada acorde respecto a un eje tonal para generar su acorde espejo", "Eliminar todas las tensiones", "Tocar sin fundamental"], 1),
       q("En un blues, el acorde I7 funciona típicamente como...", ["V7/IV literal que debe resolver", "Color tónico-blues que no resuelve como dominante secundario", "Un acorde de intercambio modal", "Una estructura superior"], 1),
-      q("¿Qué distingue a un 'híbrido' de una inversión real en un slash chord?", ["El híbrido siempre tiene bajo en la fundamental", "En el híbrido el bajo no encaja como nota propia del acorde superior", "Son exactamente lo mismo", "El híbrido no se puede cifrar con barra"], 1)
+      q("¿Qué distingue a un 'híbrido' de una inversión real en un slash chord?", ["El híbrido siempre tiene bajo en la fundamental", "En el híbrido el bajo no encaja como nota propia del acorde superior", "Son exactamente lo mismo", "El híbrido no se puede cifrar con barra"], 1),
+      q("¿Qué organiza un triad pair?", ["Dos tríadas complementarias", "Dos metrónomos", "Dos tonalidades sin relación", "Solo notas cromáticas"], 0),
+      q("¿Qué diferencia un ostinato de un pedal?", ["El ostinato repite un patrón; el pedal sostiene una nota", "No existe diferencia", "El pedal siempre es melódico", "El ostinato no tiene ritmo"], 0)
+    ]
+  },
+
+  // ============================================================
+  // NIVEL 5 — LENGUAJE, OÍDO E IMPROVISACIÓN
+  // ============================================================
+  {
+    id: 5,
+    slug: "n5",
+    name: "Lenguaje, oído e improvisación",
+    subtitle: "Pentatónicas, ritmo, bebop, notas objetivo y aplicación musical sobre formas de jazz.",
+    topics: [
+      {
+        title: "5.1 Pentatónicas, blues y superposiciones",
+        html: `
+          <p>La pentatónica menor contiene 1–♭3–4–5–♭7; la mayor contiene 1–2–3–5–6. Las escalas blues añaden la <b>blue note</b>: #4/♭5 en la menor y ♭3 en la mayor.</p>
+          <p>Superponer una pentatónica permite destacar tensiones sin abandonar una forma melódica reconocible. Sobre Dm7, D menor pentatónica ofrece 1, ♭3, 4, 5 y ♭7; E menor pentatónica añade 9, 11 y 13 y produce un color dórico.</p>
+          <p>Practica cada material como motivo, no como una escala ascendente y descendente.</p>
+        `
+      },
+      {
+        title: "5.2 Swing, articulación y anticipación",
+        html: `
+          <p>El swing no es simplemente escribir tresillos: nace de la relación entre subdivisión, acento, duración y colocación. Las corcheas pueden acercarse o alejarse de la proporción ternaria según el tempo.</p>
+          <p>En jazz, 2 y 4 sostienen el impulso. Las notas cortas, acentos, ghost notes, anticipaciones y retardos crean dirección incluso usando una sola altura.</p>
+          <p>Antes de improvisar alturas, interpreta un ritmo sobre una nota y haz que frasee con claridad.</p>
+        `
+      },
+      {
+        title: "5.3 Cromatismo y vocabulario bebop",
+        html: `
+          <p>El lenguaje bebop coloca normalmente notas estructurales en tiempos fuertes y utiliza cromatismos en posiciones débiles. La <b>escala bebop dominante</b> añade la 7 natural a la mixolidia; así conserva la alineación rítmica al tocar corcheas continuas.</p>
+          <p>Las aproximaciones pueden venir de un semitono inferior, superior o de ambos lados. Un <b>enclosure</b> rodea la nota objetivo antes de resolver en ella.</p>
+          <p>El cromatismo funciona cuando tiene destino: primero elige la nota objetivo del siguiente acorde y después diseña la aproximación.</p>
+        `
+      },
+      {
+        title: "5.4 Notas objetivo y líneas de guide tones",
+        html: `
+          <p>Las terceras y séptimas muestran con máxima claridad la función de los acordes. En Dm7–G7–Cmaj7, C baja a B y luego permanece; F permanece y luego baja a E.</p>
+          <p>Construye primero una línea de blancas con una nota guía por acorde. Después añade aproximaciones, arpegios y ritmo sin perder esa columna vertebral.</p>
+          <p>Una buena línea no necesita describir todas las notas del acorde: debe hacer audible su dirección.</p>
+        `
+      },
+      {
+        title: "5.5 Desarrollo motívico y permutaciones",
+        html: `
+          <p>Un motivo breve puede desarrollarse mediante repetición, secuencia, inversión de contorno, desplazamiento rítmico, aumentación, disminución y fragmentación.</p>
+          <p>Las permutaciones 1235, 1253, 1325 y sus variantes reorganizan un mismo grupo de grados. Transpón la fórmula a cada acorde y conserva su perfil rítmico para producir coherencia.</p>
+          <p>La regla práctica es presentar, variar y responder: si cada compás introduce una idea distinta, el solo pierde identidad.</p>
+        `
+      },
+      {
+        title: "5.6 Improvisación sobre ii–V–I y turnarounds",
+        html: `
+          <p>Estudia el ii–V–I por capas: fundamentales, arpegios, notas guía, escalas, cromatismos y finalmente motivos. El objetivo no es cambiar de escala mecánicamente, sino atravesar los acordes con una línea continua.</p>
+          <p>En I–VI7–ii–V, el VI7 introduce una dominante secundaria. Localiza primero sus terceras y séptimas, luego conecta por semitono con el ii.</p>
+          <p>Practica en ciclos, varias tonalidades y tempos lentos antes de aumentar velocidad.</p>
+        `
+      },
+      {
+        title: "5.7 Triad pairs, cuartas y recursos outside",
+        html: `
+          <p>Los triad pairs, arpegios superpuestos y células cuartales ofrecen formas claras de organizar tensiones. Un recurso <b>outside</b> crea contraste al desplazar temporalmente el material y regresar a notas objetivo inequívocas.</p>
+          <p>La tensión exterior debe tener proporción y resolución. Practica un compás inside, medio compás outside y regreso sobre la tercera o séptima del acorde.</p>
+          <p>La claridad rítmica y la resolución son más importantes que la cantidad de alteraciones.</p>
+        `
+      },
+      {
+        title: "5.8 Entrenamiento auditivo y práctica sobre standards",
+        html: `
+          <p>Escucha antes de nombrar. Compara tónica, preparación y dominante; después distingue ii–V–I mayor y menor, dominante secundario, sustitución tritonal, backdoor y resolución deceptiva.</p>
+          <p>En un standard sigue este orden: canta las fundamentales, reconoce la forma, canta las notas guía, toca la melodía y finalmente improvisa usando una sola idea del nivel.</p>
+          <p>La práctica auditiva debe ser breve y frecuente. Un concepto se considera aprendido cuando puede reconocerse, cantarse y aplicarse en música real.</p>
+        `
+      }
+    ],
+    quiz: [
+      q("¿Qué notas forman la pentatónica menor?", ["1-b3-4-5-b7", "1-2-3-5-6", "1-b2-3-5-b6", "1-3-#4-5-7"], 0),
+      q("¿Qué añade la escala blues menor?", ["La #4/b5", "La 7 mayor", "La b9", "La 13"], 0),
+      q("E menor pentatónica sobre Dm7 destaca...", ["9, 11 y 13", "b9, 3 y b13", "Solo la fundamental", "7 mayor y #5"], 0),
+      q("En la sensación tradicional de swing, ¿qué pulsos sostienen especialmente el impulso?", ["2 y 4", "1 solamente", "1 y 3 exclusivamente", "Ninguno"], 0),
+      q("¿Qué es una anticipación?", ["Atacar antes del punto esperado", "Tocar siempre tarde", "Cambiar de tonalidad", "Eliminar un pulso"], 0),
+      q("¿Qué debe practicarse antes de añadir muchas alturas?", ["El fraseo rítmico sobre una nota", "Solo escalas rápidas", "Acordes sin pulso", "La digitación más difícil"], 0),
+      q("La escala bebop dominante añade a la mixolidia...", ["La 7 natural", "La b2", "La #4", "La b6"], 0),
+      q("¿Qué hace un enclosure?", ["Rodea una nota objetivo antes de resolver", "Repite una escala completa", "Elimina las notas guía", "Cambia el compás"], 0),
+      q("El cromatismo bebop necesita principalmente...", ["Una nota objetivo clara", "Muchas notas al azar", "Un tempo muy rápido", "Un acorde disminuido"], 0),
+      q("¿Qué notas describen mejor la función de un acorde con séptima?", ["3 y 7", "1 y 5", "9 y 11", "Solo la fundamental"], 0),
+      q("En G7-Cmaj7, la séptima F suele resolver a...", ["E", "G", "C#", "A"], 0),
+      q("Una línea de guide tones debe hacer audible...", ["La dirección armónica", "Solo el registro agudo", "La marca del piano", "Un patrón de batería"], 0),
+      q("¿Cuál es una técnica de desarrollo motívico?", ["Secuencia", "Afinación alternativa", "Cambio de instrumento", "Eliminar el ritmo"], 0),
+      q("¿Qué conservan las permutaciones?", ["El material y cambian su orden", "El orden y cambian todas las notas", "Solo el tempo", "La tonalidad siempre"], 0),
+      q("¿Qué principio da coherencia a un solo?", ["Presentar, variar y responder", "Cambiar de idea cada pulso", "Evitar repeticiones", "Usar todas las escalas"], 0),
+      q("¿Cuál es el primer nivel de práctica de un ii-V-I?", ["Fundamentales y función", "Outside playing", "Sustituciones múltiples", "Velocidad máxima"], 0),
+      q("En I-VI7-ii-V, VI7 funciona como...", ["Dominante secundario de ii", "Subdominante menor", "Tónica paralela", "Acorde sin función"], 0),
+      q("¿Qué debe mantenerse al atravesar un ii-V-I?", ["Una línea melódica continua", "Una escala aislada por acorde", "La misma fundamental", "Silencio en el V"], 0),
+      q("¿Qué organiza un triad pair?", ["Dos tríadas complementarias", "Dos tempos simultáneos", "Dos compases vacíos", "Una sola nota"], 0),
+      q("Un recurso outside resulta convincente cuando...", ["Regresa con claridad a una nota objetivo", "Nunca resuelve", "Ocupa todo el solo", "No tiene pulso"], 0),
+      q("¿Qué importa más que la cantidad de alteraciones?", ["La claridad rítmica y la resolución", "La velocidad", "El volumen", "La extensión del instrumento"], 0),
+      q("Antes de improvisar un standard conviene reconocer...", ["Su forma y fundamentales", "Solo su título", "La biografía del autor", "Únicamente el último acorde"], 0),
+      q("Un concepto está integrado auditivamente cuando puede...", ["Reconocerse, cantarse y aplicarse", "Definirse de memoria solamente", "Tocarse rápido una vez", "Escribirse sin escucharse"], 0),
+      q("¿Qué progresión llega a I por la 'puerta trasera'?", ["ivm7-bVII7-Imaj7", "ii-V-I", "I-vi-ii-V", "iii-vi-ii-V"], 0)
     ]
   }
 ];

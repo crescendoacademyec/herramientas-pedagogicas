@@ -103,12 +103,16 @@
     "1.7 Relación básica acorde-escala": "chordScale",
     "1.8 Lectura de lead sheets y el Real Book": "leadSheet",
     "1.9 Funciones armónicas: tónico, subdominante y dominante": "functions",
+    "1.9b Ritmo armónico y peso métrico": "harmonicRhythm",
+    "1.9c Relación melodía–armonía y notas disponibles": "melodyHarmony",
     "2.3 Dominantes secundarios": "secondary",
     "2.4 Sustitución tritonal": "tritone",
     "2.5 Modos y relación acorde-escala": "modes",
     "2.7 ii-V encadenados y ciclo de quintas": "chain",
     "2.8 Campo armónico completo: menor armónica y menor melódica": "minorFields",
     "2.10 Tipos de cadencia: auténtica, plagal, semicadencia y deceptiva": "cadences",
+    "2.10b Modos completos de la menor melódica": "melodicModes",
+    "2.10c Escala mayor armónica y cuatro centros tonales": "tonalCenters",
     "3.1 Intercambio modal": "modalInterchange",
     "3.2 Dominantes sustitutos extendidos": "dominantExt",
     "3.3 Técnicas básicas de reharmonización": "reharm",
@@ -116,6 +120,8 @@
     "3.9 Ciclo de Coltrane y sustituciones por terceras mayores": "coltrane",
     "3.10 Constant structure (CSCP)": "constant",
     "3.11 Modulación: directa y por acorde pivote": "modulation",
+    "3.11b Cromatismo modal y sustitución escalar": "scaleSubstitution",
+    "3.11c Rearmonización desde la melodía": "melodyReharm",
     "4.3 Armonía no funcional y pandiatonicismo": "pandiatonic",
     "4.4 Escalas modales contemporáneas": "contemporaryModes",
     "4.5 Fundamentos de composición jazz": "composition",
@@ -124,6 +130,16 @@
     "4.10 Acordes de función especial": "specialFunctions",
     "4.11 Acordes compuestos: sobre bajo, inversión, híbrido y acorde sobre acorde": "compound",
     "4.12 Conducción de voces básica para arreglo": "voiceLeading"
+    ,"4.12b Triad pairs y permutaciones": "triadPairs"
+    ,"4.12c Armonización desde la voz superior y ostinato": "topVoiceOstinato"
+    ,"5.1 Pentatónicas, blues y superposiciones": "pentatonicLab"
+    ,"5.2 Swing, articulación y anticipación": "swingMap"
+    ,"5.3 Cromatismo y vocabulario bebop": "bebopLine"
+    ,"5.4 Notas objetivo y líneas de guide tones": "guideToneLine"
+    ,"5.5 Desarrollo motívico y permutaciones": "motiveLab"
+    ,"5.6 Improvisación sobre ii–V–I y turnarounds": "iiVImprovisation"
+    ,"5.7 Triad pairs, cuartas y recursos outside": "outsideLab"
+    ,"5.8 Entrenamiento auditivo y práctica sobre standards": "earPath"
   };
 
   // ---------- Navegación entre vistas ----------

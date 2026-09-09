@@ -2,8 +2,44 @@
   "use strict";
 
   var NOTES = ["C", "D♭", "D", "E♭", "E", "F", "G♭", "G", "A♭", "A", "B♭", "B"];
+  var AUDIO = { context: null, bus: null, player: null, promise: null, failed: false, nodes: [], token: 0 };
   function esc(value) { return String(value).replace(/[&<>\"']/g, function (c) { return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]; }); }
   function chord(root, suffix) { return NOTES[((root % 12) + 12) % 12] + suffix; }
+  function audioContext() {
+    if (!AUDIO.context) {
+      var AC = global.AudioContext || global.webkitAudioContext;
+      if (!AC) return null;
+      AUDIO.context = new AC(); AUDIO.bus = AUDIO.context.createGain(); AUDIO.bus.gain.value = 1.55; AUDIO.bus.connect(AUDIO.context.destination);
+    }
+    if (AUDIO.context.state === "suspended") AUDIO.context.resume();
+    return AUDIO.context;
+  }
+  function piano() {
+    var ctx = audioContext();
+    if (!ctx || AUDIO.failed) return Promise.resolve(null);
+    if (AUDIO.player) return Promise.resolve(AUDIO.player);
+    if (!global.Soundfont || !global.Soundfont.instrument) { AUDIO.failed = true; return Promise.resolve(null); }
+    if (!AUDIO.promise) AUDIO.promise = global.Soundfont.instrument(ctx, "acoustic_grand_piano", { destination: AUDIO.bus }).then(function (p) { AUDIO.player = p; return p; }).catch(function () { AUDIO.failed = true; return null; });
+    return AUDIO.promise;
+  }
+  function stopAudio() { AUDIO.token += 1; AUDIO.nodes.forEach(function (n) { try { n.stop(); } catch (e) {} }); AUDIO.nodes = []; }
+  function fallback(midi, duration, delay, gain) {
+    var ctx=audioContext(); if(!ctx)return; var osc=ctx.createOscillator(),vol=ctx.createGain(),now=ctx.currentTime+(delay||0); osc.type="triangle";osc.frequency.value=440*Math.pow(2,(midi-69)/12);vol.gain.setValueAtTime(.0001,now);vol.gain.exponentialRampToValueAtTime(gain||.12,now+.02);vol.gain.exponentialRampToValueAtTime(.0001,now+duration);osc.connect(vol);vol.connect(AUDIO.bus);osc.start(now);osc.stop(now+duration+.03);AUDIO.nodes.push(osc);
+  }
+  function playNotes(midis, options) {
+    options=options||{}; if(options.stop!==false)stopAudio(); var duration=options.duration||.75,delay=options.delay||0,gain=options.gain||.62;
+    piano().then(function(player){midis.forEach(function(midi){if(player){var node=player.play(midi,audioContext().currentTime+delay,{duration:duration,gain:gain});if(node)AUDIO.nodes.push(node);}else fallback(midi,duration,delay,Math.min(.18,gain));});});
+  }
+  function suffixIntervals(suffix) {
+    if (/m7♭5|m7b5|ø/.test(suffix)) return [0,3,6,10];
+    if (/dim|°/.test(suffix)) return [0,3,6,9];
+    if (/m\(maj7\)/.test(suffix)) return [0,3,7,11];
+    if (/m7/.test(suffix)) return [0,3,7,10];
+    if (/maj7/.test(suffix)) return [0,4,7,11];
+    if (/7/.test(suffix)) return [0,4,7,10];
+    if (/m/.test(suffix)) return [0,3,7];
+    return [0,4,7];
+  }
   function tonicControl(root) {
     return '<label class="tv-select-label">Tonalidad <select class="tv-tonic">' + NOTES.map(function (n, i) { return '<option value="' + i + '"' + (i === root ? ' selected' : '') + '>' + n + '</option>'; }).join("") + "</select></label>";
   }
@@ -16,9 +52,10 @@
   function renderProgression(root, config) {
     var grades = false;
     function paint() {
-      root.innerHTML = '<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Mapa armónico interactivo</span><h4>' + esc(config.title) + '</h4><p>' + esc(config.note) + '</p></div><div class="tv-controls">' + tonicControl(state.root) + '<button class="tv-toggle" type="button">' + (grades ? 'Ver acordes' : 'Solo grados') + '</button></div></div>' + chart(config.steps, state.root, grades) + (config.footer ? '<p class="tv-footer">' + esc(config.footer) + '</p>' : '') + '</section>';
+      root.innerHTML = '<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Mapa armónico interactivo</span><h4>' + esc(config.title) + '</h4><p>' + esc(config.note) + '</p></div><div class="tv-controls">' + tonicControl(state.root) + '<button class="tv-toggle" type="button">' + (grades ? 'Ver acordes' : 'Solo grados') + '</button><button class="tv-play" type="button">▶ Escuchar</button></div></div>' + chart(config.steps, state.root, grades) + (config.footer ? '<p class="tv-footer">' + esc(config.footer) + '</p>' : '') + '</section>';
       root.querySelector('.tv-tonic').addEventListener('change', function (e) { state.root = Number(e.target.value); paint(); });
       root.querySelector('.tv-toggle').addEventListener('click', function () { grades = !grades; paint(); });
+      root.querySelector('.tv-play').addEventListener('click', async function () { stopAudio(); var token=AUDIO.token; for(var i=0;i<config.steps.length;i++){if(token!==AUDIO.token)return;var s=config.steps[i],base=48+state.root+s.offset;playNotes(suffixIntervals(s.suffix||"").map(function(n){return base+n;}),{duration:.68,stop:false,gain:.5});await new Promise(function(resolve){setTimeout(resolve,720);});} });
     }
     var state = { root: 0 }; paint();
   }
@@ -45,6 +82,15 @@
       root.querySelector('.tv-toggle').addEventListener('click', function () { state.grades = !state.grades; paint(); });
     }
     paint();
+  }
+  function renderSequence(root, config) {
+    var state={root:0};
+    function paint(){
+      var cells=config.notes.map(function(n,i){return '<div class="tv-note-step"><small>'+(i+1)+'</small><strong>'+esc(chord(state.root+n.offset,""))+'</strong><span>'+esc(n.label||n.degree||"")+'</span></div>';}).join('<span class="tv-arrow">→</span>');
+      root.innerHTML='<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Laboratorio melódico</span><h4>'+esc(config.title)+'</h4><p>'+esc(config.note)+'</p></div><div class="tv-controls">'+tonicControl(state.root)+'<button class="tv-play" type="button">▶ Escuchar</button></div></div><div class="tv-note-line">'+cells+'</div><p class="tv-footer">'+esc(config.footer||"Canta primero y después escucha para comprobar.")+'</p></section>';
+      root.querySelector('.tv-tonic').addEventListener('change',function(e){state.root=Number(e.target.value);paint();});
+      root.querySelector('.tv-play').addEventListener('click',function(){playNotes(config.notes.map(function(n){return 60+state.root+n.offset;}),{duration:.36,gain:.7});});
+    } paint();
   }
 
   var P = function (title, note, steps, footer) { return { type: "progression", title: title, note: note, steps: steps, footer: footer }; };
@@ -119,6 +165,22 @@
     ] },
     voiceLeading: P("Conducción de voces", "Las líneas cercanas importan más que el nombre aislado de cada acorde. Sigue las notas guía por semitono.", [S(2,"m7","ii7","7ª → 3ª"),S(7,"7","V7","Notas guía"),S(0,"maj7","Imaj7","Resolución"),S(9,"m7","vi7","Conexión"),S(2,"m7","ii7","Continuidad")])
   };
+  VISUALS.harmonicRhythm=P("Un ii–V–I, dos ritmos armónicos","Compara la duración de cada función y observa cómo cambia el impulso.",[S(2,"m7","ii7","2 pulsos"),S(7,"7","V7","2 pulsos"),S(0,"maj7","Imaj7","4 pulsos")]);
+  VISUALS.melodyHarmony={type:"table",title:"Una nota, varias funciones",note:"La misma altura adquiere otro significado según el acorde inferior.",rows:[{name:"Nota del acorde",formula:"C como 7ª de Dm7",value:"Dm7",use:"Estable en tiempo fuerte"},{name:"Tensión",formula:"C como 11 de Gm7",value:"Gm7",use:"Color disponible"},{name:"Aproximación",formula:"C → B sobre G7",value:"G7",use:"Resuelve por semitono"}]};
+  VISUALS.melodicModes={type:"table",title:"Mapa completo de menor melódica",note:"Relaciona cada modo con la cualidad que produce.",rows:[{name:"I · menor melódica",formula:"1 2 ♭3 4 5 6 7",example:"m(maj7)",use:"Centro menor"},{name:"III · lidio aumentado",formula:"1 2 3 #4 #5 6 7",example:"maj7#5",use:"Mayor aumentado"},{name:"IV · lidio dominante",formula:"1 2 3 #4 5 6 ♭7",example:"7#11",use:"Dominante brillante"},{name:"VII · alterada",formula:"1 ♭9 #9 3 #11 ♭13 ♭7",example:"7alt",use:"Dominante alterado"}]};
+  VISUALS.tonalCenters={type:"table",title:"Cuatro centros tonales",note:"Compara el tercer, sexto y séptimo grado de cada escala madre.",rows:[{name:"Mayor",formula:"1 2 3 4 5 6 7",value:"C mayor",use:"Tónica maj7"},{name:"Mayor armónica",formula:"1 2 3 4 5 ♭6 7",value:"C mayor armónica",use:"Mayor con ♭6"},{name:"Menor armónica",formula:"1 2 ♭3 4 5 ♭6 7",value:"C menor armónica",use:"V7 hacia i"},{name:"Menor melódica",formula:"1 2 ♭3 4 5 6 7",value:"C menor melódica",use:"Color moderno"}]};
+  VISUALS.scaleSubstitution={type:"table",title:"Un dominante, cuatro colores",note:"La función permanece; las tensiones disponibles cambian.",rows:[{name:"Mixolidia",formula:"9, 11, 13",example:"7",use:"Dominante diatónico"},{name:"Lidia dominante",formula:"9, #11, 13",example:"7#11",use:"subV / color brillante"},{name:"Disminuida",formula:"♭9, #9, #11, 13",example:"13b9",use:"Dominante simétrico"},{name:"Alterada",formula:"♭9, #9, #11, ♭13",example:"7alt",use:"Máxima tensión"}]};
+  VISUALS.melodyReharm={type:"table",title:"Armonizar una nota C",note:"Filtra cada posibilidad por función, registro y acorde siguiente.",rows:[{name:"Como fundamental",formula:"1",value:"Cmaj7",use:"Tónica"},{name:"Como séptima",formula:"♭7",value:"Dm7",use:"Preparación"},{name:"Como tercera",formula:"♭3",value:"Am7",use:"Tónica relativa"},{name:"Como tensión",formula:"11",value:"Gm7",use:"Color"}]};
+  VISUALS.triadPairs={type:"sequence",title:"Triad pair dórico",note:"Alterna Dm y Em para obtener seis notas de D dórico.",notes:[{offset:0,label:"Dm"},{offset:3,label:"Dm"},{offset:7,label:"Dm"},{offset:2,label:"Em"},{offset:5,label:"Em"},{offset:9,label:"Em"}]};
+  VISUALS.topVoiceOstinato=P("Voz superior y ostinato","La voz aguda permanece reconocible mientras cambian bajo y función.",[S(0,"maj7","Imaj7","Melodía: E"),S(9,"m7","vi7","Melodía: E"),S(2,"m7","ii7","Melodía: F"),S(7,"7","V7","Melodía: F")]);
+  VISUALS.pentatonicLab={type:"sequence",title:"Pentatónica menor y blue note",note:"Escucha 1–♭3–4–♭5–5–♭7–1.",notes:[{offset:0,label:"1"},{offset:3,label:"♭3"},{offset:5,label:"4"},{offset:6,label:"♭5"},{offset:7,label:"5"},{offset:10,label:"♭7"},{offset:12,label:"1"}]};
+  VISUALS.swingMap={type:"table",title:"Mapa de articulación jazz",note:"La sensación nace de duración, acento y colocación.",rows:[{name:"Swing",formula:"larga–corta flexible",value:"Corcheas",use:"Flujo"},{name:"Anticipación",formula:"antes del tiempo fuerte",value:"& de 4",use:"Impulso"},{name:"Retardo",formula:"después del punto esperado",value:"Behind",use:"Relajación"},{name:"Ghost note",formula:"ataque muy ligero",value:"(nota)",use:"Textura rítmica"}]};
+  VISUALS.bebopLine={type:"sequence",title:"Aproximación bebop hacia la tercera",note:"La línea rodea E y resuelve en una nota estructural de Cmaj7.",notes:[{offset:7,label:"5"},{offset:5,label:"4"},{offset:3,label:"aprox."},{offset:4,label:"3 objetivo"},{offset:7,label:"5"},{offset:11,label:"7"},{offset:12,label:"1"}]};
+  VISUALS.guideToneLine={type:"sequence",title:"Línea de notas guía sobre ii–V–I",note:"C–B–B y F–F–E describen la progresión con movimiento mínimo.",notes:[{offset:0,label:"7ª de ii"},{offset:-1,label:"3ª de V"},{offset:-1,label:"7ª de I"},{offset:5,label:"3ª de ii"},{offset:5,label:"7ª de V"},{offset:4,label:"3ª de I"}]};
+  VISUALS.motiveLab={type:"sequence",title:"Motivo y secuencia",note:"Un contorno corto se repite desde otro grado.",notes:[{offset:0,label:"motivo"},{offset:2,label:"motivo"},{offset:4,label:"motivo"},{offset:2,label:"secuencia"},{offset:4,label:"secuencia"},{offset:5,label:"secuencia"}]};
+  VISUALS.iiVImprovisation=P("Capas para improvisar ii–V–I","Escucha primero la función; después conecta notas guía y cromatismos.",[S(2,"m7","ii7","Preparación"),S(7,"7","V7","Tensión"),S(0,"maj7","Imaj7","Resolución"),S(9,"7","VI7","Turnaround")]);
+  VISUALS.outsideLab={type:"sequence",title:"Inside → outside → resolución",note:"El desplazamiento cromático tiene sentido porque regresa a una nota objetivo.",notes:[{offset:0,label:"inside"},{offset:4,label:"inside"},{offset:7,label:"inside"},{offset:1,label:"outside"},{offset:5,label:"outside"},{offset:8,label:"outside"},{offset:7,label:"5 objetivo"},{offset:4,label:"3 objetivo"}]};
+  VISUALS.earPath=P("Ruta auditiva de un standard","Canta y reconoce cada función antes de improvisar.",[S(0,"maj7","Imaj7","Centro"),S(2,"m7","ii7","Preparación"),S(7,"7","V7","Tensión"),S(0,"maj7","Imaj7","Resolución")],"Canta las fundamentales y después las terceras y séptimas.");
   VISUALS.leadSheet = { type: "form", title: "Lectura rápida de un lead sheet", note: "Cada caja representa un compás: el símbolo superior indica armonía; la letra organiza la forma y la melodía vive sobre esa cuadrícula.", bars: [S(0,"maj7","A · 1","Compás 1"),S(2,"m7","A · 2","Cambio"),S(7,"7","A · 3","Tensión"),S(0,"maj7","A · 4","Resolución"),S(5,"maj7","B · 1","Bridge"),S(7,"7","B · 2","Dirección"),S(0,"maj7","A · 1","Retorno"),S(7,"7","A · 2","Turnaround")] };
   VISUALS.aaba = { type: "form", title: "Forma AABA y rhythm changes", note: "La forma organiza la escucha: dos A afirman el material, B contrasta y A regresa.", bars: [S(0,"maj7","I","A1"),S(9,"7","VI7","A1"),S(2,"m7","ii7","A1"),S(7,"7","V7","A1"),S(0,"maj7","I","A2"),S(9,"7","VI7","A2"),S(2,"m7","ii7","A2"),S(7,"7","V7","A2"),S(4,"7","III7","B"),S(9,"7","VI7","B"),S(2,"7","II7","B"),S(7,"7","V7","B"),S(0,"maj7","I","A3"),S(9,"7","VI7","A3"),S(2,"m7","ii7","A3"),S(7,"7","V7","A3")] };
   VISUALS.composition = { type: "form", title: "Diseño de una forma para componer", note: "Piensa la composición como recorrido: motivo, contraste, desarrollo y retorno.", bars: [S(0,"maj7","A","Motivo"),S(5,"maj7","A","Respuesta"),S(2,"m7","B","Contraste"),S(7,"7","B","Tensión"),S(0,"maj7","A'","Retorno"),S(9,"m7","A'","Variación"),S(2,"m7","C","Puente"),S(7,"7","C","Preparación")] };
@@ -130,6 +192,7 @@
     root.dataset.mounted = "true";
     if (config.type === "table") renderTable(root, config);
     else if (config.type === "form") renderForm(root, config);
+    else if (config.type === "sequence") renderSequence(root, config);
     else renderProgression(root, config);
   }
   global.TheoryVisuals = { mount: mount };

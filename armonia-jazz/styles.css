@@ -36,9 +36,9 @@ body {
 .tv-head p { max-width: 700px; margin: 5px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.45; }
 .tv-controls { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
 .tv-select-label { display: grid; gap: 4px; color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.tv-select-label select, .tv-toggle { min-height: 34px; border: 1px solid var(--line); border-radius: 6px; padding: 0 9px; color: var(--ink); background: #201e1b; font: inherit; font-size: .78rem; text-transform: none; letter-spacing: 0; }
-.tv-toggle { margin-top: 14px; cursor: pointer; color: var(--accent); }
-.tv-toggle:hover { border-color: var(--accent); background: var(--accent-soft); }
+.tv-select-label select, .tv-toggle, .tv-play { min-height: 34px; border: 1px solid var(--line); border-radius: 6px; padding: 0 9px; color: var(--ink); background: #201e1b; font: inherit; font-size: .78rem; text-transform: none; letter-spacing: 0; }
+.tv-toggle, .tv-play { margin-top: 14px; cursor: pointer; color: var(--accent); }
+.tv-toggle:hover, .tv-play:hover { border-color: var(--accent); background: var(--accent-soft); }
 .tv-chart { display: flex; align-items: stretch; gap: 7px; padding: 20px; overflow-x: auto; }
 .tv-step { display: grid; min-width: 112px; min-height: 88px; padding: 13px 12px; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: rgba(0,0,0,.16); }
 .tv-step:nth-of-type(3n+1) { border-top: 3px solid var(--accent); }
@@ -60,6 +60,11 @@ body {
 .tv-form-bar small { color: var(--muted); }
 .tv-form-bar strong { align-self: center; color: var(--accent); font-family: Georgia, serif; font-size: 1.05rem; }
 .tv-form-bar span { color: var(--muted); font-size: .68rem; }
+.tv-note-line { display:flex; align-items:stretch; gap:7px; padding:20px; overflow-x:auto; }
+.tv-note-step { display:grid; min-width:82px; min-height:82px; padding:10px; border:1px solid var(--line); border-radius:8px; background:rgba(0,0,0,.16); text-align:center; }
+.tv-note-step small { color:var(--muted); font-size:.65rem; }
+.tv-note-step strong { align-self:center; color:var(--accent); font:700 1.08rem Georgia,serif; }
+.tv-note-step span { color:var(--muted); font-size:.68rem; }
 @media (max-width: 720px) { .tv-head { flex-direction: column; } .tv-form { grid-template-columns: repeat(4, minmax(90px, 1fr)); } }
 
 .hidden { display: none !important; }
