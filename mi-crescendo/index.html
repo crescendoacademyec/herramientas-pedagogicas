@@ -164,8 +164,13 @@ function assertApiConfigured(){
 async function api(action,payload={}){
   assertApiConfigured();
   const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,...payload})});
-  if(!res.ok) throw new Error('No se pudo conectar con Mi Crescendo.');
-  const data=await res.json();
+  const raw=await res.text();
+  if(!res.ok){
+    if(res.status===401||/accounts\.google\.com|ServiceLogin/i.test(raw))throw new Error('Apps Script requiere iniciar sesión de Google. Configura el Web App con acceso para “Cualquier usuario”.');
+    throw new Error('No se pudo conectar con Mi Crescendo.');
+  }
+  let data;
+  try{data=JSON.parse(raw)}catch(_){throw new Error('La implementación de Apps Script no devolvió una respuesta válida. Revisa sus permisos y vuelve a desplegarla.')}
   if(!data.ok){if(/sesión venció|no autorizado/i.test(data.error||''))logout(data.error);throw new Error(data.error||'Error del servidor')}
   resetIdle();
   return data.data;
@@ -175,7 +180,7 @@ function setStatus(id,msg,type=''){const e=$(id);if(!e)return;e.textContent=msg;
 function switchRole(next){role=next;$('#roleStudent').classList.toggle('active',next==='student');$('#roleTeacher').classList.toggle('active',next==='teacher');$('#studentLogin').classList.toggle('hidden',next!=='student');$('#teacherLogin').classList.toggle('hidden',next!=='teacher')}
 $('#roleStudent').addEventListener('click',()=>switchRole('student'));$('#roleTeacher').addEventListener('click',()=>switchRole('teacher'));
 $('#studentLoginForm').addEventListener('submit',async e=>{e.preventDefault();setStatus('#studentLoginStatus','Consultando…');try{const data=await api('studentLogin',{code:$('#studentCode').value.trim(),pin:$('#studentPin').value.trim()});session={type:'student',token:data.token,data};resetIdle();openStudent()}catch(err){setStatus('#studentLoginStatus',err.message,'error')}});
-$('#teacherLoginForm').addEventListener('submit',async e=>{e.preventDefault();setStatus('#teacherLoginStatus','Validando…');try{const key=$('#teacherKey').value,data=await api('teacherLogin',{key});$('#teacherKey').value='';session={type:'teacher',token:data.token,key:data.token,teacher:data.teacher};resetIdle();await openTeacher()}catch(err){$('#teacherKey').value='';setStatus('#teacherLoginStatus',err.message,'error')}});
+$('#teacherLoginForm').addEventListener('submit',async e=>{e.preventDefault();setStatus('#teacherLoginStatus','Validando…');try{const key=$('#teacherKey').value,data=await api('teacherLogin',{key});$('#teacherKey').value='';session={type:'teacher',token:data.token,teacher:data.teacher};resetIdle();await openTeacher()}catch(err){$('#teacherKey').value='';setStatus('#teacherLoginStatus',err.message,'error')}});
 $('#logoutBtn').addEventListener('click',()=>logout());
 ['pointerdown','keydown','touchstart'].forEach(name=>document.addEventListener(name,resetIdle,{passive:true}));
 function studentNav(){const items=[['home','Inicio'],['tasks','Tareas'],['classes','Clases'],['rep','Repertorio'],['progress','Progreso'],['learning','Aula teórica'],['resources','Recursos']];$('#studentNav').innerHTML=items.map(([id,label])=>`<button type="button" data-section="${id}" class="${studentSection===id?'active':''}">${icons[id]||icons.resources}${label}</button>`).join('');$$('#studentNav button').forEach(b=>b.addEventListener('click',()=>{studentSection=b.dataset.section;studentNav();renderStudent()}))}
