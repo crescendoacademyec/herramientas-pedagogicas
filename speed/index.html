@@ -905,6 +905,7 @@
             let currentTime = 0;
             let startedAt = 0;
             let startedOffset = 0;
+            let timeRafId = 0;
             let duration = 0;
             let loopA = null;
             let loopB = null;
@@ -962,6 +963,27 @@
                     isPlaying = false;
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                 }
+            }
+
+            function stopTimeUpdates() {
+                if (timeRafId) cancelAnimationFrame(timeRafId);
+                timeRafId = 0;
+            }
+
+            function startTimeUpdates() {
+                stopTimeUpdates();
+                const tick = () => {
+                    if (!isPlaying) {
+                        timeRafId = 0;
+                        return;
+                    }
+                    refreshCurrentTime();
+                    updateTimeDisplay();
+                    drawWaveform();
+                    if (isPlaying) timeRafId = requestAnimationFrame(tick);
+                    else timeRafId = 0;
+                };
+                timeRafId = requestAnimationFrame(tick);
             }
 
             function disposeSource() {
@@ -1112,18 +1134,24 @@
                     refreshCurrentTime();
                     if (currentTime >= duration - 0.05) currentTime = duration;
                     isPlaying = false;
+                    stopTimeUpdates();
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                     updateTimeDisplay();
+                    drawWaveform();
                 };
                 currentSource.start(0, Math.max(0, Math.min(processedOffset, buffer.duration - 0.001)));
                 playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+                startTimeUpdates();
             }
 
             function pausePlayback() {
                 refreshCurrentTime();
                 isPlaying = false;
+                stopTimeUpdates();
                 disposeSource();
                 playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
+                updateTimeDisplay();
+                drawWaveform();
             }
 
             // --- Dibujar forma de onda ---
@@ -1310,17 +1338,6 @@
                     drawWaveform();
                     setStatus('Listo. Presiona reproducir.');
 
-                    // Conectar eventos de tiempo
-                    if (currentSource) {
-                        const updateInterval = setInterval(() => {
-                            refreshCurrentTime();
-                            updateTimeDisplay();
-                            drawWaveform();
-                        }, 200);
-                        // guardar intervalo para limpiar
-                        window._updateInterval = updateInterval;
-                    }
-
                 } catch (err) {
                     console.error(err);
                     setStatus('Error al cargar el archivo: ' + err.message, true);
@@ -1337,6 +1354,7 @@
             });
             openAnotherBtn.addEventListener('click', () => {
                 isPlaying = false;
+                stopTimeUpdates();
                 disposeSource();
                 player.classList.remove('active');
                 loaderScreen.style.display = 'block';
@@ -1350,8 +1368,8 @@
             });
             removeFileBtn.addEventListener('click', () => {
                 isPlaying = false;
+                stopTimeUpdates();
                 disposeSource();
-                if (window._updateInterval) clearInterval(window._updateInterval);
                 player.classList.remove('active');
                 loaderScreen.style.display = 'block';
                 audioBuffer = null;
@@ -1528,13 +1546,6 @@
                     currentSource = null;
                     playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                 }
-                // limpiar intervalos anteriores
-                if (window._updateInterval) clearInterval(window._updateInterval);
-                window._updateInterval = setInterval(() => {
-                    refreshCurrentTime();
-                    updateTimeDisplay();
-                    drawWaveform();
-                }, 200);
             }
 
             repeatBtn.addEventListener('click', () => {
@@ -1602,7 +1613,7 @@
             // Exportar
             function setExportFormat(format) {
                 exportFormat = format;
-                document.querySelectorAll('.mode-toggle-btn').forEach(b => b.classList.remove('active'));
+                [fmtWavBtn, fmtAiffBtn, fmtMp3Btn, fmtM4aBtn].forEach(b => b.classList.remove('active'));
                 const map = { wav: fmtWavBtn, mov: fmtAiffBtn, mp3: fmtMp3Btn, m4a: fmtM4aBtn };
                 if (map[format]) map[format].classList.add('active');
             }
