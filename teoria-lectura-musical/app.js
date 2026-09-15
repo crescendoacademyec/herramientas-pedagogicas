@@ -1033,7 +1033,7 @@ function mountNoteTrainer(root,onResult){
   body.innerHTML=`<div class="trainer-controls">
     <label>Clave <select data-nt-clef><option value="treble">Sol</option><option value="bass">Fa</option><option value="mixed">Mixta</option></select></label>
     <label>Dificultad <select data-nt-level><option value="1">Nivel 1 · centro</option><option value="2">Nivel 2 · rango amplio</option><option value="3">Nivel 3 · líneas adicionales</option></select></label>
-    <label>Modo <select data-nt-mode><option value="name">Nombre de nota</option><option value="keyboard">Tecla visual</option></select></label>
+    <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
   </div>
   <div class="trainer-question-card">
     <div data-nt-staff></div>
@@ -1049,6 +1049,7 @@ function mountNoteTrainer(root,onResult){
   const level=body.querySelector("[data-nt-level]");
   const mode=body.querySelector("[data-nt-mode]");
   let current=null, answered=false;
+  const spanishNames={C:"Do",D:"Re",E:"Mi",F:"Fa",G:"Sol",A:"La",B:"Si"};
 
   function pool(){
     const c=clef.value,lv=Number(level.value);
@@ -1066,8 +1067,8 @@ function mountNoteTrainer(root,onResult){
     return octave>=4?"treble":"bass";
   }
   function renderAnswers(){
-    if(mode.value==="name"){
-      body.querySelector("[data-nt-answers]").innerHTML=NATURAL.map(n=>`<button data-nt-answer="${n}">${n}</button>`).join("");
+    if(mode.value!=="keyboard"){
+      body.querySelector("[data-nt-answers]").innerHTML=NATURAL.map(n=>`<button data-nt-answer="${n}">${mode.value==="spanish"?spanishNames[n]:n}</button>`).join("");
     }else{
       body.querySelector("[data-nt-answers]").innerHTML=`<div class="trainer-mini-keyboard">${NATURAL.map(n=>`<button data-nt-answer="${n}">${n}</button>`).join("")}</div>`;
     }
@@ -1075,7 +1076,9 @@ function mountNoteTrainer(root,onResult){
       if(answered)return;answered=true;
       const ok=current.startsWith(btn.dataset.ntAnswer);
       onResult(ok);
-      body.querySelector("[data-nt-feedback]").textContent=ok?`Correcto: ${current}.`:`No. Era ${current}.`;
+      const spanish=spanishNames[current.slice(0,-1)]+current.slice(-1);
+      const answer=mode.value==="spanish"?`${spanish} (${current})`:`${current} (${spanish})`;
+      body.querySelector("[data-nt-feedback]").textContent=ok?`Correcto: ${answer}.`:`La respuesta correcta es ${answer}.`;
       body.querySelectorAll("[data-nt-answer]").forEach(b=>{
         b.disabled=true;
         if(current.startsWith(b.dataset.ntAnswer)) b.classList.add("correct");

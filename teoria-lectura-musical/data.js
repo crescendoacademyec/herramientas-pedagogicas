@@ -31,6 +31,10 @@ window.TLM_DATA = {
       lead: "La notación permite convertir relaciones sonoras y temporales en información visual.",
       blocks: [
         {
+          title: "Las notas musicales y el cifrado americano",
+          html: `<p>Los siete nombres de las notas musicales son <b>Do, Re, Mi, Fa, Sol, La y Si</b>. Al continuar hacia el agudo, la secuencia vuelve a Do en una octava más alta. Hacia el grave, se recorre en sentido contrario.</p><p>En la notación alfabética, también llamada <b>cifrado americano</b>, esas mismas notas se nombran con letras. No son sonidos diferentes: son dos formas de nombrarlos.</p><div class="table-scroll"><table class="music-reference-table"><caption>Equivalencia de nombres de las notas</caption><thead><tr><th scope="col">Nombre en español</th><th scope="col">Cifrado americano</th></tr></thead><tbody><tr><th scope="row">Do</th><td>C</td></tr><tr><th scope="row">Re</th><td>D</td></tr><tr><th scope="row">Mi</th><td>E</td></tr><tr><th scope="row">Fa</th><td>F</td></tr><tr><th scope="row">Sol</th><td>G</td></tr><tr><th scope="row">La</th><td>A</td></tr><tr><th scope="row">Si</th><td>B</td></tr></tbody></table></div><div class="lesson-example"><b>Recuerda:</b> A corresponde a La, no a Do. Desde Do, las letras siguen este orden: <b>C–D–E–F–G–A–B–C</b>.</div><p>Las alteraciones se conservan: <b>Do sostenido = C♯</b> y <b>Si bemol = B♭</b>. Un número identifica la octava: <b>Do4 = C4</b> (Do central, según la convención usada aquí).</p><p>En este tema, las letras nombran <b>notas individuales</b>. En un símbolo de acorde, la letra indica su fundamental: por ejemplo, <b>Cm</b> significa un acorde de Do menor.</p>`
+        },
+        {
           title: "Vertical y horizontal",
           html: "<div class='orientation-demo'><div class='orientation-card'><b>VERTICAL · ALTURA</b><p>La posición de una nota en el pentagrama informa sobre su altura relativa.</p></div><div class='orientation-card'><b>HORIZONTAL · TIEMPO</b><p>La sucesión de figuras, silencios, compases y barras organiza la duración y el avance temporal.</p></div></div>"
         },
