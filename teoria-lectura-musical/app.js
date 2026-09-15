@@ -1034,15 +1034,21 @@ function mountTrainer(level){
 function randomItem(arr){return arr[Math.floor(Math.random()*arr.length)]}
 function shuffle(arr){return arr.slice().sort(()=>Math.random()-.5)}
 
+function noteTrainerPitches(selection,chromatic=false){
+  const suffixes={natural:[""],sharps:["#"],flats:["b"],both:["#","b"],all:["","#","b"]}[selection]||[""];
+  return NATURAL.flatMap(letter=>suffixes.map(suffix=>letter+suffix))
+    .filter(pitch=>!chromatic||Object.hasOwn(CHROMATIC_SOLFEGE,pitch));
+}
+
 function mountNoteTrainer(root,onResult){
   const body=root.querySelector("[data-trainer-body]");
   body.innerHTML=`<div class="trainer-controls">
     <label>Clave <select data-nt-clef><option value="treble">Sol</option><option value="bass">Fa</option><option value="mixed">Mixta</option></select></label>
     <label>Dificultad <select data-nt-level><option value="1">Nivel 1 · centro</option><option value="2">Nivel 2 · rango amplio</option><option value="3">Nivel 3 · líneas adicionales</option></select></label>
     <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="chromatic">Solfeo cromático · Do, Di, Re…</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
-    <label data-nt-chromatic-options hidden>Alteraciones <select data-nt-accidentals><option value="sharps">Sostenidos · Di, Ri, Fi, Si, Li</option><option value="flats">Bemoles · Ra, Me, Se, Le, Te</option><option value="both">Sostenidos y bemoles</option></select></label>
+    <label>Notas a practicar <select data-nt-accidentals><option value="natural">Solo naturales</option><option value="sharps">Solo sostenidos</option><option value="flats">Solo bemoles</option><option value="both">Sostenidos y bemoles</option><option value="all">Naturales, sostenidos y bemoles</option></select></label>
   </div>
-  <p data-nt-chromatic-guide hidden>Do = C en esta práctica, como en Piano Virtual. Ti = B; Si = G♯. Identifica la sílaba según la escritura de la nota, no solo su sonido.</p>
+  <p data-nt-chromatic-guide hidden>Do = C en esta práctica, como en Piano Virtual. Ti = B; Si = G♯. Identifica la sílaba según la escritura de la nota, no solo su sonido. Este modo usa las alteraciones de la tabla introductoria (sin E♯, B♯, C♭ ni F♭).</p>
   <div class="trainer-question-card">
     <div data-nt-staff></div>
     <p class="trainer-prompt" data-nt-prompt>¿Qué nota es?</p>
@@ -1069,13 +1075,8 @@ function mountNoteTrainer(root,onResult){
                lv===2?BASS_STAFF_NOTES:
                ["C2","D2",...BASS_STAFF_NOTES,"D4","E4"];
     const notes=c==="treble"?treble:c==="bass"?bass:treble.concat(bass);
-    if(mode.value!=="chromatic")return notes;
-    return notes.flatMap(note=>{
-      const options=[note],letter=note[0],oct=note.slice(1);
-      if(accidentals.value!=="flats"&&CHROMATIC_SOLFEGE[letter+"#"])options.push(letter+"#"+oct);
-      if(accidentals.value!=="sharps"&&CHROMATIC_SOLFEGE[letter+"b"])options.push(letter+"b"+oct);
-      return options;
-    });
+    const pitches=noteTrainerPitches(accidentals.value,mode.value==="chromatic");
+    return notes.flatMap(note=>pitches.filter(pitch=>pitch[0]===note[0]).map(pitch=>pitch+note.slice(1)));
   }
   function inferClef(note){
     if(clef.value!=="mixed") return clef.value;
@@ -1084,13 +1085,13 @@ function mountNoteTrainer(root,onResult){
   }
   function renderAnswers(){
     const pitch=current.slice(0,-1);
+    const choices=noteTrainerPitches(accidentals.value,mode.value==="chromatic");
     if(mode.value==="chromatic"){
-      const choices=Object.entries(CHROMATIC_SOLFEGE).filter(([note])=>accidentals.value==="both"||(accidentals.value==="sharps"?!note.includes("b"):!note.includes("#")));
-      body.querySelector("[data-nt-answers]").innerHTML=choices.map(([note,syllable])=>`<button data-nt-answer="${note}">${syllable}</button>`).join("");
+      body.querySelector("[data-nt-answers]").innerHTML=choices.map(note=>`<button data-nt-answer="${note}">${CHROMATIC_SOLFEGE[note]}</button>`).join("");
     }else if(mode.value!=="keyboard"){
-      body.querySelector("[data-nt-answers]").innerHTML=NATURAL.map(n=>`<button data-nt-answer="${n}">${mode.value==="spanish"?spanishNames[n]:n}</button>`).join("");
+      body.querySelector("[data-nt-answers]").innerHTML=choices.map(n=>`<button data-nt-answer="${n}">${mode.value==="spanish"?spanishNames[n[0]]+(n.endsWith("#")?" sostenido":n.endsWith("b")?" bemol":""):n.replace("#","♯").replace("b","♭")}</button>`).join("");
     }else{
-      body.querySelector("[data-nt-answers]").innerHTML=`<div class="trainer-mini-keyboard">${NATURAL.map(n=>`<button data-nt-answer="${n}">${n}</button>`).join("")}</div>`;
+      body.querySelector("[data-nt-answers]").innerHTML=`<div class="trainer-mini-keyboard">${choices.map(n=>`<button data-nt-answer="${n}">${n.replace("#","♯").replace("b","♭")}</button>`).join("")}</div>`;
     }
     body.querySelectorAll("[data-nt-answer]").forEach(btn=>btn.addEventListener("click",()=>{
       if(answered)return;answered=true;
@@ -1108,7 +1109,6 @@ function mountNoteTrainer(root,onResult){
   }
   function next(){
     answered=false;
-    body.querySelector("[data-nt-chromatic-options]").hidden=mode.value!=="chromatic";
     body.querySelector("[data-nt-chromatic-guide]").hidden=mode.value!=="chromatic";
     current=randomItem(pool());
     const c=inferClef(current);

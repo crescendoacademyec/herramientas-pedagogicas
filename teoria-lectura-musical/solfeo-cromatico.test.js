@@ -23,3 +23,16 @@ assert.match(sharp,/class="ledger"/);
 assert.match(vm.runInContext('staffTrainerSVG("A3","treble")',sandbox),/cy="124"/);
 assert.match(vm.runInContext('staffTrainerSVG("C2","bass")',sandbox),/cy="124"/);
 console.log('Solfeo cromático: sílabas, alteraciones y posiciones verificadas.');
+vm.runInContext(source.slice(source.indexOf('function noteTrainerPitches('),source.indexOf('function mountNoteTrainer(')),sandbox);
+for(const chromatic of [false,true]){
+  for(const selection of ['natural','sharps','flats','both','all']){
+    const pitches=Array.from(vm.runInContext(`noteTrainerPitches('${selection}',${chromatic})`,sandbox));
+    assert.ok(pitches.length>0);
+    if(selection==='natural')assert.ok(pitches.every(p=>p.length===1));
+    if(selection==='sharps')assert.ok(pitches.every(p=>p.endsWith('#')));
+    if(selection==='flats')assert.ok(pitches.every(p=>p.endsWith('b')));
+    if(selection==='both')assert.ok(pitches.every(p=>p.length===2));
+    if(selection==='all')assert.equal(pitches.length,chromatic?17:21);
+  }
+}
+console.log('Selección de naturales y alteraciones verificada en ambos sistemas.');
