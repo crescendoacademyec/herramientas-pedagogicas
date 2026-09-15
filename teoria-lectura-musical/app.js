@@ -7,6 +7,8 @@ let activeLevelId = state.activeLevelId || DATA.levels[0].id;
 const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NATURAL = ["C","D","E","F","G","A","B"];
 const NATURAL_PC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+// Misma convención cromática que Piano Virtual; aquí Do corresponde a C.
+const CHROMATIC_SOLFEGE = Object.freeze({C:"Do","C#":"Di",Db:"Ra",D:"Re","D#":"Ri",Eb:"Me",E:"Mi",F:"Fa","F#":"Fi",Gb:"Se",G:"Sol","G#":"Si",Ab:"Le",A:"La","A#":"Li",Bb:"Te",B:"Ti"});
 const ROOTS = [
   {value:"C",label:"C"},{value:"Db",label:"D♭"},{value:"D",label:"D"},
   {value:"Eb",label:"E♭"},{value:"E",label:"E"},{value:"F",label:"F"},
@@ -414,14 +416,18 @@ const SMUFL_GLYPHS=Object.freeze({
 });
 function smuflTimeDigit(value){const digit=Number(value);return Number.isInteger(digit)&&digit>=0&&digit<=9?String.fromCodePoint(0xE080+digit):String(value)}
 function staffTrainerSVG(note,clef){
-  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES,index=notes.indexOf(note),step=index-2,w=360,h=130,baseY=82,sh=6;
+  const match=/^([A-G])([#b]?)(\d+)$/.exec(note);
+  const letter=match[1],accidental=match[2],octave=Number(match[3]);
+  const bottom=clef==="treble"?4*7+NATURAL.indexOf("E"):2*7+NATURAL.indexOf("G");
+  const step=octave*7+NATURAL.indexOf(letter)-bottom,w=360,h=160,baseY=100,sh=6;
   const lines=[0,2,4,6,8].map(s=>`<line x1="28" x2="330" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
   const y=baseY-step*sh;
   const ledger=[];
   if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
   if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
   return `<svg viewBox="0 0 ${w} ${h}" class="reading-staff" role="img" aria-label="Nota para identificar en clave de ${clef==="treble"?"sol":"fa"}">
-    ${lines}<text class="clef-text" x="34" y="78">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${ledger.join("")}
+    ${lines}<text class="clef-text" x="34" y="${baseY-4}">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${ledger.join("")}
+    ${accidental?`<text x="166" y="${y+5}" font-size="20" fill="currentColor">${accidental==="#"?"♯":"♭"}</text>`:""}
     <ellipse class="student-note" cx="190" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 190 ${y})"/>
   </svg>`;
 }
@@ -1033,8 +1039,10 @@ function mountNoteTrainer(root,onResult){
   body.innerHTML=`<div class="trainer-controls">
     <label>Clave <select data-nt-clef><option value="treble">Sol</option><option value="bass">Fa</option><option value="mixed">Mixta</option></select></label>
     <label>Dificultad <select data-nt-level><option value="1">Nivel 1 · centro</option><option value="2">Nivel 2 · rango amplio</option><option value="3">Nivel 3 · líneas adicionales</option></select></label>
-    <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
+    <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="chromatic">Solfeo cromático · Do, Di, Re…</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
+    <label data-nt-chromatic-options hidden>Alteraciones <select data-nt-accidentals><option value="sharps">Sostenidos · Di, Ri, Fi, Si, Li</option><option value="flats">Bemoles · Ra, Me, Se, Le, Te</option><option value="both">Sostenidos y bemoles</option></select></label>
   </div>
+  <p data-nt-chromatic-guide hidden>Do = C en esta práctica, como en Piano Virtual. Ti = B; Si = G♯. Identifica la sílaba según la escritura de la nota, no solo su sonido.</p>
   <div class="trainer-question-card">
     <div data-nt-staff></div>
     <p class="trainer-prompt" data-nt-prompt>¿Qué nota es?</p>
@@ -1048,6 +1056,7 @@ function mountNoteTrainer(root,onResult){
   const clef=body.querySelector("[data-nt-clef]");
   const level=body.querySelector("[data-nt-level]");
   const mode=body.querySelector("[data-nt-mode]");
+  const accidentals=body.querySelector("[data-nt-accidentals]");
   let current=null, answered=false;
   const spanishNames={C:"Do",D:"Re",E:"Mi",F:"Fa",G:"Sol",A:"La",B:"Si"};
 
@@ -1059,7 +1068,14 @@ function mountNoteTrainer(root,onResult){
     const bass=lv===1?["G2","A2","B2","C3","D3","E3","F3","G3","A3"]:
                lv===2?BASS_STAFF_NOTES:
                ["C2","D2",...BASS_STAFF_NOTES,"D4","E4"];
-    return c==="treble"?treble:c==="bass"?bass:treble.concat(bass);
+    const notes=c==="treble"?treble:c==="bass"?bass:treble.concat(bass);
+    if(mode.value!=="chromatic")return notes;
+    return notes.flatMap(note=>{
+      const options=[note],letter=note[0],oct=note.slice(1);
+      if(accidentals.value!=="flats"&&CHROMATIC_SOLFEGE[letter+"#"])options.push(letter+"#"+oct);
+      if(accidentals.value!=="sharps"&&CHROMATIC_SOLFEGE[letter+"b"])options.push(letter+"b"+oct);
+      return options;
+    });
   }
   function inferClef(note){
     if(clef.value!=="mixed") return clef.value;
@@ -1067,35 +1083,41 @@ function mountNoteTrainer(root,onResult){
     return octave>=4?"treble":"bass";
   }
   function renderAnswers(){
-    if(mode.value!=="keyboard"){
+    const pitch=current.slice(0,-1);
+    if(mode.value==="chromatic"){
+      const choices=Object.entries(CHROMATIC_SOLFEGE).filter(([note])=>accidentals.value==="both"||(accidentals.value==="sharps"?!note.includes("b"):!note.includes("#")));
+      body.querySelector("[data-nt-answers]").innerHTML=choices.map(([note,syllable])=>`<button data-nt-answer="${note}">${syllable}</button>`).join("");
+    }else if(mode.value!=="keyboard"){
       body.querySelector("[data-nt-answers]").innerHTML=NATURAL.map(n=>`<button data-nt-answer="${n}">${mode.value==="spanish"?spanishNames[n]:n}</button>`).join("");
     }else{
       body.querySelector("[data-nt-answers]").innerHTML=`<div class="trainer-mini-keyboard">${NATURAL.map(n=>`<button data-nt-answer="${n}">${n}</button>`).join("")}</div>`;
     }
     body.querySelectorAll("[data-nt-answer]").forEach(btn=>btn.addEventListener("click",()=>{
       if(answered)return;answered=true;
-      const ok=current.startsWith(btn.dataset.ntAnswer);
+      const ok=pitch===btn.dataset.ntAnswer;
       onResult(ok);
-      const spanish=spanishNames[current.slice(0,-1)]+current.slice(-1);
-      const answer=mode.value==="spanish"?`${spanish} (${current})`:`${current} (${spanish})`;
+      const spanish=spanishNames[current[0]]+(pitch.includes("#")?" sostenido":pitch.includes("b")?" bemol":"")+" "+current.slice(-1);
+      const answer=mode.value==="chromatic"?`${CHROMATIC_SOLFEGE[pitch]} · ${spanish} (${current})`:mode.value==="spanish"?`${spanish} (${current})`:`${current} (${spanish})`;
       body.querySelector("[data-nt-feedback]").textContent=ok?`Correcto: ${answer}.`:`La respuesta correcta es ${answer}.`;
       body.querySelectorAll("[data-nt-answer]").forEach(b=>{
         b.disabled=true;
-        if(current.startsWith(b.dataset.ntAnswer)) b.classList.add("correct");
+        if(pitch===b.dataset.ntAnswer) b.classList.add("correct");
         else if(b===btn) b.classList.add("wrong");
       });
     }));
   }
   function next(){
     answered=false;
+    body.querySelector("[data-nt-chromatic-options]").hidden=mode.value!=="chromatic";
+    body.querySelector("[data-nt-chromatic-guide]").hidden=mode.value!=="chromatic";
     current=randomItem(pool());
     const c=inferClef(current);
     body.querySelector("[data-nt-staff]").innerHTML=staffTrainerSVG(current,c);
-    body.querySelector("[data-nt-prompt]").textContent=`Clave de ${c==="treble"?"sol":"fa"} · ¿qué nota es?`;
+    body.querySelector("[data-nt-prompt]").textContent=`Clave de ${c==="treble"?"sol":"fa"} · ${mode.value==="chromatic"?"¿Qué sílaba de solfeo cromático corresponde?":"¿qué nota es?"}`;
     body.querySelector("[data-nt-feedback]").textContent="";
     renderAnswers();
   }
-  [clef,level,mode].forEach(x=>x.addEventListener("change",next));
+  [clef,level,mode,accidentals].forEach(x=>x.addEventListener("change",next));
   body.querySelector("[data-nt-next]").addEventListener("click",next);
   body.querySelector("[data-nt-hear]").addEventListener("click",()=>{
     const name=current.slice(0,-1),oct=Number(current.slice(-1));
