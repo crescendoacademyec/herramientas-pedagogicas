@@ -3,7 +3,9 @@ const fs = require("node:fs");
 const vm = require("node:vm");
 
 const context = {};
+context.window=context;
 vm.createContext(context);
+vm.runInContext(fs.readFileSync(`${__dirname}/../shared/music-practice.js`, "utf8"), context);
 vm.runInContext(fs.readFileSync(`${__dirname}/chords-ref.js`, "utf8"), context);
 
 const ref = context.ChordRef;
@@ -29,7 +31,7 @@ for (const rootName of ref.ROOTS) {
     });
 
     const staff = ref.staffSVG(root, tones);
-    const staffHeads = (staff.match(/<ellipse\b/g) || []).length;
+    const staffHeads = (staff.match(/&lt;pitch&gt;/g) || []).length;
     assert.equal(staffHeads, tones.length,
       `${rootName}${chordType.symbol}: cantidad incorrecta en pentagrama`);
 

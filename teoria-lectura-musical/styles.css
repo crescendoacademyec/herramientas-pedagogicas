@@ -1310,3 +1310,8 @@ button:disabled{
     display:none!important;
   }
 }
+.course-nav-btn.course-nav-btn{border:1px solid #38352d;border-radius:9px;padding:12px;gap:10px;margin-bottom:8px;background:#171613}
+.course-nav-btn.course-nav-btn.active{border-color:#d5aa47;background:#30291b;box-shadow:inset 3px 0 #d5aa47}
+.course-nav-btn>span:first-child{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:8px;background:#d5aa47;color:#171513;font-weight:800}
+.course-nav-btn small{display:block;margin-top:5px;color:#bcb6aa}
+#lessonContent>.lesson-actions:first-child{margin:0 0 24px;padding:0 0 18px;display:flex;gap:8px;flex-wrap:wrap}

@@ -2,7 +2,8 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const vm=require('node:vm');
 const source=fs.readFileSync(__dirname+'/app.js','utf8');
-const sandbox={};vm.createContext(sandbox);
+global.window={};require("../shared/music-practice.js");
+const sandbox={CrescendoPractice:window.CrescendoPractice};vm.createContext(sandbox);
 for(const name of ['NATURAL','CHROMATIC_SOLFEGE']){
   const declaration=source.match(new RegExp('const '+name+' = [^;]+;'))[0];
   vm.runInContext(declaration,sandbox);
@@ -15,13 +16,13 @@ assert.equal(vm.runInContext('CHROMATIC_SOLFEGE["C#"]',sandbox),'Di');
 assert.equal(vm.runInContext('CHROMATIC_SOLFEGE.Db',sandbox),'Ra');
 const sharp=vm.runInContext('staffTrainerSVG("C#4","treble")',sandbox);
 const flat=vm.runInContext('staffTrainerSVG("Db4","treble")',sandbox);
-assert.ok(sharp.includes('♯'));assert.ok(flat.includes('♭'));
-// Enarmónicos: igual sonido, distinta posición escrita.
-assert.match(sharp,/cy="112"/);assert.match(flat,/cy="106"/);
-assert.match(sharp,/class="ledger"/);
-// Las notas fuera del antiguo array no deben caer todas en la misma posición.
-assert.match(vm.runInContext('staffTrainerSVG("A3","treble")',sandbox),/cy="124"/);
-assert.match(vm.runInContext('staffTrainerSVG("C2","bass")',sandbox),/cy="124"/);
+// Enarmónicos: igual sonido, distinta grafía delegada al motor.
+assert.ok(sharp.includes('&lt;step&gt;C&lt;/step&gt;'));
+assert.ok(sharp.includes('&lt;alter&gt;1&lt;/alter&gt;'));
+assert.ok(flat.includes('&lt;step&gt;D&lt;/step&gt;'));
+assert.ok(flat.includes('&lt;alter&gt;-1&lt;/alter&gt;'));
+assert.ok(vm.runInContext('staffTrainerSVG("A3","treble")',sandbox).includes('&lt;octave&gt;3&lt;/octave&gt;'));
+assert.ok(vm.runInContext('staffTrainerSVG("C2","bass")',sandbox).includes('&lt;sign&gt;F&lt;/sign&gt;'));
 console.log('Solfeo cromático: sílabas, alteraciones y posiciones verificadas.');
 vm.runInContext(source.slice(source.indexOf('function noteTrainerPitches('),source.indexOf('function mountNoteTrainer(')),sandbox);
 for(const chromatic of [false,true]){

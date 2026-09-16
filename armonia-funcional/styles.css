@@ -2320,3 +2320,18 @@ select:focus-visible,input:focus-visible,textarea:focus-visible{
   .next-course-link{width:100%;text-align:center}
 }
 @media print{.next-course-cta{display:none!important}}
+.visual-panel-grid-3:has([data-scale-staff]){grid-template-columns:repeat(2,minmax(0,1fr))}
+.visual-panel:has([data-scale-staff]){grid-column:1/-1}
+@media(max-width:650px){.visual-panel-grid-3:has([data-scale-staff]){grid-template-columns:1fr}}
+.theory-section .piano-diagram-focused .piano-diagram-keyboard{width:100%;min-width:0}
+.reharm-line{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:12px 0}.reharm-line button{display:grid;gap:8px;text-align:left;padding:12px;border:1px solid var(--line);border-radius:10px;background:#201e19;color:var(--text);cursor:pointer}.reharm-line small{font-size:.75rem;color:var(--muted)}.reharm-line button[aria-pressed="true"],.theory-widget-reharm .function-chip[aria-pressed="true"],.reharm-views button[aria-pressed="true"]{outline:2px solid #d4a84f;background:#3a3020}.reharm-line .reharm-playing{box-shadow:inset 0 0 0 3px #91e2af}.theory-widget-reharm [data-reharm-viewer]{display:grid;gap:12px;margin-top:16px}.theory-widget-reharm [data-reharm-viewer] svg{max-width:100%;height:auto}.theory-widget-reharm details{padding:12px;border:1px solid var(--line);border-radius:10px;margin:16px 0}.theory-widget-reharm summary{cursor:pointer}.theory-widget-reharm .function-chip{cursor:pointer;font:inherit}.theory-widget-reharm button:disabled{opacity:.45;cursor:not-allowed}.reharm-views{margin-top:18px}@media(max-width:700px){.reharm-line{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.theory-widget-reharm button{font:inherit;border:1px solid var(--line);border-radius:9px;background:#27251f;color:#f7f0e2;padding:9px 12px;cursor:pointer}.theory-widget-reharm button:hover:not(:disabled){border-color:#d4a84f}.theory-widget-reharm button:focus-visible{outline:2px solid #d4a84f;outline-offset:3px}.theory-widget-reharm .primary-btn{background:#d4a84f;color:#171513}.theory-widget-reharm .function-chip{padding:8px 12px}
+.next-course-cta[hidden]{display:none!important}
+#resetStudyBtn{display:none}
+.theory-section>.theory-actions{margin:0 0 22px;display:flex;gap:8px;flex-wrap:wrap}
+.theory-widget-reharm [data-reharm-viewer][data-view="all"],
+.visual-panel-grid-3.visual-panel-grid-3:has([data-scale-staff]){grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:auto}
+.visual-panel-grid-3.visual-panel-grid-3> :has([data-scale-staff]){grid-column:auto}
+.theory-widget-reharm [data-reharm-viewer]>section{min-width:0}
+.theory-widget-reharm [data-reharm-viewer] svg{max-width:100%;height:auto}
+.theory-widget-reharm [data-reharm-viewer]:not([data-view="all"]){max-width:360px}

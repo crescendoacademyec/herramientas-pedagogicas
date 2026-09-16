@@ -18,9 +18,9 @@ assert.doesNotMatch(app,/<option value="sine">/,'No deben ofrecerse ondas sinté
 assert.match(app,/AUDIO\.masterBus\.gain\.value=2/,'El piano debe tener ganancia general duplicada');
 assert.doesNotMatch(app,/createDynamicsCompressor/,'El piano no debe pasar por el compresor anterior');
 assert.match(app,/QUICK_PRACTICE/);
-assert.match(app,/step=index-2/,'Las notas bajo el pentagrama deben conservar posiciones distintas');
-assert.match(app,/reading-staff[\s\S]*ledger|ledger[\s\S]*reading-staff/,'Las notas extremas requieren líneas adicionales');
-assert.match(app,/tlm-clef/,'Los pentagramas teóricos deben incluir clave');
+assert.match(app,/CrescendoPractice\.named\(note\)/,'El motor debe recibir la grafía completa de cada nota');
+assert.match(app,/CrescendoPractice\.sequence/,'El motor debe calcular claves, plicas y líneas adicionales');
+assert.doesNotMatch(app,/<ellipse/,'No deben quedar cabezas de nota dibujadas manualmente');
 assert.match(app,/function staffReferenceSVG/,'Debe existir un mapa de referencia de notas');
 assert.match(app,/<option value="both" selected>Ambas claves<\/option>/,'El mapa debe permitir mostrar ambas claves');
 assert.match(app,/data-reference-note/,'Las notas de referencia deben ser audibles e interactivas');

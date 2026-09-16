@@ -181,26 +181,30 @@
 
     var list = document.getElementById("topicsList");
     list.innerHTML = "";
+    var nav = document.getElementById("jazzTopicNav");
+    nav.innerHTML = "";
 
     lvl.topics.forEach(function (topic, idx) {
       var key = lvl.slug + "-" + idx;
       var isOpen = idx === state.topicIndex;
       var isStudied = !!state.studiedTopics[key];
+      var link = document.createElement("button");
+      link.type = "button";
+      link.className = "course-topic-link" + (isOpen ? " active" : "");
+      link.innerHTML = '<span class="course-topic-number">' + (idx + 1) + '</span><span><b>' + topic.title + '</b><small>' + (isStudied ? 'Estudiado' : 'Pendiente') + '</small></span>';
+      if (isOpen) link.setAttribute("aria-current", "page");
+      link.addEventListener("click", function () { state.topicIndex = idx; saveState(); renderTheory(); });
+      nav.appendChild(link);
+      if (!isOpen) return;
 
       var card = document.createElement("article");
       card.className = "topic-card" + (isOpen ? " open" : "") + (isStudied ? " studied" : "");
 
-      var head = document.createElement("button");
-      head.type = "button";
+      var head = document.createElement("h3");
       head.className = "topic-head";
       head.innerHTML =
         '<span class="topic-title">' + topic.title + '</span>' +
-        '<span class="topic-flags">' + (isStudied ? '<span class="check">✓ estudiado</span>' : '') + '<span class="chevron">' + (isOpen ? "–" : "+") + '</span></span>';
-      head.addEventListener("click", function () {
-        state.topicIndex = idx;
-        saveState();
-        renderTheory();
-      });
+        '<span class="topic-flags">' + (isStudied ? '<span class="check">✓ estudiado</span>' : '') + '</span>';
 
       var body = document.createElement("div");
       body.className = "topic-body";
@@ -217,6 +221,8 @@
     var studyBtn = document.getElementById("studyToggleBtn");
     var currentKey = lvl.slug + "-" + state.topicIndex;
     studyBtn.textContent = state.studiedTopics[currentKey] ? "Desmarcar como estudiado" : "Marcar tema como estudiado";
+    document.getElementById("prevTopicBtn").disabled = state.topicIndex === 0;
+    document.getElementById("nextTopicBtn").disabled = state.topicIndex === lvl.topics.length - 1;
   }
 
   function stepTopic(delta) {
@@ -478,6 +484,12 @@
     document.getElementById("prevTopicBtn").addEventListener("click", function () { stepTopic(-1); });
     document.getElementById("nextTopicBtn").addEventListener("click", function () { stepTopic(1); });
     document.getElementById("studyToggleBtn").addEventListener("click", toggleStudy);
+    document.getElementById("resetTopicsBtn").addEventListener("click", function () {
+      if (!confirm("¿Reiniciar el progreso de estudio de este nivel?")) return;
+      var lvl = currentLevel();
+      lvl.topics.forEach(function (_, idx) { delete state.studiedTopics[lvl.slug + "-" + idx]; });
+      saveState(); renderTheory();
+    });
 
     document.getElementById("startQuizBtn").addEventListener("click", startQuiz);
     document.getElementById("submitQuizBtn").addEventListener("click", submitQuiz);

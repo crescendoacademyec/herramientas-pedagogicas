@@ -787,6 +787,8 @@ function wireEvents() {
 function showView(view) {
   if (state.quiz.active && !state.quiz.submitted && view !== "quiz") view = "quiz";
   currentView = view;
+  const nextCourse=document.querySelector(".next-course-cta");
+  if(nextCourse) nextCourse.hidden=view!=="theory" || moduleTheory().findIndex(s=>s.id===activeTheoryId)!==5;
   ["homeView","theoryView","chordsView","quizView"].forEach(id => $(id).classList.add("hidden"));
   $(`${view}View`).classList.remove("hidden");
   document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -888,6 +890,8 @@ function renderTheory() {
   });
   mountTheoryVisuals();
   mountTopicPractices();
+  const cta=document.querySelector(".next-course-cta");
+  if(cta) cta.hidden=currentView!=="theory" || moduleTheory().findIndex(s=>s.id===activeTheoryId)!==5;
 }
 function selectTheoryTopic(id) {
   if (!moduleTheory().some(section => section.id === id)) return;
@@ -937,6 +941,11 @@ function renderTheoryDetail() {
         <button class="ghost-btn" data-topic-step="1" ${next ? "" : "disabled"}>Tema siguiente</button>
       </footer>
     </article>`;
+  const actions=wrap.querySelector(".theory-actions");
+  const reset=document.createElement("button");
+  reset.type="button"; reset.className="ghost-btn"; reset.textContent="Reiniciar progreso";
+  reset.addEventListener("click",resetStudy); actions.appendChild(reset);
+  wrap.querySelector("article").prepend(actions);
 }
 function renderConceptBody(item) {
   const body = typeof item === "string" ? item : item?.body || "";
@@ -1045,12 +1054,12 @@ function renderChordTable(rows) {
   </table></div>`;
 }
 function renderPianoDiagram(diagram) {
-  const range = fullPianoRange();
+  const range = diagram.range || fullPianoRange();
   const notes = buildPianoNotes(range.from, range.to);
   const whiteCount = notes.filter(note => !note.isBlack).length;
   const keys = diagram.keys || {};
   const labels = pianoFloatingLabels(notes, keys, whiteCount);
-  return `<figure class="piano-diagram">
+  return `<figure class="piano-diagram${diagram.range ? ' piano-diagram-focused' : ''}">
     <div class="piano-diagram-scroll">
       <div class="piano-diagram-keyboard" style="--white-count:${whiteCount};">
         ${notes.map(note => renderPianoKey(note, keys[note.note], whiteCount)).join("")}
@@ -2065,53 +2074,20 @@ function scalePianoDiagram(rootName, scale) {
       label: { text: tone.name, fontSize: 11, verticalOffset: 10 + ((index % 2) * 2) }
     };
   });
-  return { keys };
+  const highest = rootStep + Math.max(...tones.map(tone => tone.semi));
+  return { keys, range: { from: "C3", to: midiToSharpNote(Math.ceil(highest / 12) * 12) } };
+}
+function scaleDegreeRoman(token) {
+  const match = /^(bb|##|b|#)?(\d+)$/.exec(String(token));
+  if (!match) return String(token);
+  return (match[1] || "").replace(/b/g,"♭").replace(/#/g,"♯") + ["I","II","III","IV","V","VI","VII"][(Number(match[2])-1)%7];
 }
 function scaleLegend(tones) {
-  return tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</small></span>`).join("");
+  return tones.map(tone => `<span class="visual-pill">${escapeHtml(tone.name)} <small>${escapeHtml(scaleDegreeRoman(tone.token))}</small></span>`).join("");
 }
 function renderScaleStaff(rootName, tones, label) {
-  const root = theoryRootInfo(rootName);
-  const e4Diatonic = 4 * 7 + THEORY_VISUAL_NATURAL_LETTERS.indexOf("E");
-  function staffStep(tone) {
-    const rootDiatonic = 4 * 7 + root.letterIdx;
-    return (rootDiatonic + tone.diatonicStepsFromRoot) - e4Diatonic;
-  }
-  const placed = tones.map((tone, index) => ({ tone, step: staffStep(tone), x: 56 + (index * 28) }));
-  const minStep = Math.min(0, ...placed.map(item => item.step));
-  const maxStep = Math.max(8, ...placed.map(item => item.step));
-  const lineGap = 10;
-  const stepHeight = lineGap / 2;
-  const topPad = Math.max(0, maxStep - 8) * stepHeight + 18;
-  const bottomPad = Math.max(0, -minStep) * stepHeight + 20;
-  const w = Math.max(280, 88 + (placed.length * 30));
-  const staffTop = topPad;
-  const yOf = step => staffTop + (8 - step) * stepHeight;
-  const h = yOf(minStep) + bottomPad;
-  const lines = [];
-  for (let s = 0; s <= 8; s += 2) {
-    lines.push(`<line x1="18" y1="${yOf(s)}" x2="${w - 18}" y2="${yOf(s)}" class="jz-staff-line"></line>`);
-  }
-  const notes = placed.map(item => {
-    const nx = item.x;
-    const ny = yOf(item.step);
-    const ledger = [];
-    if (item.step > 8) {
-      for (let s = 10; s <= item.step; s += 2) ledger.push(`<line x1="${nx - 11}" y1="${yOf(s)}" x2="${nx + 11}" y2="${yOf(s)}" class="jz-ledger"></line>`);
-    }
-    if (item.step < 0) {
-      for (let s = -2; s >= item.step; s -= 2) ledger.push(`<line x1="${nx - 11}" y1="${yOf(s)}" x2="${nx + 11}" y2="${yOf(s)}" class="jz-ledger"></line>`);
-    }
-    const accidental = item.tone.accSym ? `<text x="${nx - 14}" y="${ny + 4}" text-anchor="middle" class="jz-accidental">${item.tone.accSym}</text>` : "";
-    return `${ledger.join("")}
-      ${accidental}
-      <ellipse cx="${nx}" cy="${ny}" rx="6" ry="4.6" transform="rotate(-18 ${nx} ${ny})" class="jz-notehead ${item.tone.isRoot ? "jz-notehead-root" : ""}"></ellipse>
-      <text x="${nx}" y="${h - 4}" text-anchor="middle" class="visual-staff-degree">${escapeHtml(item.tone.token.replace(/b/g, "♭").replace(/#/g, "♯"))}</text>`;
-  }).join("");
-  return `<svg viewBox="0 0 ${w} ${h}" class="jz-staff visual-staff-scale" role="img" aria-label="${escapeAttr(label)}">
-    ${lines.join("")}
-    ${notes}
-  </svg>`;
+  const root=CrescendoPractice.rootNote(rootName,4);
+  return CrescendoPractice.sequence(tones.map(t=>({...CrescendoPractice.spell(root,t.semi,t.diatonicStepsFromRoot),beats:4,label:scaleDegreeRoman(t.token)})),{labels:true});
 }
 function renderScaleGuitar(rootName, tones, label) {
   const pcs = new Set(tones.map(tone => tone.pc));
@@ -2172,7 +2148,7 @@ function mountScaleExplorer(el) {
     const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === typeSel.value) || THEORY_VISUAL_SCALE_LIBRARY[0];
     const tones = buildTheoryTones(rootName, scale.tokens);
     el.querySelector("[data-scale-name]").textContent = `${theoryRootUnicode(rootName)} ${scale.label}`;
-    el.querySelector("[data-scale-formula]").textContent = `Patrón: ${scale.formula}`;
+    el.querySelector("[data-scale-formula]").textContent = `Patrón: ${scale.formula.replace(/[♭♯]?[1-8]/g,token=>scaleDegreeRoman(token.replace(/♭/g,'b').replace(/♯/g,'#')))}`;
     el.querySelector("[data-scale-notes]").innerHTML = scaleLegend(tones);
     el.querySelector("[data-scale-piano]").innerHTML = renderPianoDiagram(scalePianoDiagram(rootName, scale));
     el.querySelector("[data-scale-guitar]").innerHTML = renderScaleGuitar(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en guitarra`);
@@ -2298,65 +2274,101 @@ function mountTonalityLab(el) {
   modeSel.addEventListener("change", update);
   update();
 }
+function reharmChord(tonic, roman, sevenths) {
+  const entry = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.find(item => item.roman === roman);
+  const scale = buildTheoryTones(tonic, THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === "major").tokens);
+  const rootName = scale[entry.degree - 1].name;
+  const minor = ["ii","iii","vi"].includes(roman);
+  const symbol = sevenths ? (roman === "vii°" ? "-7b5" : entry.suffix) : (roman === "vii°" ? "°" : minor ? "-" : "");
+  const type = ChordRef.CHORD_TYPES.find(item => item.symbol === symbol);
+  const root = ChordRef.rootInfo(rootName);
+  return { roman, family:entry.quality, label:rootName + symbol, rootName, root, tones:ChordRef.chordTones(root,type.formula) };
+}
 function mountReharmLab(el) {
+  const original = ["I","vi","ii","V","I"];
+  let progression = [...original], position = 0, selected = "I", view = "all";
+  const families = ["Tónica","Tónica","Subdominante","Dominante","Tónica"];
   el.innerHTML = `<div class="theory-widget theory-widget-reharm">
     <div class="visual-controls">
-      <label>Tonalidad<select data-reharm-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
-      <label>Tónica inicial<select data-slot-t1></select></label>
-      <label>Tónica interna<select data-slot-t2></select></label>
-      <label>Subdominante<select data-slot-s></select></label>
-      <label>Dominante<select data-slot-d></select></label>
+      <label>Tonalidad mayor<select data-reharm-root>${theorySelectOptions(THEORY_VISUAL_ROOTS,"C")}</select></label>
+      <label>Acordes<select data-reharm-quality><option value="triads">Tríadas</option><option value="sevenths">Con séptima</option></select></label>
+      <label>Tempo <input data-reharm-tempo type="range" min="40" max="160" value="80"><output data-reharm-bpm>80 BPM</output></label>
     </div>
-    <div class="visual-summary">
-      <div><strong data-reharm-title></strong><div class="small-note">Progresión funcional ejemplo: tónica → tónica → subdominante → dominante → tónica.</div></div>
-    </div>
-    <div class="function-progressions">
-      <div class="progression-line" data-reharm-progression></div>
-      <div class="function-groups" data-reharm-choices></div>
-    </div>
+    <p>Selecciona una posición y explora las tarjetas: cada clic permite escuchar y ver el acorde. Solo «Usar en esta posición» cambia tu progresión.</p>
+    <h5>Tu progresión</h5><div class="reharm-line" data-reharm-progression></div>
+    <div class="visual-controls"><button type="button" data-reharm-play="alternative">▶ Escuchar alternativa</button><button type="button" data-reharm-stop>■ Detener</button><button type="button" data-reharm-reset>Restaurar original</button></div>
+    <details><summary>Comparar con la progresión original</summary><div class="reharm-line" data-reharm-original></div><button type="button" data-reharm-play="original">▶ Escuchar original</button></details>
+    <h5 data-reharm-target></h5><div class="function-groups" data-reharm-choices></div>
+    <p data-reharm-selection aria-live="polite"></p><button type="button" class="primary-btn" data-reharm-use>Usar en esta posición</button>
+    <div class="visual-controls reharm-views" aria-label="Visualización del acorde">
+      <button type="button" data-reharm-view="staff">Pentagrama</button><button type="button" data-reharm-view="piano">Piano</button><button type="button" data-reharm-view="guitar">Diapasón</button><button type="button" data-reharm-view="all">Todas</button>
+    </div><div data-reharm-viewer></div>
+    <p class="small-note">Las familias siguen el enfoque de este curso; una sustitución depende de la melodía, la conducción de voces y el contexto. El pentagrama y el piano muestran la estructura del acorde; el diapasón propone otra disposición tocable. Cambiar el acorde final puede modificar la sensación de cierre.</p>
+    <p class="small-note" data-reharm-status aria-live="polite"></p>
   </div>`;
-  const rootSel = el.querySelector("[data-reharm-root]");
-  const t1Sel = el.querySelector("[data-slot-t1]");
-  const t2Sel = el.querySelector("[data-slot-t2]");
-  const sSel = el.querySelector("[data-slot-s]");
-  const dSel = el.querySelector("[data-slot-d]");
-  const fillOptions = () => {
-    const scale = buildTheoryTones(rootSel.value, THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === "major").tokens).slice(0, 7);
-    const families = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR;
-    const byQuality = {
-      "Tónica": families.filter(item => item.quality === "Tónica"),
-      "Subdominante": families.filter(item => item.quality === "Subdominante"),
-      "Dominante": families.filter(item => item.quality === "Dominante")
-    };
-    const makeOptions = family => family.map(item => {
-      const tone = scale[item.degree - 1];
-      return { value: item.roman, label: `${item.roman} · ${tone?.name || "?"}${item.suffix}` };
-    });
-    t1Sel.innerHTML = theorySelectOptions(makeOptions(byQuality["Tónica"]), "I");
-    t2Sel.innerHTML = theorySelectOptions(makeOptions(byQuality["Tónica"]), "vi");
-    sSel.innerHTML = theorySelectOptions(makeOptions(byQuality["Subdominante"]), "ii");
-    dSel.innerHTML = theorySelectOptions(makeOptions(byQuality["Dominante"]), "V");
-    return { scale, byQuality };
-  };
-  const update = () => {
-    const { scale, byQuality } = fillOptions();
-    const labelOf = roman => {
-      const item = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.find(entry => entry.roman === roman);
-      const tone = scale[(item?.degree || 1) - 1];
-      return `${roman} · ${tone?.name || "?"}${item?.suffix || ""}`;
-    };
-    el.querySelector("[data-reharm-title]").textContent = `${theoryRootUnicode(rootSel.value)} mayor · sustitución funcional simple`;
-    el.querySelector("[data-reharm-progression]").innerHTML = [t1Sel.value, t2Sel.value, sSel.value, dSel.value, "I"].map(value => `<span class="progression-chord">${escapeHtml(labelOf(value))}</span>`).join('<span class="progression-arrow">→</span>');
-    el.querySelector("[data-reharm-choices]").innerHTML = Object.entries(byQuality).map(([title, list]) => `<section class="function-group">
-      <h6>${title}</h6>
-      <div class="function-chip-row">${list.map(item => {
-        const tone = scale[item.degree - 1];
-        return `<span class="function-chip"><b>${item.roman}</b> ${escapeHtml(tone?.name || "?")}${escapeHtml(item.suffix)}</span>`;
-      }).join("")}</div>
-    </section>`).join("");
-  };
-  [rootSel, t1Sel, t2Sel, sSel, dSel].forEach(sel => sel.addEventListener("change", update));
-  update();
+  const get = selector => el.querySelector(selector);
+  const chord = roman => reharmChord(get("[data-reharm-root]").value,roman,get("[data-reharm-quality]").value === "sevenths");
+  function viewer() {
+    get("[data-reharm-viewer]").dataset.view=view;
+    const c = chord(selected), panels = [];
+    if(view==="staff"||view==="all")panels.push('<section class="visual-panel"><h6>Pentagrama</h6>'+ChordRef.staffSVG(c.root,c.tones,c.label)+'</section>');
+    if(view==="piano"||view==="all")panels.push('<section class="visual-panel"><h6>Piano</h6>'+ChordRef.pianoSVG(c.root,c.tones,c.label)+'</section>');
+    if(view==="guitar"||view==="all")panels.push('<section class="visual-panel"><h6>Diapasón · voicing sugerido</h6>'+ChordRef.guitarSVG(c.root,c.tones,c.label)+'</section>');
+    get("[data-reharm-viewer]").innerHTML=panels.join("");
+    el.querySelectorAll("[data-reharm-view]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.reharmView===view)));
+    el.querySelectorAll("[data-reharm-card]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.reharmCard===selected)));
+    get("[data-reharm-selection]").textContent=c.roman+" · "+c.label+" · "+c.family;
+    get("[data-reharm-use]").disabled=c.family!==families[position];
+  }
+  function line(values,editable) {
+    return values.map((roman,i)=>{const c=chord(roman);return `<button type="button" data-reharm-${editable?"slot":"preview"}="${i}" aria-pressed="${editable&&position===i}"><small>${i+1} · ${families[i]}</small><strong>${escapeHtml(roman)} · ${escapeHtml(c.label)}</strong></button>`;}).join("");
+  }
+  function render() {
+    get("[data-reharm-progression]").innerHTML=line(progression,true);
+    get("[data-reharm-original]").innerHTML=line(original,false);
+    get("[data-reharm-target]").textContent="Posición "+(position+1)+" · elige una alternativa de "+families[position];
+    get("[data-reharm-choices]").innerHTML=["Tónica","Subdominante","Dominante"].map(f=>'<section class="function-group"><h6>'+f+'</h6><div class="function-chip-row">'+THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.filter(c=>c.quality===f).map(entry=>{const c=chord(entry.roman);return `<button type="button" class="function-chip" data-reharm-card="${entry.roman}" aria-pressed="${selected===entry.roman}">${entry.roman} · ${escapeHtml(c.label)}</button>`;}).join("")+'</div></section>').join("");
+    viewer();
+  }
+  function stop() { stopTheoryAudio(); el.querySelectorAll(".reharm-playing").forEach(b=>b.classList.remove("reharm-playing")); }
+  async function listen(roman) {
+    stop(); selected=roman;render();
+    const token=THEORY_AUDIO_STATE.sequenceToken;
+    await ensureTheoryPianoSoundFont();
+    if(!el.isConnected||token!==THEORY_AUDIO_STATE.sequenceToken)return;
+    const c=chord(roman);playTheoryChord(chordTonesToMidis(c.rootName,c.tones),{duration:1.1,stop:false});
+  }
+  async function play(which) {
+    stop();const token=THEORY_AUDIO_STATE.sequenceToken;
+    const values=[...(which==="original"?original:progression)];
+    await ensureTheoryPianoSoundFont();
+    for(let i=0;i<values.length;i++){
+      if(!el.isConnected||token!==THEORY_AUDIO_STATE.sequenceToken)return;
+      selected=values[i];viewer();
+      el.querySelectorAll(".reharm-playing").forEach(b=>b.classList.remove("reharm-playing"));
+      const row=get(which==="original"?"[data-reharm-original]":"[data-reharm-progression]");
+      row.children[i].classList.add("reharm-playing");
+      const c=chord(selected),duration=60000/Number(get("[data-reharm-tempo]").value);
+      playTheoryChord(chordTonesToMidis(c.rootName,c.tones),{duration:duration/1000*.9,stop:false});
+      get("[data-reharm-status]").textContent=(which==="original"?"Original":"Alternativa")+" · posición "+(i+1)+" · "+c.roman+" "+c.label;
+      await new Promise(resolve=>setTimeout(resolve,duration));
+    }
+    if(token===THEORY_AUDIO_STATE.sequenceToken){stop();get("[data-reharm-status]").textContent="Reproducción terminada.";render();}
+  }
+  el.addEventListener("click",event=>{
+    const b=event.target.closest("button");if(!b||!el.contains(b))return;
+    if(b.hasAttribute("data-reharm-slot")){position=Number(b.dataset.reharmSlot);listen(progression[position]);}
+    else if(b.hasAttribute("data-reharm-preview"))listen(original[Number(b.dataset.reharmPreview)]);
+    else if(b.hasAttribute("data-reharm-card"))listen(b.dataset.reharmCard);
+    else if(b.hasAttribute("data-reharm-use")){stop();if(chord(selected).family===families[position]){progression[position]=selected;render();get("[data-reharm-status]").textContent="Posición "+(position+1)+" actualizada.";}}
+    else if(b.hasAttribute("data-reharm-view")){view=b.dataset.reharmView;viewer();}
+    else if(b.hasAttribute("data-reharm-play"))play(b.dataset.reharmPlay);
+    else if(b.hasAttribute("data-reharm-stop")){stop();get("[data-reharm-status]").textContent="Reproducción detenida.";}
+    else if(b.hasAttribute("data-reharm-reset")){stop();progression=[...original];position=0;selected="I";render();}
+  });
+  ["[data-reharm-root]","[data-reharm-quality]"].forEach(s=>get(s).addEventListener("change",()=>{stop();render();}));
+  get("[data-reharm-tempo]").addEventListener("input",()=>{get("[data-reharm-bpm]").textContent=get("[data-reharm-tempo]").value+" BPM";});
+  render();
 }
 function registerRangeDiagram(from, to, color, labelText) {
   const start = noteStep(from);
@@ -3334,40 +3346,7 @@ mountTonalityLab = function(el, options) {
   });
 };
 
-const _mountReharmLabPhase7 = mountReharmLab;
-mountReharmLab = function(el, options) {
-  _mountReharmLabPhase7(el, options);
-  const host = el.querySelector(".theory-widget-reharm");
-  addAudioControls(host, {
-    sequenceLabel: "▶ Escuchar progresión",
-    sequence: async () => {
-      stopTheoryAudio();
-      const token = THEORY_AUDIO_STATE.sequenceToken;
-      const rootName = el.querySelector("[data-reharm-root]")?.value || "C";
-      const scale = buildTheoryTones(rootName, THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === "major").tokens).slice(0, 7);
-      const slots = [
-        el.querySelector("[data-slot-t1]")?.value || "I",
-        el.querySelector("[data-slot-t2]")?.value || "vi",
-        el.querySelector("[data-slot-s]")?.value || "ii",
-        el.querySelector("[data-slot-d]")?.value || "V",
-        "I"
-      ];
-      for (const roman of slots) {
-        if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
-        const item = THEORY_VISUAL_ROMAN_QUALITIES_MAJOR.find(entry => entry.roman === roman) || THEORY_VISUAL_ROMAN_QUALITIES_MAJOR[0];
-        const chordRoot = scale[item.degree - 1]?.name || "C";
-        const suffixMap = { "maj7":"maj7", "-7":"-7", "7":"7", "m7♭5":"-7b5" };
-        const type = ChordRef.CHORD_TYPES.find(entry => entry.symbol === (suffixMap[item.suffix] || ""));
-        if (type) {
-          const root = ChordRef.rootInfo(chordRoot);
-          const tones = ChordRef.chordTones(root, type.formula);
-          playTheoryChord(chordTonesToMidis(chordRoot, tones), { duration: .72, stop: false });
-        }
-        await new Promise(resolve => setTimeout(resolve, 760));
-      }
-    }
-  });
-};
+// El constructor de rearmonización integra su propio transporte y visor.
 
 const _mountRegisterLabPhase7 = mountRegisterLab;
 mountRegisterLab = function(el, options) {

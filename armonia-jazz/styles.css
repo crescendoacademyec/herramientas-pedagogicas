@@ -498,3 +498,15 @@ main { max-width: 1180px; margin: 0 auto; padding: 0 clamp(18px, 4vw, 40px) 60px
 .lab-summary-with-mode { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .lab-summary-with-mode .lab-summary-left { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .lab-summary-with-mode .lab-summary-left span { color: var(--muted); font-size: .82rem; }
+.course-topic-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:20px;align-items:start}
+#jazzTopicNav{display:grid;gap:8px;position:sticky;top:100px;max-height:75vh;overflow:auto}
+.course-topic-link{display:flex;gap:10px;align-items:center;text-align:left;background:#171613;border:1px solid #38352d;color:inherit;padding:12px;border-radius:9px;cursor:pointer}
+.course-topic-link.active{border-color:#d5aa47;background:#30291b;box-shadow:inset 3px 0 #d5aa47}
+.course-topic-number{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:8px;background:#d5aa47;color:#171513;font-weight:800}
+.course-topic-link small{display:block;margin-top:5px;color:#bcb6aa}
+.course-topic-layout .topics-list{min-width:0}
+.course-topic-layout .topic-head{cursor:default}
+.lab .lab-views{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;overflow-x:auto;padding:12px}
+.lab .lab-card{min-width:0;padding:10px}
+.lab .lab-card svg{max-width:100%;height:auto}
+@media(max-width:760px){.course-topic-layout{grid-template-columns:1fr}#jazzTopicNav{position:static;max-height:230px}.lab .lab-views{grid-template-columns:repeat(3,minmax(180px,1fr))}}

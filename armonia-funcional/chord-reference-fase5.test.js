@@ -5,6 +5,7 @@ const vm=require("node:vm");
 const context={window:{},console};
 context.window=context;
 vm.createContext(context);
+vm.runInContext(fs.readFileSync(__dirname+"/../shared/music-practice.js","utf8"),context);
 vm.runInContext(fs.readFileSync(__dirname+"/chords-ref.js","utf8"),context);
 
 const ref=context.ChordRef;

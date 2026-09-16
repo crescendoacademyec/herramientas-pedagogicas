@@ -278,6 +278,14 @@
   }
 
   function generate(level, config) {
+    if(Number(level)===9){
+      const all=window.CrescendoPractice.scales,forced=forcedSet(config);
+      const pool=forced?all.filter(s=>forced.has('scale:'+s.id)):all;
+      if(!pool.length)return emptyRound('No hay escalas seleccionadas para repasar.');
+      const target=sample(pool),root=randomRootForPc(randInt(12),config.register);
+      const options=all.map(s=>option('scale:'+s.id,s.name));
+      return {options,correctIdx:options.findIndex(o=>o.id==='scale:'+target.id),seq:target.steps.map((step,i)=>({notes:[root+step],start:.1+i*.45,dur:.4,vel:.8})),meta:{targetId:'scale:'+target.id,targetType:'scale',targetName:target.name,rootMidi:root},feedback(ok){return (ok?'✓ Correcto':'✕ Respuesta incorrecta')+' · <b>'+target.name+'</b>. Compara sus distancias: '+target.steps.slice(1).map((n,i)=>n-target.steps[i]).join('–')+' semitonos.';}};
+    }
     const map={1:generateInterval,2:generateChord,3:generateLevel3,4:generateLevel4,5:generateLevel5,6:generateLevel6,7:generateLevel7,8:generateLevel8};
     return (map[level]||generateInterval)(config||{});
   }

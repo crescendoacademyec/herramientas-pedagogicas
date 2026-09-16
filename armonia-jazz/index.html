@@ -20,6 +20,9 @@
 <title>Armonía Jazz | Crescendo Academy</title>
 <link rel="icon" href="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" type="image/png">
 <link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="../shared/music-practice.css">
+<script defer src="../shared/opensheetmusicdisplay-1.8.4.min.js"></script>
+<script defer src="../shared/music-practice.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
 <script defer src="./data.js"></script>
 <script defer src="./chords-ref.js"></script>
@@ -148,8 +151,9 @@
         <button class="ghost-btn" id="prevTopicBtn" data-topic-step="-1">Tema anterior</button>
         <button class="soft-btn study-toggle" id="studyToggleBtn">Marcar tema como estudiado</button>
         <button class="ghost-btn" id="nextTopicBtn" data-topic-step="1">Tema siguiente</button>
+        <button class="ghost-btn" id="resetTopicsBtn" type="button">Reiniciar progreso</button>
       </div>
-      <div id="topicsList" class="topics-list"></div>
+      <div class="course-topic-layout"><nav id="jazzTopicNav" aria-label="Temas del nivel"></nav><div id="topicsList" class="topics-list"></div></div>
     </section>
 
     <!-- VISTA: CUESTIONARIO -->

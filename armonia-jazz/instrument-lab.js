@@ -205,6 +205,27 @@
     svg.push('</svg>'); return svg.join('');
   }
 
+  function notationNotes(root,item){
+    var P=global.CrescendoPractice;
+    var base=P.rootNote(ROOT_LABELS[root].replace(/♭/g,'b'),4);
+    return item.intervals.map(function(semi,i){
+      // Los grados compuestos de escalas se escriben dentro de su octava sonora.
+      var degree=(Number(item.degrees[i].replace(/[^0-9]/g,''))-1)%7;
+      return P.spell(base,semi,degree+7*Math.floor(semi/12));
+    });
+  }
+  function renderNotation(rootEl,root,item,group){
+    var host=rootEl.querySelector('[data-lab-score]');
+    if(!host){
+      host=document.createElement('section');host.className='lab-card';host.setAttribute('data-lab-score','');
+      rootEl.querySelector('.lab-views').appendChild(host);
+    }
+    var notes=notationNotes(root,item),isChord=group==='chord';
+    host.innerHTML='<h4>Pentagrama · '+(isChord?'estructura del acorde':'lectura ascendente')+'</h4>'+
+      (isChord?global.CrescendoPractice.staff(notes,{stack:true}):global.CrescendoPractice.sequence(notes.map(function(n,i){return Object.assign({},n,{beats:4,label:item.degrees[i]});}),{labels:true}))+
+      '<p class="lab-note-list">'+(isChord?'Disposición teórica en estado fundamental; no reproduce la inversión o digitación seleccionada en guitarra.':'Las alturas y los grados corresponden a la selección actual.')+'</p>';
+  }
+
   // ========== mount con label mode en el summary ==========
   function mount(rootEl, initial) {
     initial = initial || {};
@@ -282,6 +303,7 @@
       rootEl.querySelector('[data-lab="board"]').innerHTML=isChord?voicingFretboard(state.root,spec,state.region,state.stringSet,state.labelMode):fretboard(state.root,spec,state.region,state.group,state.labelMode);
       rootEl.querySelector('[data-lab="piano"]').innerHTML=piano(state.root,spec,state.group,state.labelMode);
       rootEl.querySelector('[data-lab="notes"]').textContent=noteList(state.root,spec);
+      renderNotation(rootEl,state.root,spec,state.group);
       var legend=rootEl.querySelector('[data-lab="legend"]');
       legend.innerHTML = isScale
         ? '<span><i style="background:'+ROLE_COLORS.root+'"></i>Fundamental</span><span><i style="background:'+ROLE_COLORS.chordTone+'"></i>Sonido estructural</span><span><i style="background:'+ROLE_COLORS.tension+'"></i>Tensión disponible</span><span><i style="background:'+ROLE_COLORS.avoid+'"></i>Evitar</span>'
@@ -311,6 +333,7 @@
       rootEl.querySelector('[data-progression="board"]').innerHTML=voicingFretboard(root,spec,state.region,state.stringSet,state.labelMode);
       rootEl.querySelector('[data-progression="piano"]').innerHTML=piano(root,spec,undefined,state.labelMode);
       rootEl.querySelector('[data-progression="notes"]').textContent=noteList(root,spec);
+      renderNotation(rootEl,root,spec,'chord');
     }
     rootEl.querySelector('[data-progression="strings"]').addEventListener("change",function(){state.stringSet=this.value;state.region=0;render();});
     rootEl.querySelector('[data-progression="tonic"]').addEventListener("change",function(){state.transpose=Number(this.value);render();});
@@ -334,5 +357,5 @@
     };
   }
 
-  global.ChordLab={mount:mount, mountProgression:mountProgression};
+  global.ChordLab={mount:mount, mountProgression:mountProgression,notationNotes:notationNotes};
 })(window);

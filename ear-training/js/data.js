@@ -9,7 +9,8 @@
     { id: 5, title: 'Disminuidos Secundarios', short: 'Disminuidos secundarios', instr: 'Identifica el disminuido secundario por su resolución.' },
     { id: 6, title: 'Sustitución Tritonal', short: 'Sustituto tritonal', instr: 'Distingue dominante secundario y sustituto tritonal.' },
     { id: 7, title: 'Cambios de Centro Tonal', short: 'Modulaciones', instr: 'Reconoce hacia dónde se desplazó el centro tonal.' },
-    { id: 8, title: 'Acordes maj7 / 6 / 6/9', short: 'Sustitutos de Imaj7', instr: 'Distingue colores de tónica mayor.' }
+    { id: 8, title: 'Acordes maj7 / 6 / 6/9', short: 'Sustitutos de Imaj7', instr: 'Distingue colores de tónica mayor.' },
+    { id: 9, title: 'Escalas', short: 'Escalas', instr: 'Escucha la escala e identifica su tipo. El pentagrama se muestra después de responder.' }
   ];
 
   const PITCH_NAMES = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];

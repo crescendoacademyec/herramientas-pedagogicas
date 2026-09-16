@@ -107,7 +107,7 @@ function renderCourse(){
   const level=DATA.levels[index]||DATA.levels[0];
   $("courseNav").innerHTML=DATA.levels.map((item,i)=>`
     <button class="course-nav-btn ${item.id===level.id?"active":""}" data-course-level="${item.id}" type="button" ${item.id===level.id?'aria-current="page"':""}>
-      <span>${i+1}</span><span><b>${escapeHtml(item.title)}</b><small>${state.completed[item.id]?" · completado":""}</small></span>
+      <span>${i+1}</span><span><b>${escapeHtml(item.title)}</b><small>${state.completed[item.id]?"Completado":"Pendiente"}</small></span>
     </button>`).join("");
   $("lessonContent").innerHTML=`
     <p class="kicker">Nivel ${index+1} de ${DATA.levels.length}</p>
@@ -128,7 +128,13 @@ function renderCourse(){
         ${state.completed[level.id]?"Nivel completado ✓":"Marcar como completado"}
       </button>
       <button class="ghost-btn" id="nextLevelBtn" type="button" ${index===DATA.levels.length-1?"disabled":""}>Siguiente →</button>
+      <button class="ghost-btn" id="resetCourseBtn" type="button">Reiniciar progreso</button>
     </div>`;
+  $("lessonContent").prepend($("lessonContent").querySelector(".lesson-actions"));
+  $("resetCourseBtn").addEventListener("click",()=>{
+    if(!confirm("¿Reiniciar el progreso de estudio del curso?")) return;
+    state.completed={}; saveState(); renderCourse(); renderLevelCards(); updateHomeProgress();
+  });
   document.querySelectorAll("[data-course-level]").forEach(btn=>btn.addEventListener("click",()=>{
     activeLevelId=btn.dataset.courseLevel; saveState(); renderCourse(); scrollTopSafe();
   }));
@@ -291,23 +297,8 @@ function pianoHTML(rootName,toneList,{octave=4,range=12}={}){
   return `<div class="tlm-piano" style="--octaves:${octaves}">${whites}${blacks}</div>`;
 }
 function staffSVG(rootName,toneList,label="Pentagrama"){
-  const root=rootInfo(rootName);
-  const baseDiatonic=4*7+root.letterIndex;
-  const e4=4*7+NATURAL.indexOf("E");
-  const placed=toneList.map((t,i)=>({t,step:baseDiatonic+(t.degree-1)-e4,x:88+i*34}));
-  const min=Math.min(0,...placed.map(p=>p.step)),max=Math.max(8,...placed.map(p=>p.step));
-  const sh=5,top=Math.max(0,max-8)*sh+20,y=s=>top+(8-s)*sh,w=Math.max(300,128+placed.length*36),h=y(min)+26;
-  const lines=[0,2,4,6,8].map(s=>`<line x1="20" x2="${w-18}" y1="${y(s)}" y2="${y(s)}"/>`).join("");
-  const notes=placed.map(p=>{
-    const ledger=[];
-    if(p.step>8)for(let s=10;s<=p.step;s+=2)ledger.push(`<line class="ledger" x1="${p.x-10}" x2="${p.x+10}" y1="${y(s)}" y2="${y(s)}"/>`);
-    if(p.step<0)for(let s=-2;s>=p.step;s-=2)ledger.push(`<line class="ledger" x1="${p.x-10}" x2="${p.x+10}" y1="${y(s)}" y2="${y(s)}"/>`);
-    const accidental=p.t.name.slice(1);
-    return `${ledger.join("")}${accidental?`<text class="acc" x="${p.x-14}" y="${y(p.step)+4}">${escapeHtml(accidental)}</text>`:""}
-      <ellipse class="note ${p.t.isRoot?"root":""}" cx="${p.x}" cy="${y(p.step)}" rx="6" ry="4.5" transform="rotate(-18 ${p.x} ${y(p.step)})"/>
-      <text class="degree" x="${p.x}" y="${h-4}" text-anchor="middle">${escapeHtml(p.t.token.replace(/b/g,"♭").replace(/#/g,"♯"))}</text>`;
-  }).join("");
-  return `<svg viewBox="0 0 ${w} ${h}" class="tlm-staff" role="img" aria-label="${escAttr(label)}">${lines}<text class="clef-text tlm-clef" x="24" y="${top+39}">${SMUFL_GLYPHS.gClef}</text>${notes}</svg>`;
+  const root=CrescendoPractice.rootNote(rootName,4);
+  return CrescendoPractice.sequence(toneList.map(t=>({...CrescendoPractice.spell(root,t.semi,t.degree-1),beats:4,label:t.token})),{labels:true});
 }
 function guitarScaleSVG(rootName,toneList){
   const pcs=new Set(toneList.map(t=>t.pc)),rootPc=rootInfo(rootName).pc;
@@ -416,41 +407,19 @@ const SMUFL_GLYPHS=Object.freeze({
 });
 function smuflTimeDigit(value){const digit=Number(value);return Number.isInteger(digit)&&digit>=0&&digit<=9?String.fromCodePoint(0xE080+digit):String(value)}
 function staffTrainerSVG(note,clef){
-  const match=/^([A-G])([#b]?)(\d+)$/.exec(note);
-  const letter=match[1],accidental=match[2],octave=Number(match[3]);
-  const bottom=clef==="treble"?4*7+NATURAL.indexOf("E"):2*7+NATURAL.indexOf("G");
-  const step=octave*7+NATURAL.indexOf(letter)-bottom,w=360,h=160,baseY=100,sh=6;
-  const lines=[0,2,4,6,8].map(s=>`<line x1="28" x2="330" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
-  const y=baseY-step*sh;
-  const ledger=[];
-  if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
-  if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line class="ledger" x1="180" x2="200" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
-  return `<svg viewBox="0 0 ${w} ${h}" class="reading-staff" role="img" aria-label="Nota para identificar en clave de ${clef==="treble"?"sol":"fa"}">
-    ${lines}<text class="clef-text" x="34" y="${baseY-4}">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${ledger.join("")}
-    ${accidental?`<text x="166" y="${y+5}" font-size="20" fill="currentColor">${accidental==="#"?"♯":"♭"}</text>`:""}
-    <ellipse class="student-note" cx="190" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 190 ${y})"/>
-  </svg>`;
+  return CrescendoPractice.staff([CrescendoPractice.named(note)],{clef});
 }
 const NOTE_SOLFEGE={C:"Do",D:"Re",E:"Mi",F:"Fa",G:"Sol",A:"La",B:"Si"};
 function staffReferenceSVG(clef){
-  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES,w=720,h=170,baseY=91,sh=6;
-  const lines=[0,2,4,6,8].map(s=>`<line x1="70" x2="690" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`).join("");
-  const noteGroups=notes.map((note,index)=>{
-    const step=index-2,x=112+index*44,y=baseY-step*sh,ledger=[];
-    if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line class="ledger" x1="${x-11}" x2="${x+11}" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
-    if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line class="ledger" x1="${x-11}" x2="${x+11}" y1="${baseY-s*sh}" y2="${baseY-s*sh}"/>`);
-    const letter=note[0],octave=note.slice(1),spoken=`${NOTE_SOLFEGE[letter]} ${octave}`;
-    return `<g class="reference-note" role="button" tabindex="0" data-reference-note="${note}" aria-label="${spoken}: escuchar">${ledger.join("")}<ellipse cx="${x}" cy="${y}" rx="8" ry="5.5" transform="rotate(-18 ${x} ${y})"/><text x="${x}" y="137" text-anchor="middle">${NOTE_SOLFEGE[letter]}</text><text class="reference-scientific" x="${x}" y="151" text-anchor="middle">${note}</text></g>`;
-  }).join("");
-  const clefName=clef==="treble"?"sol":"fa";
-  return `<div class="staff-reference"><div class="staff-reference-title">Clave de ${clefName}</div><svg viewBox="0 0 ${w} ${h}" class="reading-staff reference-staff" role="img" aria-label="Ubicación de las notas en clave de ${clefName}">${lines}<text class="clef-text" x="25" y="87">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>${noteGroups}</svg></div>`;
+  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES;
+  return '<div class="staff-reference"><div class="staff-reference-title">Clave de '+(clef==="treble"?"sol":"fa")+'</div>'+CrescendoPractice.sequence(notes.map(note=>({note,beats:4,label:NOTE_SOLFEGE[note[0]]})),{clef,labels:true})+'<div class="cp-note-buttons">'+notes.map(note=>'<button type="button" data-reference-note="'+note+'">'+NOTE_SOLFEGE[note[0]]+' · '+note+'</button>').join('')+'</div></div>';
 }
 function mountReadingLab(el){
   const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
   el.innerHTML=`<div class="visual-two">
     <section class="lab-card staff-map-card">
       <div class="diagram-label">Mapa de notas en el pentagrama</div>
-      <p class="staff-reference-copy">Observa primero dónde se escribe cada nota. Selecciona una clave y pulsa cualquier nota para escucharla.</p>
+      <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa su botón bajo el pentagrama para escucharla.</p>
       <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
       <div class="staff-reference-stack" data-reading-reference></div>
     </section>
@@ -741,11 +710,11 @@ function mountAdvancedRhythmLab(parent){
     wrapper.querySelector("[data-ar-title]").textContent=current.label;
     wrapper.querySelector("[data-ar-meter]").textContent=current.meter;
     wrapper.querySelector("[data-ar-desc]").textContent=current.description;
-    wrapper.querySelector("[data-ar-grid]").innerHTML=current.events.map((ev,i)=>`
+    wrapper.querySelector("[data-ar-grid]").innerHTML=CrescendoPractice.sequence(current.events.map(ev=>({...ev,note:"G4",beats:ev.beats*(current.meter==="6/8"?1.5:1)})),{meter:current.meter})+current.events.map((ev,i)=>`
       <div class="advanced-rhythm-event ${ev.kind}" data-ar-event="${i}" style="--beats:${ev.beats}">
-        <b>${escapeHtml(ev.label)}</b>
+        <b>Evento ${i+1}</b>
         <small>${ev.kind==="rest"?"silencio":ev.kind==="triplet"?"1/3 pulso":`${ev.beats} pulso${ev.beats===1?"":"s"}`}</small>
-        ${ev.tieStart?'<span class="tie-mark">⌒</span>':""}
+        ${ev.tieStart?'<span>Prolongar</span>':""}
       </div>`).join("");
   }
   type.addEventListener("change",render);
@@ -899,7 +868,7 @@ mountRhythmSolfege = function(root){
       <div class="rhythm-measure compound">
         <div class="compound-pulse-row">
           ${[0,1].map(group=>`<div class="compound-pulse" data-compound-pulse="${bar}-${group}">
-            ${compoundPattern.filter(ev=>ev.bar===bar&&ev.group===group).map(ev=>`<span class="rhythm-symbol"><b>${ev.glyph}</b></span>`).join("")}
+            ${CrescendoPractice.sequence(compoundPattern.filter(ev=>ev.bar===bar&&ev.group===group).map(ev=>({...ev,note:"G4",bar:0,beats:ev.beats*1.5})),{compact:true})}
           </div>`).join("")}
         </div>
         <span class="measure-number">Compás ${bar+1} · 6/8</span>
@@ -1023,11 +992,17 @@ function mountTrainer(level){
   };
   if(cfg.type==="noteTrainer") mountNoteTrainer(root,onResult);
   if(cfg.type==="rhythmTrainer") mountRhythmTrainer(root,onResult);
-  if(cfg.type==="intervalTrainer") mountIntervalTrainer(root,onResult);
-  if(cfg.type==="scaleTrainer") mountScaleTrainer(root,onResult);
-  if(cfg.type==="keyTrainer") mountKeyTrainer(root,onResult);
+  const practicePlay=(midis,chord)=>{stopAllAudio();if(chord)midis.forEach(midi=>playTone(midi,{duration:1.6}));else playSequence(midis,500);};
+  const practiceKinds={intervalTrainer:'interval',scaleTrainer:'scale',keyTrainer:'key'};
+  if(practiceKinds[cfg.type]) window.CrescendoPractice.mount(root.querySelector('[data-trainer-body]'),practiceKinds[cfg.type],practicePlay,onResult);
   if(cfg.type==="expressionTrainer") mountExpressionTrainer(root,onResult);
   if(cfg.type==="melodyAnalysis") mountMelodyAnalysisTrainer(root,onResult);
+  if(level.id==='puente-armonia'){
+    const section=document.createElement('section');
+    section.innerHTML='<h3>Identificación de acordes</h3><p>Reconoce tríadas y séptimas por su escritura o su sonido.</p><div data-chord-practice></div>';
+    root.appendChild(section);
+    window.CrescendoPractice.mount(section.querySelector('[data-chord-practice]'),'chord',practicePlay);
+  }
   updateStats();
 }
 
@@ -1156,7 +1131,7 @@ function mountRhythmTrainer(root,onResult){
   function RHythmAllowed(lv){return lv===1?RHYTHM_FIGURES.filter(x=>x.beats>=1):lv===2?RHYTHM_FIGURES.filter(x=>x.beats>=.5):RHYTHM_FIGURES}
   function render(){
     answered=false;generate();
-    body.querySelector("[data-rt-scoreline]").innerHTML=current.map(f=>`<span class="rhythm-token"><b>${f.symbol}</b><small>${f.name}</small></span>`).join("");
+    body.querySelector("[data-rt-scoreline]").innerHTML=CrescendoPractice.sequence(current.map(f=>({note:"G4",beats:f.beats})));
     const candidates=shuffle([...new Set([total,total+.5,Math.max(.5,total-.5),total+1])]).slice(0,4);
     body.querySelector("[data-rt-answers]").innerHTML=candidates.map(v=>`<button data-rt-answer="${v}">${v} pulsos</button>`).join("");
     body.querySelector("[data-rt-feedback]").textContent="";
@@ -1357,54 +1332,7 @@ function makeMelodyPhrase({bars=2,meter=4,level=1}={}){
 }
 
 function phraseStaffSVG(phrase,{clef="treble",meter="4/4"}={}){
-  const w=Math.max(620,phrase.length*54+120),h=180;
-  const staffTop=54,lineGap=12,stepH=lineGap/2;
-  const noteOrder = clef==="treble"
-    ? ["C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5"]
-    : ["E2","F2","G2","A2","B2","C3","D3","E3","F3","G3","A3","B3","C4"];
-  const baseIndex=2;
-  function yFor(note){
-    let idx=noteOrder.indexOf(note);
-    if(idx<0){
-      const midi=midiFromNamed(note);
-      const nearest=noteOrder.map((n,i)=>({i,d:Math.abs(midiFromNamed(n)-midi)})).sort((a,b)=>a.d-b.d)[0];
-      idx=nearest.i;
-    }
-    return staffTop+4*lineGap-(idx-baseIndex)*stepH;
-  }
-  const lines=Array.from({length:5},(_,i)=>`<line x1="24" x2="${w-25}" y1="${staffTop+i*lineGap}" y2="${staffTop+i*lineGap}" class="sol-staff-line"/>`).join("");
-  let x=124;
-  const notes=[];
-  let lastBar=-1;
-  phrase.forEach((ev,index)=>{
-    if(ev.bar!==lastBar && lastBar!==-1){
-      notes.push(`<line x1="${x-16}" x2="${x-16}" y1="${staffTop}" y2="${staffTop+4*lineGap}" class="sol-barline"/>`);
-    }
-    lastBar=ev.bar;
-    const y=yFor(ev.note);
-    const noteIndex=noteOrder.indexOf(ev.note),step=noteIndex-baseIndex,ledger=[];
-    if(step<0)for(let s=-2;s>=step;s-=2)ledger.push(`<line x1="${x-11}" x2="${x+11}" y1="${staffTop+4*lineGap-s*stepH}" y2="${staffTop+4*lineGap-s*stepH}" class="sol-ledger-line"/>`);
-    if(step>8)for(let s=10;s<=step;s+=2)ledger.push(`<line x1="${x-11}" x2="${x+11}" y1="${staffTop+4*lineGap-s*stepH}" y2="${staffTop+4*lineGap-s*stepH}" class="sol-ledger-line"/>`);
-    const stem = `<line x1="${x+6}" x2="${x+6}" y1="${y}" y2="${y-28}" class="sol-stem"/>`;
-    const fill=ev.dur==="h" ? "none":"currentColor";
-    const flag=ev.dur==="e"?`<path d="M ${x+6} ${y-28} q 18 6 6 18" class="sol-flag"/>`:"";
-    notes.push(`<g class="sol-note-group" data-sol-note-index="${index}">
-      ${ledger.join("")}
-      <ellipse cx="${x}" cy="${y}" rx="7" ry="5" transform="rotate(-18 ${x} ${y})" class="sol-notehead" style="fill:${fill}"/>
-      ${stem}${flag}
-      <text x="${x}" y="${h-14}" text-anchor="middle" class="sol-note-label">${escapeHtml(ev.note.replace(/\d/,""))}</text>
-    </g>`);
-    x+=ev.beats*48;
-  });
-  const [meterTop="4",meterBottom="4"]=String(meter).split("/");
-  const finalBar=phrase.length?`<line x1="${Math.min(w-25,x-20)}" x2="${Math.min(w-25,x-20)}" y1="${staffTop}" y2="${staffTop+4*lineGap}" class="sol-barline sol-final-barline"/>`:"";
-  return `<svg viewBox="0 0 ${w} ${h}" class="solfege-staff" role="img" aria-label="Frase musical en compás de ${escapeHtml(meter)}">
-    ${lines}
-    <text x="30" y="${staffTop+42}" class="sol-clef">${clef==="treble"?SMUFL_GLYPHS.gClef:SMUFL_GLYPHS.fClef}</text>
-    <text x="79" y="${staffTop+17}" class="sol-meter" text-anchor="middle"><tspan x="79">${smuflTimeDigit(meterTop)}</tspan><tspan x="79" dy="18">${smuflTimeDigit(meterBottom)}</tspan></text>
-    ${notes.join("")}
-    ${finalBar}
-  </svg>`;
+  return CrescendoPractice.sequence(phrase,{clef,meter,labels:true})+'<div class="cp-note-buttons">'+phrase.map((ev,index)=>'<span data-sol-note-index="'+index+'">'+escapeHtml(ev.note)+'</span>').join('')+'</div>';
 }
 
 async function playPhrase(root,phrase,bpm){
@@ -1477,10 +1405,7 @@ function makeRhythmBars({bars=2,meter=4,level=1}={}){
 function rhythmNotationHTML(pattern){
   const grouped={};
   pattern.forEach(ev=>(grouped[ev.bar]??=[]).push(ev));
-  return Object.entries(grouped).map(([bar,events])=>`<div class="rhythm-measure" data-rhythm-measure="${bar}">
-    <div class="rhythm-measure-inner">${events.map((ev,i)=>`<span class="rhythm-symbol" data-rhythm-event="${bar}-${i}"><b>${ev.glyph}</b><small>${ev.label}</small></span>`).join("")}</div>
-    <span class="measure-number">Compás ${Number(bar)+1}</span>
-  </div>`).join("");
+  return Object.entries(grouped).map(([bar,events])=>'<div class="rhythm-measure" data-rhythm-measure="'+bar+'">'+CrescendoPractice.sequence(events.map(ev=>({...ev,note:"G4",bar:0})),{meter:"4/4"})+'<div class="cp-note-buttons">'+events.map((ev,i)=>'<span class="rhythm-symbol" data-rhythm-event="'+bar+'-'+i+'">'+escapeHtml(ev.label)+'</span>').join('')+'</div><span class="measure-number">Compás '+(Number(bar)+1)+'</span></div>').join('');
 }
 async function playRhythmPattern(root,pattern,bpm){
   stopAllAudio();

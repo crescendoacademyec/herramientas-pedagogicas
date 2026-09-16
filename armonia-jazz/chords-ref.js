@@ -320,6 +320,20 @@
     }
   ];
 
+  function chordStaff(entry) {
+    var P=global.CrescendoPractice,root=P.rootNote('C',4),symbol=entry.symbol;
+    var notes=entry.formula.map(function(semi){
+      var degree=[0,1,1,2,2,3,4,4,5,5,6,6][semi%12];
+      if(semi===3&&/#9/.test(symbol))degree=1;
+      if(semi===6&&/#11/.test(symbol))degree=3;
+      if(semi===8&&/(#5|\+)/.test(symbol))degree=4;
+      if(semi===9&&/(dim|°|o7)/.test(symbol))degree=6;
+      if((degree===1&&/9|11|13/.test(symbol))||(degree===3&&/11/.test(symbol))||(degree===5&&/13/.test(symbol))){semi+=12;degree+=7;}
+      return P.spell(root,semi,degree);
+    }).sort(function(a,b){return a.midi-b.midi;});
+    return P.staff(notes,{stack:true});
+  }
+
   function renderChordCard(entry) {
     return (
       '<div class="chord-card">' +
@@ -328,6 +342,7 @@
       '<div class="chord-diagrams">' +
       '<div class="diagram-block"><span class="diagram-label">Piano</span>' + pianoSVG(entry.formula) + '</div>' +
       '<div class="diagram-block"><span class="diagram-label">Guitarra (mapa de notas)</span>' + guitarSVG(entry.formula) + '</div>' +
+      '<div class="diagram-block chord-score"><span class="diagram-label">Pentagrama · disposición teórica</span>' + chordStaff(entry) + '</div>' +
       '</div>' +
       '</div>'
     );

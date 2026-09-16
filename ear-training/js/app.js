@@ -159,7 +159,14 @@
     const opts=document.getElementById('options'); if(!opts||!state.round)return;
     const count=state.round.options.length; opts.style.gridTemplateColumns=count<=2?'1fr':count===3?'repeat(3,1fr)':'repeat(2,1fr)';
     opts.innerHTML=state.round.options.map((o,i)=>`<button class="opt-btn" data-action="answer" data-index="${i}" ${state.round.disabled?'disabled':''}><span class="key-hint">${i<9?`${i+1}. `:''}</span>${esc(o.label)}</button>`).join('');
-    const fb=document.getElementById('feedback'); if(fb)fb.innerHTML=state.round.disabled?state.round.feedback():'Escucha y selecciona una respuesta.';
+    const fb=document.getElementById('feedback'); if(fb){
+      fb.innerHTML=state.round.disabled?state.round.feedback():'Escucha y selecciona una respuesta.';
+      if(!state.round.disabled&&!state.challenge){
+        const help=document.createElement('button');help.type='button';help.className='ghost-btn';help.textContent='Mostrar ayuda visual';
+        help.onclick=()=>{help.disabled=true;fb.insertAdjacentHTML('beforeend',window.CrescendoPractice.review(state.round));};
+        fb.appendChild(help);
+      }
+    }
     const next=document.getElementById('nextBtn'); if(next)next.disabled=true;
   }
 
@@ -185,7 +192,7 @@
     }
 
     [...document.querySelectorAll('#options .opt-btn')].forEach((b,idx)=>{b.disabled=true;if(idx===r.correctIdx)b.classList.add('correct');else if(idx===i)b.classList.add('wrong');});
-    const fb=document.getElementById('feedback'); if(fb)fb.innerHTML=r.feedback(correct,selected);
+    const fb=document.getElementById('feedback'); if(fb)fb.innerHTML=r.feedback(correct,selected)+window.CrescendoPractice.review(r);
     const next=document.getElementById('nextBtn'); if(next)next.disabled=false;
     const stats=document.querySelector('.stats-line'); if(stats)stats.outerHTML=statsHtml();
     if(state.challenge)setTimeout(()=>{if(state.challenge)newRound();},950);
@@ -217,6 +224,9 @@
 
   function renderLearn(){
     const view=document.getElementById('view');
+    if(state.level===9){
+      view.innerHTML='<div class="learn-note">Escucha el patrón completo. La menor melódica se practica en su forma ascendente; la variante clásica descendente coincide con la menor natural.</div><div class="learn-grid">'+window.CrescendoPractice.scales.map(s=>'<article class="learn-item"><h3>'+esc(s.name)+'</h3><p>Semitonos desde la tónica: '+s.steps.join(' · ')+'</p>'+window.CrescendoPractice.staff(s.steps.map((v,i)=>window.CrescendoPractice.spell(window.CrescendoPractice.rootNote('C'),v,i)))+'<button type="button" class="sample-btn" data-action="sample-scale" data-scale="'+s.id+'">▶ Escuchar</button></article>').join('')+'</div>';return;
+    }
     if(state.level===1){
       view.innerHTML=`<div class="learn-note"><b>Guía:</b> el nombre del intervalo define la distancia; “Do → …” es solo un ejemplo. El tritono puede escribirse como 4ª aumentada o 5ª disminuida según el contexto. Las canciones son referencias mnemónicas: la asociación puede corresponder a un fragmento específico y conviene verificarlo en clase.</div><div class="learn-grid">${D.INTERVALS.map(iv=>`<article class="learn-item"><div><h3>${esc(iv.name)}</h3><span class="formula">${iv.semitones} semitonos · ${esc(iv.example)}</span></div><div><p><b>Asc.:</b> ${esc(iv.ascRefs.join(' · '))}</p><p><b>Desc.:</b> ${esc(iv.descRefs.join(' · '))}</p></div><div class="sample-actions"><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="ascending">↑ Asc</button><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="descending">↓ Desc</button><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="harmonic">♬ Arm</button></div></article>`).join('')}</div>`;
       return;
@@ -290,6 +300,7 @@
     else if(a==='sample-interval')sampleInterval(btn.dataset.semitones,btn.dataset.direction);
     else if(a==='sample-chord')sampleChord(btn.dataset.chord);
     else if(a==='sample-generated'){const r=G.generate(state.level,captureConfig());audio.playSequence(r.seq||[]);}
+    else if(a==='sample-scale'){const s=window.CrescendoPractice.scales.find(s=>s.id===btn.dataset.scale);if(s)audio.playSequence(s.steps.map((v,i)=>({notes:[60+v],start:.1+i*.45,dur:.4,vel:.8})));}
     else if(a==='practice-history-errors'){const h=S.getHistory().find(x=>x.id===btn.dataset.historyId);if(h){const ids=[...new Set((h.answers||[]).filter(x=>!x.correct).map(x=>x.meta?.targetId).filter(Boolean))];startErrorPractice(h.level,ids,'Challenge');}}
     else if(a==='practice-weak'){try{startErrorPractice(Number(btn.dataset.level),JSON.parse(btn.dataset.targets),'debilidades');}catch(_){}}
     else if(a==='reset-progress'){if(confirm('¿Reiniciar únicamente el progreso? Se guardará un informe y se conservarán tus configuraciones.')){S.resetProgress();state.session={correct:0,total:0,streak:0,streakMax:0};renderApp();}}
