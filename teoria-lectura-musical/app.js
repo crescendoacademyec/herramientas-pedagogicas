@@ -152,6 +152,7 @@ function renderCourse(){
   mountTrainer(level);
   mountSolfege(level);
   mountQuickPractice(level);
+  window.CrescendoLab?.attach($("lessonContent"),'theory');
 }
 function updateHomeProgress(){
   const done=DATA.levels.filter(x=>state.completed[x.id]).length;

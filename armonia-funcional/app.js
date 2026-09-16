@@ -890,6 +890,7 @@ function renderTheory() {
   });
   mountTheoryVisuals();
   mountTopicPractices();
+  window.CrescendoLab?.attach($("theoryDetail"),'functional');
   const cta=document.querySelector(".next-course-cta");
   if(cta) cta.hidden=currentView!=="theory" || moduleTheory().findIndex(s=>s.id===activeTheoryId)!==5;
 }

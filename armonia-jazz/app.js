@@ -216,6 +216,7 @@
       card.appendChild(head);
       card.appendChild(body);
       list.appendChild(card);
+      window.CrescendoLab?.attach(body,'jazz');
     });
 
     var studyBtn = document.getElementById("studyToggleBtn");

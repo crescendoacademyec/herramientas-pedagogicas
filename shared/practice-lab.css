@@ -1,0 +1,9 @@
+[data-practice-workshop]{margin:24px 0;border:1px solid #645335;border-radius:12px;padding:16px;background:#191713;color:#f6eedf}
+[data-practice-workshop]>summary{cursor:pointer;font-weight:700;color:#d5aa47}
+.practice-lab h3{margin-top:20px}.pl-controls{display:flex;gap:12px;flex-wrap:wrap}.pl-controls label{display:grid;gap:5px;flex:1;min-width:140px}
+.practice-lab select,.practice-lab button{font:inherit;color:inherit;background:#24211c;border:1px solid #665a43;border-radius:7px;padding:8px;cursor:pointer}
+.practice-lab button:hover,.practice-lab button:focus-visible{outline:2px solid #d5aa47}.practice-lab [hidden]{display:none!important}
+.pl-actions,.pl-answers{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.practice-lab [data-pl="display"]{overflow:auto;max-width:100%;display:flex;gap:12px}.practice-lab [data-pl="display"]>.cp-staff{flex:1;min-width:180px}
+.pl-piano{width:100%;height:155px;padding:4px;overflow:auto}.pl-keyboard{position:relative;width:928px;height:135px}.pl-piano button{position:absolute;top:0;width:32px;height:130px;background:#f6efdf;color:#151515;border-radius:0 0 5px 5px;padding:2px;font-size:10px;display:flex;align-items:end;justify-content:center}.pl-piano button.black{z-index:1;background:#171717;color:white;height:85px;width:20px}.practice-lab button.selected{background:#d5aa47;color:#171513}
+.pl-board{overflow:auto;min-width:600px;flex:1}.pl-string{display:grid;grid-template-columns:44px repeat(13,minmax(38px,1fr));align-items:center}.pl-string button{border-radius:0;border-color:#696054;background-image:linear-gradient(transparent 48%,#8c826f 49%,#8c826f 51%,transparent 52%);font-size:11px;min-height:38px}.practice-lab [data-pl="feedback"]{color:#dfbd71;min-height:24px}
+.pl-board-wrap{width:100%;min-width:0}.pl-fretless .pl-string button{border-left:1px dashed #484238;border-right:0}.practice-lab button:disabled{opacity:.5;cursor:default}

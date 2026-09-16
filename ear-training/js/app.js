@@ -333,6 +333,7 @@
   });
 
   document.addEventListener('keydown',e=>{
+    if(e.target.closest('[data-practice-workshop]'))return;
     if(state.mode!=='practice')return;
     const tag=e.target?.tagName?.toLowerCase();if(['input','select','textarea','button'].includes(tag))return;
     if(e.code==='Space'){e.preventDefault();playRound();return;}
