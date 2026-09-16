@@ -1,0 +1,66 @@
+/* A transform on a course view would anchor fixed controls to the page,
+   rather than to the viewport (the functional course uses fadeUp). */
+#theoryView,
+#cursoView {
+  animation: none;
+  transform: none;
+  padding-bottom: 160px;
+}
+
+/* Frosted panels also create a containing block for fixed descendants. */
+#theoryDetail > .theory-section,
+#cursoView .lesson-panel {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+#theoryDetail .theory-section > .theory-actions,
+#theoryView > .theory-actions-top,
+#lessonContent > .lesson-actions:first-child {
+  position: fixed;
+  inset: auto 12px max(12px, env(safe-area-inset-bottom));
+  z-index: 100;
+  box-sizing: border-box;
+  width: min(920px, calc(100% - 24px));
+  margin: 0 auto;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1fr 1.2fr;
+  align-items: stretch;
+  gap: 10px;
+  border: 1px solid #766039;
+  border-radius: 14px;
+  background: #201d17;
+  color: #fffaf0;
+  box-shadow: 0 4px 30px #0009;
+}
+
+#theoryDetail .theory-actions > button,
+#theoryView > .theory-actions-top > button,
+#lessonContent > .lesson-actions > button {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px;
+  white-space: normal;
+}
+
+html { scroll-padding-bottom: 160px; }
+
+@media (max-width: 640px) {
+  #theoryDetail .theory-section > .theory-actions,
+  #theoryView > .theory-actions-top,
+  #lessonContent > .lesson-actions:first-child {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+  }
+}
+
+@media print {
+  #theoryDetail .theory-section > .theory-actions,
+  #theoryView > .theory-actions-top,
+  #lessonContent > .lesson-actions:first-child { display: none; }
+  #theoryView, #cursoView { padding-bottom: 0; }
+}

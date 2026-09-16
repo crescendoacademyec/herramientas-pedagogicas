@@ -17,3 +17,13 @@ assert.match(theory, /prepend\(\$\("lessonContent"\).querySelector\(".lesson-act
 assert.match(theory, /id="resetCourseBtn"/);
 assert.ok(read('armonia-jazz/instrument-lab.js').includes("querySelector('.lab-views').appendChild(host)"));
 console.log('Navegación, reinicio acotado, visualizadores y enlace final verificados.');
+const actionsCSS=read('shared/course-actions.css');
+assert.match(actionsCSS,/position: fixed/);
+assert.match(actionsCSS,/backdrop-filter: none/);
+assert.match(actionsCSS,/safe-area-inset-bottom/);
+assert.match(actionsCSS,/repeat\(2, minmax\(0, 1fr\)\)/);
+assert.match(actionsCSS,/@media print/);
+for(const app of ['armonia-funcional','armonia-jazz','teoria-lectura-musical']){
+  assert.ok(read(app+'/index.html').includes('../shared/course-actions.css'));
+}
+console.log('Barra fija compartida, espacio inferior y estilos móviles/impresión verificados.');
