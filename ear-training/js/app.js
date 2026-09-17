@@ -6,6 +6,16 @@
   const G = window.ETGenerators;
   const { AudioEngine, INSTRUMENTS } = window.ETAudio;
   const audio = new AudioEngine();
+  const chordClefs = new Map();
+  function chordLearningScore(id){
+    return window.CrescendoPractice.review(D.chordExample(id,chordClefs.get(id)||'treble'))
+      .replace('Lo que escuchaste','Notas del acorde')
+      .replace('Lectura de las alturas reproducidas; las grafías enarmónicas pueden variar según el contexto armónico.','El piano reproduce este registro. La clave adapta la octava del acorde completo, sin cambiar su disposición.');
+  }
+  function chordClefButtons(id){
+    const selected=chordClefs.get(id)||'treble';
+    return ['treble','bass'].map(clef=>`<button type="button" class="chord-clef-btn" data-action="chord-clef" data-chord="${id}" data-clef="${clef}" aria-pressed="${selected===clef}">Clave de ${clef==='treble'?'sol':'fa'}</button>`).join('');
+  }
 
   const app = document.getElementById('app');
   const levelNav = document.getElementById('levelNav');
@@ -222,18 +232,36 @@
     state.level=Number(level);S.setPref('activeLevel',state.level);state.mode='practice';S.setPref('mode','practice');state.errorPractice={level:state.level,targetIds:clean,source:source||'errores'};state.session={correct:0,total:0,streak:0,streakMax:0};renderApp();
   }
 
+  function renderIntervalLearning(){
+    const P=window.CrescendoPractice;
+    return `<div class="learn-note"><b>Guía:</b> compara cada intervalo desde Do4, hacia arriba y hacia abajo. El unísono repite la misma altura. El tritono se escribe aquí como cuarta aumentada; también puede escribirse como quinta disminuida según el contexto. Las canciones y sus atribuciones se recuperaron del material anterior como referencias mnemónicas: el fragmento exacto y la versión deben revisarse en clase. Los botones reproducen el intervalo, no la canción.</div>
+      <div class="learn-grid interval-learning">${D.INTERVALS.map(iv=>`<article class="learn-item interval-learn-card">
+        <header><h3>${esc(iv.name)}</h3><span class="formula">${iv.semitones} semitonos</span></header>
+        <div class="interval-directions">${['ascending','descending'].map(direction=>{
+          const example=D.intervalExample(iv.semitones,direction),ascending=direction==='ascending';
+          return `<section class="interval-direction"><h4>${ascending?'↑ Ascendente':'↓ Descendente'}</h4>
+            ${P.sequence(example.notes.map(n=>({...n,beats:1})),{clef:'treble'})}
+            <p class="interval-note-label">${esc(example.labels.join(' → '))}</p>
+            <button type="button" class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="${direction}" aria-label="Escuchar ${esc(iv.name)} ${ascending?'ascendente':'descendente'}">▶ Escuchar</button>
+            <ul class="interval-song-list">${(ascending?iv.ascRefs:iv.descRefs).map(song=>`<li>${esc(song)}</li>`).join('')}</ul>
+          </section>`;
+        }).join('')}</div>
+        <div class="sample-actions"><button type="button" class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="harmonic" aria-label="Escuchar ${esc(iv.name)} armónico">♬ Escuchar armónico</button></div>
+      </article>`).join('')}</div>`;
+  }
+
   function renderLearn(){
     const view=document.getElementById('view');
     if(state.level===9){
-      view.innerHTML='<div class="learn-note">Escucha el patrón completo. La menor melódica se practica en su forma ascendente; la variante clásica descendente coincide con la menor natural.</div><div class="learn-grid">'+window.CrescendoPractice.scales.map(s=>'<article class="learn-item"><h3>'+esc(s.name)+'</h3><p>Semitonos desde la tónica: '+s.steps.join(' · ')+'</p>'+window.CrescendoPractice.staff(s.steps.map((v,i)=>window.CrescendoPractice.spell(window.CrescendoPractice.rootNote('C'),v,i)))+'<button type="button" class="sample-btn" data-action="sample-scale" data-scale="'+s.id+'">▶ Escuchar</button></article>').join('')+'</div>';return;
+      view.innerHTML='<div class="learn-note">Escucha el patrón completo. La menor melódica se practica en su forma ascendente; la variante clásica descendente coincide con la menor natural.</div><div class="learn-grid">'+window.CrescendoPractice.scales.map(s=>'<article class="learn-item scale-learn-card"><h3>'+esc(s.name)+'</h3><p>Semitonos desde la tónica: '+s.steps.join(' · ')+'</p>'+window.CrescendoPractice.staff(s.steps.map((v,i)=>window.CrescendoPractice.spell(window.CrescendoPractice.rootNote('C'),v,i)))+'<button type="button" class="sample-btn text" data-action="sample-scale" data-scale="'+s.id+'">▶ Escuchar</button></article>').join('')+'</div>';return;
     }
     if(state.level===1){
-      view.innerHTML=`<div class="learn-note"><b>Guía:</b> el nombre del intervalo define la distancia; “Do → …” es solo un ejemplo. El tritono puede escribirse como 4ª aumentada o 5ª disminuida según el contexto. Las canciones son referencias mnemónicas: la asociación puede corresponder a un fragmento específico y conviene verificarlo en clase.</div><div class="learn-grid">${D.INTERVALS.map(iv=>`<article class="learn-item"><div><h3>${esc(iv.name)}</h3><span class="formula">${iv.semitones} semitonos · ${esc(iv.example)}</span></div><div><p><b>Asc.:</b> ${esc(iv.ascRefs.join(' · '))}</p><p><b>Desc.:</b> ${esc(iv.descRefs.join(' · '))}</p></div><div class="sample-actions"><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="ascending">↑ Asc</button><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="descending">↓ Desc</button><button class="sample-btn text" data-action="sample-interval" data-semitones="${iv.semitones}" data-direction="harmonic">♬ Arm</button></div></article>`).join('')}</div>`;
+      view.innerHTML=renderIntervalLearning();
       return;
     }
     if(state.level===2){
       const groups=[...new Set(D.CHORD_BANK.map(c=>c.group))];
-      view.innerHTML=`<div class="learn-note"><b>Banco oficial:</b> ${D.CHORD_BANK.length} sonoridades transcritas de la imagen de referencia. Los alias de cifrado se muestran dentro del mismo acorde para evitar preguntas auditivamente imposibles. Ejemplo: <b>Cm(maj7)</b> = 1–♭3–5–7.</div>${groups.map(g=>`<h3 class="section-title">${esc(g)}</h3><div class="learn-grid">${D.CHORD_BANK.filter(c=>c.group===g).map(ch=>`<article class="learn-item"><div><h3>C${esc(ch.symbol)}</h3><span class="formula">${esc(D.formulaLabel(ch.intervals))}</span></div><div><p>${esc(ch.name)}${ch.aliases.length?` · Alias: ${esc(ch.aliases.join(', '))}`:''}</p></div><div class="sample-actions"><button class="sample-btn" aria-label="Escuchar C${esc(ch.symbol)}" data-action="sample-chord" data-chord="${ch.id}">▶</button></div></article>`).join('')}</div>`).join('')}`;
+      view.innerHTML=`<div class="learn-note"><b>Banco oficial:</b> ${D.CHORD_BANK.length} sonoridades transcritas de la imagen de referencia. Los alias de cifrado se muestran dentro del mismo acorde para evitar preguntas auditivamente imposibles. Ejemplo: <b>Cm(maj7)</b> = 1–♭3–5–7.</div>${groups.map(g=>`<h3 class="section-title">${esc(g)}</h3><div class="learn-grid chord-learn-grid">${D.CHORD_BANK.filter(c=>c.group===g).map(ch=>`<article class="learn-item chord-learn-card"><div><h3>C${esc(ch.symbol)}</h3><span class="formula">${esc(D.formulaLabel(ch.intervals))}</span></div><div><p>${esc(ch.name)}${ch.aliases.length?` · Alias: ${esc(ch.aliases.join(', '))}`:''}</p></div>${chordLearningScore(ch.id)}<div class="sample-actions"><button type="button" class="sample-btn text" aria-label="Escuchar C${esc(ch.symbol)}" data-action="sample-chord" data-chord="${ch.id}">▶ Escuchar</button>${chordClefButtons(ch.id)}</div></article>`).join('')}</div>`).join('')}`;
       return;
     }
     const cards=D.LEARN_OVERVIEW[state.level]||[];
@@ -275,9 +303,11 @@
   }
 
   async function sampleInterval(semitones,direction){
-    const s=Number(semitones),root=60;let seq;if(direction==='harmonic')seq=[{notes:[root,root+s],start:0,dur:1.8,vel:.8}];else if(direction==='descending')seq=[{notes:[root],start:0,dur:.6,vel:.7},{notes:[root-s],start:.9,dur:1.3,vel:.8}];else seq=[{notes:[root],start:0,dur:.6,vel:.7},{notes:[root+s],start:.9,dur:1.3,vel:.8}];await audio.playSequence(seq);
+    const midis=D.intervalExample(Number(semitones),direction).notes.map(n=>n.midi);
+    const seq=direction==='harmonic'?[{notes:midis,start:0,dur:1.8,vel:.8}]:midis.map((m,i)=>({notes:[m],start:i*.9,dur:i?1.3:.6,vel:i?.8:.7}));
+    await audio.playSequence(seq);
   }
-  async function sampleChord(id){const c=D.CHORD_BANK.find(x=>x.id===id);if(c)await audio.playSequence([{notes:c.intervals.map(iv=>48+iv),start:0,dur:2.4,vel:.82}]);}
+  async function sampleChord(id){await audio.playSequence(D.chordExample(id,chordClefs.get(id)||'treble').seq);}
 
   function updateSelection(key,value,checked){
     let arr=S.getSelection(key);const parsed=(key==='intervals'||key.startsWith('level3'))?Number(value):value;
@@ -299,7 +329,21 @@
     else if(a==='stop-error-practice'){state.errorPractice=null;renderApp();}
     else if(a==='sample-interval')sampleInterval(btn.dataset.semitones,btn.dataset.direction);
     else if(a==='sample-chord')sampleChord(btn.dataset.chord);
-    else if(a==='sample-generated'){const r=G.generate(state.level,captureConfig());audio.playSequence(r.seq||[]);}
+    else if(a==='chord-clef'){
+      chordClefs.set(btn.dataset.chord,btn.dataset.clef);
+      audio.stopAll();
+      const card=btn.closest('.chord-learn-card');
+      card.querySelector('.cp-review').outerHTML=chordLearningScore(btn.dataset.chord);
+      card.querySelectorAll('[data-action="chord-clef"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.clef===btn.dataset.clef)));
+    }
+    else if(a==='sample-generated'){
+      const r=G.generate(state.level,captureConfig());
+      const card=btn.closest('.learn-item');
+      let preview=card.querySelector('.learn-harmony-score');
+      if(!preview){preview=document.createElement('div');preview.className='learn-harmony-score';card.appendChild(preview);}
+      preview.innerHTML='<p>Ejemplo auditivo del nivel actual; no necesariamente del concepto de esta tarjeta.</p>'+window.CrescendoPractice.review(r);
+      audio.playSequence(r.seq||[]);
+    }
     else if(a==='sample-scale'){const s=window.CrescendoPractice.scales.find(s=>s.id===btn.dataset.scale);if(s)audio.playSequence(s.steps.map((v,i)=>({notes:[60+v],start:.1+i*.45,dur:.4,vel:.8})));}
     else if(a==='practice-history-errors'){const h=S.getHistory().find(x=>x.id===btn.dataset.historyId);if(h){const ids=[...new Set((h.answers||[]).filter(x=>!x.correct).map(x=>x.meta?.targetId).filter(Boolean))];startErrorPractice(h.level,ids,'Challenge');}}
     else if(a==='practice-weak'){try{startErrorPractice(Number(btn.dataset.level),JSON.parse(btn.dataset.targets),'debilidades');}catch(_){}}

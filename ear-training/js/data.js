@@ -96,19 +96,19 @@
   }
 
   const INTERVALS = [
-    {semitones:0, name:'Unísono', short:'P1', example:'Do → Do', ascRefs:['Jingle Bells','Let It Be'], descRefs:['Jingle Bells','Let It Be']},
-    {semitones:1, name:'2ª menor', short:'m2', example:'Do → Re♭', ascRefs:['Tema de Tiburón','White Christmas'], descRefs:['Für Elise','Fly Me to the Moon']},
-    {semitones:2, name:'2ª mayor', short:'M2', example:'Do → Re', ascRefs:['Martinillo','Noche de Paz'], descRefs:['Yesterday','Mary Tenía un Corderito']},
-    {semitones:3, name:'3ª menor', short:'m3', example:'Do → Mi♭', ascRefs:['Greensleeves','Georgia on My Mind'], descRefs:['Hey Jude','The Star-Spangled Banner']},
-    {semitones:4, name:'3ª mayor', short:'M3', example:'Do → Mi', ascRefs:['Morning Has Broken','What a Wonderful World'], descRefs:['Summertime','Giant Steps']},
-    {semitones:5, name:'4ª justa', short:'P4', example:'Do → Fa', ascRefs:['Amazing Grace','Love Me Tender'], descRefs:['Eine kleine Nachtmusik','All of Me']},
-    {semitones:6, name:'Tritono · 4ª aumentada / 5ª disminuida', short:'A4/d5', example:'Do → Fa♯ / Sol♭', ascRefs:['Maria (West Side Story)','The Simpsons Theme'], descRefs:['Blue 7','YYZ']},
-    {semitones:7, name:'5ª justa', short:'P5', example:'Do → Sol', ascRefs:['Scarborough Fair','Top Gun Anthem'], descRefs:['Minuet en Sol','Flintstones Theme']},
-    {semitones:8, name:'6ª menor', short:'m6', example:'Do → La♭', ascRefs:['Go Down Moses','In My Life'], descRefs:['Chega de Saudade','Love Story Theme']},
-    {semitones:9, name:'6ª mayor', short:'M6', example:'Do → La', ascRefs:['My Bonnie Lies over the Ocean','My Way'], descRefs:['Man in the Mirror','No Surprises']},
-    {semitones:10, name:'7ª menor', short:'m7', example:'Do → Si♭', ascRefs:['Somewhere','Star Trek Theme'], descRefs:['Watermelon Man','Lady Jane']},
-    {semitones:11, name:'7ª mayor', short:'M7', example:'Do → Si', ascRefs:['Take on Me','Don’t Know Why'], descRefs:['I Love You (Cole Porter)']},
-    {semitones:12, name:'Octava justa', short:'P8', example:'Do → Do (octava)', ascRefs:['Over the Rainbow','Blue Bossa'], descRefs:['Willow Weep for Me','To Zanarkand']}
+    {semitones:0, name:'Unísono', short:'P1', example:'Do → Do', ascRefs:["Gloria al Bravo Pueblo (Vicente Salias, 1810)","Jingle Bells (James Lord Pierpont, 1857)","Feliz Cumpleaños (Mildred Hill, 1893)","Let It Be (The Beatles, 1970)","Candle in the Wind (Elton John, 1973)"], descRefs:["Gloria al Bravo Pueblo (Vicente Salias, 1810)","Jingle Bells (James Lord Pierpont, 1857)","Feliz Cumpleaños (Mildred Hill, 1893)","Let It Be (The Beatles, 1970)","Candle in the Wind (Elton John, 1973)"]},
+    {semitones:1, name:'2ª menor', short:'m2', example:'Do → Re♭', ascRefs:["¡Oh, gloria inmarcesible! (Oreste Sindici, 1887)","White Christmas (Irving Berlin, 1954)","A Hard Day's Night (The Beatles, 1964)","Tema de Tiburón (John Williams, 1975)","Isn't She Lovely (Stevie Wonder, 1976)"], descRefs:["Joy to the World (Isaac Watts, 1719)","Für Elise (Ludwig van Beethoven, 1810)","Fly Me to the Moon (Frank Sinatra, 1954)","All My Loving (The Beatles, 1963)","Fields of Gold (Sting, 1993)"]},
+    {semitones:2, name:'2ª mayor', short:'M2', example:'Do → Re', ascRefs:["Martinillo (canción folk)","Himno Nacional Argentino (Blas Parera, 1813)","Noche de Paz (Franz Xaver Gruber, 1818)","Rodolfo el Reno (J. Marks, 1939)","La Patita (Cri-Cri, 1957)"], descRefs:["La Primera Navidad (canción folk)","Mary Tenía un Corderito (canción folk)","Eight Days a Week (The Beatles, 1964)","Yesterday (The Beatles, 1965)","Wonderwall (Oasis, 1995)"]},
+    {semitones:3, name:'3ª menor', short:'m3', example:'Do → Mi♭', ascRefs:["Greensleeves (canción folk)","Antón Pirulero (canción folk)","Georgia on My Mind (Hoagy Carmichael, 1930)","What the World Needs Now (Burt Bacharach, 1965)","Axel F (Beverly Hills Cop, 1985)"], descRefs:["The Star-Spangled Banner (Francis Scott Key, 1814)","La Mañana (Edvard Grieg, 1875)","Frosty the Snowman (Walter Rollins, 1950)","Hey Jude (The Beatles, 1968)","They Don't Care About Us (Michael Jackson, 1996)"]},
+    {semitones:4, name:'3ª mayor', short:'M3', example:'Do → Mi', ascRefs:["For He's a Jolly Good Fellow (canción folk)","Morning Has Broken (canción folk)","La Primavera (Antonio Vivaldi, 1721-25)","Himno Nacional Mexicano (Jaime Nunó, 1854)","What a Wonderful World (George Douglas, 1967)"], descRefs:["Swing Low, Sweet Chariot (canción folk)","Quinta Sinfonía (Ludwig van Beethoven, 1804)","Summertime (George Gershwin, 1935)","Giant Steps (John Coltrane, 1960)","Tears in Heaven (Eric Clapton, 1991)"]},
+    {semitones:5, name:'4ª justa', short:'P4', example:'Do → Fa', ascRefs:["We Wish You a Merry Christmas (canción folk)","Amazing Grace (John Newton, 1773)","Someday My Prince Will Come (F. Churchill, 1937)","Love Me Tender (Elvis Presley, 1956)","Black or White (Michael Jackson, 1991)"], descRefs:["O Come, All Ye Faithful (John Wade, 1751)","Marcha Real (Espinosa de los Monteros, 1761)","Eine kleine Nachtmusik (W.A. Mozart, 1787)","I´ve Been Working on the Railroad (canción folk)","All of Me (Gerald Marks, 1931)"]},
+    {semitones:6, name:'Tritono · 4ª aumentada / 5ª disminuida', short:'A4/d5', example:'Do → Fa♯ / Sol♭', ascRefs:["Maria – Coro (Leonard Bernstein, 1956)","The Simpsons Theme (Danny Elfman, 1989)","The Saint (Edwin Astley, 1997)"], descRefs:["Blue 7 (Sonny Rollins, 1956)","Turn Back, O Man (Godspell, 1971)","YYZ (Rush, 1981)","Even Flow (Pearl Jam, 1991)"]},
+    {semitones:7, name:'5ª justa', short:'P5', example:'Do → Sol', ascRefs:["Scarborough Fair (canción folk)","Byssan Lull (canción folk)","Can't Help Falling in Love (Elvis Presley, 1961)","Perhaps Love (John Denver, 1981)","Top Gun Anthem (Harold Faltermeyer, 1986)"], descRefs:["Minuet en Sol (Christian Petzold, 1725)","The Way You Look Tonight (Dorothy Fields, 1936)","Have You Met Miss Jones? (Richard Rodgers, 1937)","Flintstones Theme (Hoyt Curtin, 1961)","Love Will Keep You Warm (Swan Lee, 2004)"]},
+    {semitones:8, name:'6ª menor', short:'m6', example:'Do → La♭', ascRefs:["Go Down Moses (canción folk)","Vals en Do sostenido menor (Frédéric Chopin, 1847)","In My Life – introducción (The Beatles, 1965)","A Town with an Ocean View (Joe Hisaishi, 1989)","Close Every Door (Andrew Lloyd Webber, 1991)"], descRefs:["Forêts Paisibles (Jean-Philippe Rameau, 1735)","Chega de Saudade (Antônio Carlos Jobim, 1957)","Love Story Theme (Francis Lai, 1970)","You're Everything (Chick Corea, 1973)"]},
+    {semitones:9, name:'6ª mayor', short:'M6', example:'Do → La', ascRefs:["My Bonnie Lies over the Ocean (canción folk)","Nocturno en Mi Mayor (Frédéric Chopin, 1830)","La Traviata: Brindisi (Giuseppe Verdi, 1853)","My Way (Frank Sinatra, 1969)","Only Love (Nana Mouskouri, 1985)"], descRefs:["Nobody Knows the Trouble I´ve Seen (canción folk)","A Weaver of Dreams (Nat King Cole, 1925)","The Music of the Night (Andrew Lloyd Webber, 1986)","Man in the Mirror – Coro (Michael Jackson, 1988)","No Surprises (Radiohead, 1997)"]},
+    {semitones:10, name:'7ª menor', short:'m7', example:'Do → Si♭', ascRefs:["Maman les p'tits bateaux (canción folk)","Somewhere (Leonard Bernstein, 1957)","Theme from Star Trek (Alexander Courage, 1966)","The Winner Takes It All – Coro (ABBA, 1980)"], descRefs:["An American in Paris (George Gershwin, 1951)","Watermelon Man (Herbie Hancock, 1962)","Lady Jane – Coro (Rolling Stones, 1966)"]},
+    {semitones:11, name:'7ª mayor', short:'M7', example:'Do → Si', ascRefs:["Fantasy Island Theme (John Ottman, 1977)","Take on Me – Coro (A-ha, 1984)","Popular (Nada Surf, 1996)","Don't Know Why (Norah Jones, 2002)"], descRefs:["I Love You (Cole Porter, 1944)"]},
+    {semitones:12, name:'Octava justa', short:'P8', example:'Do → Do (octava)', ascRefs:["Singin' in the Rain (Nacio Herb Brown, 1929)","Over the Rainbow (Harold Arlen, 1939)","The Christmas Song (Robert Wells, 1945)","Blue Bossa (Kenny Dorham, 1963)","Ironic (Alanis Morissette, 1996)"], descRefs:["Willow Weep for Me (Ann Ronell, 1932)","Doogie Howser Theme (Mike Post, 1989)","Todos los Días un Poco (León Gieco, 1993)","To Zanarkand (Nobuo Uematsu, 2002)"]}
   ];
 
   const INTERVAL_PRESETS = {
@@ -166,10 +166,28 @@
     ]
   };
 
+  function chordExample(id, clef='treble') {
+    const chord=CHORD_BANK.find(c=>c.id===id);
+    if(!chord) throw new Error('Acorde desconocido');
+    clef=clef==='bass'?'bass':'treble';
+    const root=clef==='treble'?60:(Math.max(...chord.intervals)>11?36:48);
+    return {seq:[{notes:chord.intervals.map(iv=>root+iv),start:0,dur:2.4,vel:.82}],meta:{targetType:'chord',chordId:id,root:'C',clef}};
+  }
+
+  function intervalExample(semitones, direction='ascending') {
+    const degrees=[0,1,1,2,2,3,3,4,5,5,6,6,7];
+    const P=window.CrescendoPractice, root=P.rootNote('C',4);
+    const sign=direction==='descending'?-1:1;
+    const notes=[root,P.spell(root,sign*Number(semitones),sign*degrees[Number(semitones)])];
+    const names=['Do','Re','Mi','Fa','Sol','La','Si'];
+    const labels=notes.map(n=>names[((n.diatonic%7)+7)%7]+(n.alter>0?'♯'.repeat(n.alter):'♭'.repeat(-n.alter))+Math.floor(n.diatonic/7));
+    return {notes,labels};
+  }
+
   window.ETData = {
     LEVELS, PITCH_NAMES, SOLFEGE_NAMES, MAJOR_SCALE, CORE_CHORDS, CHORD_BANK, INTERVALS,
     INTERVAL_PRESETS, CHORD_PRESETS, LEVEL3_TRIAD_ROMAN, LEVEL3_TETRAD_ROMAN,
     LEVEL3_TRIAD_FORMULA, LEVEL3_TETRAD_FORMULA, MODULATIONS, LEARN_OVERVIEW,
-    formulaLabel
+    formulaLabel, intervalExample, chordExample
   };
 })();

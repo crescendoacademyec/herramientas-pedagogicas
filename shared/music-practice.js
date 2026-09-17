@@ -167,7 +167,7 @@
         const n=spell(root,iv,degree),oct=(midi-n.midi)/12;
         return {...n,midi,diatonic:n.diatonic+oct*7};
       });
-      drawings=staff(spelled,{stack:true,clef:Math.max(...seq[0].notes)<60?'bass':'treble'});
+      drawings=staff(spelled,{stack:true,clef:meta.clef||(Math.max(...seq[0].notes)<60?'bass':'treble')});
     }else drawings=seq.map(event=>staff(event.notes.map(midiNote),{stack:event.notes.length>1,clef:Math.max(...event.notes)<60?'bass':'treble'})).join('');
     return '<div class="cp-review"><h4>Lo que escuchaste</h4>'+drawings+'<p>Lectura de las alturas reproducidas; las grafías enarmónicas pueden variar según el contexto armónico.</p></div>';
   }
