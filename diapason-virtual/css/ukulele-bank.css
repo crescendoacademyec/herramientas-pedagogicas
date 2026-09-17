@@ -1,0 +1,15 @@
+#ukuleleBank[hidden] { display:none !important; }
+#ukuleleBank { margin:12px 0; padding:14px; border:1px solid #65502a; border-radius:12px; background:#211e18; color:#fff5df; }
+#ukuleleBank summary { cursor:pointer; font-weight:700; color:#e4ba61; padding:6px; }
+#ukuleleBank .uke-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:14px 0; }
+#ukuleleBank label { display:grid; gap:5px; }
+#ukuleleBank .uke-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:12px; max-height:520px; overflow:auto; padding:3px; }
+#ukuleleBank .uke-card { background:#151411; border:1px solid #484236; border-radius:9px; padding:10px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+#ukuleleBank .uke-card.is-selected { border:2px solid #e4ba61; }
+#ukuleleBank .uke-card svg { width:110px; height:155px; background:#fbf7f0; border-radius:6px; }
+#ukuleleBank button { color:#19160e; background:#d4a84f; border:0; border-radius:6px; padding:8px 10px; cursor:pointer; font-weight:bold; }
+#ukuleleBank .uke-select { width:100%; }
+#ukuleleBank .uke-card > div { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+#ukuleleBank .uke-card small { text-align:center; color:#cec4b1; }
+#ukuleleBank .uke-status { line-height:1.5; padding:10px 0; }
+#ukuleleBank select { max-width:100%; }
