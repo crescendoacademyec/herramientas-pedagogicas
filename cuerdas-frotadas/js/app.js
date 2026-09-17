@@ -1379,34 +1379,6 @@
 
     /***************** PENTAGRAMA SVG (adaptado de requinto) *************************/
     const svg = document.getElementById('staffSvg');
-    const SVG_W = 2100, SVG_H = 2100;
-    const STAFF_Y0 = 600, STAFF_LINE_SPACING = 220, STAFF_X1 = 90, STAFF_X2 = 2000;
-
-    function svgEl(tag, attrs) {
-      const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-      for(const k in attrs) e.setAttribute(k, attrs[k]);
-      return e;
-    }
-
-    function placeClef(glyph, leftX, topY, bottomY, extraScale = 1.4) {
-      const probe = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif' });
-      probe.textContent = glyph;
-      svg.appendChild(probe);
-      const bbox = probe.getBBox();
-      svg.removeChild(probe);
-      if(!bbox.height) return;
-      const targetHeight = bottomY - topY;
-      let scale = (targetHeight / bbox.height) * extraScale;
-      const dx = leftX - bbox.x * scale;
-      const dy = topY - bbox.y * scale;
-      const g = svgEl('g', { transform: `translate(${dx},${dy}) scale(${scale})` });
-      const text = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif', fill: '#333' });
-      text.textContent = glyph;
-      g.appendChild(text);
-      svg.appendChild(g);
-    }
-
-    const CLEF_BOTTOM_DIATONIC={treble:30, bass:18, alto:24, tenor:22}; // línea inferior: E4, G2, F3, D3
     const DIATONIC_LETTERS=['C','D','E','F','G','A','B'];
     const SHARP_ORDER=['F','C','G','D','A','E','B'];
     const FLAT_ORDER=['B','E','A','D','G','C','F'];
@@ -1415,14 +1387,6 @@
     const MODE_KEYSIG_OFFSETS={mayor:0,jonico:0,dorico:10,frigio:8,lidio:7,mixolidio:5,eolico:3,locrio:1,menor_melodica:3,menor_armonica:3,pentatonica_mayor:0};
     const MAJOR_KEY_SIGNATURES={C:0,G:1,D:2,A:3,E:4,B:5,'F#':6,'C#':7,F:-1,'Bb':-2,'Eb':-3,'Ab':-4,'Db':-5,'Gb':-6,'Cb':-7};
     const PC_TO_MAJOR_KEY={0:'C',1:'Db',2:'D',3:'Eb',4:'E',5:'F',6:'Gb',7:'G',8:'Ab',9:'A',10:'Bb',11:'B'};
-    const KEYSIG_POSITIONS={
-      treble:{sharp:['F5','C5','G5','D5','A4','E5','B4'],flat:['B4','E5','A4','D5','G4','C5','F4']},
-      bass:{sharp:['F3','C3','G3','D3','A2','E3','B2'],flat:['B2','E3','A2','D3','G2','C3','F2']},
-      alto:{sharp:['F4','C4','G4','D4','A3','E4','B3'],flat:['B3','E4','A3','D4','G3','C4','F3']},
-      tenor:{sharp:['F4','C4','G4','D4','A3','E4','B3'],flat:['B3','E4','A3','D4','G3','C4','F3']}
-    };
-    let currentStaffMeta={clef:'treble',keySig:null,noteBaseX:(STAFF_X1+STAFF_X2)/2};
-
     function diatonicIndexFromLetterOctave(letter,octave){
       return octave*7+DIATONIC_LETTERS.indexOf(letter);
     }
@@ -1474,27 +1438,6 @@
     function accidentalGlyph(kind){
       return kind==='sharp'?'♯':kind==='flat'?'♭':kind==='natural'?'♮':'';
     }
-    function drawKeySignature(clef,keySig){
-      if(!keySig||!keySig.count)return {width:0};
-      const kind=keySig.count>0?'sharp':'flat';
-      const count=Math.abs(keySig.count);
-      const positions=KEYSIG_POSITIONS[clef]?.[kind]||KEYSIG_POSITIONS.treble[kind];
-      const bottomIndex=CLEF_BOTTOM_DIATONIC[clef]??CLEF_BOTTOM_DIATONIC.treble;
-      const yFromStep=(step)=>{ const bottom=STAFF_Y0+4*STAFF_LINE_SPACING; return bottom-(step-4)*(STAFF_LINE_SPACING/2); };
-      const startX=clef==='bass'?650:clef==='alto'||clef==='tenor'?700:720;
-      const gap=92;
-      for(let i=0;i<count;i++){
-        const info=parsePitchToken(positions[i]);
-        if(!info)continue;
-        const step=4+(diatonicIndexFromLetterOctave(info.letter,info.octave)-bottomIndex);
-        const y=yFromStep(step);
-        const text=svgEl('text',{class:'key-sig-el',x:startX+i*gap,y:y+72,'font-size':205,fill:'#222','font-family':'serif','text-anchor':'middle'});
-        text.textContent=kind==='sharp'?'♯':'♭';
-        svg.appendChild(text);
-      }
-      return {width:count*gap+35,startX};
-    }
-
     function chooseStaffClef(notes){
       const key=instrumentSel.value;
       if(key==='violin')return 'treble';
@@ -1510,72 +1453,18 @@
       return activeInstrument().primaryClef||'treble';
     }
 
+    const liveStaff = new CrescendoLiveStaff(svg);
     function drawBaseStaff(clef = 'treble') {
-      svg.innerHTML = '';
-      svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
-      for(let i=0; i<5; i++) {
-        const y = STAFF_Y0 + i * STAFF_LINE_SPACING;
-        svg.appendChild(svgEl('line', {x1:STAFF_X1,x2:STAFF_X2,y1:y,y2:y,stroke:'#000','stroke-width':7}));
-      }
-      const clefY = STAFF_Y0 - 3.2 * STAFF_LINE_SPACING;
-      if(clef === 'bass') {
-        const y=clefY+470; placeClef('𝄢', STAFF_X1-5, y-1, y+1, 600);
-      } else if(clef === 'alto' || clef === 'tenor') {
-        // Glifo de clave de Do; posición vertical diferenciada por el tipo de clave.
-        const cY = clef==='alto' ? STAFF_Y0+2*STAFF_LINE_SPACING : STAFF_Y0+3*STAFF_LINE_SPACING;
-        const t=svgEl('text',{x:STAFF_X1+55,y:cY+85,'font-size':520,'font-family':'serif',fill:'#333','text-anchor':'middle'});
-        t.textContent='𝄡'; svg.appendChild(t);
-      } else {
-        placeClef('𝄞', STAFF_X1 - 5, clefY - 1, clefY + 1, 1100);
-      }
-      const keySig=selectedKeySignature();
-      const keySigLayout=drawKeySignature(clef,keySig);
-      const clefRight=clef==='bass'?620:clef==='alto'||clef==='tenor'?660:680;
-      const sigRight=keySig&&keySig.count ? keySigLayout.startX+Math.max(0,Math.abs(keySig.count)-1)*92+95 : clefRight;
-      currentStaffMeta={
-        clef,
-        keySig,
-        noteBaseX:Math.max(1220,sigRight+260),
-        keySigWidth:keySigLayout.width||0
-      };
-      svg.appendChild(svgEl('line',{x1:STAFF_X1,x2:STAFF_X1,y1:STAFF_Y0,y2:STAFF_Y0+4*STAFF_LINE_SPACING,stroke:'#000','stroke-width':5}));
-      svg.appendChild(svgEl('line',{x1:STAFF_X2,x2:STAFF_X2,y1:STAFF_Y0,y2:STAFF_Y0+4*STAFF_LINE_SPACING,stroke:'#000','stroke-width':5}));
+      // The following renderStaffNotes call renders the complete score atomically.
     }
 
     function renderStaffNotes(notes, forcedClef) {
-      svg.querySelectorAll('.staff-note-el').forEach(e => e.remove());
-      if(!notes || notes.length === 0) return;
       const clef=forcedClef||chooseStaffClef(notes);
-      const keySig=currentStaffMeta?.keySig??selectedKeySignature();
-      const sorted = notes.slice().sort((a,b) => a.midi - b.midi);
-      function yFromStep(step){
-        const bottom=STAFF_Y0+4*STAFF_LINE_SPACING;
-        return bottom-(step-4)*(STAFF_LINE_SPACING/2);
-      }
-      const bottomIndex=CLEF_BOTTOM_DIATONIC[clef]??CLEF_BOTTOM_DIATONIC.treble;
-      const baseX=currentStaffMeta?.noteBaseX||Math.max(1105,(STAFF_X1+STAFF_X2)/2+10);
-      const LEDGER_LENGTH=240;
-      let prevStep=null, shiftToggle=false;
-      sorted.forEach(n=>{
-        const displayMidi=n.midi+(activeInstrument().writtenTranspose||0);
-        const spelling=spellMidiForStaff(displayMidi,keySig);
-        const step=4+(diatonicIndexFromLetterOctave(spelling.letter,spelling.octave)-bottomIndex);
-        const y=yFromStep(step);
-        if(prevStep!==null&&Math.abs(step-prevStep)<=1)shiftToggle=!shiftToggle;else shiftToggle=false;
-        prevStep=step;
-        const x=baseX+(shiftToggle?260:0);
-        const ledgers=[];
-        if(step<4){for(let l=2;l>=step;l-=2)ledgers.push(l);}else if(step>12){for(let l=14;l<=step;l+=2)ledgers.push(l);}
-        ledgers.forEach(L=>svg.appendChild(svgEl('line',{class:'staff-note-el',x1:x-LEDGER_LENGTH,x2:x+LEDGER_LENGTH,y1:yFromStep(L),y2:yFromStep(L),stroke:'#000','stroke-width':5})));
-        const visibleAcc=visibleAccidentalForSpelling(spelling,keySig);
-        if(visibleAcc){
-          const accidental=svgEl('text',{class:'staff-note-el',x:x-235,y:y+64,'font-size':235,fill:'#222','font-family':'serif','text-anchor':'middle'});
-          accidental.textContent=accidentalGlyph(visibleAcc); svg.appendChild(accidental);
-        }
-        svg.appendChild(svgEl('ellipse',{class:'staff-note-el',cx:x,cy:y,rx:110,ry:100,fill:'#000',stroke:'#222','stroke-width':1.5}));
-        const lbl=svgEl('text',{class:'staff-note-el',x:x,y:y+3,'font-size':100,'text-anchor':'middle','dominant-baseline':'central',fill:'#fff','font-weight':'bold'});
-        lbl.textContent=spelling.letter; svg.appendChild(lbl);
-      });
+      const keySig=selectedKeySignature();
+      const pitches=[...new Set((notes||[]).map(n=>n.midi))]
+        .sort((a,b)=>a-b)
+        .map(midi=>spellMidiForStaff(midi+(activeInstrument().writtenTranspose||0),keySig));
+      liveStaff.update(pitches,clef,keySig?.count||0);
     }
 
     /***************** CARGA DE PARTITURAS (PDF, MusicXML, imagen, web) *************************/

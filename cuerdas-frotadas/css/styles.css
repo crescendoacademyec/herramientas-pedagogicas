@@ -331,6 +331,11 @@
       display: block;
       background: var(--paper);
     }
+    #staffSvg [data-live-score] { width: 100%; min-width: 150px; overflow-x: auto; }
+    #staffSvg [data-live-score] svg { display: block; width: 100%; height: auto; max-height: 240px; }
+    #staffSvg [data-live-labels] { color: #29251f; text-align: center; font-size: 13px; padding: 4px; overflow-wrap: anywhere; }
+    #staffSvg [data-live-labels]:empty { display: none; }
+    #staffSvg .live-note-label { font: 600 11px Arial, sans-serif; fill: #29251f; stroke: var(--paper); stroke-width: 3px; paint-order: stroke fill; pointer-events: none; }
 
     .board-wrap {
       flex: 1;

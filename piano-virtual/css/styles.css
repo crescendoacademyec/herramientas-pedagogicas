@@ -715,9 +715,13 @@
   #staffSvg{
     width: 96%;
 
-    height: 100%;
+    height: auto;
     display: block;
   }
+  #staffSvg [data-live-score] { width:100%; overflow-x:auto; }
+  #staffSvg [data-live-score] svg { display:block; width:100%; height:auto; max-height:100%; }
+  #staffSvg [data-live-labels]:empty { display:none; }
+  #staffSvg .live-note-label { font:600 11px Arial,sans-serif; fill:#29251f; stroke:var(--paper, #fbf7f0); stroke-width:3px; paint-order:stroke fill; pointer-events:none; }
 
   .pdf-viewer{
     width: 100%;

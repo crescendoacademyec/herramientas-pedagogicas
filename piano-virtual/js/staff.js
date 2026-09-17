@@ -1,38 +1,4 @@
-// ---------- PENTAGRAMA ----------
-const svg = document.getElementById('staffSvg');
-const SVG_W = 2100, SVG_H = 450;
-const Y0 = 150, HALF = 110;
-function stepY(step) { return Y0 - step * HALF; }
-
-const STAFF_X1 = 10, STAFF_X2 = 2090;
-
-function svgEl(tag, attrs) {
-  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  return e;
-}
-
-function placeClef(glyph, leftX, topY, bottomY, extraScale = 1.4) {
-  const probe = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif' });
-  probe.textContent = glyph;
-  svg.appendChild(probe);
-  const bbox = probe.getBBox();
-  svg.removeChild(probe);
-  if (!bbox.height) return;
-  const targetHeight = bottomY - topY;
-  let scale = (targetHeight / bbox.height) * extraScale;
-  const dx = leftX - bbox.x * scale;
-  const dy = topY - bbox.y * scale;
-  const g = svgEl('g', { transform: `translate(${dx},${dy}) scale(${scale})` });
-  const text = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif', fill: '#333' });
-  text.textContent = glyph;
-  g.appendChild(text);
-  svg.appendChild(g);
-}
-
-// ---------- ARMADURA DE CLAVE (sostenidos/bemoles según la tonalidad) ----------
-// Orden estándar de aparición: sostenidos "Fa Do Sol Re La Mi Si",
-// bemoles "Si Mi La Re Sol Do Fa" (el orden de bemoles es el inverso del de sostenidos).
+// Live grand staff rendered by OpenSheetMusicDisplay; preserve piano spelling and input hooks.
 const SHARP_LETTERS = ['F','C','G','D','A','E','B'];
 const FLAT_LETTERS  = ['B','E','A','D','G','C','F'];
 // Octava convencional de cada alteración según la clave (posición estándar de notación).
@@ -58,86 +24,6 @@ const KEY_SIGNATURES = {
   10: { type: 'flat',  count: 2 },
   5:  { type: 'flat',  count: 1 }
 };
-
-const KEYSIG_X_START = 700; // mover armaduras
-const KEYSIG_SPACING = 100; // separar armaduras
-
-function drawKeySignature() {
-  svg.querySelectorAll('.keysig-el').forEach(e => e.remove());
-  if (currentKeyPc === null) return;
-  const sig = currentSignature();
-  if (!sig || sig.count === 0) return;
-
-  const letters = sig.type === 'sharp' ? SHARP_LETTERS : FLAT_LETTERS;
-  const octTreble = sig.type === 'sharp' ? SHARP_OCTAVE_TREBLE : FLAT_OCTAVE_TREBLE;
-  const octBass = sig.type === 'sharp' ? SHARP_OCTAVE_BASS : FLAT_OCTAVE_BASS;
-  const glyph = sig.type === 'sharp' ? '♯' : '♭';
-
-  for (let i = 0; i < sig.count; i++) {
-    const letter = letters[i];
-    const x = KEYSIG_X_START + i * KEYSIG_SPACING;
-
-    const stepTreble = diatonicStep(letter, octTreble[letter]);
-    const yTreble = stepY(stepTreble);
-    const symTreble = svgEl('text', { class: 'keysig-el', x, y: yTreble, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
-    symTreble.textContent = glyph;
-    svg.appendChild(symTreble);
-
-    const stepBass = diatonicStep(letter, octBass[letter]);
-    const yBass = stepY(stepBass);
-    const symBass = svgEl('text', { class: 'keysig-el', x, y: yBass, 'font-size': 250, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#222', 'font-family': 'serif' });
-    symBass.textContent = glyph;
-    svg.appendChild(symBass);
-  }
-}
-
-function drawBaseStaff() {
-  svg.innerHTML = '';
-  svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
-  [2,4,6,8,10].forEach(step => {
-    const y = stepY(step);
-    svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
-  });
-  [-10,-8,-6,-4,-2].forEach(step => {
-    const y = stepY(step);
-    svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X2, y1: y, y2: y, stroke: '#000', 'stroke-width': 10 }));
-  });
-  // Clave de sol con parámetros según SO
-  // Clave de sol
-  placeClef('𝄞', STAFF_X1+5, stepY(14) + clefOffsetY + CLEF_Y_SHIFT, stepY(3) + clefOffsetY + CLEF_Y_SHIFT, clefScale);
-  // Clave de fa
-  placeClef('𝄢', STAFF_X1+5, stepY(-3)-320, stepY(-10)-354, 1.45);
-  svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X1, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
-  svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: stepY(10), y2: stepY(-10), stroke: '#000', 'stroke-width': 5 }));
-}
-drawBaseStaff();
-drawKeySignature();
-
-function ledgerLinesFor(step, clef) {
-  const lines = [];
-  if (clef === 'treble') {
-    if (step < 2) {
-      for (let l = 0; l >= step; l -= 2) {
-        lines.push(l);
-      }
-    } else if (step > 10) {
-      for (let l = 12; l <= step; l += 2) {
-        lines.push(l);
-      }
-    }
-  } else {
-    if (step < -10) {
-      for (let l = -12; l >= step; l -= 2) {
-        lines.push(l);
-      }
-    } else if (step > -2) {
-      for (let l = 0; l <= step; l += 2) {
-        lines.push(l);
-      }
-    }
-  }
-  return lines;
-}
 
 const activeStaffNotes = {};
 
@@ -218,61 +104,18 @@ function setStaffNote(midi, on) {
   renderStaffNotes();
 }
 
-function renderStaffNotes() {
-  svg.querySelectorAll('.note-el').forEach(e => e.remove());
-  const activeMidis = Object.keys(activeStaffNotes).map(Number).sort((a,b)=>a-b);
-  const chord = (activeMidis.length >= 2 && typeof identifyChord === 'function') ? identifyChord(activeMidis) : null;
-  const active = activeMidis.map(m => spellStaffMidi(m, chord));
-  const cx = (STAFF_X1 + STAFF_X2) / 2;
-  const NOTE_X_OFFSET = 500; //cabezas a la derecha
-  let prevStep = null, shiftToggle = false;
-  const LEDGER_LENGTH = 200;
 
-  active.forEach(n => {
-    const step = diatonicStep(n.name, n.octave);
-    const clef = step >= 0 ? 'treble' : 'bass';
-    let stepVisible = step;
-    let octaveShift = null;
-
-    if (step <= -13) {
-      stepVisible = step + 7;
-      octaveShift = '8vb';
-    } else if (step >= 13) {
-      stepVisible = step - 7;
-      octaveShift = '8va';
-    }
-
-    const y = stepY(stepVisible);
-    if (prevStep !== null && Math.abs(stepVisible - prevStep) <= 1) shiftToggle = !shiftToggle;
-    else shiftToggle = false;
-    prevStep = stepVisible;
-    const x = cx + NOTE_X_OFFSET + (shiftToggle ? 300 : 0);
-
-    const ledgerLines = ledgerLinesFor(stepVisible, clef);
-    ledgerLines.forEach(L => {
-      const ly = stepY(L);
-      const led = svgEl('line', { class: 'note-el', x1: x - LEDGER_LENGTH, x2: x + LEDGER_LENGTH, y1: ly, y2: ly, stroke: '#000', 'stroke-width': 20 });
-      svg.appendChild(led);
-    });
-
-    if (n.glyph) {
-      const accidental = svgEl('text', { class: 'note-el', x: x-205, y: y+24, 'font-size': 205, fill: '#222', 'font-family': 'serif', 'text-anchor':'middle' });
-      accidental.textContent = n.glyph;
-      svg.appendChild(accidental);
-    }
-
-    const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 122, ry: 106, fill: '#000', stroke: '#222', 'stroke-width': 0.8 });
-    svg.appendChild(head);
-
-    const lbl = svgEl('text', { class: 'note-el', x: x, y: y+2, 'font-size': 157, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
-    lbl.textContent = n.label;
-    svg.appendChild(lbl);
-
-    if (octaveShift) {
-      const offsetY = (octaveShift === '8va') ? -173 : 196;
-      const indicador = svgEl('text', { class: 'note-el', x: x, y: y + offsetY, 'font-size': 79, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
-      indicador.textContent = octaveShift;
-      svg.appendChild(indicador);
-    }
+const pianoLiveStaff=new CrescendoLiveStaff(document.getElementById('staffSvg'));
+function drawBaseStaff(){renderStaffNotes();}
+function drawKeySignature(){renderStaffNotes();}
+function renderStaffNotes(){
+  const midis=Object.keys(activeStaffNotes).map(Number).sort((a,b)=>a-b);
+  const chord=midis.length>=2&&typeof identifyChord==='function'?identifyChord(midis):null;
+  const notes=midis.map(midi=>{
+    const n=spellStaffMidi(midi,chord);
+    return {...n,alter:n.accidental,staff:diatonicStep(n.name,n.octave)>=0?1:2,label:n.label+n.glyph+n.octave};
   });
+  const sig=currentSignature();
+  pianoLiveStaff.update(notes,'grand',currentKeyPc===null?0:(sig.count||0)*(sig.type==='flat'?-1:1));
 }
+drawBaseStaff();

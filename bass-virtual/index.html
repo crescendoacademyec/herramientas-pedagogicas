@@ -338,6 +338,11 @@
       background: var(--paper);
     }
 
+    #staffSvg [data-live-score] { width: 100%; min-width: 150px; overflow-x: auto; }
+    #staffSvg [data-live-score] svg { display: block; width: 100%; height: auto; max-height: 240px; }
+    #staffSvg [data-live-labels] { color: #29251f; text-align: center; font-size: 13px; }
+    #staffSvg [data-live-labels]:empty { display: none; }
+    #staffSvg .live-note-label { font: 600 11px Arial, sans-serif; fill: #29251f; stroke: var(--paper); stroke-width: 3px; paint-order: stroke fill; pointer-events: none; }
     .board-wrap {
       flex: 1;
       background: #1a1a1a;
@@ -1252,7 +1257,7 @@
     <!-- ===== FILA SUPERIOR: pentagrama + diapasón ===== -->
     <div class="top-row">
       <div class="staff-left">
-        <svg id="staffSvg" viewBox="0 0 2100 240" preserveAspectRatio="xMidYMid meet"></svg>
+        <div id="staffSvg" role="img" aria-label="Pentagrama de bajo"><div data-live-score></div><div data-live-labels></div></div>
       </div>
       <div class="board-wrap" aria-label="Diapasón del bajo seleccionado">
         <canvas id="board"></canvas>
@@ -1418,6 +1423,7 @@
   <!-- ===== SCRIPTS ===== -->
   <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
+  <script src="../cuerdas-frotadas/js/live-staff.js"></script>
   <script>
     // ======================================================================
     // 1. CÓDIGO COMPLETO DEL REQUINTO VIRTUAL (diapasón, escalas, acordes)
@@ -2754,45 +2760,9 @@
     // ======================================================================
     // 2. CÓDIGO DEL PENTAGRAMA (CORREGIDO)
     // ======================================================================
-    const svg = document.getElementById('staffSvg');
-    const SVG_W = 2100;
-    const SVG_H = 2100;
-
-    // Estas constantes DEBEN coincidir con las de drawBaseStaff
-    const STAFF_Y0 = 600;          // primera línea del pentagrama
-    const STAFF_LINE_SPACING = 220; // separación entre líneas
-    const STAFF_X1 = 90;
-    const STAFF_X2 = 2000;
-
-    function svgEl(tag, attrs) {
-      const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
-      for (const k in attrs) e.setAttribute(k, attrs[k]);
-      return e;
-    }
-
-    function placeClef(glyph, leftX, topY, bottomY, extraScale = 1.4) {
-      const probe = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif' });
-      probe.textContent = glyph;
-      svg.appendChild(probe);
-      const bbox = probe.getBBox();
-      svg.removeChild(probe);
-      if (!bbox.height) return;
-      const targetHeight = bottomY - topY;
-      let scale = (targetHeight / bbox.height) * extraScale;
-      const dx = leftX - bbox.x * scale;
-      const dy = topY - bbox.y * scale;
-      const g = svgEl('g', { transform: `translate(${dx},${dy}) scale(${scale})` });
-      const text = svgEl('text', { x: 0, y: 0, 'font-size': 200, 'font-family': 'serif', fill: '#333' });
-      text.textContent = glyph;
-      g.appendChild(text);
-      svg.appendChild(g);
-    }
-
-
     const STAFF_KEY_SIGNATURES={C:0,G:1,D:2,A:3,E:4,B:5,'F#':6,'C#':7,F:-1,Bb:-2,Eb:-3,Ab:-4,Db:-5,Gb:-6,Cb:-7};
     const STAFF_MAJOR_BY_PC={0:'C',1:'Db',2:'D',3:'Eb',4:'E',5:'F',6:'Gb',7:'G',8:'Ab',9:'A',10:'Bb',11:'B'};
     const STAFF_MODE_MAJOR_OFFSET={mayor:0,jonico:0,dorico:10,frigio:8,lidio:7,mixolidio:5,eolico:3,locrio:1,menor_armonica:3,menor_melodica:3,pentatonica_mayor:0};
-    const STAFF_KEYSIG_BASS={sharp:[['F',3],['C',3],['G',3],['D',3],['A',2],['E',3],['B',2]],flat:[['B',2],['E',3],['A',2],['D',3],['G',2],['C',3],['F',2]]};
     function currentKeySignatureCount(){
       const raw=keySignatureSel?.value||'none';
       if(raw==='none')return 0;
@@ -2802,48 +2772,6 @@
       const majorPc=(rootPc+STAFF_MODE_MAJOR_OFFSET[scaleSel.value])%12;
       return STAFF_KEY_SIGNATURES[STAFF_MAJOR_BY_PC[majorPc]]||0;
     }
-    function staffDiatonicIndex(letter,octave){return octave*7+({C:0,D:1,E:2,F:3,G:4,A:5,B:6})[letter];}
-    let staffKeySignatureLayout={count:0,startX:0,endX:0};
-    function drawKeySignatureBass(){
-      const count=currentKeySignatureCount();
-      if(!count){staffKeySignatureLayout={count:0,startX:0,endX:0};return 0;}
-      const type=count>0?'sharp':'flat', arr=STAFF_KEYSIG_BASS[type], total=Math.abs(count);
-      const bottomIndex=staffDiatonicIndex('G',2), yBottom=STAFF_Y0+4*STAFF_LINE_SPACING;
-      const yFor=(letter,oct)=>{const step=4+(staffDiatonicIndex(letter,oct)-bottomIndex);return yBottom-(step-4)*(STAFF_LINE_SPACING/2)};
-      // La clave de Fa ocupa bastante anchura: la armadura empieza claramente después de ella.
-      const startX=650,gap=92;
-      for(let i=0;i<total;i++){
-        const [letter,oct]=arr[i], y=yFor(letter,oct);
-        const t=svgEl('text',{class:'key-sig-el',x:startX+i*gap,y:y+62,'font-size':205,fill:'#222','font-family':'serif','text-anchor':'middle'});
-        t.textContent=type==='sharp'?'♯':'♭'; svg.appendChild(t);
-      }
-      const endX=startX+(total-1)*gap+75;
-      staffKeySignatureLayout={count:total,startX,endX};
-      return endX-startX;
-    }
-
-    function drawBaseStaff() {
-      svg.innerHTML = '';
-      svg.setAttribute('viewBox', '0 0 ' + SVG_W + ' ' + SVG_H);
-
-      for (let i = 0; i < 5; i++) {
-        const y = STAFF_Y0 + i * STAFF_LINE_SPACING;
-        svg.appendChild(svgEl('line', {
-          x1: STAFF_X1, x2: STAFF_X2,
-          y1: y, y2: y,
-          stroke: '#000', 'stroke-width': 7
-        }));
-      }
-
-      const clefY = STAFF_Y0 - 3.2 * STAFF_LINE_SPACING;
-      const bassClefY = clefY + 470;
-      placeClef('𝄢', STAFF_X1 - 5, bassClefY - 1, bassClefY + 1, 600);
-      drawKeySignatureBass();
-
-      svg.appendChild(svgEl('line', { x1: STAFF_X1, x2: STAFF_X1, y1: STAFF_Y0, y2: STAFF_Y0 + 4 * STAFF_LINE_SPACING, stroke: '#000', 'stroke-width': 5 }));
-      svg.appendChild(svgEl('line', { x1: STAFF_X2, x2: STAFF_X2, y1: STAFF_Y0, y2: STAFF_Y0 + 4 * STAFF_LINE_SPACING, stroke: '#000', 'stroke-width': 5 }));
-    }
-
     const STAFF_LETTERS=['C','D','E','F','G','A','B'];
     const STAFF_NATURAL_PC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
     function rootPrefersFlats(rootName){return /b/.test(rootName)||['F'].includes(rootName)}
@@ -2857,93 +2785,18 @@
       return {letter,acc,label:letter,glyph:acc==='b'?'♭':acc==='#'?'♯':acc==='bb'?'♭♭':acc==='##'?'𝄪':''};
     }
 
-    function renderStaffNotes(notes) {
-      svg.querySelectorAll('.note-el').forEach(e => e.remove());
-      if (!notes || notes.length === 0) return;
 
-      const sorted = notes.slice().sort((a, b) => a.midi - b.midi);
-
-      // El bajo se escribe en clave de Fa una octava por encima de su sonido real.
-      // Audio y diapasón conservan la altura sonora real.
-      const transpose = 12;
-
-      const letterStep={C:0,D:1,E:2,F:3,G:4,A:5,B:6};
-      function diatonicStepFromSpelling(midi,sp){
-        const octave=Math.floor(midi/12)-1;
-        return ((octave-4)*7)+letterStep[sp.letter]+2;
-      }
-
-      function yFromStep(step) {
-        const STAFF_Y_BOTTOM = STAFF_Y0 + 4 * STAFF_LINE_SPACING;
-        return STAFF_Y_BOTTOM - (step - 4) * (STAFF_LINE_SPACING / 2);
-      }
-
-      const cx = (STAFF_X1 + STAFF_X2) / 2;
-      // Las figuras siempre empiezan después de la clave y, si existe, después de toda la armadura.
-      const defaultNoteX = cx + 120;
-      const noteAfterKeySigX = staffKeySignatureLayout.count ? staffKeySignatureLayout.endX + 180 : defaultNoteX;
-      const NOTE_BASE_X = Math.max(defaultNoteX, noteAfterKeySigX);
-      let prevStep = null, shiftToggle = false;
-      const LEDGER_LENGTH = 240;
-
-      sorted.forEach((n) => {
-        // Aplicar transposición para el dibujo
-        const displayMidi = n.midi + transpose;
-        const spelling=staffSpelling(displayMidi);
-        let step = diatonicStepFromSpelling(displayMidi,spelling) + 5;
-
-        let octaveShift = null;
-        if (step <= -10) { step += 7; octaveShift = '8vb'; }
-        else if (step >= 17) { step -= 7; octaveShift = '8va'; }
-
-        const y = yFromStep(step);
-        if (prevStep !== null && Math.abs(step - prevStep) <= 1) shiftToggle = !shiftToggle;
-        else shiftToggle = false;
-        prevStep = step;
-        const x = NOTE_BASE_X + (shiftToggle ? 250 : 0);
-
-        // Líneas adicionales
-        const ledgerLines = [];
-        if (step < 4) {
-          for (let l = 2; l >= step; l -= 2) ledgerLines.push(l);
-        } else if (step > 12) {
-          for (let l = 14; l <= step; l += 2) ledgerLines.push(l);
-        }
-        ledgerLines.forEach(L => {
-          const ly = yFromStep(L);
-          const led = svgEl('line', { class: 'note-el', x1: x - LEDGER_LENGTH, x2: x + LEDGER_LENGTH, y1: ly, y2: ly, stroke: '#000', 'stroke-width': 5 });
-          svg.appendChild(led);
-        });
-
-        // Alteración fuera de la cabeza
-        if (spelling.glyph) {
-          const accidental = svgEl('text', { class: 'note-el', x: x - 175, y: y + 42, 'font-size': 135, fill: '#222', 'font-family': 'serif', 'text-anchor':'middle' });
-          accidental.textContent = spelling.glyph;
-          svg.appendChild(accidental);
-        }
-
-        // Cabeza de la nota
-        const head = svgEl('ellipse', { class: 'note-el', cx: x, cy: y, rx: 110, ry: 100, fill: '#000', stroke: '#222', 'stroke-width': 1.5 });
-        svg.appendChild(head);
-
-        // Etiqueta de la nota (usar la nota transpuesta)
-        const lbl = svgEl('text', { class: 'note-el', x: x, y: y + 3, 'font-size': 110, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill: '#fff', 'font-weight': 'bold' });
-        lbl.textContent = spelling.label;
-        svg.appendChild(lbl);
-
-        if (octaveShift) {
-          const STAFF_Y_BOTTOM = STAFF_Y0 + 4 * STAFF_LINE_SPACING;
-          let textY;
-          if (octaveShift === '8va') {
-            textY = STAFF_Y0 - 60;
-          } else {
-            textY = STAFF_Y_BOTTOM + 60;
-          }
-          const indicador = svgEl('text', { class: 'note-el', x: x, y: textY, 'font-size': 100, 'text-anchor': 'middle', 'font-family': 'serif', fill: '#333', 'font-weight': 'bold' });
-          indicador.textContent = octaveShift;
-          svg.appendChild(indicador);
-        }
+    const bassLiveStaff=new CrescendoLiveStaff(document.getElementById('staffSvg'));
+    let bassStaffNotes=[];
+    function drawBaseStaff(){renderStaffNotes(bassStaffNotes);}
+    function renderStaffNotes(notes){
+      bassStaffNotes=notes||[];
+      const pitches=[...new Set(bassStaffNotes.map(n=>n.midi))].sort((a,b)=>a-b).map(midi=>{
+        // Written bass pitch is one octave above sounding pitch; audio is unchanged.
+        const written=midi+12,spelling=staffSpelling(written);
+        return {letter:spelling.letter,acc:spelling.acc==='#'?'sharp':spelling.acc==='b'?'flat':null,octave:Math.floor(written/12)-1};
       });
+      bassLiveStaff.update(pitches,'bass',currentKeySignatureCount());
     }
 
 </script>
