@@ -83,8 +83,8 @@
           this.engine.Zoom=1.05;
           this.engine.render();
           this.currentNotes=job.notes;this.annotate();this.labels.textContent='';
-          const names=job.notes.map(n=>n.letter+(n.acc==='sharp'?'♯':n.acc==='flat'?'♭':'')+n.octave).join(' · ');
-          this.host.setAttribute('aria-label','Pentagrama: '+({treble:'clave de sol',bass:'clave de fa',alto:'clave de do en tercera',tenor:'clave de do en cuarta'}[job.clef])+(names?', '+names:''));
+          const names=job.notes.map(n=>n.label||n.letter+(n.acc==='sharp'?'♯':n.acc==='flat'?'♭':'')+n.octave).join(' · ');
+          this.host.setAttribute('aria-label','Pentagrama: '+({grand:'claves de sol y fa',treble:'clave de sol',bass:'clave de fa',alto:'clave de do en tercera',tenor:'clave de do en cuarta'}[job.clef])+(names?', '+names:''));
         }
       }catch(error){
         this.last='';this.labels.textContent='No se pudo cargar el pentagrama. Vuelve a seleccionar una nota.';console.error(error);

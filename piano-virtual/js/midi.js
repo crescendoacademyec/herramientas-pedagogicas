@@ -51,6 +51,7 @@ function renderVelocityMenu(){
 }
 
 function panic(){
+  document.dispatchEvent(new Event('piano-panic'));
   setSustain(false); sustainedNotes.clear();
   Object.keys(activeSources).map(Number).forEach(stopSoundNow);
   heldKeys.clear(); updateChordDisplay();
@@ -110,6 +111,7 @@ document.getElementById('midiRecordBtn').addEventListener('click',startMidiRecor
 
 // ---------- TECLADO FÍSICO ----------
 window.addEventListener('keydown', (e) => {
+  if (e.target.closest('input,select,textarea,button,a,summary,[contenteditable="true"]')) return;
   const k = e.key.toLowerCase();
   if (keyMap[k] !== undefined && !heldKeys.has(k)) {
     const midi = keyMap[k];

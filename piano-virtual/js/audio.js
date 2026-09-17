@@ -167,6 +167,7 @@ function setSustain(on) {
 // ---------- NOTE ON / OFF ----------
 function noteOn(n, velocity = 127) {
   if (!isNoteInRange(n.midi)) return;
+  document.dispatchEvent(new CustomEvent('piano-input',{detail:{midi:n.midi,on:true}}));
   if (sustainedNotes.has(n.midi)) {
     sustainedNotes.delete(n.midi);
     stopSoundNow(n.midi);
@@ -226,6 +227,7 @@ function noteOn(n, velocity = 127) {
 }
 
 function noteOff(n) {
+  document.dispatchEvent(new CustomEvent('piano-input',{detail:{midi:n.midi,on:false}}));
   if (!isNoteInRange(n.midi)) return;
   if (!activeSources[n.midi]) return;
   if (sustainOn) {

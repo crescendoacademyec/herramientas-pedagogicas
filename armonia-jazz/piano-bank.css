@@ -1,0 +1,6 @@
+.jazz-piano-bank{margin-top:20px;padding:18px;border:1px solid #766137;border-radius:12px;background:#201d16}
+.jazz-piano-bank h4{color:#e4bc60;margin:0 0 14px}.jazz-piano-controls,.jazz-piano-links{display:flex;gap:12px;flex-wrap:wrap}
+.jazz-piano-controls label{display:grid;gap:6px;font-size:13px;max-width:100%}
+.jazz-piano-controls select{max-width:100%;padding:9px;background:#151515;color:#eee;border:1px solid #665a41;border-radius:6px}
+.jazz-piano-links a{display:inline-block;padding:10px;color:#efd185;border:1px solid #766137;border-radius:6px;text-decoration:none}
+.jazz-piano-links a:focus-visible,.jazz-piano-controls select:focus-visible{outline:3px solid #a3d0dd;outline-offset:3px}

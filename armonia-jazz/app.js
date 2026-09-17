@@ -211,6 +211,7 @@
       if (isOpen) {
         body.innerHTML = topic.html + (TOPIC_VISUALS[topic.title] ? '<div class="theory-visual-mount" data-viz="' + TOPIC_VISUALS[topic.title] + '"></div>' : '');
         populateGeneratedDiagrams(body);
+        window.CrescendoJazzPiano?.attach(body, topic.title);
       }
 
       card.appendChild(head);

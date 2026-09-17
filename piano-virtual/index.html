@@ -7,6 +7,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
 <title>Piano Virtual Pro</title>
 <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/chord-bank.css">
 </head>
 <body>
 
@@ -177,6 +178,8 @@
       <div class="quick-select-dropdown" id="qsColorDropdown" role="listbox"></div>
       <input type="color" id="activeColor" value="#66b3ff" class="file-input-hidden" tabindex="-1" aria-hidden="true">
     </div>
+
+    <button type="button" id="openChordBank" aria-controls="chordBank" aria-expanded="false">Banco de acordes</button>
 
     <div class="sample-controls">
       <input type="file" id="sampleFolder" webkitdirectory multiple class="file-input-hidden">
@@ -385,6 +388,10 @@
     </div>
   </div>
 
+  <details id="chordBank" class="chord-bank">
+    <summary>Banco de acordes · construir, escuchar y practicar</summary>
+    <div id="chordBankContent"></div>
+  </details>
   <div class="spacer"></div>
 
   <div class="piano-wrap">
@@ -408,6 +415,8 @@
 </script>
 
 <script src="js/core.js"></script>
+<script src="../shared/piano-chord-patterns.js"></script>
+<script src="../shared/piano-voicings.js"></script>
 <script src="js/audio.js"></script>
 <script src="../cuerdas-frotadas/js/live-staff.js"></script>
 <script src="js/staff.js"></script>
@@ -418,5 +427,6 @@
 <script src="js/metronome.js"></script>
 <script src="js/chords.js"></script>
 <script src="js/init.js"></script>
+<script src="js/chord-bank.js"></script>
 </body>
 </html>
