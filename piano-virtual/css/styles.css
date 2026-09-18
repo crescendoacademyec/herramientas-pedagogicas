@@ -173,6 +173,7 @@
   .header-center-tools{justify-self:center;display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;}
   #chordDisplay{justify-self:auto;}
   .header-metronome{flex-wrap:nowrap;white-space:nowrap;}
+  .metro-timing{min-width:70px;font-size:.6rem;color:var(--muted);text-align:center}.metro-timing:empty{display:none}.metro-timing[data-grade="center"]{color:#70d49b}.metro-timing[data-grade="near"]{color:var(--gold)}.metro-timing[data-grade="far"]{color:#e9867a}
   @media (max-width:1280px){
     .topbar{grid-template-columns:1fr auto;}
     .brand{grid-column:1;grid-row:1;}

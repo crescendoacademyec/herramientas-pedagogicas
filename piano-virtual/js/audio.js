@@ -166,6 +166,7 @@ function setSustain(on) {
 
 // ---------- NOTE ON / OFF ----------
 function noteOn(n, velocity = 127) {
+  if(typeof window.evaluateMetroAttack==='function')window.evaluateMetroAttack();
   if (!isNoteInRange(n.midi)) return;
   document.dispatchEvent(new CustomEvent('piano-input',{detail:{midi:n.midi,on:true}}));
   if (sustainedNotes.has(n.midi)) {

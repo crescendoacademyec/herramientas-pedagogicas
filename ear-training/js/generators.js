@@ -317,6 +317,19 @@
     return {options,correctIdx,seq,meta:{targetId:`layer:${target.id}`,targetType:'listeningLayer',targetName:target.label,key:D.PITCH_NAMES[keyPc]},feedback(ok,s){return `${ok?'✓ Correcto':'✕ Respuesta incorrecta'} · Primer plano: <b>${target.label}</b>. La pista principal fue ${clue}${ok?'':`. Elegiste <b>${s?.label||'—'}</b>.`}`;}};
   }
 
+  function generateLevel11(config){
+    const R=window.CrescendoRhythm;if(!R)return emptyRound('El motor rítmico no está disponible.');
+    const forced=forcedSet(config);let pool=R.EAR_PATTERNS.slice();
+    if(forced)pool=pool.filter(x=>forced.has(`rhythm:${x.id}`));
+    if(!pool.length)return emptyRound('No hay patrones rítmicos seleccionados para repasar.');
+    const target=sample(pool),midi=randomRootForPc(randInt(12),config.register||'mid')+12;
+    let candidates=pick(R.EAR_PATTERNS,4);if(!candidates.some(x=>x.id===target.id))candidates[0]=target;candidates=shuffle(candidates);
+    const options=candidates.map(x=>option(`rhythm:${x.id}`,x.label));
+    const correctIdx=options.findIndex(x=>x.id===`rhythm:${target.id}`);
+    const clue=target.division===1?'un ataque por pulso':target.division===2?'una cuadrícula binaria':target.division===3?'una cuadrícula ternaria':'una cuadrícula de semicorcheas';
+    return {options,correctIdx,seq:R.patternSequence(target.id,midi,2),meta:{targetId:`rhythm:${target.id}`,targetType:'rhythmFeel',targetName:target.label},feedback(ok,s){return `${ok?'✓ Correcto':'✕ Respuesta incorrecta'} · <b>${target.label}</b>. Escucha ${clue} y compara cada ataque con el pulso grave${ok?'':`. Elegiste <b>${s?.label||'—'}</b>.`}`;}};
+  }
+
   function emptyRound(message) {
     return {options:[option('empty','Configura el ejercicio')],correctIdx:0,seq:[],meta:{targetId:null,targetType:'empty',targetName:'Sin configuración'},feedback:()=>message,disabled:true};
   }
@@ -330,7 +343,7 @@
       const options=all.map(s=>option('scale:'+s.id,s.name));
       return {options,correctIdx:options.findIndex(o=>o.id==='scale:'+target.id),seq:target.steps.map((step,i)=>({notes:[root+step],start:.1+i*.45,dur:.4,vel:.8})),meta:{targetId:'scale:'+target.id,targetType:'scale',targetName:target.name,rootMidi:root},feedback(ok){return (ok?'✓ Correcto':'✕ Respuesta incorrecta')+' · <b>'+target.name+'</b>. Compara sus distancias: '+target.steps.slice(1).map((n,i)=>n-target.steps[i]).join('–')+' semitonos.';}};
     }
-    const map={1:generateInterval,2:generateChord,3:generateLevel3,4:generateLevel4,5:generateLevel5,6:generateLevel6,7:generateLevel7,8:generateLevel8,10:generateLevel10};
+    const map={1:generateInterval,2:generateChord,3:generateLevel3,4:generateLevel4,5:generateLevel5,6:generateLevel6,7:generateLevel7,8:generateLevel8,10:generateLevel10,11:generateLevel11};
     return (map[level]||generateInterval)(config||{});
   }
 

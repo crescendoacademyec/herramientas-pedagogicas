@@ -3,7 +3,7 @@
 <head>
   <link rel="stylesheet" href="../shared/music-practice.css">
   <script defer src="../shared/opensheetmusicdisplay-1.8.4.min.js"></script>
-  <script defer src="../shared/music-practice.js?v=20260918-jazz-scales"></script>
+  <script defer src="../shared/music-practice.js?v=20260918-midi-notation-fix"></script>
   <link rel="stylesheet" href="../shared/practice-lab.css">
   <script defer src="../shared/practice-lab.js"></script>
   <script defer src="../shared/ear-workshop.js"></script>
@@ -12,9 +12,10 @@
   <meta name="theme-color" content="#17191b">
   <title>Ear Training · Crescendo Academy</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../shared/header-icons.css?v=20260918-flat-header">
   <link rel="stylesheet" href="styles.css?v=20260916-clefs">
 </head>
-<body>
+<body class="ear-training-page">
   <header class="topbar">
     <div class="brand-wrap">
       <div class="brand-mark" aria-hidden="true">ET</div>
@@ -69,10 +70,11 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-  <script defer src="js/data.js?v=20260918-listening-layers"></script>
+  <script defer src="js/data.js?v=20260918-rhythm-feel"></script>
   <script defer src="js/storage.js"></script>
   <script defer src="js/audio.js"></script>
-  <script defer src="js/generators.js?v=20260918-listening-layers"></script>
-  <script defer src="js/app.js?v=20260918-listening-layers"></script>
+  <script defer src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
+  <script defer src="js/generators.js?v=20260918-rhythm-feel"></script>
+  <script defer src="js/app.js?v=20260918-rhythm-feel"></script>
 </body>
 </html>

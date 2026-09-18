@@ -19,6 +19,21 @@
     { roman: "V7", degrees: [4, 6, 8, 10] }, { roman: "vim7", degrees: [5, 7, 9, 11] },
     { roman: "viiø7", degrees: [6, 8, 10, 12] }
   ];
+  let variation = 0;
+
+  function exactBar(pattern, pitch, shift = 0) {
+    const capacity = 4, offset = Math.max(0, Math.min(1.5, Number(shift) || 0));
+    const source = pattern.map(item => typeof item === "number" ? { beats: item } : { ...item });
+    const events = offset ? [{ kind: "rest", beats: offset }] : [];
+    let remaining = capacity - offset, cursor = 0;
+    while (remaining > 1e-7) {
+      const sourceEvent = source[cursor % source.length];
+      const beats = Math.min(Number(sourceEvent.beats), remaining);
+      events.push({ ...sourceEvent, beats, midi: pitch, bar: 0 });
+      remaining -= beats; cursor++;
+    }
+    return events;
+  }
 
   function degreeMidi(rootMidi, degree) {
     const octave = Math.floor(degree / 7);
@@ -49,12 +64,19 @@
   function rhythm(root, type) {
     const pitch = ROOTS[root];
     const patterns = {
-      offbeat: [{ kind: "rest", beats: .5 }, { beats: .5 }, { beats: 1 }, { kind: "rest", beats: .5 }, { beats: .5 }, { beats: 1 }],
-      rests: [{ beats: 1 }, { kind: "rest", beats: 1 }, { beats: .5 }, { beats: .5 }, { kind: "rest", beats: 1 }],
-      triplets: Array.from({ length: 6 }, () => ({ beats: 1 / 3, kind: "triplet" })),
-      mixed: [{ beats: 1.5 }, { beats: .5 }, { beats: 1 }, { kind: "rest", beats: .5 }, { beats: .5 }]
+      offbeat: [
+        [{ kind: "rest", beats: .5 }, .5, 1, { kind: "rest", beats: .5 }, .5, 1],
+        [.5, { kind: "rest", beats: .5 }, .5, .5, { kind: "rest", beats: .5 }, .5, 1]
+      ],
+      rests: [
+        [1, { kind: "rest", beats: 1 }, .5, .5, { kind: "rest", beats: 1 }],
+        [{ kind: "rest", beats: .5 }, .5, 1, { kind: "rest", beats: 1 }, 1]
+      ],
+      triplets: [Array.from({ length: 12 }, () => ({ beats: 1 / 3, kind: "triplet" }))],
+      mixed: [[1.5, .5, 1, { kind: "rest", beats: .5 }, .5], [.5, 1, .5, 1.5, .5]]
     };
-    return patterns[type].map((event, index) => ({ ...event, midi: pitch + MAJOR[index % 7], bar: 0 }));
+    const choices = patterns[type] || patterns.mixed, selected = choices[variation++ % choices.length];
+    return exactBar(selected, pitch).map((event, index) => ({ ...event, midi: pitch + MAJOR[index % 7] }));
   }
   function gravity(root, progression="major251", direction="down") {
     const base=ROOTS[root],maps={
@@ -68,6 +90,17 @@
       const line=nearest.concat(chord.target);return line.map((semi,i)=>({midi:base+semi,beats:1,bar,target:i===line.length-1,label:i===0?chord.name:i===line.length-1?"objetivo":""}));
     });
   }
-  global.CrescendoImprovisationEngine = { ROOTS, MODES, DIATONIC, degreeMidi, scale, motive, targets, approaches, rhythm, gravity };
+  function locking(root,type="tree",shift=0){
+    const patterns={
+      tree:[[2,1,.5,.5],[1.5,.5,1,.5,.5],[1,.5,.5,1.5,.5]],
+      charleston:[[1.5,.5,1.5,.5],[.5,1.5,.5,1.5]],
+      reverse:[[.5,1.5,2],[1,.5,1.5,1]],
+      redGarland:[[1.5,1,1.5],[.5,1,1.5,1]],
+      funk:[[.75,.25,1,1,1],[.25,.75,.5,.5,1,1]]
+    };
+    const choices=patterns[type]||patterns.tree,selected=choices[variation++%choices.length];
+    return exactBar(selected,ROOTS[root],shift);
+  }
+  global.CrescendoImprovisationEngine = { ROOTS, MODES, DIATONIC, degreeMidi, scale, motive, targets, approaches, rhythm, gravity, locking };
   if (typeof module !== "undefined") module.exports = global.CrescendoImprovisationEngine;
 })(typeof window === "undefined" ? globalThis : window);

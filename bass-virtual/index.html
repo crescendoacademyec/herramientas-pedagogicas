@@ -6,6 +6,7 @@
   <meta name="description" content="Bajo Virtual Crescendo: bajo eléctrico de 4 y 5 cuerdas con escalas, arpegios, metrónomo y lector avanzado de partituras." />
   <title>Bajo Virtual</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../shared/header-icons.css?v=20260918-flat-header">
   <style>
     /* ===== Variables y estilos base ===== */
     :root {
@@ -168,6 +169,7 @@
     .metro-bpm-readout{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;line-height:1;color:var(--gold);font-weight:900}
     .metro-bpm-readout small{font-size:.43rem;color:var(--muted);letter-spacing:.08em;margin-bottom:2px}
     #metroBeat{min-width:14px;text-align:center;color:var(--gold);font-family:Georgia,serif;font-weight:900}
+    .metro-timing{min-width:66px;text-align:center;font-size:.58rem;color:var(--muted)}.metro-timing:empty{display:none}.metro-timing[data-grade="center"]{color:#70d49b}.metro-timing[data-grade="near"]{color:var(--gold)}.metro-timing[data-grade="far"]{color:#e9867a}
     .score-practice-options{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;background:rgba(255,255,255,.055);border-radius:6px;padding:3px 5px}
     .score-practice-options label{font-size:.58rem;text-transform:none;color:#eee;display:inline-flex;align-items:center;gap:3px}
     .score-practice-options select,.score-practice-options input{min-height:22px;height:22px;width:auto;min-width:42px;padding:0 4px;font-size:.6rem;border-radius:4px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.26);color:#eee}
@@ -1037,7 +1039,9 @@
       <button id="metroTap" type="button">Tap</button>
       <select id="metroMeter" title="Compás"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>6/8</option></select>
       <select id="metroPulse" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩</option><option value="eighth">♪</option><option value="dottedQuarter">♩.</option></select>
+      <select id="metroPlacement" title="Colocación del clic" aria-label="Colocación del clic"><option value="all">Todos</option><option value="oneThree">1 y 3</option><option value="twoFour">2 y 4</option><option value="beatOne">Solo 1</option><option value="beatFour">Solo 4</option><option value="upbeat">Contratiempo</option><option value="tripletEnd">3.er tresillo</option><option value="randomMute">Silencios</option></select>
       <span id="metroBeat">1</span>
+      <span id="metroTiming" class="metro-timing" title="Desviación del último ataque respecto al pulso"></span>
     </div>
     <div class="social-bar">
       <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
@@ -1434,6 +1438,7 @@
   <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
   <script src="../cuerdas-frotadas/js/live-staff.js"></script>
+  <script src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
   <script>
     // ======================================================================
     // 1. CÓDIGO COMPLETO DEL REQUINTO VIRTUAL (diapasón, escalas, acordes)
@@ -1637,7 +1642,7 @@
       }catch(e){return{}}
     }
     function saveSettings(){
-      try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({instrument:instrumentSel.value,tuning:tuningSel.value,capo:+capoSel.value,orientation:orientationSel.value,labelMode:labelModeSel.value,keySignature:keySignatureSel?.value||'none',pattern:patternSel.value,bassFrettingMode:bassFrettingModeSel?.value||'auto',voicingRange:voicingRangeSel.value,root:rootSel.value,chord:chordTypeSel.value,scale:scaleSel.value,pos:posSel.value,frets:visibleFrets,volume:+volumeSlider.value,soundType:soundTypeSel.value,metroBpm:+($("metroBpmValue")?.textContent||80),metroMeter:$("metroMeter")?.value||'4/4',metroPulse:$("metroPulse")?.value||'auto',countIn:$("scoreCountIn")?.value||'1',scoreClick:!!$("scoreMetroSync")?.checked,loopRepeats:+($("scoreLoopRepeats")?.value||0),loopBpmAdd:+($("scoreLoopBpmAdd")?.value||0),loopBpmEvery:+($("scoreLoopBpmEvery")?.value||1),fingeringView:scoreFingeringView?.value||'all',fingeringStrategy:scoreFingeringStrategy?.value||'phrase',phraseLength:+(scorePhraseLength?.value||8),techniqueMode:scoreTechniqueMode?.value||'musical',bassExercise:bassExerciseSel?.value||'none',rightHandPattern:rightHandPatternSel?.value||'free',exerciseDirection:exerciseDirectionSel?.value||'asc'}))}catch(e){}
+      try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({instrument:instrumentSel.value,tuning:tuningSel.value,capo:+capoSel.value,orientation:orientationSel.value,labelMode:labelModeSel.value,keySignature:keySignatureSel?.value||'none',pattern:patternSel.value,bassFrettingMode:bassFrettingModeSel?.value||'auto',voicingRange:voicingRangeSel.value,root:rootSel.value,chord:chordTypeSel.value,scale:scaleSel.value,pos:posSel.value,frets:visibleFrets,volume:+volumeSlider.value,soundType:soundTypeSel.value,metroBpm:+($("metroBpmValue")?.textContent||80),metroMeter:$("metroMeter")?.value||'4/4',metroPulse:$("metroPulse")?.value||'auto',metroPlacement:$("metroPlacement")?.value||'all',countIn:$("scoreCountIn")?.value||'1',scoreClick:!!$("scoreMetroSync")?.checked,loopRepeats:+($("scoreLoopRepeats")?.value||0),loopBpmAdd:+($("scoreLoopBpmAdd")?.value||0),loopBpmEvery:+($("scoreLoopBpmEvery")?.value||1),fingeringView:scoreFingeringView?.value||'all',fingeringStrategy:scoreFingeringStrategy?.value||'phrase',phraseLength:+(scorePhraseLength?.value||8),techniqueMode:scoreTechniqueMode?.value||'musical',bassExercise:bassExerciseSel?.value||'none',rightHandPattern:rightHandPatternSel?.value||'free',exerciseDirection:exerciseDirectionSel?.value||'asc'}))}catch(e){}
     }
 
     // Poblar selects
@@ -1955,6 +1960,7 @@
 
     // Sonido (playNote)
     function playNote(midi, duration = 1.5) {
+      if(typeof evaluateMetroAttack==='function')evaluateMetroAttack();
       if (!soundEnabled) return null;
       const ctx = ensureCtx();
       if (!ctx) return null;
@@ -2857,22 +2863,23 @@
     // ======================================================================
     // METRÓNOMO / PRÁCTICA SINCRONIZADA
     // ======================================================================
-    const metroToggle=$('metroToggle'),metroDown=$('metroDown'),metroUp=$('metroUp'),metroTap=$('metroTap'),metroBpmValue=$('metroBpmValue'),metroMeter=$('metroMeter'),metroPulse=$('metroPulse'),metroBeat=$('metroBeat');
-    let metroRunning=false,metroTimer=null,metroNextTime=0,metroBeatIndex=0,metroTapTimes=[];
+    const metroToggle=$('metroToggle'),metroDown=$('metroDown'),metroUp=$('metroUp'),metroTap=$('metroTap'),metroBpmValue=$('metroBpmValue'),metroMeter=$('metroMeter'),metroPulse=$('metroPulse'),metroPlacement=$('metroPlacement'),metroBeat=$('metroBeat');
+    let metroRunning=false,metroTimer=null,metroNextTime=0,metroBeatIndex=0,metroStartTime=0,metroTapTimes=[];
     function getMeterTiming(bpm=+metroBpmValue.textContent||80){
       const [num,den]=metroMeter.value.split('/').map(Number); const barQ=num*(4/den);
       const p=metroPulse.value; let pulseQ=p==='quarter'?1:p==='eighth'?.5:p==='dottedQuarter'?1.5:(num===6&&den===8?1.5:1);
       let pulses=barQ/pulseQ; if(!Number.isInteger(Math.round(pulses))||Math.abs(pulses-Math.round(pulses))>.01||pulses<1){pulseQ=(num===6&&den===8)?1.5:1;pulses=barQ/pulseQ}
-      return {pulses:Math.max(1,Math.round(pulses)),secondsPerPulse:60/Math.max(30,Math.min(300,bpm))};
+      return {pulses:Math.max(1,Math.round(pulses)),secondsPerPulse:60/Math.max(15,Math.min(300,bpm))};
     }
     function metroClick(time,accent=false){const c=ensureCtx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=accent?1450:980;g.gain.setValueAtTime(.0001,time);g.gain.exponentialRampToValueAtTime(accent?.18:.11,time+.003);g.gain.exponentialRampToValueAtTime(.0001,time+.045);o.connect(g);g.connect(masterBus);o.start(time);o.stop(time+.055)}
-    function metroSchedule(){if(!metroRunning)return;const c=ensureCtx(),timing=getMeterTiming(),beats=timing.pulses;while(metroNextTime<c.currentTime+.12){const idx=metroBeatIndex%beats;metroClick(metroNextTime,idx===0);const shown=idx+1;setTimeout(()=>{if(metroRunning)metroBeat.textContent=shown},Math.max(0,(metroNextTime-c.currentTime)*1000));metroBeatIndex++;metroNextTime+=timing.secondsPerPulse}metroTimer=setTimeout(metroSchedule,25)}
-    function startMetro(){if(metroRunning)return;const c=ensureCtx();metroRunning=true;metroBeatIndex=0;metroNextTime=c.currentTime+.06;metroToggle.textContent='■';metroSchedule()}
-    function stopMetro(){metroRunning=false;if(metroTimer)clearTimeout(metroTimer);metroTimer=null;metroToggle.textContent='▶';metroBeat.textContent='1'}
-    function setMetroBpm(v){metroBpmValue.textContent=String(Math.max(30,Math.min(300,Math.round(v))));saveSettings()}
+    function metroSchedule(){if(!metroRunning)return;const c=ensureCtx(),timing=getMeterTiming(),beats=timing.pulses,mode=metroPlacement?.value||'all',division=window.CrescendoRhythm?.PLACEMENTS[mode]?.division||1,seconds=timing.secondsPerPulse/division;while(metroNextTime<c.currentTime+.12){const frame=window.CrescendoRhythm?.placementFrame(mode,metroBeatIndex,beats)||{audible:true,accent:metroBeatIndex%beats===0,beat:metroBeatIndex%beats};if(frame.audible)metroClick(metroNextTime,frame.accent);const shown=frame.beat+1;setTimeout(()=>{if(metroRunning)metroBeat.textContent=shown},Math.max(0,(metroNextTime-c.currentTime)*1000));metroBeatIndex++;metroNextTime+=seconds}metroTimer=setTimeout(metroSchedule,25)}
+    function startMetro(){if(metroRunning)return;const c=ensureCtx();metroRunning=true;metroBeatIndex=0;metroNextTime=metroStartTime=c.currentTime+.06;metroToggle.textContent='■';metroSchedule()}
+    function stopMetro(){metroRunning=false;if(metroTimer)clearTimeout(metroTimer);metroTimer=null;metroToggle.textContent='▶';metroBeat.textContent='1';if($('metroTiming'))$('metroTiming').textContent=''}
+    function evaluateMetroAttack(){if(!metroRunning||!metroStartTime)return;const c=ensureCtx(),pulse=getMeterTiming().secondsPerPulse,elapsed=c.currentTime-metroStartTime,nearest=Math.round(elapsed/pulse),ms=Math.round((elapsed-nearest*pulse)*1000),abs=Math.abs(ms),out=$('metroTiming');if(out){out.textContent=abs<=35?'Centro':ms<0?`${abs} ms antes`:`${abs} ms después`;out.dataset.grade=abs<=35?'center':abs<=80?'near':'far'}return ms}
+    function setMetroBpm(v){metroBpmValue.textContent=String(Math.max(15,Math.min(300,Math.round(v))));saveSettings()}
     metroToggle.addEventListener('click',()=>metroRunning?stopMetro():startMetro()); metroDown.addEventListener('click',()=>setMetroBpm(+metroBpmValue.textContent-1)); metroUp.addEventListener('click',()=>setMetroBpm(+metroBpmValue.textContent+1));
-    metroTap.addEventListener('click',()=>{const now=performance.now();metroTapTimes=metroTapTimes.filter(t=>now-t<2500);metroTapTimes.push(now);if(metroTapTimes.length>=2){const ds=metroTapTimes.slice(1).map((t,i)=>t-metroTapTimes[i]);setMetroBpm(60000/(ds.reduce((a,b)=>a+b,0)/ds.length))}});
-    ;[metroMeter,metroPulse].forEach(e=>e.addEventListener('change',saveSettings));
+    metroTap.addEventListener('click',()=>{const now=performance.now();metroTapTimes=metroTapTimes.filter(t=>now-t<5000);metroTapTimes.push(now);if(metroTapTimes.length>=2){const ds=metroTapTimes.slice(1).map((t,i)=>t-metroTapTimes[i]);setMetroBpm(60000/(ds.reduce((a,b)=>a+b,0)/ds.length))}});
+    ;[metroMeter,metroPulse,metroPlacement].filter(Boolean).forEach(e=>e.addEventListener('change',()=>{metroBeatIndex=0;saveSettings()}));
 
 </script>
   <script>
@@ -4069,7 +4076,7 @@
       populateChordOptions(s.chord||'');
       if(s.chord&&[...chordTypeSel.options].some(o=>o.value===s.chord))chordTypeSel.value=s.chord;
       if(s.scale&&SCALE[s.scale])scaleSel.value=s.scale;
-      if(s.metroBpm)setMetroBpm(s.metroBpm); if(s.metroMeter)metroMeter.value=s.metroMeter;if(s.metroPulse)metroPulse.value=s.metroPulse;
+      if(s.metroBpm)setMetroBpm(s.metroBpm); if(s.metroMeter)metroMeter.value=s.metroMeter;if(s.metroPulse)metroPulse.value=s.metroPulse;if(s.metroPlacement&&metroPlacement)metroPlacement.value=s.metroPlacement;
       if(s.countIn!=null)scoreCountIn.value=String(s.countIn);scoreMetroSync.checked=!!s.scoreClick;if(s.loopRepeats!=null)scoreLoopRepeats.value=s.loopRepeats;if(s.loopBpmAdd!=null)scoreLoopBpmAdd.value=s.loopBpmAdd;if(s.loopBpmEvery!=null)scoreLoopBpmEvery.value=s.loopBpmEvery;
       if(scoreFingeringView&&s.fingeringView)scoreFingeringView.value=s.fingeringView;
       if(scoreFingeringStrategy&&s.fingeringStrategy)scoreFingeringStrategy.value=s.fingeringStrategy; else if(scoreFingeringStrategy)scoreFingeringStrategy.value='phrase';

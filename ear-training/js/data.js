@@ -11,7 +11,8 @@
     { id: 7, title: 'Cambios de Centro Tonal', short: 'Modulaciones', instr: 'Reconoce hacia dónde se desplazó el centro tonal.' },
     { id: 8, title: 'Acordes maj7 / 6 / 6/9', short: 'Sustitutos de Imaj7', instr: 'Distingue colores de tónica mayor.' },
     { id: 9, title: 'Escalas', short: 'Escalas', instr: 'Escucha la escala e identifica su tipo. El pentagrama se muestra después de responder.' },
-    { id: 10, title: 'Escucha por capas', short: 'Escucha por capas', instr: 'Identifica qué elemento musical ocupa el primer plano de la textura.' }
+    { id: 10, title: 'Escucha por capas', short: 'Escucha por capas', instr: 'Identifica qué elemento musical ocupa el primer plano de la textura.' },
+    { id: 11, title: 'Ritmo y time feel', short: 'Ritmo y time feel', instr: 'Reconoce la subdivisión o la colocación de los ataques contra un pulso estable.' }
   ];
 
   const PITCH_NAMES = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];

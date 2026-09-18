@@ -517,6 +517,7 @@
 
     // Sonido (playNote)
     function playNote(midi, duration = 1.5) {
+      if(typeof evaluateMetroAttack==='function')evaluateMetroAttack();
       if (!soundEnabled) return null;
       const ctx = ensureCtx();
       if (!ctx) return null;

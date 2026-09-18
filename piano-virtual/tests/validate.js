@@ -3,7 +3,7 @@ const root=path.resolve(__dirname,'..');
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);
 const dup=ids.filter((x,i,a)=>a.indexOf(x)!==i);
-const required=['css/styles.css','css/chord-bank.css','js/core.js','js/audio.js','js/staff.js','js/midi.js','js/score.js','js/tutor.js','js/web.js','js/metronome.js','js/chords.js','js/init.js','js/chord-bank.js','../shared/piano-chord-patterns.js','../shared/piano-voicings.js'];
+const required=['css/styles.css','css/chord-bank.css','js/core.js','js/audio.js','js/staff.js','js/midi.js','js/score.js','js/tutor.js','js/web.js','js/metronome.js','js/chords.js','js/init.js','js/chord-bank.js','../shared/piano-chord-patterns.js','../shared/piano-voicings.js','../shared/rhythm-engine.js'];
 const missing=required.filter(f=>!fs.existsSync(path.join(root,f)));
 if(dup.length){console.error('IDs duplicados:',[...new Set(dup)]);process.exitCode=1;}
 if(missing.length){console.error('Archivos faltantes:',missing);process.exitCode=1;}

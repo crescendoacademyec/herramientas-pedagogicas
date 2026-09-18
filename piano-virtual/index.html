@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../shared/header-icons.css?v=20260918-flat-header">
 <title>Piano Virtual Pro</title>
 <link rel="stylesheet" href="css/styles.css">
 <link rel="stylesheet" href="css/chord-bank.css">
@@ -31,12 +32,14 @@
       <button type="button" class="metro-main" id="metroToggle" aria-pressed="false" title="Iniciar o detener metrónomo">▶</button>
       <div class="metro-bpm">
         <span class="metro-label">BPM</span>
-        <div class="metro-stepper"><button type="button" id="metroDown" aria-label="Bajar BPM">−</button><input id="metroBpm" type="number" min="30" max="300" value="80" inputmode="numeric" aria-label="Tempo en BPM"><button type="button" id="metroUp" aria-label="Subir BPM">+</button></div>
+        <div class="metro-stepper"><button type="button" id="metroDown" aria-label="Bajar BPM">−</button><input id="metroBpm" type="number" min="15" max="300" value="80" inputmode="numeric" aria-label="Tempo en BPM"><button type="button" id="metroUp" aria-label="Subir BPM">+</button></div>
       </div>
       <button type="button" class="metro-tap" id="metroTap" title="Marca el pulso varias veces">Tap</button>
       <select id="metroMeter" aria-label="Compás del metrónomo" title="Compás"><option value="2">2/4</option><option value="3">3/4</option><option value="4" selected>4/4</option><option value="6">6/8</option></select>
       <select id="metroPulse" aria-label="Figura de pulso del metrónomo" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩ Negra</option><option value="eighth">♪ Corchea</option><option value="dottedQuarter">♩. Negra con puntillo</option></select>
+      <select id="metroPlacement" aria-label="Colocación del clic" title="Colocación del clic"><option value="all">Todos</option><option value="oneThree">1 y 3</option><option value="twoFour">2 y 4</option><option value="beatOne">Solo 1</option><option value="beatFour">Solo 4</option><option value="upbeat">Contratiempo</option><option value="tripletEnd">3.er tresillo</option><option value="randomMute">Silencios</option></select>
       <span class="metro-beat" id="metroBeat" aria-live="polite">1</span>
+      <span class="metro-timing" id="metroTiming" aria-live="polite" title="Desviación del último ataque respecto al pulso"></span>
     </div>
   </div>
 
@@ -423,6 +426,7 @@
 <script src="js/score.js"></script>
 <script src="js/tutor.js"></script>
 <script src="js/web.js"></script>
+<script src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
 <script src="js/metronome.js"></script>
 <script src="js/chords.js"></script>
 <script src="js/init.js"></script>

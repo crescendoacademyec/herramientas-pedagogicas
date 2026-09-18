@@ -8,6 +8,7 @@ if(dups.length) throw new Error('IDs duplicados: '+[...new Set(dups)].join(', ')
 const deps=[...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m=>m[1])
   .filter(x=>! /^(https?:|mailto:|#)/.test(x));
 for(const dep of deps){
-  if(!fs.existsSync(path.join(root,dep))) throw new Error('Falta dependencia: '+dep);
+  const file=dep.split(/[?#]/)[0];
+  if(!fs.existsSync(path.join(root,file))) throw new Error('Falta dependencia: '+dep);
 }
 console.log(`OK · ${ids.length} IDs únicos · ${deps.length} dependencias locales`);

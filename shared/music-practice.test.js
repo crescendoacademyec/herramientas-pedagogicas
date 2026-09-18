@@ -15,6 +15,11 @@ assert.equal((triplet.match(/<tuplet /g)||[]).length,2);
 assert.ok(!triplet.includes('type="continue"'));
 assert.ok(decode(P.sequence([{beats:1.5}])).includes('<dot/>'));
 assert.ok(decode(P.sequence([{tieStart:true},{tied:true}])).includes('<tied type="stop"/>'));
+const midiSequence=decode(P.sequence([{midi:67,beats:1}]));
+assert.ok(midiSequence.includes('<step>G</step>'));
+assert.ok(midiSequence.includes('<octave>4</octave>'));
+assert.ok(!midiSequence.includes('undefined'));
+assert.ok(!midiSequence.includes('NaN'));
 const pc=[0,2,4,5,7,9,11];
 for(const kind of ['key','interval','scale','chord'])for(const clef of ['treble','bass'])for(let i=0;i<100;i++){
   const q=P.question(kind,{clef,family:i%2?'minor':'major',inversions:true});

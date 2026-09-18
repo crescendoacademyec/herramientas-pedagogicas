@@ -259,7 +259,7 @@ function getMeterTiming(bpmValue=+metroBpm.value||80){
     pulses=barQuarterLength/pulseQuarterLength;
   }
   pulses=Math.max(1,Math.round(pulses));
-  return {numerator,denominator,pulses,secondsPerPulse:60/Math.max(30,Math.min(300,bpmValue)),pulseQuarterLength};
+  return {numerator,denominator,pulses,secondsPerPulse:60/Math.max(15,Math.min(300,bpmValue)),pulseQuarterLength};
 }
 function runCountIn(done){
   clearCountIn(); const bars=Math.max(0,Math.min(2,+scoreCountIn.value||0)); if(!bars){done();return}

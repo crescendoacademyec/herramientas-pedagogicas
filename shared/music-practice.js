@@ -25,7 +25,7 @@
   function midiNote(midi){const names=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];return rootNote(names[((midi%12)+12)%12],Math.floor(midi/12)-1);}
   function musicXML(notes,{clef='treble',stack=false,key=0}={}){
     const accidentals={'-2':'flat-flat','-1':'flat',0:'natural',1:'sharp',2:'double-sharp'};
-    const body=notes.length?notes.map((n,i)=>`<note>${stack&&i?'<chord/>':''}<pitch><step>${letters[((n.diatonic%7)+7)%7]}</step><alter>${n.alter}</alter><octave>${Math.floor(n.diatonic/7)}</octave></pitch><duration>4</duration><type>whole</type>${n.alter?`<accidental>${accidentals[n.alter]}</accidental>`:''}</note>`).join(''):'<note print-object="no"><rest/><duration>4</duration><type>whole</type></note>';
+    const body=notes.length?notes.map((n,i)=>`<note>${stack&&i?'<chord/>':''}<pitch><step>${letters[((n.diatonic%7)+7)%7]}</step><alter>${n.alter}</alter><octave>${Math.floor(n.diatonic/7)}</octave></pitch><duration>4</duration><type>whole</type>${n.alter&&accidentals[n.alter]?`<accidental>${accidentals[n.alter]}</accidental>`:''}</note>`).join(''):'<note print-object="no"><rest/><duration>4</duration><type>whole</type></note>';
     return `<?xml version="1.0" encoding="UTF-8"?><score-partwise version="3.1"><part-list><score-part id="P1"><part-name></part-name></score-part></part-list><part id="P1"><measure number="1" implicit="yes"><attributes><divisions>1</divisions><key><fifths>${key}</fifths></key><time print-object="no"><beats>${stack||!notes.length?4:notes.length*4}</beats><beat-type>4</beat-type></time><clef><sign>${clef==='bass'?'F':'G'}</sign><line>${clef==='bass'?4:2}</line></clef></attributes>${body}<barline location="right"><bar-style>none</bar-style></barline></measure></part></score-partwise>`;
   }
   function staff(notes,options={}){
@@ -40,7 +40,7 @@
     let measures='';
     for(const [bar,notes] of groups){
       const body=notes.map((e,i)=>{
-        const n=e.note?named(e.note):e.midi!==undefined?e:rootNote('G',4),beats=e.beats??1;
+        const n=e.note?named(e.note):e.midi!==undefined?{...midiNote(e.midi),...e}:rootNote('G',4),beats=e.beats??1;
         const triplet=e.kind==='triplet'||Math.abs(beats-1/3)<.00001;
         const base=triplet?.5:beats;
         const type=types.find(([v])=>Math.abs(base-v)<.00001)||types.find(([v])=>Math.abs(base-v*1.5)<.00001)||types.find(([v])=>Math.abs(base-v*1.75)<.00001)||types[2];
@@ -118,7 +118,8 @@
         const osmd=new Engine(surface,{backend:'svg',autoResize:false,drawTitle:false,drawSubtitle:false,drawComposer:false,drawPartNames:false,drawMeasureNumbers:false,drawTimeSignatures:host.dataset.cpTime==='true'});
         await osmd.load(host.dataset.cpXml);
         if(!host.isConnected){mounted.delete(host);return;}
-        osmd.Zoom=host.classList.contains('cp-compact')?.6:.85;osmd.render();
+        const earPage=document.body.classList.contains('ear-training-page');
+        osmd.Zoom=earPage?(host.classList.contains('cp-compact')?.76:1.08):(host.classList.contains('cp-compact')?.6:.85);osmd.render();
         let width=host.clientWidth;
         const resize=new ResizeObserver(()=>{if(host.isConnected&&host.clientWidth>0&&host.clientWidth!==width){width=host.clientWidth;osmd.render();}});
         resize.observe(host);mounted.set(host,resize);host.dataset.cpRendered='true';

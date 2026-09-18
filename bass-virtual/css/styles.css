@@ -159,6 +159,7 @@
     .metro-bpm-readout{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.62rem;line-height:1;color:var(--gold);font-weight:900}
     .metro-bpm-readout small{font-size:.43rem;color:var(--muted);letter-spacing:.08em;margin-bottom:2px}
     #metroBeat{min-width:14px;text-align:center;color:var(--gold);font-family:Georgia,serif;font-weight:900}
+    .metro-timing{min-width:66px;text-align:center;font-size:.58rem;color:var(--muted)}.metro-timing:empty{display:none}.metro-timing[data-grade="center"]{color:#70d49b}.metro-timing[data-grade="near"]{color:var(--gold)}.metro-timing[data-grade="far"]{color:#e9867a}
     .score-practice-options{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap;background:rgba(255,255,255,.055);border-radius:6px;padding:3px 5px}
     .score-practice-options label{font-size:.58rem;text-transform:none;color:#eee;display:inline-flex;align-items:center;gap:3px}
     .score-practice-options select,.score-practice-options input{min-height:22px;height:22px;width:auto;min-width:42px;padding:0 4px;font-size:.6rem;border-radius:4px;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.26);color:#eee}
