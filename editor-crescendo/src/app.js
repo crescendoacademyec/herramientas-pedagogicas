@@ -53,6 +53,7 @@
   const fullscreenButton = document.getElementById("fullscreenButton");
   const playbackButton = document.getElementById("playbackButton");
   const playbackBpmInput = document.getElementById("playbackBpmInput");
+  const metronomeButton = document.getElementById("metronomeButton");
   const jazzModeButton = document.getElementById("jazzModeButton");
   const reflowButton = document.getElementById("reflowButton");
   const clearButton = document.getElementById("clearButton");
@@ -11951,6 +11952,70 @@
     });
   }
 
+  const editorMetronome = { active: false, context: null, timer: null, nextTime: 0, beat: 0 };
+
+  function editorMetronomeMeter() {
+    const index = Number.isFinite(state.selectedMeasureIndex) ? state.selectedMeasureIndex : 0;
+    const meter = meterForMeasureIndex(Math.max(0, index)) || state.meter || { top: 4, bottom: 4 };
+    return { top: Math.max(1, Number(meter.top) || 4), bottom: Math.max(1, Number(meter.bottom) || 4) };
+  }
+
+  function soundEditorMetronomeClick(time, accented = false) {
+    const context = editorMetronome.context;
+    if (!context) return;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(accented ? 1320 : 880, time);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(accented ? 0.18 : 0.1, time + 0.002);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.055);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start(time);
+    oscillator.stop(time + 0.065);
+  }
+
+  function scheduleEditorMetronome() {
+    if (!editorMetronome.active || !editorMetronome.context) return;
+    const context = editorMetronome.context;
+    while (editorMetronome.nextTime < context.currentTime + 0.12) {
+      const meter = editorMetronomeMeter();
+      soundEditorMetronomeClick(editorMetronome.nextTime, editorMetronome.beat === 0);
+      editorMetronome.nextTime += (60 / normalizePlaybackBpm(state.playbackBpm)) * (4 / meter.bottom);
+      editorMetronome.beat = (editorMetronome.beat + 1) % meter.top;
+    }
+    editorMetronome.timer = window.setTimeout(scheduleEditorMetronome, 25);
+  }
+
+  function updateEditorMetronomeButton() {
+    if (!metronomeButton) return;
+    const active = editorMetronome.active;
+    metronomeButton.classList.toggle("is-active", active);
+    metronomeButton.setAttribute("aria-pressed", active ? "true" : "false");
+    metronomeButton.setAttribute("aria-label", active ? "Desactivar metrónomo" : "Activar metrónomo");
+    metronomeButton.title = active ? "Desactivar metrónomo" : "Activar metrónomo";
+    MenuRenderer.renderControl(metronomeButton, { label: active ? "Metrónomo activo" : "Metrónomo", shortcut: false });
+  }
+
+  async function toggleEditorMetronome() {
+    if (editorMetronome.active) {
+      editorMetronome.active = false;
+      if (editorMetronome.timer) window.clearTimeout(editorMetronome.timer);
+      editorMetronome.timer = null;
+      updateEditorMetronomeButton();
+      return;
+    }
+    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+    editorMetronome.context ||= new AudioContextCtor();
+    if (editorMetronome.context.state === "suspended") await editorMetronome.context.resume();
+    editorMetronome.active = true;
+    editorMetronome.beat = 0;
+    editorMetronome.nextTime = editorMetronome.context.currentTime + 0.04;
+    updateEditorMetronomeButton();
+    scheduleEditorMetronome();
+  }
+
   function playbackSelectedItemAbsoluteTick() {
     const candidates = [
       ...selectedEntryLocations().map(absoluteTickForLocation),
@@ -22263,6 +22328,7 @@
   shiftModeButton?.addEventListener("click", toggleDisplacementMode);
   editModeButton?.addEventListener("click", toggleEditMode);
   playbackButton?.addEventListener("click", () => toggleMidiPlayback());
+  metronomeButton?.addEventListener("click", () => toggleEditorMetronome());
   reflowButton?.addEventListener("click", reflowScoreLayout);
   textModeButton?.addEventListener("click", toggleTextMode);
   chordModeButton?.addEventListener("click", toggleChordMode);
@@ -22423,6 +22489,7 @@
 
   document.documentElement.dataset.jmlEditorBoot = "listeners-ready";
   ensurePrimaryIconMetadata();
+  updateEditorMetronomeButton();
   document.documentElement.dataset.jmlEditorBoot = "metadata-ready";
   renderPalette("figures");
   document.documentElement.dataset.jmlEditorBoot = "palette-ready";

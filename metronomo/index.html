@@ -281,10 +281,11 @@
         .visualizer { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 4px 0 30px 0; min-height: 46px; flex-wrap: wrap; }
         .rhythm-lab{margin:0 0 24px;padding:16px;border:1px solid rgba(212,168,79,.28);border-radius:10px;background:rgba(0,0,0,.18)}
         .rhythm-lab-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.rhythm-lab h2{font:700 1.2rem Georgia,serif;margin:0 0 4px}.rhythm-lab p{margin:0;color:var(--text-dim);font-size:.78rem;line-height:1.45}
-        .rhythm-lab-controls{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr)) auto;gap:8px;align-items:end}.rhythm-lab label{display:grid;gap:4px;color:var(--text-dim);font-size:.68rem}.rhythm-lab select,.rhythm-lab button{min-height:38px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.07);color:var(--text);padding:7px 9px}.rhythm-lab button{background:var(--accent);color:var(--ink);font-weight:900;cursor:pointer}
-        .rhythm-score{margin-top:12px;min-height:132px;max-height:132px;overflow:hidden;border-radius:8px;background:#fffdf8;color:#111}.rhythm-score .cp-staff{height:132px;min-height:132px;padding:0;overflow:hidden}.rhythm-score .cp-staff>div{transform:translateY(-19px)}
+        .rhythm-lab-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;align-items:end}.rhythm-lab label{display:grid;gap:4px;color:var(--text-dim);font-size:.68rem}.rhythm-lab select,.rhythm-lab input,.rhythm-lab button{min-height:38px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.07);color:var(--text);padding:7px 9px}.rhythm-lab button{background:var(--accent);color:var(--ink);font-weight:900;cursor:pointer}
+        .rhythm-score{margin-top:12px;min-height:132px;max-height:168px;overflow:auto;border-radius:8px;background:#fffdf8;color:#111}.rhythm-score .cp-staff{height:132px;min-height:132px;padding:0;overflow:visible}.rhythm-score .cp-staff>div{transform:translateY(-19px)}
+        .rhythm-editor{margin-top:14px;padding-top:14px;border-top:1px solid rgba(212,168,79,.22)}.rhythm-editor h3{margin:0 0 5px;font:700 1rem Georgia,serif}.rhythm-editor-layout{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:12px;margin-top:10px}.rhythm-pitch-grid{position:relative;display:grid;grid-template-rows:repeat(13,1fr);height:182px;padding:12px 10px 12px 62px;border-radius:8px;background:#fffdf8;color:#111;overflow:hidden}.rhythm-clef-symbol{position:absolute;left:12px;top:43px;z-index:2;font-family:Bravura,"Noto Music",serif;font-size:62px;line-height:1}.rhythm-position{position:relative;border:0!important;border-radius:0!important;min-height:0!important;padding:0!important;background:transparent!important;color:#555!important;text-align:right;font-size:.58rem;font-weight:800;cursor:pointer}.rhythm-position.staff-line::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid #555}.rhythm-position:hover{background:rgba(212,168,79,.2)!important}.rhythm-position span{position:relative;z-index:1;background:#fffdf8;padding-left:4px}.rhythm-editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.rhythm-editor-actions button{background:rgba(255,255,255,.07);color:var(--text)}
         .rhythm-lab-status{margin-top:8px!important;color:#9bd1b5!important}
-        @media(max-width:860px){.rhythm-lab-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.rhythm-lab-controls button{grid-column:1/-1}.rhythm-score{overflow:auto}}
+        @media(max-width:860px){.rhythm-lab-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.rhythm-editor-layout{grid-template-columns:1fr}.rhythm-score{overflow:auto}}
         .beat-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .beat-num { font-size: 0.72rem; font-weight: 800; color: var(--text-dim); min-height: 15px; line-height: 1; transition: color 0.08s, transform 0.08s; font-variant-numeric: tabular-nums; }
         .beat-num.empty { visibility: hidden; }
@@ -696,6 +697,8 @@
             <div class="rhythm-lab-head"><div><h2 id="rhythmLabTitle">Laboratorio de ritmo y feel</h2><p>Genera un compás completo, palméalos primero y después practícalo con distintas ubicaciones del clic.</p></div></div>
             <div class="rhythm-lab-controls">
                 <label>Compás<select id="rhythmMeter"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option><option>6/8</option><option>7/8</option></select></label>
+                <label>Compases<input id="rhythmBars" type="number" min="1" max="8" value="2"></label>
+                <label>Clave<select id="rhythmClef"><option value="treble">Sol</option><option value="bass">Fa</option></select></label>
                 <label>Figura base<select id="rhythmFigure"><option value="1">Negras</option><option value=".5">Corcheas</option><option value=".333333">Tresillos</option><option value=".25">Semicorcheas</option><option value="2">Blancas</option></select></label>
                 <label>Ejercicio<select id="rhythmExercise"><option value="steady">Pulso continuo</option><option value="syncopation">Síncopas</option><option value="rests">Notas y silencios</option><option value="mixed">Figuras mixtas</option><option value="triplets">Tresillos</option></select></label>
                 <label>Colocación del clic<select id="rhythmPlacement"><option value="all">Todos los pulsos</option><option value="oneThree">1 y 3</option><option value="twoFour">2 y 4</option><option value="beatOne">Solo 1</option><option value="beatFour">Solo 4</option><option value="upbeat">Contratiempo</option><option value="tripletEnd">3.er parcial del tresillo</option><option value="randomMute">Silencios aleatorios</option></select></label>
@@ -703,6 +706,16 @@
             </div>
             <div class="rhythm-score" id="rhythmScore" aria-live="polite"></div>
             <p class="rhythm-lab-status" id="rhythmStatus"></p>
+            <div class="rhythm-editor">
+                <h3>Editor rítmico sencillo</h3><p>Elige una figura o silencio y pulsa la línea o el espacio donde quieres colocarlo.</p>
+                <div class="rhythm-lab-controls">
+                    <label>Escribir<select id="rhythmDrawKind"><option value="note">Figura</option><option value="rest">Silencio</option></select></label>
+                    <label>Duración<select id="rhythmDrawDuration"><option value="4">Redonda</option><option value="3">Blanca con puntillo</option><option value="2">Blanca</option><option value="1.5">Negra con puntillo</option><option value="1" selected>Negra</option><option value=".5">Corchea</option><option value=".25">Semicorchea</option></select></label>
+                </div>
+                <div class="rhythm-editor-layout"><div class="rhythm-pitch-grid" id="rhythmPitchGrid" aria-label="Posiciones del pentagrama"></div><div class="rhythm-score" id="rhythmEditorScore" aria-live="polite"></div></div>
+                <div class="rhythm-editor-actions"><button type="button" id="rhythmUndo">Deshacer</button><button type="button" id="rhythmFillRests">Completar con silencios</button><button type="button" id="rhythmClear">Limpiar</button></div>
+                <p class="rhythm-lab-status" id="rhythmEditorStatus"></p>
+            </div>
         </section>
 
         <div class="controls-grid">
@@ -982,7 +995,7 @@
         scorePrevNote: document.getElementById('scorePrevNote'), scoreNextNote: document.getElementById('scoreNextNote'), scoreLoopA: document.getElementById('scoreLoopA'), scoreLoopB: document.getElementById('scoreLoopB'), scoreLoopClear: document.getElementById('scoreLoopClear'),
         scoreCountIn: document.getElementById('scoreCountIn'), scoreSyncMetro: document.getElementById('scoreSyncMetro')
     };
-    UI.rhythmMeter=document.getElementById('rhythmMeter');UI.rhythmFigure=document.getElementById('rhythmFigure');UI.rhythmExercise=document.getElementById('rhythmExercise');UI.rhythmPlacement=document.getElementById('rhythmPlacement');UI.rhythmGenerate=document.getElementById('rhythmGenerate');UI.rhythmScore=document.getElementById('rhythmScore');UI.rhythmStatus=document.getElementById('rhythmStatus');
+    UI.rhythmMeter=document.getElementById('rhythmMeter');UI.rhythmBars=document.getElementById('rhythmBars');UI.rhythmClef=document.getElementById('rhythmClef');UI.rhythmFigure=document.getElementById('rhythmFigure');UI.rhythmExercise=document.getElementById('rhythmExercise');UI.rhythmPlacement=document.getElementById('rhythmPlacement');UI.rhythmGenerate=document.getElementById('rhythmGenerate');UI.rhythmScore=document.getElementById('rhythmScore');UI.rhythmStatus=document.getElementById('rhythmStatus');UI.rhythmDrawKind=document.getElementById('rhythmDrawKind');UI.rhythmDrawDuration=document.getElementById('rhythmDrawDuration');UI.rhythmPitchGrid=document.getElementById('rhythmPitchGrid');UI.rhythmEditorScore=document.getElementById('rhythmEditorScore');UI.rhythmEditorStatus=document.getElementById('rhythmEditorStatus');UI.rhythmUndo=document.getElementById('rhythmUndo');UI.rhythmFillRests=document.getElementById('rhythmFillRests');UI.rhythmClear=document.getElementById('rhythmClear');
     const quickBpmRow = document.getElementById('quick-bpm-row');
     for (let i = 40; i <= 400; i += 20) {
         let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
@@ -1179,9 +1192,9 @@
     // --- Laboratorio de ritmo y feel ---
     let rhythmVariation=0;
     function rhythmCapacity(meter){const [n,d]=meter.split('/').map(Number);return n*4/d}
-    function fillRhythmBar(source,capacity,midi=67){
+    function fillRhythmBar(source,capacity,midi=67,bar=0){
         const events=[];let remaining=capacity,cursor=0;
-        while(remaining>1e-7){const raw=source[cursor%source.length],item=typeof raw==='number'?{beats:raw}:{...raw};const beats=Math.min(Number(item.beats),remaining);events.push({...item,beats,midi,bar:0});remaining-=beats;cursor++}
+        while(remaining>1e-7){const raw=source[cursor%source.length],item=typeof raw==='number'?{beats:raw}:{...raw};const beats=Math.min(Number(item.beats),remaining);events.push({...item,beats,midi,bar});remaining-=beats;cursor++}
         return events;
     }
     function generateRhythmExercise(){
@@ -1190,7 +1203,7 @@
             UI.rhythmStatus.textContent='El metrónomo sigue disponible, pero el pentagrama necesita volver a cargar sus recursos.';
             return;
         }
-        const meter=UI.rhythmMeter.value,capacity=rhythmCapacity(meter),kind=UI.rhythmExercise.value,base=Number(UI.rhythmFigure.value),v=rhythmVariation++;
+        const meter=UI.rhythmMeter.value,capacity=rhythmCapacity(meter),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),clef=UI.rhythmClef.value,kind=UI.rhythmExercise.value,base=Number(UI.rhythmFigure.value),v=rhythmVariation++;
         const patterns={
             steady:[[base]],
             syncopation:[[{kind:'rest',beats:.5},.5,1,{kind:'rest',beats:.5},.5,1],[.5,{kind:'rest',beats:.5},.5,.5,1,1]],
@@ -1198,20 +1211,27 @@
             mixed:[[1.5,.5,1,.5,.5],[.5,1,.25,.25,1.5,.5]],
             triplets:[[...Array.from({length:12},()=>({beats:1/3,kind:'triplet'}))]]
         };
-        const choices=patterns[kind];let source=choices[v%choices.length];
-        if(kind==='triplets'&&meter.endsWith('/8'))source=Array.from({length:14},()=>({beats:.5,kind:'triplet'}));
-        const events=fillRhythmBar(source,capacity);
+        const choices=patterns[kind];const events=[];
+        for(let bar=0;bar<bars;bar++){let source=choices[(v+bar)%choices.length];if(kind==='triplets'&&meter.endsWith('/8'))source=Array.from({length:14},()=>({beats:.5,kind:'triplet'}));events.push(...fillRhythmBar(source,capacity,clef==='bass'?48:67,bar))}
         const total=events.reduce((sum,e)=>sum+e.beats,0);
-        UI.rhythmScore.innerHTML=window.CrescendoPractice.sequence(events,{meter});
-        UI.rhythmStatus.textContent=`${meter} · ${total.toFixed(3).replace(/\.000$/,'')} tiempos de negra · clic: ${UI.rhythmPlacement.options[UI.rhythmPlacement.selectedIndex].text}`;
+        UI.rhythmScore.innerHTML=window.CrescendoPractice.sequence(events,{meter,clef});
+        UI.rhythmStatus.textContent=`${bars} ${bars===1?'compás':'compases'} en ${meter} · ${total.toFixed(3).replace(/\.000$/,'')} tiempos de negra · clave de ${clef==='bass'?'fa':'sol'} · clic: ${UI.rhythmPlacement.options[UI.rhythmPlacement.selectedIndex].text}`;
         const numerator=meter.split('/')[0],value=[...UI.beatsSel.options].find(o=>o.textContent.trim()===meter)?.value||numerator;
         UI.amalgamInp.value='';UI.beatsSel.value=value;
         const subValue=kind==='triplets'?'3':String(Math.max(.25,1/base));if([...UI.subSel.options].some(o=>o.value===subValue))UI.subSel.value=subValue;
         UI.beatsSel.dispatchEvent(new Event('change'));UI.subSel.dispatchEvent(new Event('change'));renderVisualizer();syncBasicLabels();
     }
+    let rhythmEditorEvents=[];
+    const editorPitches={treble:['A5','G5','F5','E5','D5','C5','B4','A4','G4','F4','E4','D4','C4'],bass:['C4','B3','A3','G3','F3','E3','D3','C3','B2','A2','G2','F2','E2']};
+    function renderRhythmPitchGrid(){const clef=UI.rhythmClef.value;UI.rhythmPitchGrid.innerHTML=`<span class="rhythm-clef-symbol" aria-hidden="true">${clef==='bass'?'𝄢':'𝄞'}</span>`+editorPitches[clef].map((note,index)=>`<button type="button" class="rhythm-position ${index>=2&&index<=10&&index%2===0?'staff-line':''}" data-note="${note}" aria-label="Colocar en ${note}"><span>${note}</span></button>`).join('')}
+    function renderRhythmEditor(message=''){if(!window.CrescendoPractice)return;const meter=UI.rhythmMeter.value,clef=UI.rhythmClef.value;UI.rhythmEditorScore.innerHTML=rhythmEditorEvents.length?window.CrescendoPractice.sequence(rhythmEditorEvents,{meter,clef}):'<p style="padding:44px 18px;text-align:center;color:#666">Pulsa una línea o espacio para comenzar.</p>';const used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),total=rhythmCapacity(meter)*Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1));UI.rhythmEditorStatus.textContent=message||`${used.toFixed(2).replace(/\.00$/,'')} de ${total} tiempos escritos.`}
+    function addRhythmEditorEvent(note){const beats=Number(UI.rhythmDrawDuration.value),capacity=rhythmCapacity(UI.rhythmMeter.value),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),usedInBar=used-bar*capacity;if(bar>=bars)return renderRhythmEditor('El ejercicio ya está completo. Deshaz o limpia para modificarlo.');if(beats>capacity-usedInBar+1e-7)return renderRhythmEditor('Esa duración no cabe en el compás actual. Elige una figura menor o complétalo con silencios.');const kind=UI.rhythmDrawKind.value;rhythmEditorEvents.push({note,beats,bar,kind:kind==='rest'?'rest':undefined});renderRhythmEditor()}
+    function fillEditorWithRests(){const capacity=rhythmCapacity(UI.rhythmMeter.value),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),durations=[4,3,2,1.5,1,.5,.25];while(rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0)<capacity*bars-1e-7){const used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),remaining=Math.min(capacity-(used-bar*capacity),capacity*bars-used),beats=durations.find(d=>d<=remaining+1e-7)||.25;rhythmEditorEvents.push({note:UI.rhythmClef.value==='bass'?'C3':'C5',beats,bar,kind:'rest'})}renderRhythmEditor('Compases completados con silencios.')}
+    UI.rhythmPitchGrid.addEventListener('click',event=>{const button=event.target.closest('[data-note]');if(button)addRhythmEditorEvent(button.dataset.note)});
+    UI.rhythmUndo.addEventListener('click',()=>{rhythmEditorEvents.pop();renderRhythmEditor()});UI.rhythmClear.addEventListener('click',()=>{rhythmEditorEvents=[];renderRhythmEditor('Editor limpio.')});UI.rhythmFillRests.addEventListener('click',fillEditorWithRests);
     UI.rhythmGenerate.addEventListener('click',generateRhythmExercise);
-    [UI.rhythmMeter,UI.rhythmFigure,UI.rhythmExercise,UI.rhythmPlacement].forEach(el=>el.addEventListener('change',generateRhythmExercise));
-    generateRhythmExercise();
+    [UI.rhythmMeter,UI.rhythmBars,UI.rhythmClef,UI.rhythmFigure,UI.rhythmExercise,UI.rhythmPlacement].forEach(el=>el.addEventListener('change',()=>{generateRhythmExercise();renderRhythmPitchGrid();renderRhythmEditor()}));
+    generateRhythmExercise();renderRhythmPitchGrid();renderRhythmEditor();
 
     // --- Pantalla completa (para proyectar en clase) ---
     UI.fullscreenBtn.addEventListener('click', () => { UI.fsView.classList.add('open'); });
