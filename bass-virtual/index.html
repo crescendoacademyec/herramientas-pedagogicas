@@ -1178,6 +1178,16 @@
           <option value="arpeggio1">Arpegio · 1 octava</option>
           <option value="pentatonic">Pentatónica · 1 octava</option>
           <option value="horizontal">Desplazamiento horizontal</option>
+          <optgroup label="Patrones de escala jazz">
+            <option value="scale-full">Escala · sube y baja</option>
+            <option value="scale-thirds">Escala por terceras</option>
+            <option value="scale-ninth">Arpegio hasta la 9ª</option>
+            <option value="scale-combined">Arpegio y regreso por escala</option>
+          </optgroup>
+          <optgroup label="Walking bass">
+            <option value="walking-251">Walking · ii–V–I mayor</option>
+            <option value="walking-blues">Walking · blues de 12 compases</option>
+          </optgroup>
         </select>
       </div>
       <div class="field">
@@ -2287,6 +2297,47 @@
       }
       return best?.cells||[];
     }
+    function buildScalePattern(kind){
+      const scale=scaleIntervalsForExercise(),top=scale.length-1;
+      let route;
+      if(kind==='scale-thirds'){
+        const order=[];for(let i=0;i<top-1;i++)order.push(scale[i],scale[i+2]);route=order;
+      }else if(kind==='scale-ninth'){
+        route=[0,2,4,6].filter(i=>i<scale.length).map(i=>scale[i]);
+        route.push((scale[1]||2)+12,...route.slice().reverse().slice(1));
+      }else if(kind==='scale-combined'){
+        const chord=[0,2,4,6].filter(i=>i<scale.length).map(i=>scale[i]);
+        route=chord.concat([(scale[1]||2)+12],scale.slice(0,-1).reverse());
+      }else route=scale.concat(scale.slice(0,-1).reverse());
+      return chooseExerciseRoute(route);
+    }
+    function chooseWalkingRoute(targets){
+      const {start,end}=exerciseVisibleRange(),pitches=activePitches();let previous=null;
+      return targets.map((target,index)=>{
+        const opts=[];
+        for(let string=0;string<pitches.length;string++)for(let fret=start;fret<=end;fret++){
+          const midi=pitches[string]+physicalFret(fret);if(((midi%12)+12)%12===target.pc)opts.push({string,fret,midi});
+        }
+        opts.sort((a,b)=>{
+          const score=c=>previous?Math.abs(c.midi-previous.midi)*.7+Math.abs(c.fret-previous.fret)*.35+Math.abs(c.string-previous.string)*1.35+exerciseRangePenalty(c.string):Math.abs(c.midi-43)+c.fret*.08+exerciseRangePenalty(c.string);
+          return score(a)-score(b);
+        });
+        const picked=opts[0]||{string:0,fret:0,midi:pitches[0]};previous=picked;
+        return {...picked,...target,walkIndex:index};
+      });
+    }
+    function walkingTargets(kind){
+      const tonic=NOTE.indexOf(rootSel.value),bars=kind==='walking-blues'?[0,0,0,0,5,5,0,0,7,5,0,7]:[2,7,0];
+      const qualities=kind==='walking-blues'?bars.map(()=>[0,4,7,10]):[[0,3,7,10],[0,4,7,10],[0,4,7,11]];
+      const romans=kind==='walking-blues'?bars.map(x=>x===0?'I7':x===5?'IV7':'V7'):['ii7','V7','Imaj7'];
+      const targets=[];
+      bars.forEach((offset,bar)=>{
+        const root=((tonic+offset)%12+12)%12,formula=qualities[bar],nextOffset=bars[(bar+1)%bars.length],nextRoot=((tonic+nextOffset)%12+12)%12;
+        const approach=((nextRoot-root+12)%12)>6?(nextRoot+1)%12:(nextRoot+11)%12;
+        [root,(root+formula[1])%12,(root+formula[3])%12,approach].forEach((pitch,beat)=>targets.push({pc:pitch,beat:beat+1,chord:romans[bar],role:beat===0?'Fundamental':beat===1?'Nota del acorde':beat===2?'Nota guía':'Aproximación cromática'}));
+      });
+      return targets;
+    }
     function generateBassExercise(){
       const kind=bassExerciseSel?.value||'none';
       if(kind==='none')return [];
@@ -2312,7 +2363,9 @@
         else { const old=scaleSel.value; scaleSel.value='pentatonica_mayor'; ints=scaleIntervalsForExercise(); scaleSel.value=old; }
         route=chooseExerciseRoute(ints);
       } else if(kind==='horizontal') route=buildHorizontalExercise();
-      route=applyExerciseDirection(route);
+      else if(kind.startsWith('scale-')) route=buildScalePattern(kind);
+      else if(kind.startsWith('walking-')) route=chooseWalkingRoute(walkingTargets(kind));
+      if(!kind.startsWith('walking-'))route=applyExerciseDirection(route);
       return addExerciseFingerings(route);
     }
     function exerciseName(){
@@ -2327,10 +2380,10 @@
       }
       const step=Math.min(bassExerciseStep,bassExerciseRoute.length-1), c=bassExerciseRoute[step];
       const note=spellPc(((c.midi%12)+12)%12,rootSel.value);
-      bassExerciseStatus.textContent=message||`${exerciseName()} · paso ${step+1}/${bassExerciseRoute.length} · ${note}`;
+      bassExerciseStatus.textContent=message||`${exerciseName()} · paso ${step+1}/${bassExerciseRoute.length} · ${note}${c.chord?' · '+c.chord:''}`;
       const rh=c.rh?` · mano derecha ${c.rh}`:'';
       const lh=c.finger===0?'cuerda al aire':`dedo ${c.finger} · posición ${roman(c.handPos||1)}`;
-      bassExerciseDetail.textContent=`Cuerda ${c.string+1} · traste ${c.fret} · ${lh}${rh}`;
+      bassExerciseDetail.textContent=`${c.beat?'Pulso '+c.beat+' · '+c.role+' · ':''}Cuerda ${c.string+1} · traste ${c.fret} · ${lh}${rh}`;
     }
     function startBassExercise(){
       bassExerciseRoute=generateBassExercise(); bassExerciseStep=0; bassExerciseRunning=!!bassExerciseRoute.length;
@@ -4022,11 +4075,16 @@
       if(scoreFingeringStrategy&&s.fingeringStrategy)scoreFingeringStrategy.value=s.fingeringStrategy; else if(scoreFingeringStrategy)scoreFingeringStrategy.value='phrase';
       if(scorePhraseLength&&s.phraseLength)scorePhraseLength.value=String(s.phraseLength);
       if(scoreTechniqueMode&&s.techniqueMode)scoreTechniqueMode.value=s.techniqueMode;
-      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
+      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal','scale-full','scale-thirds','scale-ninth','scale-combined','walking-251','walking-blues'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
+      const launchParams=new URLSearchParams(location.search),launchExercise=launchParams.get('exercise');
+      if(bassExerciseSel&&['walking-251','walking-blues','scale-full','scale-thirds','scale-ninth','scale-combined'].includes(launchExercise)){
+        bassExerciseSel.value=launchExercise;if(!rootSel.value)rootSel.value='C';
+      }
       if(rightHandPatternSel&&['free','im','mi','pick'].includes(s.rightHandPattern))rightHandPatternSel.value=s.rightHandPattern;
       if(exerciseDirectionSel&&['asc','desc','updown'].includes(s.exerciseDirection))exerciseDirectionSel.value=s.exerciseDirection;
       refresh();
       updateBassExercisePanel();
+      if(launchExercise&&bassExerciseSel.value===launchExercise)startBassExercise();
       drawBaseStaff();
       renderStaffNotes([]);
     });

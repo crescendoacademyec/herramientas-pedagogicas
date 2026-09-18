@@ -1220,6 +1220,27 @@ const LEVELS = [
           <div id="jazzGlossaryLabMount"></div>
           <p><b>Simetría útil:</b> tonos enteros produce solo dos colecciones diferentes; cada forma disminuida produce tres. Transponer por tonos enteros o terceras menores puede cambiar el nombre funcional sin cambiar la colección de alturas.</p>
         `
+      },
+      {
+        title: "5.11 Walking bass y construcción de líneas",
+        html: `
+          <p>El <b>walking bass</b> convierte la armonía en una línea continua de negras. No consiste en recorrer mecánicamente una escala: cada pulso tiene peso, función y dirección hacia el acorde siguiente.</p>
+          <ul>
+            <li><b>Pulso 1:</b> establece con claridad la fundamental o una inversión deliberada.</li>
+            <li><b>Pulso 2:</b> admite nota del acorde o paso diatónico.</li>
+            <li><b>Pulso 3:</b> refuerza la calidad con 3ª, 5ª o 7ª.</li>
+            <li><b>Pulso 4:</b> prepara el acorde siguiente mediante movimiento conjunto o aproximación cromática.</li>
+          </ul>
+          <p>Primero practica fundamentales, después arpegios, líneas diatónicas y finalmente cromatismo. Una aproximación es convincente cuando resuelve; una nota externa sin destino solo debilita la dirección.</p>
+          <h4>Del acompañamiento a la improvisación</h4>
+          <p>En un solo de bajo puedes comenzar desde 3, 5 o 7 y ampliar el registro, pero debes conservar la forma. Practica las escalas en ciclos: sube y baja, por terceras, como arpegio hasta la novena y combinando arpegio con regreso por escala.</p>
+          <div class="topic-link-grid">
+            <a class="soft-btn" href="../bass-virtual/index.html?exercise=walking-251">Practicar walking ii–V–I en Bajo Virtual →</a>
+            <a class="soft-btn" href="../bass-virtual/index.html?exercise=walking-blues">Practicar walking blues →</a>
+            <a class="soft-btn" href="../piano-virtual/index.html?bank=lines">Practicar líneas en Piano Virtual →</a>
+          </div>
+          <p class="small-note">La selección escala–acorde es un punto de partida. Comprueba siempre melodía, función, registro y resolución; no uses dórico automáticamente sobre cualquier acorde menor.</p>
+        `
       }
     ],
     quiz: [
@@ -1251,6 +1272,9 @@ const LEVELS = [
       q("Antes de improvisar un standard conviene reconocer...", ["Su forma y fundamentales", "Solo su título", "La biografía del autor", "Únicamente el último acorde"], 0),
       q("Un concepto está integrado auditivamente cuando puede...", ["Reconocerse, cantarse y aplicarse", "Definirse de memoria solamente", "Tocarse rápido una vez", "Escribirse sin escucharse"], 0),
       q("¿Qué progresión llega a I por la 'puerta trasera'?", ["ivm7-bVII7-Imaj7", "ii-V-I", "I-vi-ii-V", "iii-vi-ii-V"], 0)
+      ,q("¿Qué función suele cumplir el cuarto pulso de una línea walking?", ["Preparar el acorde siguiente", "Eliminar el pulso", "Repetir siempre la tónica", "Cambiar de compás"], 0)
+      ,q("¿Dónde conviene colocar 3ª y 7ª para hacer audible la armonía?", ["En pulsos estructurales como 1 y 3", "Solo fuera del compás", "Siempre como clusters", "Nunca en el bajo"], 0)
+      ,q("¿Cuándo funciona una aproximación cromática?", ["Cuando resuelve con claridad en una nota objetivo", "Cuando evita toda resolución", "Solo al tocar muy rápido", "Cuando sustituye la forma"], 0)
     ]
   }
 ];

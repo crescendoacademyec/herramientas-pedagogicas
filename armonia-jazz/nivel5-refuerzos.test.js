@@ -8,11 +8,11 @@ vm.createContext(context);
 vm.runInContext(dataSource + ";this.__levels=LEVELS", context);
 
 assert.equal(context.__levels.length, 5);
-assert.deepEqual(Array.from(context.__levels, level => level.topics.length), [13, 13, 15, 15, 10]);
-assert.deepEqual(Array.from(context.__levels, level => level.quiz.length), [20, 19, 20, 24, 28]);
+assert.deepEqual(Array.from(context.__levels, level => level.topics.length), [13, 13, 15, 15, 11]);
+assert.deepEqual(Array.from(context.__levels, level => level.quiz.length), [20, 19, 20, 24, 31]);
 
 const level5 = context.__levels[4];
-const requiredLevel5 = ["Pentatónicas", "Swing", "bebop", "guide tones", "motívico", "ii–V–I", "outside", "Entrenamiento auditivo", "Glosario", "Referencia rápida"];
+const requiredLevel5 = ["Pentatónicas", "Swing", "bebop", "guide tones", "motívico", "ii–V–I", "outside", "Entrenamiento auditivo", "Glosario", "Referencia rápida", "Walking bass"];
 requiredLevel5.forEach(term => assert.ok(level5.topics.some(topic => topic.title.includes(term)), `Falta ${term}`));
 
 const app = fs.readFileSync(__dirname + "/app.js", "utf8");
