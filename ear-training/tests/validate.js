@@ -1,5 +1,6 @@
 const assert = require('assert');
 global.window = {};
+require('../../shared/music-practice.js');
 require('../js/data.js');
 require('../js/generators.js');
 const D = window.ETData;
@@ -30,7 +31,7 @@ const config = {
   level3Targets:[0,1,2,3,4,5,6], level3Refs:[0,1,2,3,4,5,6], level3Type:'tetrad',
   intervalMode:'random', register:'random', chordVoicing:'random', tonalReference:'chord'
 };
-for (let level=1; level<=8; level++) {
+for (const level of [1,2,3,4,5,6,7,8,9,10]) {
   for (let i=0; i<100; i++) {
     const r = G.generate(level, config);
     assert(r.options.length > 0, `Nivel ${level} sin opciones`);
@@ -38,4 +39,4 @@ for (let level=1; level<=8; level++) {
     for (const step of r.seq || []) for (const note of step.notes || []) assert(Number.isFinite(note), `Nivel ${level} nota inválida`);
   }
 }
-console.log('OK · 52 acordes únicos y 8 generadores validados.');
+console.log('OK · 52 acordes únicos y 10 generadores validados.');

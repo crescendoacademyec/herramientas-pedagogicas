@@ -112,7 +112,7 @@
     if(state.level===1) html+=prefSelect('intervalMode','Tipo de intervalo',[['ascending','Melódico ↑'],['descending','Melódico ↓'],['harmonic','Armónico'],['random','Aleatorio (↑/↓/armónico)']],S.getPref('intervalMode')||'random',locked);
     if(state.level===2) html+=prefSelect('chordVoicing','Voicing',[['root','Posición fundamental'],['inversions','Inversiones'],['open','Abierto / drop 2'],['random','Aleatorio']],S.getPref('chordVoicing')||'root',locked);
     if(state.level===3) html+=prefSelect('level3Type','Tipo diatónico',[['triad','Tríadas'],['tetrad','Cuatríadas']],S.getPref('level3Type')||'tetrad',locked);
-    if(state.level>=4) html+=prefSelect('tonalReference','Referencia tonal',[['note','Nota tónica'],['chord','Imaj7'],['cadence','I–IV–V–I']],S.getPref('tonalReference')||'chord',locked);
+    if(state.level>=4&&state.level<=9) html+=prefSelect('tonalReference','Referencia tonal',[['note','Nota tónica'],['chord','Imaj7'],['cadence','I–IV–V–I']],S.getPref('tonalReference')||'chord',locked);
     html+='</div>';
     return html;
   }
@@ -252,6 +252,18 @@
 
   function renderLearn(){
     const view=document.getElementById('view');
+    if(state.level===10){
+      const layers=[
+        ['Forma','Cuenta secciones, repeticiones y puntos de llegada antes de perseguir detalles.'],
+        ['Bajo','Sigue fundamentales, dirección y relación con el pulso.'],
+        ['Melodía','Observa contorno, motivos, repeticiones y notas largas.'],
+        ['Armonía','Distingue calidad, tensión, resolución y ritmo armónico.'],
+        ['Ritmo','Localiza anticipaciones, síncopas, silencios y acentos.'],
+        ['Interacción','Compara registros, densidad y respuesta entre instrumentos.']
+      ];
+      view.innerHTML=`<div class="learn-note"><b>Escucha con propósito:</b> repite el mismo fragmento varias veces y asigna un solo foco a cada pasada. Primera escucha: panorama; segunda: una capa; tercera: confirma con otra capa.</div><div class="learn-grid listening-layer-grid">${layers.map((x,i)=>`<article class="learn-item"><div><h3>${i+1}. ${esc(x[0])}</h3></div><div><p>${esc(x[1])}</p></div></article>`).join('')}</div><div class="learn-note"><b>Rutina sugerida:</b> escucha sin responder, canta o marca la capa elegida y vuelve a escuchar para comprobarla. En Practicar identificarás cuál de cuatro capas ocupa el primer plano.</div>`;
+      return;
+    }
     if(state.level===9){
       view.innerHTML='<div class="learn-note">Escucha el patrón completo. La menor melódica se practica en su forma ascendente. Las escalas bebop tienen ocho notas: escucha cómo la nota cromática permite alternar tonos estructurales y notas de paso. Compara también las dos colecciones de tonos enteros y las tres familias disminuidas.</div><div class="learn-grid">'+window.CrescendoPractice.scales.map(s=>'<article class="learn-item scale-learn-card"><h3>'+esc(s.name)+'</h3><p>Semitonos desde la tónica: '+s.steps.join(' · ')+'</p>'+window.CrescendoPractice.staff(s.steps.map((v,i)=>window.CrescendoPractice.spell(window.CrescendoPractice.rootNote('C'),v,i)))+'<button type="button" class="sample-btn text" data-action="sample-scale" data-scale="'+s.id+'">▶ Escuchar</button></article>').join('')+'</div>';return;
     }
@@ -279,7 +291,7 @@
     if(Number(c.level)===1)parts.push(`intervalos: ${(c.intervals||[]).length}`,`modo: ${c.intervalMode||'—'}`);
     if(Number(c.level)===2)parts.push(`acordes: ${(c.chords||[]).length}`,`voicing: ${c.chordVoicing||'—'}`);
     if(Number(c.level)===3)parts.push(`tipo: ${c.level3Type||'—'}`);
-    if(Number(c.level)>=4)parts.push(`referencia: ${c.tonalReference||'—'}`);
+    if(Number(c.level)>=4&&Number(c.level)<=9)parts.push(`referencia: ${c.tonalReference||'—'}`);
     return parts.join(' · ');
   }
 

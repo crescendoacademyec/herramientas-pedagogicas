@@ -20,7 +20,7 @@
       <label data-for="progression">Registro del enlace<select id="bankSmooth">${options([[1,'Acercar registros'],[0,'Registro de partida']])}</select></label>
       <label data-for="drop2">Disposición<select id="bankDropLayout">${options([['close','4 voces cerradas'],['shearing','Estilo Shearing'],['drop2','Drop 2 tradicional'],['modern','Drop 2 modernizado']])}</select></label>
       <label data-for="drop2">Dirección<select id="bankDropDirection">${options([['up','Ascendente'],['down','Descendente']])}</select></label>
-      <label data-for="lines">Práctica melódica<select id="bankLineType">${options([['major-course','Curso de escala mayor · 12 tonalidades'],['patterns','Cinco patrones de escala'],['ii-v-i','Línea ii–V–I'],['guide','Notas guía'],['approach','Aproximaciones cromáticas'],['bebop','Alineación bebop'],['pentatonic','Superposiciones pentatónicas']])}</select></label>
+      <label data-for="lines">Práctica melódica<select id="bankLineType">${options([['major-course','Curso de escala mayor · 12 tonalidades'],['scale-running','Scale running sobre ii–V–I'],['gravity','Gravedad hacia notas objetivo'],['independence','Independencia: escala + shell'],['patterns','Cinco patrones de escala'],['ii-v-i','Línea ii–V–I'],['guide','Notas guía'],['approach','Aproximaciones cromáticas'],['bebop','Alineación bebop'],['pentatonic','Superposiciones pentatónicas']])}</select></label>
       <label data-for="lines" data-major-course>Familia<select id="bankCourseFamily">${options([['basics','Fundamentos'],['approach','Aproximación y pivote'],['pentatonic','Pentatónica mayor']])}</select></label>
       <label data-for="lines" data-major-course>Dirección<select id="bankCourseDirection">${options([['updown','Ascendente y descendente'],['up','Ascendente'],['down','Descendente']])}</select></label>
       <label data-for="lines" data-major-course>Ritmo<select id="bankCourseRhythm">${options([['straight','Corcheas rectas'],['swing','Swing'],['three-over-four','3 sobre 4']])}</select></label>
@@ -122,6 +122,19 @@
       if(direction==='down')degrees=degrees.slice().reverse();else if(direction==='updown')degrees=degrees.concat(degrees.slice(0,-1).reverse());
       material=degrees.map((iv,i)=>make(tonic+iv,`${name} · ${rhythm==='three-over-four'?'grupo '+(Math.floor(i/3)+1):rhythm==='swing'?'swing':'corcheas'}`,'Escala mayor'));
       material.forEach(v=>v.course={name,rhythm});
+    }else if(type==='scale-running'){
+      const chords=[{name:api.roots[pc(root+2)]+'m7',base:2,scale:[2,4,5,7,9,11,12,14]},{name:api.roots[pc(root+7)]+'7',base:7,scale:[7,9,11,12,14,16,17,19]},{name:api.roots[root]+'maj7',base:0,scale:[12,11,9,7,5,4,2,0]}];
+      material=chords.flatMap((chord,bar)=>chord.scale.map((iv,i)=>make(tonic+iv,`${i===0?'Inicio':'Conexión'} · compás ${bar+1}`,chord.name)));
+    }else if(type==='gravity'){
+      const ii=api.roots[pc(root+2)]+'m7',v=api.roots[pc(root+7)]+'7',one=api.roots[root]+'maj7';
+      const cells=[[9,7,5,ii,'♭3 del ii'],[14,12,11,v,'3 del V'],[7,5,4,one,'3 del I'],[2,1,0,one,'fundamental del I']];
+      material=cells.flatMap(([a,b,target,chord,label])=>[make(tonic+a,'Salida',chord),make(tonic+b,'Preparación',chord),make(tonic+target,`Objetivo: ${label}`,chord)]);
+    }else if(type==='independence'){
+      const right=[0,2,4,5,7,9,11,12,11,9,7,5,4,2,0],left=[tonic-12,tonic-8,tonic-1];
+      material=right.map((iv,i)=>{
+        const step=make(tonic+iv,`Mano derecha · grado ${i<8?i+1:15-i}`,'Imaj7 · escala + shell');
+        step.notes=left.map((m,j)=>lineNote(m,['Fundamental','3','7'][j],'').notes[0]).concat(step.notes);step.notes.forEach((n,j)=>n.hand=j<3?'left':'right');step.help='Mantén o repite fundamental–3ª–7ª con la mano izquierda mientras la derecha recorre la escala. Empieza lento y conserva el pulso.';return step;
+      });
     }else if(type==='patterns'){
       const groups=[
         ['1 · Escala completa',[0,2,4,5,7,9,11,12,11,9,7,5,4,2,0]],

@@ -273,6 +273,50 @@
     return {options,correctIdx,seq,meta:{targetId:`tonic:${target.id}`,targetType:'tonicColor',targetName:target.label,formula:target.formula,key:D.PITCH_NAMES[keyPc],referenceMode:ref.label},feedback(ok,s){return `${ok?'✓ Correcto':'✕ Respuesta incorrecta'} · <b>${D.PITCH_NAMES[keyPc]}${target.label}</b>. Fórmula: <b>${target.formula}</b>${ok?'':`. Elegiste <b>${s?.label||'—'}</b>.`}`;}};
   }
 
+  function generateLevel10(config) {
+    const layers = [
+      {id:'bass',label:'Línea de bajo'},
+      {id:'melody',label:'Melodía'},
+      {id:'harmony',label:'Armonía'},
+      {id:'syncopation',label:'Síncopa'}
+    ];
+    const forced=forcedSet(config);
+    const pool=forced?layers.filter(x=>forced.has(`layer:${x.id}`)):layers;
+    if(!pool.length)return emptyRound('No hay capas seleccionadas para repasar.');
+    const target=sample(pool),keyPc=randInt(12),register=config.register||'random';
+    let tonic=randomRootForPc(keyPc,register);
+    while(tonic<55)tonic+=12;
+    while(tonic>67)tonic-=12;
+    const bass=tonic-24;
+    const I=normalizeWithinRange(chordMidis(tonic,D.CORE_CHORDS.MAJ7),48,84);
+    const IV=normalizeWithinRange(chordMidis(tonic+5,D.CORE_CHORDS.MAJ7),48,84);
+    const V=normalizeWithinRange(chordMidis(tonic+7,D.CORE_CHORDS.DOM7),48,84);
+    const bed=[
+      {notes:I,start:0,dur:.92,vel:.28},{notes:IV,start:1,dur:.92,vel:.28},
+      {notes:V,start:2,dur:.92,vel:.28},{notes:I,start:3,dur:1.15,vel:.3}
+    ];
+    let seq;
+    if(target.id==='bass'){
+      seq=bed.concat([0,5,7,0].map((iv,i)=>({notes:[bass+iv],start:i,dur:.86,vel:.92})));
+    }else if(target.id==='melody'){
+      const phrase=[0,2,4,7,9,7,5,4];
+      seq=bed.concat(phrase.map((iv,i)=>({notes:[tonic+12+iv],start:i*.5,dur:.42,vel:.9})));
+    }else if(target.id==='harmony'){
+      seq=[
+        {notes:I,start:0,dur:.92,vel:.92},{notes:IV,start:1,dur:.92,vel:.92},
+        {notes:V,start:2,dur:.92,vel:.92},{notes:I,start:3,dur:1.15,vel:.96},
+        {notes:[bass],start:0,dur:.8,vel:.25},{notes:[bass+5],start:1,dur:.8,vel:.25},
+        {notes:[bass+7],start:2,dur:.8,vel:.25},{notes:[bass],start:3,dur:1,vel:.25}
+      ];
+    }else{
+      seq=bed.concat([.5,1.5,2.25,2.75,3.5].map((start,i)=>({notes:[tonic+12+[0,4,7,5,4][i]],start,dur:.22,vel:.96})));
+    }
+    const options=layers.map(x=>option(`layer:${x.id}`,x.label));
+    const correctIdx=options.findIndex(x=>x.id===`layer:${target.id}`);
+    const clue={bass:'el registro grave y el movimiento de las fundamentales',melody:'el contorno de la línea superior',harmony:'el cambio de calidad y función entre acordes',syncopation:'los ataques que evitan los pulsos fuertes'}[target.id];
+    return {options,correctIdx,seq,meta:{targetId:`layer:${target.id}`,targetType:'listeningLayer',targetName:target.label,key:D.PITCH_NAMES[keyPc]},feedback(ok,s){return `${ok?'✓ Correcto':'✕ Respuesta incorrecta'} · Primer plano: <b>${target.label}</b>. La pista principal fue ${clue}${ok?'':`. Elegiste <b>${s?.label||'—'}</b>.`}`;}};
+  }
+
   function emptyRound(message) {
     return {options:[option('empty','Configura el ejercicio')],correctIdx:0,seq:[],meta:{targetId:null,targetType:'empty',targetName:'Sin configuración'},feedback:()=>message,disabled:true};
   }
@@ -286,7 +330,7 @@
       const options=all.map(s=>option('scale:'+s.id,s.name));
       return {options,correctIdx:options.findIndex(o=>o.id==='scale:'+target.id),seq:target.steps.map((step,i)=>({notes:[root+step],start:.1+i*.45,dur:.4,vel:.8})),meta:{targetId:'scale:'+target.id,targetType:'scale',targetName:target.name,rootMidi:root},feedback(ok){return (ok?'✓ Correcto':'✕ Respuesta incorrecta')+' · <b>'+target.name+'</b>. Compara sus distancias: '+target.steps.slice(1).map((n,i)=>n-target.steps[i]).join('–')+' semitonos.';}};
     }
-    const map={1:generateInterval,2:generateChord,3:generateLevel3,4:generateLevel4,5:generateLevel5,6:generateLevel6,7:generateLevel7,8:generateLevel8};
+    const map={1:generateInterval,2:generateChord,3:generateLevel3,4:generateLevel4,5:generateLevel5,6:generateLevel6,7:generateLevel7,8:generateLevel8,10:generateLevel10};
     return (map[level]||generateInterval)(config||{});
   }
 

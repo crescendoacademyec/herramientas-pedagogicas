@@ -56,6 +56,18 @@
     };
     return patterns[type].map((event, index) => ({ ...event, midi: pitch + MAJOR[index % 7], bar: 0 }));
   }
-  global.CrescendoImprovisationEngine = { ROOTS, MODES, DIATONIC, degreeMidi, scale, motive, targets, approaches, rhythm };
+  function gravity(root, progression="major251", direction="down") {
+    const base=ROOTS[root],maps={
+      major251:[{name:"iim7 · dórico",pcs:[2,4,5,7,9,11,12,14],target:5},{name:"V7 · mixolidio",pcs:[7,9,11,12,14,16,17,19],target:11},{name:"Imaj7 · jónico",pcs:[0,2,4,5,7,9,11,12],target:12}],
+      minor251:[{name:"iiø7 · locrio",pcs:[2,3,5,7,8,10,12,14],target:5},{name:"V7♭9 · frigio dominante",pcs:[7,8,11,12,14,15,17,19],target:11},{name:"im6 · menor melódica",pcs:[0,2,3,5,7,9,11,12],target:12}],
+      tritone:[{name:"iim7 · dórico",pcs:[2,4,5,7,9,11,12,14],target:5},{name:"♭II7♯11 · lidio dominante",pcs:[1,3,5,7,8,10,11,13],target:5},{name:"Imaj7 · jónico",pcs:[0,2,4,5,7,9,11,12],target:12}]
+    };
+    return maps[progression].flatMap((chord,bar)=>{
+      let pool=chord.pcs.slice();if(direction==="down")pool.reverse();
+      const nearest=pool.slice().sort((a,b)=>Math.abs(a-chord.target)-Math.abs(b-chord.target)).slice(0,3).sort((a,b)=>direction==="down"?b-a:a-b);
+      const line=nearest.concat(chord.target);return line.map((semi,i)=>({midi:base+semi,beats:1,bar,target:i===line.length-1,label:i===0?chord.name:i===line.length-1?"objetivo":""}));
+    });
+  }
+  global.CrescendoImprovisationEngine = { ROOTS, MODES, DIATONIC, degreeMidi, scale, motive, targets, approaches, rhythm, gravity };
   if (typeof module !== "undefined") module.exports = global.CrescendoImprovisationEngine;
 })(typeof window === "undefined" ? globalThis : window);
