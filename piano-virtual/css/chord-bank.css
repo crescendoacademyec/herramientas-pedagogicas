@@ -1,16 +1,16 @@
 #openChordBank,.chord-bank button,.chord-bank select,.chord-bank input{font:inherit;border:1px solid #736447;border-radius:8px;padding:9px 12px;background:#26231d;color:#f5eddb;cursor:pointer}
-#openChordBank{color:#edc763;white-space:nowrap;flex-shrink:0;font-size:.75rem;min-height:40px}
+#openChordBank{color:#edc763;white-space:nowrap;flex-shrink:0;font-size:.75rem;min-height:40px;transition:background .18s,color .18s,border-color .18s}
+#openChordBank[aria-pressed="true"]{background:#d5aa4c;color:#17130d;border-color:#edc763;box-shadow:0 0 0 2px rgba(213,170,76,.18)}
 .chord-bank{margin:16px 0;padding:16px;border:1px solid #625234;border-radius:12px;background:#191814;color:#f5eddb}
-.chord-bank:not([open]){display:none}
-.chord-bank[open]{flex:1 1 auto;min-height:0;overflow:auto;margin:0}
-.app-content:has(.chord-bank[open])>.staff-wrap,.app-content:has(.chord-bank[open])>.spacer{display:none}
-.chord-bank summary{position:sticky;top:-16px;background:#191814;padding:12px 0;z-index:3}
-.chord-bank summary{font-weight:700;color:#edc763;cursor:pointer}
+.chord-bank[hidden]{display:none!important}
+.chord-bank:not([hidden]){flex:1 1 auto;min-height:0;overflow:auto;margin:0}
+.app-content:has(.chord-bank:not([hidden]))>.staff-wrap,.app-content:has(.chord-bank:not([hidden]))>.spacer{display:none}
 .chord-bank [hidden]{display:none!important}
-.bank-tabs,.bank-controls,.bank-actions,.bank-steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:end}
-.bank-controls label{display:grid;gap:6px;font-size:13px;max-width:100%;min-width:150px;flex:0 1 auto}
-.bank-controls select{width:100%;min-width:150px;max-width:100%;text-overflow:ellipsis}.bank-controls input{width:110px}
-#bankRoot{min-width:145px}#bankMinor{min-width:150px}#bankStyle{min-width:245px}#bankSmooth{min-width:205px}#bankPattern,#bankVoicing{min-width:240px}#bankFormula{min-width:225px}#bankInversion{min-width:190px}#bankRegister,#bankOpen,#bankHands{min-width:205px}
+.bank-tabs,.bank-controls,.bank-actions,.bank-steps{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;align-items:end}
+.bank-course-progress{display:grid;grid-template-columns:repeat(12,minmax(48px,1fr));gap:6px;margin:12px 0}.bank-course-progress button{padding:7px 4px}.bank-course-progress button[aria-pressed="true"]{background:#416f58;color:#fff}
+.bank-controls{flex-wrap:nowrap}.bank-controls label{display:grid;gap:5px;font-size:12px;max-width:100%;min-width:0;flex:1 1 125px}.bank-controls select,.bank-controls input{width:100%;min-width:0;max-width:100%;padding:8px 9px;text-overflow:clip}.bank-controls input{box-sizing:border-box}
+#bankRoot{min-width:90px}#bankMinor{min-width:105px}#bankStyle{min-width:185px}#bankSmooth{min-width:155px}#bankPattern,#bankVoicing{min-width:170px}#bankFormula{min-width:165px}#bankInversion{min-width:120px}#bankRegister,#bankOpen,#bankHands{min-width:140px}#bankTempo{min-width:92px}
+.bank-actions{flex-wrap:nowrap}.bank-actions button{padding:7px 9px;font-size:12px;line-height:1.15;white-space:nowrap;flex:1 1 auto}
 .chord-bank button[aria-pressed="true"],.chord-bank .bank-primary{background:#d5aa4c;color:#17130d}
 .bank-display{display:grid;grid-template-columns:minmax(210px,320px) minmax(0,1fr);gap:20px;align-items:center}
 .bank-score{background:#fbf7f0;border-radius:10px;min-height:220px;padding:14px;display:flex;align-items:center}
@@ -28,5 +28,7 @@
 .bank-key.black{height:63%;background:#171717;z-index:1}.bank-key.left{background:#58b9db}.bank-key.right{background:#e0b555}
 .bank-key.sounding{box-shadow:inset 0 -14px #85e4a4}.bank-preview-scroll{overflow-x:auto;margin:16px 0}
 .chord-bank a{color:#edc763}.chord-bank :focus-visible{outline:3px solid #a4d4e3;outline-offset:3px}
-@media(max-width:650px){.bank-display{grid-template-columns:1fr}.bank-controls label{width:100%;min-width:0}.bank-score{max-width:320px}.bank-tabs button{flex:1}.bank-controls select{width:100%;min-width:0}}
-@media(max-width:700px){.chord-bank[open]{max-height:70vh;flex:none}}
+@media(max-width:900px){.bank-controls,.bank-actions{flex-wrap:wrap}.bank-controls label{flex:1 1 180px}.bank-actions button{flex:1 1 auto}}
+@media(max-width:650px){.bank-display{grid-template-columns:1fr}.bank-controls label{width:100%;min-width:0;flex-basis:100%}.bank-score{max-width:320px}.bank-tabs button{flex:1}.bank-controls select{width:100%;min-width:0}}
+@media(max-width:800px){.bank-course-progress{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:700px){.chord-bank:not([hidden]){max-height:70vh;flex:none}}

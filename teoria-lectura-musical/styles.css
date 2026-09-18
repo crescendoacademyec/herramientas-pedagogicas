@@ -192,6 +192,7 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   border:1px solid var(--line);border-radius:16px;background:rgba(17,16,15,.52)
 }
 .lab-card{padding:18px}
+.scale-fluency{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.scale-fluency h4{margin:.25rem 0}.scale-fluency .note-pills{max-height:145px;overflow:auto}
 .controls-grid{
   display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px
 }

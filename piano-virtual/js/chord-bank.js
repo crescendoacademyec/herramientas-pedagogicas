@@ -20,11 +20,15 @@
       <label data-for="progression">Registro del enlace<select id="bankSmooth">${options([[1,'Acercar registros'],[0,'Registro de partida']])}</select></label>
       <label data-for="drop2">Disposición<select id="bankDropLayout">${options([['close','4 voces cerradas'],['shearing','Estilo Shearing'],['drop2','Drop 2 tradicional'],['modern','Drop 2 modernizado']])}</select></label>
       <label data-for="drop2">Dirección<select id="bankDropDirection">${options([['up','Ascendente'],['down','Descendente']])}</select></label>
-      <label data-for="lines">Práctica melódica<select id="bankLineType">${options([['patterns','Cinco patrones de escala'],['ii-v-i','Línea ii–V–I'],['guide','Notas guía'],['approach','Aproximaciones cromáticas'],['bebop','Alineación bebop'],['pentatonic','Superposiciones pentatónicas']])}</select></label>
+      <label data-for="lines">Práctica melódica<select id="bankLineType">${options([['major-course','Curso de escala mayor · 12 tonalidades'],['patterns','Cinco patrones de escala'],['ii-v-i','Línea ii–V–I'],['guide','Notas guía'],['approach','Aproximaciones cromáticas'],['bebop','Alineación bebop'],['pentatonic','Superposiciones pentatónicas']])}</select></label>
+      <label data-for="lines" data-major-course>Familia<select id="bankCourseFamily">${options([['basics','Fundamentos'],['approach','Aproximación y pivote'],['pentatonic','Pentatónica mayor']])}</select></label>
+      <label data-for="lines" data-major-course>Dirección<select id="bankCourseDirection">${options([['updown','Ascendente y descendente'],['up','Ascendente'],['down','Descendente']])}</select></label>
+      <label data-for="lines" data-major-course>Ritmo<select id="bankCourseRhythm">${options([['straight','Corcheas rectas'],['swing','Swing'],['three-over-four','3 sobre 4']])}</select></label>
       <label data-for="lines">Patrón<select id="bankLinePattern">${options([['0','1 · Escala completa'],['1','2 · Hasta la quinta y regreso'],['2','3 · Escala por terceras'],['3','4 · Arpegio hasta la novena'],['4','5 · Arpegio y escala']])}</select></label>
       <label>Tempo de práctica (BPM)<input id="bankTempo" type="number" min="30" max="180" value="70"></label>
     </div>
     <div class="bank-steps" id="bankSteps"></div>
+    <div class="bank-course-progress" id="bankCourseProgress" data-major-course aria-label="Progreso en las doce tonalidades"></div>
     <div class="bank-display"><div class="bank-score" id="bankScore" role="img" aria-label="Voicing en gran pentagrama"><div data-live-score></div><div data-live-labels></div></div>
       <div><h2 id="bankTitle"></h2><p class="bank-help" id="bankHelp"></p><ul class="bank-note-list" id="bankNotes"></ul>
       <p class="bank-note">Azul: mano izquierda · Dorado: mano derecha · Verde: sonando. Reparto sugerido, ajustable a tu mano. El cifrado objetivo se mantiene aunque el detector encuentre un nombre equivalente.</p></div></div>
@@ -32,20 +36,22 @@
     <div class="bank-actions"><button class="bank-primary" data-action="play">Escuchar acorde</button><button data-action="arpeggio" data-for="build jazz drop2 progression">Escuchar arpegio</button><button data-action="stop">Detener</button>
     <button data-action="add" data-for="build">Añadir siguiente nota</button><button data-action="clear" data-for="build">Empezar desde cero</button><button data-action="all" data-for="build">Mostrar completo</button>
     <button data-action="sequence" data-for="progression drop2 lines">Escuchar secuencia</button><button data-action="pro">Mostrar 88 teclas del piano</button><button data-action="check">Comprobar lo que toco</button></div>
+    <button data-action="complete-key" data-for="lines" data-major-course>Marcar tonalidad practicada</button>
     <p class="bank-status" id="bankStatus" role="status" aria-live="polite"></p>
     <p class="bank-note">La comprobación usa las teclas pulsadas (ratón, teclado o MIDI), con octavas exactas; no evalúa el pedal. Para tensiones y omisiones, distingue siempre fórmula teórica de voicing. En progresiones, «Acercar registros» transpone octavas: no calcula una digitación óptima.</p>
     <a href="../armonia-jazz/index.html">Estudiar la explicación en Armonía Jazz →</a>`;
   const $=id=>document.getElementById('bank'+id);
   $('Pattern').value='1';$('Register').value='0';
   const state={tab:'build',step:0,count:Infinity};
+  const courseDone=new Set(JSON.parse(localStorage.getItem('crescendo-major-course-keys')||'[]'));
   let current,sequence=[],staff=null,timers=[],voices=[],generation=0;
   const sounding=new Set(), pressed=new Set();
   function status(t){$('Status').textContent=t;}
   function highlight(){
-    const notes=panel.open?(current?.notes||[]):[];
+    const open=!panel.hidden,notes=open?(current?.notes||[]):[];
     document.querySelectorAll('#keyboard [data-midi]').forEach(k=>{
       const midi=Number(k.dataset.midi),n=notes.find(n=>n.midi===midi);
-      k.classList.toggle('bank-left',n?.hand==='left');k.classList.toggle('bank-right',n?.hand==='right');k.classList.toggle('bank-sounding',panel.open&&sounding.has(midi));
+      k.classList.toggle('bank-left',n?.hand==='left');k.classList.toggle('bank-right',n?.hand==='right');k.classList.toggle('bank-sounding',open&&sounding.has(midi));
     });
     $('Keyboard').querySelectorAll('[data-midi]').forEach(k=>k.classList.toggle('sounding',sounding.has(Number(k.dataset.midi))));
   }
@@ -91,7 +97,32 @@
     const root=Number($('Root').value),register=Number($('Register').value),tonic=60+root+register*12,type=$('LineType').value;
     const make=(midi,role,chord)=>lineNote(midi,role,chord,api.roots[root].includes('b'));
     let material=[];
-    if(type==='patterns'){
+    if(type==='major-course'){
+      const family=$('CourseFamily').value,direction=$('CourseDirection').value,rhythm=$('CourseRhythm').value;
+      const degree=d=>[0,2,4,5,7,9,11][((d%7)+7)%7]+12*Math.floor(d/7);
+      const basics={
+        scale:[0,1,2,3,4,5,6,7],
+        thirds:[0,2,1,3,2,4,3,5,4,6,5,7],
+        triads:[0,2,4,1,3,5,2,4,6,3,5,7,4,6,8,5,7,9,6,8,10],
+        sevenths:[0,2,4,6,1,3,5,7,2,4,6,8,3,5,7,9,4,6,8,10,5,7,9,11,6,8,10,12]
+      };
+      let name,degrees;
+      if(family==='basics'){
+        const choices=[['Escala lineal',basics.scale],['Terceras diatónicas',basics.thirds],['Tríadas por grado',basics.triads],['Tétradas por grado',basics.sevenths]];
+        const selected=choices[Number($('LinePattern').value)||0]||choices[0];name=selected[0];degrees=selected[1].map(degree);
+      }else if(family==='approach'){
+        const targets=[0,2,4,5,7,9,11,12];
+        const choices=[['Aproximación inferior',targets.flatMap(x=>[x-1,x])],['Aproximación superior',targets.flatMap(x=>[x+1,x])],['Envolvente',targets.flatMap(x=>[x+1,x-1,x])],['Pivote 1–3–2–4',[0,4,2,5,2,5,4,7,4,7,5,9,5,9,7,11]]];
+        const selected=choices[Number($('LinePattern').value)||0]||choices[0];name=selected[0];degrees=selected[1];
+      }else{
+        const p=[0,2,4,7,9,12];
+        const choices=[['Pentatónica lineal',p],['Saltos pentatónicos',[0,4,2,7,4,9,7,12]],['Tríadas pentatónicas',[0,4,7,2,7,9,4,9,12]],['Pentatónica 3 sobre 4',[0,2,4,2,4,7,4,7,9,7,9,12]]];
+        const selected=choices[Number($('LinePattern').value)||0]||choices[0];name=selected[0];degrees=selected[1];
+      }
+      if(direction==='down')degrees=degrees.slice().reverse();else if(direction==='updown')degrees=degrees.concat(degrees.slice(0,-1).reverse());
+      material=degrees.map((iv,i)=>make(tonic+iv,`${name} · ${rhythm==='three-over-four'?'grupo '+(Math.floor(i/3)+1):rhythm==='swing'?'swing':'corcheas'}`,'Escala mayor'));
+      material.forEach(v=>v.course={name,rhythm});
+    }else if(type==='patterns'){
       const groups=[
         ['1 · Escala completa',[0,2,4,5,7,9,11,12,11,9,7,5,4,2,0]],
         ['2 · Hasta la quinta y regreso',[0,2,4,5,7,5,4,2,0]],
@@ -127,7 +158,14 @@
   function render(){
     stop();const root=Number($('Root').value),preset=api.presets.find(p=>p.id===$('Voicing').value);
     host.querySelectorAll('[data-for]').forEach(el=>el.hidden=!el.dataset.for.split(' ').includes(state.tab));
-    $('LinePattern').parentElement.hidden=state.tab!=='lines'||$('LineType').value!=='patterns';
+    const isCourse=state.tab==='lines'&&$('LineType').value==='major-course';
+    $('LinePattern').parentElement.hidden=state.tab!=='lines'||(!isCourse&&$('LineType').value!=='patterns');
+    host.querySelectorAll('[data-major-course]').forEach(el=>el.hidden=!isCourse);
+    if(isCourse){
+      const names=$('CourseFamily').value==='basics'?['Escala lineal','Terceras diatónicas','Tríadas por grado','Tétradas por grado']:$('CourseFamily').value==='approach'?['Aproximación inferior','Aproximación superior','Envolvente','Pivote 1–3–2–4']:['Pentatónica lineal','Saltos pentatónicos','Tríadas pentatónicas','Pentatónica 3 sobre 4'];
+      const keep=Math.min(Number($('LinePattern').value)||0,names.length-1);$('LinePattern').innerHTML=options(names.map((n,i)=>[i,`${i+1} · ${n}`]));$('LinePattern').value=String(keep);
+      $('CourseProgress').innerHTML=api.roots.map((name,i)=>`<button type="button" data-course-root="${i}" aria-pressed="${courseDone.has(i)}">${courseDone.has(i)?'✓ ':''}${esc(name)}</button>`).join('');
+    }
     host.querySelector('[data-action="play"]').textContent=state.tab==='lines'?'Escuchar nota':'Escuchar acorde';
     host.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===state.tab)));
     const pattern=patterns[Number($('Pattern').value)],full=api.fullFormulas[pattern.name];
@@ -135,7 +173,7 @@
     const selectedPattern=$('Formula').value==='full'?{name:pattern.name,intervals:full}:pattern;
     const invCount=state.tab==='build'?selectedPattern.intervals.length:state.tab==='jazz'&&preset.kind==='shape'?4:1;
     const inv=Math.min(Number($('Inversion').value)||0,invCount-1);
-    $('Inversion').innerHTML=options(Array.from({length:invCount},(_,i)=>[i,i?`${i}ª inversión`:'Fundamental / posición original']));$('Inversion').value=String(inv);
+    $('Inversion').innerHTML=options(Array.from({length:invCount},(_,i)=>[i,i?`${i}ª inversión`:'Fundamental']));$('Inversion').value=String(inv);
     $('Inversion').disabled=invCount===1;$('Open').disabled=preset.kind!=='shape';$('Hands').disabled=preset.kind!=='rootless';
     if(state.tab==='jazz'){
       $('Inversion').parentElement.hidden=preset.kind!=='shape';
@@ -146,7 +184,7 @@
     if(state.tab==='lines'){
       sequence=jazzLineSequence();state.step=Math.min(state.step,sequence.length-1);
       sequence.forEach((v,i)=>{const b=document.createElement('button');b.textContent=(i+1)+' · '+v.notes[0].label;b.setAttribute('aria-pressed',String(i===state.step));b.onclick=()=>{stop();state.step=i;display(v);$('Steps').querySelectorAll('button').forEach((x,j)=>x.setAttribute('aria-pressed',String(i===j)));};$('Steps').appendChild(b);});
-      display(sequence[state.step]);status('Practica patrones, notas guía, cromatismo, bebop y superposiciones pentatónicas.');
+      display(sequence[state.step]);status(isCourse?'Curso de escala mayor: transpón el patrón por las 12 tonalidades y completa las tres familias.':'Practica patrones, notas guía, cromatismo, bebop y superposiciones pentatónicas.');
     } else if(state.tab==='drop2'){
       sequence=drop2Sequence();state.step=Math.min(state.step,sequence.length-1);
       sequence.forEach((v,i)=>{const b=document.createElement('button');b.textContent=(i+1)+' · '+v.notes[v.notes.length-1].label;b.setAttribute('aria-pressed',String(i===state.step));b.onclick=()=>{stop();state.step=i;display(v);$('Steps').querySelectorAll('button').forEach((x,j)=>x.setAttribute('aria-pressed',String(i===j)));};$('Steps').appendChild(b);});
@@ -194,13 +232,16 @@
       case 'clear':state.count=0;render();break;case 'all':state.count=Infinity;render();break;
       case 'pro':modeProBtn.click();highlight();status('Piano completo: 88 teclas.');break;
       case 'check':{const expected=current.notes.map(n=>n.midi),missing=expected.filter(n=>!pressed.has(n)),extra=[...pressed].filter(n=>!expected.includes(n));status(!expected.length?'Añade primero alguna nota.':!missing.length&&!extra.length?'¡Correcto! Coinciden las notas y sus octavas.':`Faltan ${missing.length} notas; sobran ${extra.length}. Mantén las teclas pulsadas al comprobar.`);break;}
+      case 'complete-key':{const key=Number($('Root').value);courseDone.has(key)?courseDone.delete(key):courseDone.add(key);localStorage.setItem('crescendo-major-course-keys',JSON.stringify([...courseDone]));render();status(`${courseDone.size}/12 tonalidades practicadas.`);break;}
     }
+    if(b.dataset.courseRoot!==undefined){$('Root').value=b.dataset.courseRoot;state.step=0;render();}
   });
   document.addEventListener('piano-input',e=>{if(e.detail.on)pressed.add(e.detail.midi);else pressed.delete(e.detail.midi);});
   document.addEventListener('piano-panic',()=>{pressed.clear();stop();});
   new MutationObserver(highlight).observe(keyboardEl,{childList:true});
-  panel.addEventListener('toggle',()=>{document.getElementById('openChordBank').setAttribute('aria-expanded',String(panel.open));if(panel.open)render();else stop();highlight();});
-  document.getElementById('openChordBank').onclick=()=>{panel.open=!panel.open;if(panel.open)panel.scrollIntoView({behavior:'smooth',block:'start'});};
+  const launcher=document.getElementById('openChordBank');
+  function setPanelOpen(open){panel.hidden=!open;launcher.setAttribute('aria-expanded',String(open));launcher.setAttribute('aria-pressed',String(open));if(open)render();else{stop();highlight();}}
+  launcher.onclick=()=>{const open=panel.hidden;setPanelOpen(open);if(open)panel.scrollIntoView({behavior:'smooth',block:'start'});};
   window.addEventListener('pagehide',stop);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
   const params=new URLSearchParams(location.search);
@@ -210,6 +251,6 @@
     if(api.presets.some(p=>p.id===params.get('voicing')))$('Voicing').value=params.get('voicing');
     if(params.get('minor')==='1')$('Minor').value='1';
     if(['rootless','baga-a','baga-b','shell','sixth'].includes(params.get('style')))$('Style').value=params.get('style');
-    panel.open=true;requestAnimationFrame(()=>panel.scrollIntoView({block:'start'}));
+    setPanelOpen(true);requestAnimationFrame(()=>panel.scrollIntoView({block:'start'}));
   }
 })();

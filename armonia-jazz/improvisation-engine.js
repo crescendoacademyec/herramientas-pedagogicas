@@ -9,6 +9,9 @@
     fourths: { name: "Saltos diatónicos", degrees: [0, 3, 1, 4, 2, 5, 3, 6, 4, 7] },
     sevenths: { name: "Arpegios de séptima", degrees: [0, 2, 4, 6, 1, 3, 5, 7] },
     permutation: { name: "Permutación 1–3–2–4", degrees: [0, 2, 1, 3, 1, 3, 2, 4, 2, 4, 3, 5] }
+    ,triads: { name: "Tríadas diatónicas", degrees: [0,2,4,1,3,5,2,4,6,3,5,7,4,6,8,5,7,9,6,8,10] }
+    ,pentatonicSkip: { name: "Saltos pentatónicos", degrees: [0,2,1,4,2,5,4,7] }
+    ,threeOverFour: { name: "Tres sobre cuatro", degrees: [0,1,2,1,2,3,2,3,4,3,4,5] }
   };
   const DIATONIC = [
     { roman: "Imaj7", degrees: [0, 2, 4, 6] }, { roman: "iim7", degrees: [1, 3, 5, 7] },

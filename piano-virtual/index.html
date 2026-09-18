@@ -179,7 +179,7 @@
       <input type="color" id="activeColor" value="#66b3ff" class="file-input-hidden" tabindex="-1" aria-hidden="true">
     </div>
 
-    <button type="button" id="openChordBank" aria-controls="chordBank" aria-expanded="false">Banco de acordes</button>
+    <button type="button" id="openChordBank" aria-controls="chordBank" aria-expanded="false" aria-pressed="false">Laboratorio musical</button>
 
     <div class="sample-controls">
       <input type="file" id="sampleFolder" webkitdirectory multiple class="file-input-hidden">
@@ -388,10 +388,9 @@
     </div>
   </div>
 
-  <details id="chordBank" class="chord-bank">
-    <summary>Banco de acordes · construir, escuchar y practicar</summary>
+  <section id="chordBank" class="chord-bank" hidden>
     <div id="chordBankContent"></div>
-  </details>
+  </section>
   <div class="spacer"></div>
 
   <div class="piano-wrap">
@@ -427,6 +426,6 @@
 <script src="js/metronome.js"></script>
 <script src="js/chords.js"></script>
 <script src="js/init.js"></script>
-<script src="js/chord-bank.js?v=20260918-jazz-lines-4"></script>
+<script src="js/chord-bank.js?v=20260918-major-scale-course"></script>
 </body>
 </html>

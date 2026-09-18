@@ -2131,6 +2131,7 @@ function mountScaleExplorer(el) {
     <div class="visual-controls">
       <label>Fundamental<select data-scale-root>${theorySelectOptions(THEORY_VISUAL_ROOTS, "C")}</select></label>
       <label>Escala<select data-scale-type>${theorySelectOptions(THEORY_VISUAL_SCALE_LIBRARY, defaultScale, "id", "label")}</select></label>
+      <label>Armonización / recorrido<select data-scale-practice><option value="scale">Escala lineal</option><option value="thirds">Terceras diatónicas</option><option value="triads">Tríadas por grado</option><option value="sevenths">Tétradas por grado</option></select></label>
     </div>
     <div class="visual-summary">
       <div><strong data-scale-name></strong><div class="small-note" data-scale-formula></div></div>
@@ -2139,11 +2140,12 @@ function mountScaleExplorer(el) {
     <div class="visual-panel-grid visual-panel-grid-3">
       <section class="visual-panel"><div class="diagram-label">Piano</div><div data-scale-piano></div></section>
       <section class="visual-panel"><div class="diagram-label">Guitarra · mapa de escala</div><div class="diagram-scroll" data-scale-guitar></div></section>
-      <section class="visual-panel"><div class="diagram-label">Pentagrama · grados ascendentes</div><div class="diagram-scroll" data-scale-staff></div></section>
+      <section class="visual-panel"><div class="diagram-label">Pentagrama · recorrido seleccionado</div><div class="diagram-scroll" data-scale-staff></div></section>
     </div>
   </div>`;
   const rootSel = el.querySelector("[data-scale-root]");
   const typeSel = el.querySelector("[data-scale-type]");
+  const practiceSel = el.querySelector("[data-scale-practice]");
   const update = () => {
     const rootName = rootSel.value;
     const scale = THEORY_VISUAL_SCALE_LIBRARY.find(item => item.id === typeSel.value) || THEORY_VISUAL_SCALE_LIBRARY[0];
@@ -2153,11 +2155,26 @@ function mountScaleExplorer(el) {
     el.querySelector("[data-scale-notes]").innerHTML = scaleLegend(tones);
     el.querySelector("[data-scale-piano]").innerHTML = renderPianoDiagram(scalePianoDiagram(rootName, scale));
     el.querySelector("[data-scale-guitar]").innerHTML = renderScaleGuitar(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en guitarra`);
-    el.querySelector("[data-scale-staff]").innerHTML = renderScaleStaff(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en pentagrama`);
+    if(scale.id==="major"){
+      const root=CrescendoPractice.rootNote(rootName,4),degrees=majorScalePracticeDegrees(practiceSel.value),semis=majorScalePracticeSemis(practiceSel.value);
+      el.querySelector("[data-scale-staff]").innerHTML=CrescendoPractice.sequence(semis.map((semi,index)=>({...CrescendoPractice.spell(root,semi,degrees[index]%7),beats:.5,label:""})),{labels:false});
+    }else el.querySelector("[data-scale-staff]").innerHTML = renderScaleStaff(rootName, tones, `${theoryRootUnicode(rootName)} ${scale.label} en pentagrama`);
+    practiceSel.disabled=scale.id!=="major";
   };
   rootSel.addEventListener("change", update);
   typeSel.addEventListener("change", update);
+  practiceSel.addEventListener("change", update);
   update();
+}
+function majorScalePracticeDegrees(kind="scale"){
+  if(kind==="thirds")return [0,2,1,3,2,4,3,5,4,6,5,7];
+  if(kind==="triads")return [0,2,4,1,3,5,2,4,6,3,5,7,4,6,8,5,7,9,6,8,10];
+  if(kind==="sevenths")return [0,2,4,6,1,3,5,7,2,4,6,8,3,5,7,9,4,6,8,10,5,7,9,11,6,8,10,12];
+  return [0,1,2,3,4,5,6,7];
+}
+function majorScalePracticeSemis(kind="scale"){
+  const scale=[0,2,4,5,7,9,11],degree=n=>scale[n%7]+12*Math.floor(n/7);
+  return majorScalePracticeDegrees(kind).map(degree);
 }
 function mountIntervalExplorer(el) {
   const defaultInterval = "M3";
@@ -3236,7 +3253,8 @@ function addScaleAudio(el) {
     sequenceLabel: "▶ Escuchar escala",
     sequence: () => {
       const { rootName, tones } = currentScaleSelection(el);
-      const midis = theoryToneMidis(rootName, tones, 4);
+      const practice=el.querySelector("[data-scale-practice]");
+      const midis=practice&&!practice.disabled?majorScalePracticeSemis(practice.value).map(semi=>theoryRootMidi(rootName,4)+semi):theoryToneMidis(rootName, tones, 4);
       const pills = [...el.querySelectorAll("[data-scale-notes] .visual-pill")];
       playTheorySequence(midis, index => {
         pills.forEach((pill, i) => pill.classList.toggle("audio-active", i === index));

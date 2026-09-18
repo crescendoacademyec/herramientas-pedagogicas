@@ -502,6 +502,10 @@ function mountScaleLab(el){
     <div class="summary-line"><strong data-scale-title></strong><span data-scale-pattern></span></div><div class="note-pills" data-scale-notes></div>
     <div class="visual-three"><section class="visual-box"><div class="diagram-label">Piano</div><div data-scale-piano></div></section><section class="visual-box"><div class="diagram-label">Guitarra</div><div class="scroll-x" data-scale-guitar></div></section><section class="visual-box"><div class="diagram-label">Pentagrama</div><div class="scroll-x" data-scale-staff></div></section></div>
     <div class="lab-actions"><button class="primary-btn" data-scale-play>▶ Escuchar escala</button><button class="ghost-btn" data-scale-chord>▶ Notas simultáneas</button></div>
+    <section class="scale-fluency"><p class="eyebrow">FLUIDEZ EN 12 TONALIDADES</p><h4>Transforma la escala mayor</h4><p>Lee y escucha la misma tonalidad como línea, terceras, tríadas o tétradas. La escritura correcta de cada nota se conserva aunque cambie el recorrido.</p>
+      <div class="controls-row"><label>Patrón <select data-fluency-pattern><option value="line">Escala lineal</option><option value="thirds">Terceras diatónicas</option><option value="triads">Tríadas por grado</option><option value="sevenths">Tétradas por grado</option><option value="pentatonic">Pentatónica con saltos</option></select></label><label>Dirección <select data-fluency-direction><option value="up">Ascendente</option><option value="down">Descendente</option><option value="both">Ambas</option></select></label></div>
+      <div class="note-pills" data-fluency-notes></div><button class="primary-btn" data-fluency-play>▶ Escuchar patrón</button>
+    </section>
   </div>`;
   const root=el.querySelector("[data-scale-root]"),sel=el.querySelector("[data-scale-type]");
   const current=()=>{const s=SCALES.find(x=>x.id===sel.value)||SCALES[0],ts=tones(root.value,s.tokens);return{s,ts}};
@@ -509,6 +513,15 @@ function mountScaleLab(el){
   [root,sel].forEach(x=>x.addEventListener("change",update));update();
   el.querySelector("[data-scale-play]").addEventListener("click",()=>{const {ts}=current(),m=rootMidi(root.value,4);playSequence(ts.map(t=>m+t.semi),340)});
   el.querySelector("[data-scale-chord]").addEventListener("click",()=>{const {ts}=current(),m=rootMidi(root.value,4);playChord(ts.slice(0,-1).map(t=>m+t.semi))});
+  const fluency=()=>{
+    const base=[0,2,4,5,7,9,11],kind=el.querySelector("[data-fluency-pattern]").value,degreeSemi=n=>base[n%7]+12*Math.floor(n/7);
+    let degrees=kind==="line"?[0,1,2,3,4,5,6,7]:kind==="thirds"?[0,2,1,3,2,4,3,5,4,6,5,7]:kind==="triads"?[0,2,4,1,3,5,2,4,6,3,5,7,4,6,8,5,7,9,6,8,10]:kind==="sevenths"?[0,2,4,6,1,3,5,7,2,4,6,8,3,5,7,9,4,6,8,10,5,7,9,11,6,8,10,12]:[0,2,1,4,2,5,4,7];
+    const direction=el.querySelector("[data-fluency-direction]").value;if(direction==="down")degrees=degrees.slice().reverse();if(direction==="both")degrees=degrees.concat(degrees.slice(0,-1).reverse());
+    return degrees.map(degree=>({degree,semi:degreeSemi(degree)}));
+  };
+  const updateFluency=()=>{const names=fluency().map(item=>spellTone(root.value,String(item.degree%7+1)).name+(4+Math.floor(item.degree/7)));el.querySelector("[data-fluency-notes]").innerHTML=names.map((name,i)=>`<span>${escapeHtml(name)} <small>${i+1}</small></span>`).join("")};
+  [root,el.querySelector("[data-fluency-pattern]"),el.querySelector("[data-fluency-direction]")].forEach(x=>x.addEventListener("change",updateFluency));updateFluency();
+  el.querySelector("[data-fluency-play]").addEventListener("click",()=>{const m=rootMidi(root.value,4);playSequence(fluency().map(item=>m+item.semi),230)});
 }
 
 /* TONALITY */
