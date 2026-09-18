@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Metronomo: herramienta web para estudiar pulso, subdivisiones, swing, clave, polirritmia y polimetria.">
-    <base href="/metronomo/">
+    <base href="./">
     <title>Metrónomo</title>
   <link id="suite-favicon" rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260918-flat-header">
@@ -1185,6 +1185,11 @@
         return events;
     }
     function generateRhythmExercise(){
+        if(!window.CrescendoPractice){
+            UI.rhythmScore.innerHTML='<p style="padding:28px;color:#7a3b3b;font-weight:800">No se pudo cargar el motor de notación. Recarga la página para intentarlo nuevamente.</p>';
+            UI.rhythmStatus.textContent='El metrónomo sigue disponible, pero el pentagrama necesita volver a cargar sus recursos.';
+            return;
+        }
         const meter=UI.rhythmMeter.value,capacity=rhythmCapacity(meter),kind=UI.rhythmExercise.value,base=Number(UI.rhythmFigure.value),v=rhythmVariation++;
         const patterns={
             steady:[[base]],
