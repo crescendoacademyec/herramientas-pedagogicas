@@ -6,7 +6,14 @@
     {id:'major',name:'Mayor',steps:[0,2,4,5,7,9,11,12]},
     {id:'minor',name:'Menor natural',steps:[0,2,3,5,7,8,10,12]},
     {id:'harmonic',name:'Menor armónica',steps:[0,2,3,5,7,8,11,12]},
-    {id:'melodic',name:'Menor melódica ascendente',steps:[0,2,3,5,7,9,11,12]}
+    {id:'melodic',name:'Menor melódica ascendente',steps:[0,2,3,5,7,9,11,12]},
+    {id:'bebopDominant',name:'Bebop dominante',steps:[0,2,4,5,7,9,10,11,12]},
+    {id:'bebopMajor',name:'Bebop mayor',steps:[0,2,4,5,7,8,9,11,12]},
+    {id:'bebopMinor',name:'Bebop menor',steps:[0,2,3,5,7,8,9,11,12]},
+    {id:'minorSixPentatonic',name:'Pentatónica menor 6',steps:[0,2,3,7,9,12]},
+    {id:'wholeTone',name:'Tonos enteros',steps:[0,2,4,6,8,10,12]},
+    {id:'diminishedHalfWhole',name:'Disminuida semitono–tono',steps:[0,1,3,4,6,7,9,10,12]},
+    {id:'diminishedWholeHalf',name:'Disminuida tono–semitono',steps:[0,2,3,5,6,8,9,11,12]}
   ];
   const chords=[['Mayor',[0,4,7]],['Menor',[0,3,7]],['Aumentado',[0,4,8]],['Disminuido',[0,3,6]],['Séptima dominante',[0,4,7,10]],['Séptima mayor',[0,4,7,11]],['Séptima menor',[0,3,7,10]],['Semidisminuido',[0,3,6,10]],['Séptima disminuida',[0,3,6,9]]];
   const intervals=[['2ª menor',1,1],['2ª mayor',2,1],['3ª menor',3,2],['3ª mayor',4,2],['4ª justa',5,3],['4ª aumentada',6,3],['5ª disminuida',6,4],['5ª justa',7,4],['6ª menor',8,5],['6ª mayor',9,5],['7ª menor',10,6],['7ª mayor',11,6],['8ª justa',12,7]];

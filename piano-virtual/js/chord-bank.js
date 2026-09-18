@@ -5,19 +5,21 @@
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const options=items=>items.map(([v,t])=>`<option value="${esc(v)}">${esc(t)}</option>`).join('');
   host.innerHTML=`<div class="bank-tabs" aria-label="Tipo de práctica">
-    <button data-tab="build" aria-pressed="true">Construir acordes</button><button data-tab="jazz" aria-pressed="false">Voicings jazz</button><button data-tab="progression" aria-pressed="false">Progresiones</button></div>
+    <button data-tab="build" aria-pressed="true">Construir acordes</button><button data-tab="jazz" aria-pressed="false">Voicings jazz</button><button data-tab="drop2" aria-pressed="false">Drop 2 melódico</button><button data-tab="progression" aria-pressed="false">Progresiones</button></div>
     <div class="bank-controls">
       <label>Fundamental / tonalidad<select id="bankRoot">${options(api.roots.map((r,i)=>[i,r]))}</select></label>
       <label data-for="build">Familia del detector<select id="bankPattern">${options(patterns.map((p,i)=>[i,p.name||'Mayor']))}</select></label>
       <label data-for="build">Notas a construir<select id="bankFormula">${options([['pattern','Patrón del detector'],['full','Fórmula extendida completa']])}</select></label>
       <label data-for="jazz">Voicing<select id="bankVoicing">${options(api.presets.map(p=>[p.id,p.label]))}</select></label>
       <label data-for="build jazz">Inversión<select id="bankInversion"></select></label>
-      <label data-for="build jazz">Registro<select id="bankRegister">${options([[-1,'Una octava abajo'],[0,'Registro central'],[1,'Una octava arriba']])}</select></label>
+      <label data-for="build jazz drop2">Registro<select id="bankRegister">${options([[-1,'Una octava abajo'],[0,'Registro central'],[1,'Una octava arriba']])}</select></label>
       <label data-for="jazz">Disposición de sextas y disminuidos<select id="bankOpen">${options([[0,'Cerrada'],[1,'Abierta · drop 2']])}</select></label>
       <label data-for="jazz">Rootless: reparto<select id="bankHands">${options([['both','Dos manos'],['left','Mano izquierda']])}</select></label>
       <label data-for="progression">Modo<select id="bankMinor">${options([[0,'Mayor'],[1,'Menor']])}</select></label>
       <label data-for="progression">Familia<select id="bankStyle">${options([['rootless','Rootless general'],['baga-a','Baga A · ii–V–I mayor'],['baga-b','Baga B · ii–V–I mayor'],['shell','Shells / estructura básica'],['sixth','Sextas y disminuidos']])}</select></label>
       <label data-for="progression">Registro del enlace<select id="bankSmooth">${options([[1,'Acercar registros'],[0,'Registro de partida']])}</select></label>
+      <label data-for="drop2">Disposición<select id="bankDropLayout">${options([['close','4 voces cerradas'],['shearing','Estilo Shearing'],['drop2','Drop 2 tradicional'],['modern','Drop 2 modernizado']])}</select></label>
+      <label data-for="drop2">Dirección<select id="bankDropDirection">${options([['up','Ascendente'],['down','Descendente']])}</select></label>
       <label>Tempo de práctica (BPM)<input id="bankTempo" type="number" min="30" max="180" value="70"></label>
     </div>
     <div class="bank-steps" id="bankSteps"></div>
@@ -27,7 +29,7 @@
     <div class="bank-preview-scroll"><div class="bank-preview" id="bankKeyboard" role="img" aria-label="88 teclas: posiciones del acorde, de La0 a Do8"></div></div>
     <div class="bank-actions"><button class="bank-primary" data-action="play">Escuchar acorde</button><button data-action="arpeggio">Escuchar arpegio</button><button data-action="stop">Detener</button>
     <button data-action="add" data-for="build">Añadir siguiente nota</button><button data-action="clear" data-for="build">Empezar desde cero</button><button data-action="all" data-for="build">Mostrar completo</button>
-    <button data-action="sequence" data-for="progression">Escuchar ii–V–I</button><button data-action="pro">Mostrar 88 teclas del piano</button><button data-action="check">Comprobar lo que toco</button></div>
+    <button data-action="sequence" data-for="progression drop2">Escuchar secuencia</button><button data-action="pro">Mostrar 88 teclas del piano</button><button data-action="check">Comprobar lo que toco</button></div>
     <p class="bank-status" id="bankStatus" role="status" aria-live="polite"></p>
     <p class="bank-note">La comprobación usa las teclas pulsadas (ratón, teclado o MIDI), con octavas exactas; no evalúa el pedal. Para tensiones y omisiones, distingue siempre fórmula teórica de voicing. En progresiones, «Acercar registros» transpone octavas: no calcula una digitación óptima.</p>
     <a href="../armonia-jazz/index.html">Estudiar la explicación en Armonía Jazz →</a>`;
@@ -56,6 +58,29 @@
     }
     $('Keyboard').innerHTML=keys.join('');
   }
+  const pc=n=>((n%12)+12)%12;
+  function closeBelow(top,pcs){
+    const out=[];for(let midi=top;midi>=top-24&&out.length<4;midi--)if(pcs.includes(pc(midi)))out.push(midi);
+    return out.sort((a,b)=>a-b);
+  }
+  function drop2Step(root,offset,layout,register){
+    const tonic=60+root+register*12,top=tonic+12+offset,main=[0,4,7,9].map(x=>pc(tonic+x)),passing=[11,2,5,8].map(x=>pc(tonic+x));
+    const structural=[0,4,7,9].includes(offset%12),source=closeBelow(top,structural?main:passing);let midis=source.slice();
+    if(layout==='shearing')midis=[top-12].concat(source);
+    if(layout==='drop2'||layout==='modern'){midis[source.length-2]-=12;midis.sort((a,b)=>a-b);}
+    if(layout==='modern'){
+      const protectedPc=pc(top),candidates=midis.map((m,i)=>({m,i,rel:pc(m-tonic)})).filter(x=>pc(x.m)!==protectedPc);
+      let chosen=structural?candidates.find(x=>x.rel===0)||candidates.find(x=>x.rel===7):candidates[candidates.length>1?1:0];
+      if(chosen)midis[chosen.i]+=2;midis.sort((a,b)=>a-b);
+    }
+    const names={close:'4-way close',shearing:'Shearing',drop2:'Drop 2',modern:'Drop 2 modernizado'},symbol=structural?api.roots[root]+(layout==='modern'?'6/9 · color moderno':'6'):api.roots[pc(root+11)]+'°7 · paso';
+    const notes=midis.map((m,i)=>{const info=midiToInfo(m),letter=info.name.charAt(0),alter=info.name.includes('#')?1:0;return {midi:m,letter,alter,acc:alter?'sharp':'',octave:info.octave,label:info.name+info.octave,degree:i===midis.length-1?'Melodía':structural?'Voz del acorde':'Paso disminuido',hand:i===0?'left':'right'};});
+    return {symbol,notes,help:`${names[layout]} · melodía ${midiToInfo(top).name}${midiToInfo(top).octave}. ${structural?'Nota estructural: armonización de sexta.':'Nota de paso: acorde disminuido de enlace.'} La voz superior permanece fija.`};
+  }
+  function drop2Sequence(){
+    const root=Number($('Root').value),layout=$('DropLayout').value,register=Number($('Register').value),up=$('DropDirection').value==='up';let steps=[0,2,4,5,7,8,9,11,12];
+    if(!up)steps=steps.slice().reverse();return steps.map(offset=>drop2Step(root,offset,layout,register));
+  }
   function display(v){
     current=v;$('Title').textContent=v.symbol;$('Help').textContent=v.help;
     $('Notes').innerHTML=v.notes.map(n=>`<li data-hand="${n.hand}">${esc(n.label)} · ${esc(n.degree)} · ${n.hand==='left'?'MI':'MD'}</li>`).join('');
@@ -70,7 +95,7 @@
     const pattern=patterns[Number($('Pattern').value)],full=api.fullFormulas[pattern.name];
     $('Formula').disabled=!full;if(!full)$('Formula').value='pattern';
     const selectedPattern=$('Formula').value==='full'?{name:pattern.name,intervals:full}:pattern;
-    const invCount=state.tab==='build'?selectedPattern.intervals.length:preset.kind==='shape'?4:1;
+    const invCount=state.tab==='build'?selectedPattern.intervals.length:state.tab==='jazz'&&preset.kind==='shape'?4:1;
     const inv=Math.min(Number($('Inversion').value)||0,invCount-1);
     $('Inversion').innerHTML=options(Array.from({length:invCount},(_,i)=>[i,i?`${i}ª inversión`:'Fundamental / posición original']));$('Inversion').value=String(inv);
     $('Inversion').disabled=invCount===1;$('Open').disabled=preset.kind!=='shape';$('Hands').disabled=preset.kind!=='rootless';
@@ -80,7 +105,11 @@
       $('Hands').parentElement.hidden=preset.kind!=='rootless';
     }
     $('Steps').innerHTML='';
-    if(state.tab==='progression') {
+    if(state.tab==='drop2'){
+      sequence=drop2Sequence();state.step=Math.min(state.step,sequence.length-1);
+      sequence.forEach((v,i)=>{const b=document.createElement('button');b.textContent=(i+1)+' · '+v.notes[v.notes.length-1].label;b.setAttribute('aria-pressed',String(i===state.step));b.onclick=()=>{stop();state.step=i;display(v);$('Steps').querySelectorAll('button').forEach((x,j)=>x.setAttribute('aria-pressed',String(i===j)));};$('Steps').appendChild(b);});
+      display(sequence[state.step]);status('Compara posición cerrada, Shearing, Drop 2 tradicional y modernizado. La melodía permanece arriba.');
+    } else if(state.tab==='progression') {
       if($('Style').value.startsWith('baga-')&&$('Minor').value==='1'){$('Minor').value='0';status('Las Bagas A/B de este banco corresponden al ii–V–I mayor.');}
       sequence=api.progression(root,$('Minor').value==='1',$('Style').value,$('Smooth').value==='1');
       sequence.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.roman+' · '+v.symbol;b.setAttribute('aria-pressed',String(i===state.step));b.onclick=()=>{stop();state.step=i;display(v);$('Steps').querySelectorAll('button').forEach((x,j)=>x.setAttribute('aria-pressed',String(i===j)));};$('Steps').appendChild(b);});
@@ -134,7 +163,7 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
   const params=new URLSearchParams(location.search);
   if(params.get('bank')) {
-    const tab=params.get('bank');state.tab=['build','jazz','progression'].includes(tab)?tab:'build';
+    const tab=params.get('bank');state.tab=['build','jazz','drop2','progression'].includes(tab)?tab:'build';
     const root=Number(params.get('root'));if(Number.isInteger(root)&&root>=0&&root<12)$('Root').value=String(root);
     if(api.presets.some(p=>p.id===params.get('voicing')))$('Voicing').value=params.get('voicing');
     if(params.get('minor')==='1')$('Minor').value='1';

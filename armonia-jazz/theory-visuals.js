@@ -92,6 +92,35 @@
       root.querySelector('.tv-play').addEventListener('click',function(){playNotes(config.notes.map(function(n){return 60+state.root+n.offset;}),{duration:.36,gain:.7});});
     } paint();
   }
+  function renderBebop(root, config) {
+    var families={
+      dominant:{label:"Bebop dominante",steps:[0,2,4,5,7,9,10,11],tones:[0,4,7,10],degrees:["1","2","3","4","5","6","♭7","7"]},
+      major:{label:"Bebop mayor",steps:[0,2,4,5,7,8,9,11],tones:[0,4,7,11],degrees:["1","2","3","4","5","♯5/♭6","6","7"]},
+      minor:{label:"Bebop menor",steps:[0,2,3,5,7,8,9,11],tones:[0,3,7,11],degrees:["1","2","♭3","4","5","♭6","6","7"]}
+    };
+    var state={root:0,family:"dominant",start:0,direction:"up"};
+    function line(){
+      var f=families[state.family],start=f.tones[state.start%f.tones.length],base=f.steps.indexOf(start),out=[];
+      for(var i=0;i<8;i++){
+        var raw=state.direction==="up"?base+i:base-i,wrap=Math.floor(raw/8),index=((raw%8)+8)%8;
+        out.push({offset:f.steps[index]+wrap*12,label:f.degrees[index],strong:i%2===0,chordTone:f.tones.indexOf(f.steps[index])>=0});
+      }
+      return out;
+    }
+    function paint(){
+      var f=families[state.family],notes=line(),cells=notes.map(function(n,i){var pc=((state.root+n.offset)%12+12)%12;return '<div class="tv-note-step'+(n.strong?' is-strong':'')+'"><small>'+(n.strong?'Tiempo fuerte':'Tiempo débil')+'</small><strong>'+esc(chord(pc,""))+'</strong><span>'+esc(n.label)+(n.chordTone?' · acorde':' · paso')+'</span></div>';}).join('<span class="tv-arrow">→</span>');
+      root.innerHTML='<section class="theory-viz bebop-align"><div class="tv-head"><div><span class="tv-kicker">Laboratorio de alineación</span><h4>Alineación rítmica de escalas bebop</h4><p>Las posiciones alternan fuerte/débil. Cambia el punto de partida: una escala de ocho notas no garantiza por sí sola que los tonos del acorde queden bien alineados.</p></div><div class="tv-controls">'+tonicControl(state.root)+'<label>Escala <select class="tv-bebop-family"><option value="dominant">Dominante</option><option value="major">Mayor</option><option value="minor">Menor</option></select></label><label>Inicio <select class="tv-bebop-start">'+f.tones.map(function(_,i){return '<option value="'+i+'">'+["1","3","5","7"][i]+'</option>';}).join('')+'</select></label><label>Dirección <select class="tv-bebop-direction"><option value="up">Ascendente</option><option value="down">Descendente</option></select></label><button class="tv-play" type="button">▶ Escuchar</button></div></div><div class="tv-note-line">'+cells+'</div><p class="tv-footer">Dorado: posición métrica fuerte. Observa si coincide con una nota estructural y desplaza el inicio cuando sea necesario.</p></section>';
+      root.querySelector('.tv-tonic').value=state.root;
+      root.querySelector('.tv-bebop-family').value=state.family;
+      root.querySelector('.tv-bebop-start').value=state.start;
+      root.querySelector('.tv-bebop-direction').value=state.direction;
+      root.querySelector('.tv-tonic').onchange=function(e){state.root=Number(e.target.value);paint();};
+      root.querySelector('.tv-bebop-family').onchange=function(e){state.family=e.target.value;state.start=0;paint();};
+      root.querySelector('.tv-bebop-start').onchange=function(e){state.start=Number(e.target.value);paint();};
+      root.querySelector('.tv-bebop-direction').onchange=function(e){state.direction=e.target.value;paint();};
+      root.querySelector('.tv-play').onclick=function(){playNotes(notes.map(function(n){return 60+state.root+n.offset;}),{duration:.32,gain:.72});};
+    } paint();
+  }
 
   var P = function (title, note, steps, footer) { return { type: "progression", title: title, note: note, steps: steps, footer: footer }; };
   var S = function (o, suffix, degree, role) { return { offset: o, suffix: suffix, degree: degree, role: role }; };
@@ -175,12 +204,23 @@
   VISUALS.topVoiceOstinato=P("Voz superior y ostinato","La voz aguda permanece reconocible mientras cambian bajo y función.",[S(0,"maj7","Imaj7","Melodía: E"),S(9,"m7","vi7","Melodía: E"),S(2,"m7","ii7","Melodía: F"),S(7,"7","V7","Melodía: F")]);
   VISUALS.pentatonicLab={type:"sequence",title:"Pentatónica menor y blue note",note:"Escucha 1–♭3–4–♭5–5–♭7–1.",notes:[{offset:0,label:"1"},{offset:3,label:"♭3"},{offset:5,label:"4"},{offset:6,label:"♭5"},{offset:7,label:"5"},{offset:10,label:"♭7"},{offset:12,label:"1"}]};
   VISUALS.swingMap={type:"table",title:"Mapa de articulación jazz",note:"La sensación nace de duración, acento y colocación.",rows:[{name:"Swing",formula:"larga–corta flexible",value:"Corcheas",use:"Flujo"},{name:"Anticipación",formula:"antes del tiempo fuerte",value:"& de 4",use:"Impulso"},{name:"Retardo",formula:"después del punto esperado",value:"Behind",use:"Relajación"},{name:"Ghost note",formula:"ataque muy ligero",value:"(nota)",use:"Textura rítmica"}]};
-  VISUALS.bebopLine={type:"sequence",title:"Aproximación bebop hacia la tercera",note:"La línea rodea E y resuelve en una nota estructural de Cmaj7.",notes:[{offset:7,label:"5"},{offset:5,label:"4"},{offset:3,label:"aprox."},{offset:4,label:"3 objetivo"},{offset:7,label:"5"},{offset:11,label:"7"},{offset:12,label:"1"}]};
+  VISUALS.bebopLine={type:"bebop"};
   VISUALS.guideToneLine={type:"sequence",title:"Línea de notas guía sobre ii–V–I",note:"C–B–B y F–F–E describen la progresión con movimiento mínimo.",notes:[{offset:0,label:"7ª de ii"},{offset:-1,label:"3ª de V"},{offset:-1,label:"7ª de I"},{offset:5,label:"3ª de ii"},{offset:5,label:"7ª de V"},{offset:4,label:"3ª de I"}]};
   VISUALS.motiveLab={type:"sequence",title:"Motivo y secuencia",note:"Un contorno corto se repite desde otro grado.",notes:[{offset:0,label:"motivo"},{offset:2,label:"motivo"},{offset:4,label:"motivo"},{offset:2,label:"secuencia"},{offset:4,label:"secuencia"},{offset:5,label:"secuencia"}]};
   VISUALS.iiVImprovisation=P("Capas para improvisar ii–V–I","Escucha primero la función; después conecta notas guía y cromatismos.",[S(2,"m7","ii7","Preparación"),S(7,"7","V7","Tensión"),S(0,"maj7","Imaj7","Resolución"),S(9,"7","VI7","Turnaround")]);
   VISUALS.outsideLab={type:"sequence",title:"Inside → outside → resolución",note:"El desplazamiento cromático tiene sentido porque regresa a una nota objetivo.",notes:[{offset:0,label:"inside"},{offset:4,label:"inside"},{offset:7,label:"inside"},{offset:1,label:"outside"},{offset:5,label:"outside"},{offset:8,label:"outside"},{offset:7,label:"5 objetivo"},{offset:4,label:"3 objetivo"}]};
   VISUALS.earPath=P("Ruta auditiva de un standard","Canta y reconoce cada función antes de improvisar.",[S(0,"maj7","Imaj7","Centro"),S(2,"m7","ii7","Preparación"),S(7,"7","V7","Tensión"),S(0,"maj7","Imaj7","Resolución")],"Canta las fundamentales y después las terceras y séptimas.");
+  VISUALS.jazzTerms={type:"table",title:"Vocabulario para tocar con otros músicos",note:"Reconoce el término y conviértelo en una acción musical concreta.",rows:[
+    {name:"Changes",formula:"Progresión",example:"Leer la forma",use:"Seguir los acordes"},
+    {name:"Comping",formula:"Acompañamiento",example:"Ritmo + voicing",use:"Sostener al solista"},
+    {name:"Trading 4s",formula:"4 compases",example:"Pregunta / respuesta",use:"Improvisación colectiva"},
+    {name:"Two-feel",formula:"Pulso en blancas",example:"Bajo en 1 y 3",use:"Sensación abierta"}
+  ]};
+  VISUALS.symmetricFamilies={type:"table",title:"Familias simétricas: menos material, más tonalidades",note:"Varias fundamentales pueden compartir exactamente la misma colección.",rows:[
+    {name:"Tonos enteros",formula:"T–T–T–T–T–T",example:"2 colecciones",use:"7♯5 / 7♯11"},
+    {name:"Disminuida H–W",formula:"S–T alternados",example:"3 colecciones",use:"Dominante 7♭9"},
+    {name:"Disminuida W–H",formula:"T–S alternados",example:"3 colecciones",use:"Acorde °7"}
+  ]};
   VISUALS.leadSheet = { type: "form", title: "Lectura rápida de un lead sheet", note: "Cada caja representa un compás: el símbolo superior indica armonía; la letra organiza la forma y la melodía vive sobre esa cuadrícula.", bars: [S(0,"maj7","A · 1","Compás 1"),S(2,"m7","A · 2","Cambio"),S(7,"7","A · 3","Tensión"),S(0,"maj7","A · 4","Resolución"),S(5,"maj7","B · 1","Bridge"),S(7,"7","B · 2","Dirección"),S(0,"maj7","A · 1","Retorno"),S(7,"7","A · 2","Turnaround")] };
   VISUALS.aaba = { type: "form", title: "Forma AABA y rhythm changes", note: "La forma organiza la escucha: dos A afirman el material, B contrasta y A regresa.", bars: [S(0,"maj7","I","A1"),S(9,"7","VI7","A1"),S(2,"m7","ii7","A1"),S(7,"7","V7","A1"),S(0,"maj7","I","A2"),S(9,"7","VI7","A2"),S(2,"m7","ii7","A2"),S(7,"7","V7","A2"),S(4,"7","III7","B"),S(9,"7","VI7","B"),S(2,"7","II7","B"),S(7,"7","V7","B"),S(0,"maj7","I","A3"),S(9,"7","VI7","A3"),S(2,"m7","ii7","A3"),S(7,"7","V7","A3")] };
   VISUALS.composition = { type: "form", title: "Diseño de una forma para componer", note: "Piensa la composición como recorrido: motivo, contraste, desarrollo y retorno.", bars: [S(0,"maj7","A","Motivo"),S(5,"maj7","A","Respuesta"),S(2,"m7","B","Contraste"),S(7,"7","B","Tensión"),S(0,"maj7","A'","Retorno"),S(9,"m7","A'","Variación"),S(2,"m7","C","Puente"),S(7,"7","C","Preparación")] };
@@ -193,6 +233,7 @@
     if (config.type === "table") renderTable(root, config);
     else if (config.type === "form") renderForm(root, config);
     else if (config.type === "sequence") renderSequence(root, config);
+    else if (config.type === "bebop") renderBebop(root, config);
     else renderProgression(root, config);
   }
   global.TheoryVisuals = { mount: mount };

@@ -31,6 +31,7 @@ body {
 .theory-visual-mount { margin-top: 22px; }
 .theory-viz { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: rgba(255,250,240,.025); box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
 .tv-head { display: flex; justify-content: space-between; gap: 20px; padding: 18px 20px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg, rgba(212,168,79,.12), rgba(154,184,170,.04)); }
+.bebop-align .tv-note-step.is-strong{border-color:var(--accent);background:rgba(212,168,79,.14)}
 .tv-kicker { display: block; margin-bottom: 3px; color: var(--accent); font-size: .65rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .tv-head h4 { margin: 0; font-size: 1rem; }
 .tv-head p { max-width: 700px; margin: 5px 0 0; color: var(--muted); font-size: .84rem; line-height: 1.45; }

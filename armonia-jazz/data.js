@@ -921,6 +921,19 @@ const LEVELS = [
             o para acordes a dos manos; se combinan con las tensiones (9, #11, 13) sustituyendo la fundamental
             o la 5ª, tal como viste en los voicings rootless del Nivel 3.</li>
           </ul>
+          <h4>Drop 2 como armonización melódica</h4>
+          <p>La técnica no se limita a redistribuir un acorde aislado. En una línea armonizada, la melodía permanece como <b>voz superior</b>; debajo se construye primero una posición cerrada y después se baja una octava la segunda voz contada desde arriba. Así cada nota de la melodía conduce un bloque de cuatro voces.</p>
+          <p>En una escala bebop mayor, las notas estructurales pueden armonizarse con el acorde de sexta y las notas cromáticas o de paso con disminuidos de enlace. La alternancia produce movimiento I–V y mantiene una voz superior continua. No es una regla automática para cualquier melodía: hay que comprobar función, duración y acorde siguiente.</p>
+          <h4>Cuatro disposiciones para comparar</h4>
+          <ul>
+            <li><b>4-way close</b>: cuatro voces dentro de una octava.</li>
+            <li><b>Estilo Shearing</b>: posición cerrada con la melodía duplicada una octava abajo.</li>
+            <li><b>Drop 2 tradicional</b>: la segunda voz desde arriba baja una octava.</li>
+            <li><b>Drop 2 modernizado</b>: conserva la melodía y sustituye alguna voz interior por 9, 7 mayor, 13 u otro color apropiado.</li>
+          </ul>
+          <p><b>Registro:</b> una disposición puede ser teóricamente correcta y sonar turbia si queda demasiado grave. Las segundas y terceras cerradas necesitan más altura; abre o transpón el bloque cuando las voces internas pierdan definición.</p>
+          <p><b>Articulación:</b> prueba la mano derecha más ligera o staccato y la voz grave más sostenida. La línea inferior puede convertirse en una contramelodía, pero durante el comping conviene dejar espacio al solista y evitar que los cromatismos interiores compitan con su frase.</p>
+          <p><a class="soft-btn" href="../piano-virtual/index.html?bank=drop2">Abrir el laboratorio Drop 2 melódico en Piano Virtual →</a></p>
           <p><b>Formas reales en el diapasón:</b> aquí tienes el drop 2 (raíz en el bajo) de los 8 tipos de
           tétrada más comunes, calculado con raíz en Do y organizado por 6ª y 5ª cuerda — exactamente como
           pediste, para que veas la forma concreta en vez de solo leerla:</p>
@@ -1100,6 +1113,9 @@ const LEVELS = [
       q("¿En qué consiste un voicing 'drop 2'?", ["Bajar la nota más grave una octava", "Bajar la segunda voz desde arriba una octava", "Subir todas las voces una octava", "Eliminar la 5ª del acorde"], 1),
       q("¿Por qué el drop 2 es el voicing más idiomático en guitarra?", ["Porque usa solo dos notas", "Porque encaja naturalmente en los sets de 4 cuerdas del mástil", "Porque no requiere tensiones", "Porque siempre incluye la fundamental en el bajo"], 1),
       q("¿Qué voicing resulta de bajar la 2ª y la 4ª voz (la más grave) una octava?", ["Drop 3", "Drop 2&4", "Close voicing", "Drop 2&3"], 1),
+      q("Al armonizar una melodía en Drop 2, ¿qué voz debe conservarse arriba?", ["La fundamental", "La melodía", "La quinta", "La voz más grave"], 1),
+      q("¿Qué indica que un Drop 2 está colocado demasiado grave?", ["Las voces pierden definición y suenan turbias", "La melodía se vuelve más rápida", "El acorde cambia de función", "Aparece una nueva tonalidad"], 0),
+      q("Durante el comping, ¿cuándo conviene usar líneas Drop 2 muy activas?", ["Cuando hay espacio en la frase del solista", "Durante cada nota del solo", "Solo sobre la tónica", "Únicamente sin bajo"], 0),
       q("¿Qué es un polichord?", ["Un acorde con muchas tensiones", "Dos acordes/tríadas independientes tocados simultáneamente", "Un acorde cuartal", "Una escala simétrica"], 1),
       q("El desarrollo motívico incluye técnicas como...", ["Solo transposición literal", "Repetición, secuencia, inversión y variación rítmica", "Solo cambios de tonalidad", "Solo cambios de compás"], 1),
       q("¿Qué modo se usa típicamente sobre un maj7(#5)?", ["Lidio aumentado", "Mixolidio", "Dórico", "Locrio"], 0),
@@ -1128,6 +1144,8 @@ const LEVELS = [
           <p>La pentatónica menor contiene 1–♭3–4–5–♭7; la mayor contiene 1–2–3–5–6. Las escalas blues añaden la <b>blue note</b>: #4/♭5 en la menor y ♭3 en la mayor.</p>
           <p>Superponer una pentatónica permite destacar tensiones sin abandonar una forma melódica reconocible. Sobre Dm7, D menor pentatónica ofrece 1, ♭3, 4, 5 y ♭7; E menor pentatónica añade 9, 11 y 13 y produce un color dórico.</p>
           <p>Practica cada material como motivo, no como una escala ascendente y descendente.</p>
+          <p>La <b>pentatónica menor 6</b> contiene 1–2–♭3–5–6. Además de m6 y m(maj7), puede superponerse sobre un m7♭5 desde su sexta y sobre un maj7♯11 desde su ♭3. Comprueba siempre la melodía y la función antes de tratar una relación como regla.</p>
+          <div id="minorSixPentatonicMount"></div>
         `
       },
       {
@@ -1141,9 +1159,9 @@ const LEVELS = [
       {
         title: "5.3 Cromatismo y vocabulario bebop",
         html: `
-          <p>El lenguaje bebop coloca normalmente notas estructurales en tiempos fuertes y utiliza cromatismos en posiciones débiles. La <b>escala bebop dominante</b> añade la 7 natural a la mixolidia; así conserva la alineación rítmica al tocar corcheas continuas.</p>
+          <p>El lenguaje bebop coloca normalmente notas estructurales en tiempos fuertes y utiliza cromatismos en posiciones débiles. La <b>bebop dominante</b> añade 7 natural a la mixolidia; la <b>bebop mayor</b> añade ♯5/♭6 a la escala mayor; y la <b>bebop menor</b> añade ♭6 a la menor melódica ascendente.</p>
           <p>Las aproximaciones pueden venir de un semitono inferior, superior o de ambos lados. Un <b>enclosure</b> rodea la nota objetivo antes de resolver en ella.</p>
-          <p>El cromatismo funciona cuando tiene destino: primero elige la nota objetivo del siguiente acorde y después diseña la aproximación.</p>
+          <p>El cromatismo funciona cuando tiene destino: primero elige la nota objetivo del siguiente acorde y después diseña la aproximación. Usa el laboratorio para comenzar desde 1, 3, 5 o 7, cambiar la dirección y comprobar qué notas caen en los tiempos fuertes.</p>
         `
       },
       {
@@ -1185,6 +1203,23 @@ const LEVELS = [
           <p>En un standard sigue este orden: canta las fundamentales, reconoce la forma, canta las notas guía, toca la melodía y finalmente improvisa usando una sola idea del nivel.</p>
           <p>La práctica auditiva debe ser breve y frecuente. Un concepto se considera aprendido cuando puede reconocerse, cantarse y aplicarse en música real.</p>
         `
+      },
+      {
+        title: "5.9 Glosario práctico de interpretación jazz",
+        html: `
+          <p><b>Changes</b> son los cambios de acordes de un tema; <b>head</b> es su melodía principal; <b>comping</b> es el acompañamiento rítmico-armónico que sostiene al solista.</p>
+          <p><b>Groove</b> describe la sensación conjunta de pulso, subdivisión y articulación. Un <b>two-feel</b> organiza el bajo principalmente en 1 y 3 y suele sentirse más abierto que el <i>four-feel</i> o walking.</p>
+          <p><b>Trading 2s, 4s u 8s</b> significa intercambiar improvisaciones de dos, cuatro u ocho compases. Para practicarlo, conserva la forma, responde a la idea anterior y termina la frase antes del relevo.</p>
+          <p><b>Head in → solos → head out</b> resume una forma frecuente de interpretación: tema, improvisaciones sobre los changes y regreso al tema.</p>
+        `
+      },
+      {
+        title: "5.10 Referencia rápida de escalas y voicings",
+        html: `
+          <p>Esta referencia reúne el material que suele quedar disperso: elige acordes, voicings o escalas, transpón la tónica y compáralos en pentagrama, piano y diapasón.</p>
+          <div id="jazzGlossaryLabMount"></div>
+          <p><b>Simetría útil:</b> tonos enteros produce solo dos colecciones diferentes; cada forma disminuida produce tres. Transponer por tonos enteros o terceras menores puede cambiar el nombre funcional sin cambiar la colección de alturas.</p>
+        `
       }
     ],
     quiz: [
@@ -1195,6 +1230,8 @@ const LEVELS = [
       q("¿Qué es una anticipación?", ["Atacar antes del punto esperado", "Tocar siempre tarde", "Cambiar de tonalidad", "Eliminar un pulso"], 0),
       q("¿Qué debe practicarse antes de añadir muchas alturas?", ["El fraseo rítmico sobre una nota", "Solo escalas rápidas", "Acordes sin pulso", "La digitación más difícil"], 0),
       q("La escala bebop dominante añade a la mixolidia...", ["La 7 natural", "La b2", "La #4", "La b6"], 0),
+      q("¿Qué nota cromática añade la escala bebop mayor?", ["#5/b6", "b2", "b7", "#4"], 0),
+      q("¿Qué fórmula corresponde a la pentatónica menor 6?", ["1-2-b3-5-6", "1-b3-4-5-b7", "1-3-5-6-7", "1-b2-b3-b5-b6"], 0),
       q("¿Qué hace un enclosure?", ["Rodea una nota objetivo antes de resolver", "Repite una escala completa", "Elimina las notas guía", "Cambia el compás"], 0),
       q("El cromatismo bebop necesita principalmente...", ["Una nota objetivo clara", "Muchas notas al azar", "Un tempo muy rápido", "Un acorde disminuido"], 0),
       q("¿Qué notas describen mejor la función de un acorde con séptima?", ["3 y 7", "1 y 5", "9 y 11", "Solo la fundamental"], 0),
@@ -1208,6 +1245,8 @@ const LEVELS = [
       q("¿Qué debe mantenerse al atravesar un ii-V-I?", ["Una línea melódica continua", "Una escala aislada por acorde", "La misma fundamental", "Silencio en el V"], 0),
       q("¿Qué organiza un triad pair?", ["Dos tríadas complementarias", "Dos tempos simultáneos", "Dos compases vacíos", "Una sola nota"], 0),
       q("Un recurso outside resulta convincente cuando...", ["Regresa con claridad a una nota objetivo", "Nunca resuelve", "Ocupa todo el solo", "No tiene pulso"], 0),
+      q("¿Qué significa hacer trading 4s?", ["Alternar improvisaciones de cuatro compases", "Tocar cuatro tonalidades", "Repetir cuatro acordes", "Cambiar a compás de 4/4"], 0),
+      q("¿Cuántas colecciones diferentes genera la escala de tonos enteros?", ["Dos", "Tres", "Seis", "Doce"], 0),
       q("¿Qué importa más que la cantidad de alteraciones?", ["La claridad rítmica y la resolución", "La velocidad", "El volumen", "La extensión del instrumento"], 0),
       q("Antes de improvisar un standard conviene reconocer...", ["Su forma y fundamentales", "Solo su título", "La biografía del autor", "Únicamente el último acorde"], 0),
       q("Un concepto está integrado auditivamente cuando puede...", ["Reconocerse, cantarse y aplicarse", "Definirse de memoria solamente", "Tocarse rápido una vez", "Escribirse sin escucharse"], 0),

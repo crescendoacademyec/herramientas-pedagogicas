@@ -80,6 +80,10 @@
     var octMount = scope.querySelector("#octatonicMount");
     if (octMount && window.ChordLab) window.ChordLab.mount(octMount, { group: "scale", item: "diminishedWH", title: "Escalas octatónicas" });
     else if (octMount) octMount.innerHTML = window.ChordRef.renderOctatonicSection();
+    var minorSixMount = scope.querySelector("#minorSixPentatonicMount");
+    if (minorSixMount && window.ChordLab) window.ChordLab.mount(minorSixMount, { group: "scale", item: "minorSixPentatonic", title: "Pentatónica menor 6 y sus aplicaciones" });
+    var glossaryMount = scope.querySelector("#jazzGlossaryLabMount");
+    if (glossaryMount && window.ChordLab) window.ChordLab.mount(glossaryMount, { group: "scale", item: "bebopDominant", title: "Glosario visual interactivo" });
     var usMount = scope.querySelector("#upperStructMount");
     if (usMount) usMount.innerHTML = window.ChordRef.renderUpperStructuresSection();
     var dropMount = scope.querySelector("#dropVoicingMount");
@@ -140,6 +144,8 @@
     ,"5.6 Improvisación sobre ii–V–I y turnarounds": "iiVImprovisation"
     ,"5.7 Triad pairs, cuartas y recursos outside": "outsideLab"
     ,"5.8 Entrenamiento auditivo y práctica sobre standards": "earPath"
+    ,"5.9 Glosario práctico de interpretación jazz": "jazzTerms"
+    ,"5.10 Referencia rápida de escalas y voicings": "symmetricFamilies"
   };
 
   // ---------- Navegación entre vistas ----------
