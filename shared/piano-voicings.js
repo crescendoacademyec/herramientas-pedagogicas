@@ -21,6 +21,8 @@
     {id:'minor-b',label:'Menor rootless B',suffix:'m9',offsets:[10,14,15,19],degrees:[7,9,3,5],kind:'rootless',help:'♭7–9–♭3–5. El registro se ajusta para evitar saltos innecesarios.'},
     {id:'dominant-a',label:'Dominante rootless A',suffix:'13',offsets:[4,9,10,14],degrees:[3,13,7,9],kind:'rootless',help:'3–13–♭7–9. La quinta se sustituye por la trecena.'},
     {id:'dominant-b',label:'Dominante rootless B',suffix:'13',offsets:[10,14,16,21],degrees:[7,9,3,13],kind:'rootless',help:'♭7–9–3–13. Conserva las notas comunes al enlazar ii–V–I.'},
+    {id:'baga-tonic-a',label:'Tónica 6/9 · Baga A',suffix:'6/9',offsets:[4,7,9,14],degrees:[3,5,6,9],kind:'rootless',help:'3–5–6–9. Tónica mayor sin fundamental, distinta de maj9 porque usa sexta en lugar de séptima mayor.'},
+    {id:'baga-tonic-b',label:'Tónica 6/9 · Baga B',suffix:'6/9',offsets:[9,14,16,19],degrees:[6,9,3,5],kind:'rootless',help:'6–9–3–5. Segunda disposición de la tónica 6/9 para enlazar el ii–V–I sin saltos amplios.'},
     {id:'half-dim',label:'Semidisminuido · forma menor sexta',suffix:'m7(b5)',offsets:[0,3,6,10],degrees:[1,3,5,7],kind:'shape',help:'Bm7♭5 y Dm6 comparten notas. El bajo y la función determinan el nombre.'},
     {id:'dominant-dim',label:'Dominante ♭9 · forma disminuida',suffix:'7(b9)',offsets:[0,16,19,22,25],degrees:[1,3,5,7,9],hands:['left','right','right','right','right'],help:'Sobre G: bajo G y B–D–F–A♭. La derecha forma Bdim7; juntos producen G7♭9.'},
     {id:'dominant-min6',label:'Dominante 9 · forma menor sexta',suffix:'9',offsets:[0,19,22,26,28],degrees:[1,5,7,9,3],hands:['left','right','right','right','right'],help:'Sobre G: Dm6 en la derecha (D–F–A–B) y G en el bajo forman G9.'},
@@ -75,6 +77,13 @@
     return {symbol:roots[root]+p.suffix,notes,help:p.help,id:p.id};
   }
   function progression(root,minor=false,style='rootless',smooth=true) {
+    const baga=style==='baga-a'||style==='baga-b';
+    if(baga&&!minor){
+      const ids=style==='baga-a'?['minor-a','dominant-b','baga-tonic-a']:['minor-b','dominant-a','baga-tonic-b'];
+      const steps=[2,7,0].map((delta,i)=>({...voice(ids[i],mod(root+delta)),roman:['ii · Baga '+style.at(-1).toUpperCase(),'V · Baga '+style.at(-1).toUpperCase(),'I · Baga '+style.at(-1).toUpperCase()][i]}));
+      if(smooth) smoothProgression(steps);
+      return steps;
+    }
     const ids=minor?(style==='shell'?['half-dim','shell-dominant','minor6']:style==='sixth'?['half-dim','dominant-dim','minor6']:['half-dim','altered','minor6']):
       (style==='shell'?['shell-minor','shell-dominant','shell-major']:style==='sixth'?['minor-upper6','dominant-min6','major-upper6']:['minor-a','dominant-b','major-a']);
     // In major, the ii is a minor seventh, not a half-diminished chord.
@@ -83,13 +92,16 @@
       const v=voice(ids[i],r);
       return {...v,roman:minor?['iiø7','V7','i6'][i]:['ii','V','I'][i]};
     });
-    if(smooth) for(let i=1;i<steps.length;i++) {
+    if(smooth) smoothProgression(steps);
+    return steps;
+  }
+  function smoothProgression(steps) {
+    for(let i=1;i<steps.length;i++) {
       const avg=ns=>ns.reduce((s,n)=>s+n.midi,0)/ns.length;
       const prev=avg(steps[i-1].notes);
       const shift=[-12,0,12].sort((a,b)=>Math.abs(avg(steps[i].notes)+a-prev)-Math.abs(avg(steps[i].notes)+b-prev))[0];
       steps[i].notes=steps[i].notes.map(n=>({...n,midi:n.midi+shift,octave:n.octave+shift/12,label:n.label.replace(/-?\d+$/,String(n.octave+shift/12))}));
     }
-    return steps;
   }
   const api={roots,presets,fullFormulas,construct,voice,progression,spell};
   global.CrescendoPianoVoicings=api;

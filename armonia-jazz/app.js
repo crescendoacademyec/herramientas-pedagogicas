@@ -213,6 +213,7 @@
         body.innerHTML = topic.html + (TOPIC_VISUALS[topic.title] ? '<div class="theory-visual-mount" data-viz="' + TOPIC_VISUALS[topic.title] + '"></div>' : '');
         populateGeneratedDiagrams(body);
         window.CrescendoJazzPiano?.attach(body, topic.title);
+        window.CrescendoBagaLab?.mount(body);
       }
 
       card.appendChild(head);
@@ -503,6 +504,11 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     loadState();
+    var params = new URLSearchParams(location.search);
+    var directLevel = Number(params.get("level"));
+    if (Number.isInteger(directLevel) && directLevel >= 1 && directLevel <= LEVELS.length) state.levelIndex = directLevel - 1;
+    var directTopic = Number(params.get("topic"));
+    if (Number.isInteger(directTopic) && directTopic >= 1 && directTopic <= currentLevel().topics.length) state.topicIndex = directTopic - 1;
     var directView = location.hash.match(/^#(home|theory|improv|library|quiz)View$/);
     if (directView) state.view = directView[1];
     bindEvents();

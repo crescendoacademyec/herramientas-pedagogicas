@@ -16,7 +16,7 @@
       <label data-for="jazz">Disposición de sextas y disminuidos<select id="bankOpen">${options([[0,'Cerrada'],[1,'Abierta · drop 2']])}</select></label>
       <label data-for="jazz">Rootless: reparto<select id="bankHands">${options([['both','Dos manos'],['left','Mano izquierda']])}</select></label>
       <label data-for="progression">Modo<select id="bankMinor">${options([[0,'Mayor'],[1,'Menor']])}</select></label>
-      <label data-for="progression">Familia<select id="bankStyle">${options([['rootless','Rootless'],['shell','Shells / estructura básica'],['sixth','Sextas y disminuidos']])}</select></label>
+      <label data-for="progression">Familia<select id="bankStyle">${options([['rootless','Rootless general'],['baga-a','Baga A · ii–V–I mayor'],['baga-b','Baga B · ii–V–I mayor'],['shell','Shells / estructura básica'],['sixth','Sextas y disminuidos']])}</select></label>
       <label data-for="progression">Registro del enlace<select id="bankSmooth">${options([[1,'Acercar registros'],[0,'Registro de partida']])}</select></label>
       <label>Tempo de práctica (BPM)<input id="bankTempo" type="number" min="30" max="180" value="70"></label>
     </div>
@@ -81,6 +81,7 @@
     }
     $('Steps').innerHTML='';
     if(state.tab==='progression') {
+      if($('Style').value.startsWith('baga-')&&$('Minor').value==='1'){$('Minor').value='0';status('Las Bagas A/B de este banco corresponden al ii–V–I mayor.');}
       sequence=api.progression(root,$('Minor').value==='1',$('Style').value,$('Smooth').value==='1');
       sequence.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.roman+' · '+v.symbol;b.setAttribute('aria-pressed',String(i===state.step));b.onclick=()=>{stop();state.step=i;display(v);$('Steps').querySelectorAll('button').forEach((x,j)=>x.setAttribute('aria-pressed',String(i===j)));};$('Steps').appendChild(b);});
       display(sequence[state.step]);
@@ -137,7 +138,7 @@
     const root=Number(params.get('root'));if(Number.isInteger(root)&&root>=0&&root<12)$('Root').value=String(root);
     if(api.presets.some(p=>p.id===params.get('voicing')))$('Voicing').value=params.get('voicing');
     if(params.get('minor')==='1')$('Minor').value='1';
-    if(['rootless','shell','sixth'].includes(params.get('style')))$('Style').value=params.get('style');
+    if(['rootless','baga-a','baga-b','shell','sixth'].includes(params.get('style')))$('Style').value=params.get('style');
     panel.open=true;requestAnimationFrame(()=>panel.scrollIntoView({block:'start'}));
   }
 })();

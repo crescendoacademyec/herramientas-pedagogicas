@@ -31,3 +31,13 @@ test('ii–V–I en doce tonos: el ii mayor es menor séptima, el menor es semid
     assert.ok(pcs.includes(3));assert.ok(pcs.includes(10));
   }
 });
+test('Baga A/B: fórmulas exactas del ii–V–I mayor en doce tonos',()=>{
+  const expected={
+    'baga-a':[[3,7,10,2],[10,2,4,9],[4,7,9,2]],
+    'baga-b':[[10,2,3,7],[4,9,10,2],[9,2,4,7]]
+  };
+  for(let root=0;root<12;root++)for(const style of Object.keys(expected)){
+    const seq=api.progression(root,false,style,false);assert.equal(seq.length,3);
+    seq.forEach((v,i)=>{validate(v);assert.deepEqual(v.notes.map(n=>(n.midi-root-[2,7,0][i]+120)%12),expected[style][i]);});
+  }
+});

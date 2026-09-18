@@ -13,6 +13,7 @@
       <p>En el banco puedes comparar el registro inicial con otro más cercano. Acercar registros no garantiza por sí solo la mejor conducción: observa también cada voz. Los ejemplos son generados por Crescendo y no requieren cargar partituras externas.</p>`
   });
   function attach(host,title){
+    if(/Sistema Baga/i.test(title))return;
     const sixth=/sextas, disminuidos|disminuidos de paso/i.test(title);
     const rootless=/rootless/i.test(title);
     const shell=/shell/i.test(title);

@@ -8,8 +8,9 @@
 .chord-bank summary{font-weight:700;color:#edc763;cursor:pointer}
 .chord-bank [hidden]{display:none!important}
 .bank-tabs,.bank-controls,.bank-actions,.bank-steps{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;align-items:end}
-.bank-controls label{display:grid;gap:6px;font-size:13px;max-width:100%}
-.bank-controls select{max-width:100%}.bank-controls input{width:90px}
+.bank-controls label{display:grid;gap:6px;font-size:13px;max-width:100%;min-width:150px;flex:0 1 auto}
+.bank-controls select{width:100%;min-width:150px;max-width:100%;text-overflow:ellipsis}.bank-controls input{width:110px}
+#bankRoot{min-width:145px}#bankMinor{min-width:150px}#bankStyle{min-width:245px}#bankSmooth{min-width:205px}#bankPattern,#bankVoicing{min-width:240px}#bankFormula{min-width:225px}#bankInversion{min-width:190px}#bankRegister,#bankOpen,#bankHands{min-width:205px}
 .chord-bank button[aria-pressed="true"],.chord-bank .bank-primary{background:#d5aa4c;color:#17130d}
 .bank-display{display:grid;grid-template-columns:minmax(210px,320px) minmax(0,1fr);gap:20px;align-items:center}
 .bank-score{background:#fbf7f0;border-radius:10px;min-height:220px;padding:14px;display:flex;align-items:center}
@@ -27,5 +28,5 @@
 .bank-key.black{height:63%;background:#171717;z-index:1}.bank-key.left{background:#58b9db}.bank-key.right{background:#e0b555}
 .bank-key.sounding{box-shadow:inset 0 -14px #85e4a4}.bank-preview-scroll{overflow-x:auto;margin:16px 0}
 .chord-bank a{color:#edc763}.chord-bank :focus-visible{outline:3px solid #a4d4e3;outline-offset:3px}
-@media(max-width:650px){.bank-display{grid-template-columns:1fr}.bank-controls label{width:100%}.bank-score{max-width:320px}.bank-tabs button{flex:1}.bank-controls select{width:100%}}
+@media(max-width:650px){.bank-display{grid-template-columns:1fr}.bank-controls label{width:100%;min-width:0}.bank-score{max-width:320px}.bank-tabs button{flex:1}.bank-controls select{width:100%;min-width:0}}
 @media(max-width:700px){.chord-bank[open]{max-height:70vh;flex:none}}
