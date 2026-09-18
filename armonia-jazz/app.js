@@ -149,13 +149,14 @@
       view = "quiz";
     }
     state.view = view;
-    ["home", "theory", "library", "quiz"].forEach(function (v) {
+    ["home", "theory", "improv", "library", "quiz"].forEach(function (v) {
       document.getElementById(v + "View").classList.toggle("hidden", v !== view);
     });
     document.querySelectorAll(".nav-btn").forEach(function (btn) {
       btn.classList.toggle("active", btn.getAttribute("data-view") === view);
     });
     document.getElementById("lockBanner").classList.toggle("hidden", !(state.quiz && !state.quiz.submitted));
+    if (history.replaceState) history.replaceState(null, "", "#" + view + "View");
     saveState();
   }
 
@@ -502,6 +503,8 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     loadState();
+    var directView = location.hash.match(/^#(home|theory|improv|library|quiz)View$/);
+    if (directView) state.view = directView[1];
     bindEvents();
     renderAll();
   });

@@ -35,9 +35,12 @@
 <script defer src="./theory-visuals.js"></script>
 <script defer src="./ata-library-index.js"></script>
 <script defer src="./ata-library.js"></script>
+<script defer src="./improvisation-engine.js"></script>
+<script defer src="./improvisation.js"></script>
 <script defer src="./app.js"></script>
 <link rel="stylesheet" href="../shared/course-actions.css">
 <link rel="stylesheet" href="./piano-bank.css">
+<link rel="stylesheet" href="./improvisation.css">
 </head>
 <body>
   <div class="page-bg" aria-hidden="true"></div>
@@ -102,6 +105,7 @@
       <nav class="main-nav" aria-label="Navegación principal">
         <button class="nav-btn active" data-view="home" type="button">Inicio</button>
         <button class="nav-btn" data-view="theory" type="button">Módulo teórico</button>
+        <button class="nav-btn" data-view="improv" type="button">Improvisación</button>
         <button class="nav-btn" data-view="library" type="button">Standards ATA</button>
         <button class="nav-btn" data-view="quiz" type="button">Cuestionario</button>
       </nav>
@@ -137,6 +141,10 @@
         <h3>Los 5 niveles de Armonía Jazz</h3>
         <div class="levels-grid" id="levelsOverviewGrid"></div>
       </div>
+    </section>
+
+    <section id="improvView" class="view hidden">
+      <div id="improvisationMount"></div>
     </section>
 
     <section id="libraryView" class="view hidden">
