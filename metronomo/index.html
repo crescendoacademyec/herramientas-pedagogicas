@@ -280,12 +280,13 @@
 
         .visualizer { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 4px 0 30px 0; min-height: 46px; flex-wrap: wrap; }
         .rhythm-lab{margin:0 0 24px;padding:16px;border:1px solid rgba(212,168,79,.28);border-radius:10px;background:rgba(0,0,0,.18)}
+        .rhythm-lab[hidden]{display:none}
         .rhythm-lab-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px}.rhythm-lab h2{font:700 1.2rem Georgia,serif;margin:0 0 4px}.rhythm-lab p{margin:0;color:var(--text-dim);font-size:.78rem;line-height:1.45}
-        .rhythm-lab-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;align-items:end}.rhythm-lab label{display:grid;gap:4px;color:var(--text-dim);font-size:.68rem}.rhythm-lab select,.rhythm-lab input,.rhythm-lab button{min-height:38px;border:1px solid var(--line);border-radius:8px;background:rgba(255,255,255,.07);color:var(--text);padding:7px 9px}.rhythm-lab button{background:var(--accent);color:var(--ink);font-weight:900;cursor:pointer}
+        .rhythm-lab-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;align-items:end}.rhythm-lab label{display:grid;gap:5px;color:var(--text-dim);font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.rhythm-lab select,.rhythm-lab input,.rhythm-lab button{width:100%;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);color:var(--text);padding:7px 9px}.rhythm-lab select:focus,.rhythm-lab input:focus{outline:1px solid var(--accent);border-color:var(--accent)}.rhythm-lab button{background:var(--accent);color:var(--ink);font-weight:900;cursor:pointer}
         .rhythm-score{margin-top:12px;min-height:132px;max-height:168px;overflow:auto;border-radius:8px;background:#fffdf8;color:#111}.rhythm-score .cp-staff{height:132px;min-height:132px;padding:0;overflow:visible}.rhythm-score .cp-staff>div{transform:translateY(-19px)}
-        .rhythm-editor{margin-top:14px;padding-top:14px;border-top:1px solid rgba(212,168,79,.22)}.rhythm-editor h3{margin:0 0 5px;font:700 1rem Georgia,serif}.rhythm-editor-layout{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:12px;margin-top:10px}.rhythm-pitch-grid{position:relative;display:grid;grid-template-rows:repeat(13,1fr);height:182px;padding:12px 10px 12px 62px;border-radius:8px;background:#fffdf8;color:#111;overflow:hidden}.rhythm-clef-symbol{position:absolute;left:12px;top:43px;z-index:2;font-family:Bravura,"Noto Music",serif;font-size:62px;line-height:1}.rhythm-position{position:relative;border:0!important;border-radius:0!important;min-height:0!important;padding:0!important;background:transparent!important;color:#555!important;text-align:right;font-size:.58rem;font-weight:800;cursor:pointer}.rhythm-position.staff-line::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid #555}.rhythm-position:hover{background:rgba(212,168,79,.2)!important}.rhythm-position span{position:relative;z-index:1;background:#fffdf8;padding-left:4px}.rhythm-editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.rhythm-editor-actions button{background:rgba(255,255,255,.07);color:var(--text)}
+        .rhythm-palette{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}.rhythm-tool{min-width:48px!important;background:rgba(255,255,255,.07)!important;color:var(--text)!important;font-family:Bravura,"Noto Music",serif;font-size:1.2rem}.rhythm-tool.is-active{background:var(--accent)!important;color:var(--ink)!important}.rhythm-score-wrap{position:relative}.rhythm-score-overlay{position:absolute;inset:0;z-index:4;cursor:crosshair}.rhythm-editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.rhythm-editor-actions button{background:rgba(255,255,255,.07);color:var(--text)}
         .rhythm-lab-status{margin-top:8px!important;color:#9bd1b5!important}
-        @media(max-width:860px){.rhythm-lab-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.rhythm-editor-layout{grid-template-columns:1fr}.rhythm-score{overflow:auto}}
+        @media(max-width:860px){.rhythm-lab-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.rhythm-score{overflow:auto}}
         .beat-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .beat-num { font-size: 0.72rem; font-weight: 800; color: var(--text-dim); min-height: 15px; line-height: 1; transition: color 0.08s, transform 0.08s; font-variant-numeric: tabular-nums; }
         .beat-num.empty { visibility: hidden; }
@@ -396,7 +397,7 @@
 
         /* Cuadros de selección rápida (Compás / Figura) del modo básico */
         .basic-controls { display: none; gap: 12px; margin-bottom: 22px; }
-        .metronome-container.mode-basic .basic-controls { display: flex; }
+        .metronome-container.mode-basic .basic-controls { display: contents; }
         .basic-select-wrap { position: relative; flex: 1; }
         .basic-box {
             width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.14);
@@ -423,11 +424,13 @@
         .basic-dropdown-item .fig-icon { font-size: 1.1rem; width: 22px; text-align: center; }
 
         /* ===== Rutinas (guardar / cargar presets) — visible en Pro y Básico ===== */
-        .preset-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-        .preset-wrap { flex: none; width: 175px; }
-        #scoreOpenBtn { width: 175px; }
+        .preset-bar { display: grid;grid-template-columns:repeat(5,minmax(120px,1fr));align-items:stretch;gap:10px;margin-bottom:18px }
+        .preset-wrap { width:auto;min-width:0 }
+        #scoreOpenBtn,#exerciseToggleBtn { width:auto }
         .preset-box { padding: 10px 14px; }
         .preset-box .basic-box-value { font-size: 0.85rem; }
+        @media(max-width:900px){.preset-bar{grid-template-columns:repeat(3,minmax(120px,1fr))}}
+        @media(max-width:620px){.preset-bar{grid-template-columns:repeat(2,minmax(0,1fr))}}
         .preset-wrap .basic-dropdown { min-width: 280px; }
         .preset-row { display: flex; align-items: center; gap: 4px; }
         .preset-row .basic-dropdown-item { flex: 1; }
@@ -630,8 +633,8 @@
 
     <section class="metronome-container" aria-label="Controles del metronomo" id="metroContainer">
         <div class="mode-toggle" role="tablist" aria-label="Modo del metrónomo">
-            <button type="button" class="mode-toggle-btn" id="modeProBtn" role="tab" aria-selected="false">Pro</button>
             <button type="button" class="mode-toggle-btn active" id="modeBasicBtn" role="tab" aria-selected="true">Básico</button>
+            <button type="button" class="mode-toggle-btn" id="modeProBtn" role="tab" aria-selected="false">Pro</button>
         </div>
         <div class="header"><h1>Metrónomo</h1></div>
 
@@ -648,31 +651,27 @@
                 <span class="basic-box-value" id="scoreBtnValue">📄 Cargar</span>
             </button>
             <input type="file" id="scoreFileInput" accept="image/*,application/pdf,.xml,.musicxml,.mxl" style="display:none">
-        </div>
-
-        <div class="stage hidden" id="stageArea">
-            <div class="bulb bulb-swing" id="light-swing"></div>
-            <div class="bulb bulb-clave" id="light-clave"></div>
-            <div class="bulb bulb-poly" id="light-poly"></div>
-            <div class="bulb bulb-pm" id="light-pm"></div>
-            <div id="pendulum" class="pendulum"></div>
-        </div>
-
-        <div class="basic-controls" id="basicControls">
-            <div class="basic-select-wrap">
+            <div class="basic-controls" id="basicControls">
+              <div class="basic-select-wrap">
                 <button type="button" class="basic-box" id="basicCompasBtn">
                     <span class="basic-box-label">Compás</span>
                     <span class="basic-box-value" id="basicCompasValue">4/4</span>
                 </button>
                 <div class="basic-dropdown" id="basicCompasDropdown"></div>
-            </div>
-            <div class="basic-select-wrap">
+              </div>
+              <div class="basic-select-wrap">
                 <button type="button" class="basic-box" id="basicFiguraBtn">
                     <span class="basic-box-label">Figura</span>
                     <span class="basic-box-value" id="basicFiguraValue">♩</span>
                 </button>
                 <div class="basic-dropdown" id="basicFiguraDropdown"></div>
+              </div>
             </div>
+            <button type="button" class="basic-box preset-box" id="exerciseToggleBtn" aria-expanded="false"><span class="basic-box-label">Práctica</span><span class="basic-box-value">Ejercicios / editor</span></button>
+        </div>
+
+        <div class="stage hidden" id="stageArea">
+            <div class="bulb bulb-swing" id="light-swing"></div><div class="bulb bulb-clave" id="light-clave"></div><div class="bulb bulb-poly" id="light-poly"></div><div class="bulb bulb-pm" id="light-pm"></div><div id="pendulum" class="pendulum"></div>
         </div>
 
         <div class="bpm-section">
@@ -693,29 +692,22 @@
         </div>
         <div class="visualizer" id="visualizer"></div>
 
-        <section class="rhythm-lab" aria-labelledby="rhythmLabTitle">
+        <section class="rhythm-lab" id="rhythmLab" aria-labelledby="rhythmLabTitle" hidden>
             <div class="rhythm-lab-head"><div><h2 id="rhythmLabTitle">Laboratorio de ritmo y feel</h2><p>Genera un compás completo, palméalos primero y después practícalo con distintas ubicaciones del clic.</p></div></div>
             <div class="rhythm-lab-controls">
-                <label>Compás<select id="rhythmMeter"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>5/4</option><option>6/8</option><option>7/8</option></select></label>
                 <label>Compases<input id="rhythmBars" type="number" min="1" max="8" value="2"></label>
                 <label>Clave<select id="rhythmClef"><option value="treble">Sol</option><option value="bass">Fa</option></select></label>
                 <label>Figura base<select id="rhythmFigure"><option value="1">Negras</option><option value=".5">Corcheas</option><option value=".333333">Tresillos</option><option value=".25">Semicorcheas</option><option value="2">Blancas</option></select></label>
                 <label>Ejercicio<select id="rhythmExercise"><option value="steady">Pulso continuo</option><option value="syncopation">Síncopas</option><option value="rests">Notas y silencios</option><option value="mixed">Figuras mixtas</option><option value="triplets">Tresillos</option></select></label>
                 <label>Colocación del clic<select id="rhythmPlacement"><option value="all">Todos los pulsos</option><option value="oneThree">1 y 3</option><option value="twoFour">2 y 4</option><option value="beatOne">Solo 1</option><option value="beatFour">Solo 4</option><option value="upbeat">Contratiempo</option><option value="tripletEnd">3.er parcial del tresillo</option><option value="randomMute">Silencios aleatorios</option></select></label>
-                <button type="button" id="rhythmGenerate">Generar y aplicar</button>
+                <button type="button" id="rhythmGenerate">Generar</button>
             </div>
-            <div class="rhythm-score" id="rhythmScore" aria-live="polite"></div>
+            <div class="rhythm-palette" id="rhythmPalette" aria-label="Figuras y silencios">
+              <button type="button" class="rhythm-tool is-active" data-kind="note" data-beats="4" title="Redonda">𝅝</button><button type="button" class="rhythm-tool" data-kind="note" data-beats="3" title="Blanca con puntillo">𝅗𝅥.</button><button type="button" class="rhythm-tool" data-kind="note" data-beats="2" title="Blanca">𝅗𝅥</button><button type="button" class="rhythm-tool" data-kind="note" data-beats="1.5" title="Negra con puntillo">♩.</button><button type="button" class="rhythm-tool" data-kind="note" data-beats="1" title="Negra">♩</button><button type="button" class="rhythm-tool" data-kind="note" data-beats=".75" title="Corchea con puntillo">♪.</button><button type="button" class="rhythm-tool" data-kind="note" data-beats=".5" title="Corchea">♪</button><button type="button" class="rhythm-tool" data-kind="note" data-beats=".25" title="Semicorchea">𝅘𝅥𝅯</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats="4" title="Silencio de redonda">𝄻</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats="3" title="Silencio de blanca con puntillo">𝄼.</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats="2" title="Silencio de blanca">𝄼</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats="1.5" title="Silencio de negra con puntillo">𝄽.</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats="1" title="Silencio de negra">𝄽</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats=".75" title="Silencio de corchea con puntillo">𝄾.</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats=".5" title="Silencio de corchea">𝄾</button><button type="button" class="rhythm-tool" data-kind="rest" data-beats=".25" title="Silencio de semicorchea">𝄿</button>
+            </div>
+            <div class="rhythm-score-wrap"><div class="rhythm-score" id="rhythmScore" aria-live="polite"></div><div class="rhythm-score-overlay" id="rhythmScoreOverlay" aria-label="Pulsa directamente sobre el pentagrama para escribir"></div></div>
             <p class="rhythm-lab-status" id="rhythmStatus"></p>
-            <div class="rhythm-editor">
-                <h3>Editor rítmico sencillo</h3><p>Elige una figura o silencio y pulsa la línea o el espacio donde quieres colocarlo.</p>
-                <div class="rhythm-lab-controls">
-                    <label>Escribir<select id="rhythmDrawKind"><option value="note">Figura</option><option value="rest">Silencio</option></select></label>
-                    <label>Duración<select id="rhythmDrawDuration"><option value="4">Redonda</option><option value="3">Blanca con puntillo</option><option value="2">Blanca</option><option value="1.5">Negra con puntillo</option><option value="1" selected>Negra</option><option value=".5">Corchea</option><option value=".25">Semicorchea</option></select></label>
-                </div>
-                <div class="rhythm-editor-layout"><div class="rhythm-pitch-grid" id="rhythmPitchGrid" aria-label="Posiciones del pentagrama"></div><div class="rhythm-score" id="rhythmEditorScore" aria-live="polite"></div></div>
-                <div class="rhythm-editor-actions"><button type="button" id="rhythmUndo">Deshacer</button><button type="button" id="rhythmFillRests">Completar con silencios</button><button type="button" id="rhythmClear">Limpiar</button></div>
-                <p class="rhythm-lab-status" id="rhythmEditorStatus"></p>
-            </div>
+            <div class="rhythm-editor-actions"><button type="button" id="rhythmUndo">Deshacer</button><button type="button" id="rhythmFillRests">Completar con silencios</button><button type="button" id="rhythmClear">Limpiar</button></div>
         </section>
 
         <div class="controls-grid">
@@ -995,7 +987,7 @@
         scorePrevNote: document.getElementById('scorePrevNote'), scoreNextNote: document.getElementById('scoreNextNote'), scoreLoopA: document.getElementById('scoreLoopA'), scoreLoopB: document.getElementById('scoreLoopB'), scoreLoopClear: document.getElementById('scoreLoopClear'),
         scoreCountIn: document.getElementById('scoreCountIn'), scoreSyncMetro: document.getElementById('scoreSyncMetro')
     };
-    UI.rhythmMeter=document.getElementById('rhythmMeter');UI.rhythmBars=document.getElementById('rhythmBars');UI.rhythmClef=document.getElementById('rhythmClef');UI.rhythmFigure=document.getElementById('rhythmFigure');UI.rhythmExercise=document.getElementById('rhythmExercise');UI.rhythmPlacement=document.getElementById('rhythmPlacement');UI.rhythmGenerate=document.getElementById('rhythmGenerate');UI.rhythmScore=document.getElementById('rhythmScore');UI.rhythmStatus=document.getElementById('rhythmStatus');UI.rhythmDrawKind=document.getElementById('rhythmDrawKind');UI.rhythmDrawDuration=document.getElementById('rhythmDrawDuration');UI.rhythmPitchGrid=document.getElementById('rhythmPitchGrid');UI.rhythmEditorScore=document.getElementById('rhythmEditorScore');UI.rhythmEditorStatus=document.getElementById('rhythmEditorStatus');UI.rhythmUndo=document.getElementById('rhythmUndo');UI.rhythmFillRests=document.getElementById('rhythmFillRests');UI.rhythmClear=document.getElementById('rhythmClear');
+    UI.rhythmLab=document.getElementById('rhythmLab');UI.exerciseToggleBtn=document.getElementById('exerciseToggleBtn');UI.rhythmBars=document.getElementById('rhythmBars');UI.rhythmClef=document.getElementById('rhythmClef');UI.rhythmFigure=document.getElementById('rhythmFigure');UI.rhythmExercise=document.getElementById('rhythmExercise');UI.rhythmPlacement=document.getElementById('rhythmPlacement');UI.rhythmGenerate=document.getElementById('rhythmGenerate');UI.rhythmScore=document.getElementById('rhythmScore');UI.rhythmScoreOverlay=document.getElementById('rhythmScoreOverlay');UI.rhythmPalette=document.getElementById('rhythmPalette');UI.rhythmStatus=document.getElementById('rhythmStatus');UI.rhythmUndo=document.getElementById('rhythmUndo');UI.rhythmFillRests=document.getElementById('rhythmFillRests');UI.rhythmClear=document.getElementById('rhythmClear');
     const quickBpmRow = document.getElementById('quick-bpm-row');
     for (let i = 40; i <= 400; i += 20) {
         let btn = document.createElement('button'); btn.className = 'quick-bpm-btn'; btn.innerText = i;
@@ -1189,8 +1181,10 @@
     UI.amalgamInp.addEventListener('input', syncBasicLabels);
     syncBasicLabels();
 
-    // --- Laboratorio de ritmo y feel ---
-    let rhythmVariation=0;
+    // --- Laboratorio de ritmo y feel: generador y editor sobre un único pentagrama ---
+    let rhythmVariation=0,rhythmEditorEvents=[],activeRhythmTool={kind:'note',beats:4};
+    const editorPitches={treble:['A5','G5','F5','E5','D5','C5','B4','A4','G4','F4','E4','D4','C4'],bass:['C4','B3','A3','G3','F3','E3','D3','C3','B2','A2','G2','F2','E2']};
+    function currentRhythmMeter(){const selected=UI.beatsSel.options[UI.beatsSel.selectedIndex];return selected?.textContent.trim()||`${UI.beatsSel.value}/4`}
     function rhythmCapacity(meter){const [n,d]=meter.split('/').map(Number);return n*4/d}
     function fillRhythmBar(source,capacity,midi=67,bar=0){
         const events=[];let remaining=capacity,cursor=0;
@@ -1203,7 +1197,7 @@
             UI.rhythmStatus.textContent='El metrónomo sigue disponible, pero el pentagrama necesita volver a cargar sus recursos.';
             return;
         }
-        const meter=UI.rhythmMeter.value,capacity=rhythmCapacity(meter),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),clef=UI.rhythmClef.value,kind=UI.rhythmExercise.value,base=Number(UI.rhythmFigure.value),v=rhythmVariation++;
+        const meter=currentRhythmMeter(),capacity=rhythmCapacity(meter),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),clef=UI.rhythmClef.value,kind=UI.rhythmExercise.value,base=Number(UI.rhythmFigure.value),v=rhythmVariation++;
         const patterns={
             steady:[[base]],
             syncopation:[[{kind:'rest',beats:.5},.5,1,{kind:'rest',beats:.5},.5,1],[.5,{kind:'rest',beats:.5},.5,.5,1,1]],
@@ -1213,25 +1207,21 @@
         };
         const choices=patterns[kind];const events=[];
         for(let bar=0;bar<bars;bar++){let source=choices[(v+bar)%choices.length];if(kind==='triplets'&&meter.endsWith('/8'))source=Array.from({length:14},()=>({beats:.5,kind:'triplet'}));events.push(...fillRhythmBar(source,capacity,clef==='bass'?48:67,bar))}
-        const total=events.reduce((sum,e)=>sum+e.beats,0);
-        UI.rhythmScore.innerHTML=window.CrescendoPractice.sequence(events,{meter,clef});
-        UI.rhythmStatus.textContent=`${bars} ${bars===1?'compás':'compases'} en ${meter} · ${total.toFixed(3).replace(/\.000$/,'')} tiempos de negra · clave de ${clef==='bass'?'fa':'sol'} · clic: ${UI.rhythmPlacement.options[UI.rhythmPlacement.selectedIndex].text}`;
-        const numerator=meter.split('/')[0],value=[...UI.beatsSel.options].find(o=>o.textContent.trim()===meter)?.value||numerator;
-        UI.amalgamInp.value='';UI.beatsSel.value=value;
+        rhythmEditorEvents=events;renderRhythmScore();
         const subValue=kind==='triplets'?'3':String(Math.max(.25,1/base));if([...UI.subSel.options].some(o=>o.value===subValue))UI.subSel.value=subValue;
-        UI.beatsSel.dispatchEvent(new Event('change'));UI.subSel.dispatchEvent(new Event('change'));renderVisualizer();syncBasicLabels();
+        UI.subSel.dispatchEvent(new Event('change'));renderVisualizer();syncBasicLabels();
     }
-    let rhythmEditorEvents=[];
-    const editorPitches={treble:['A5','G5','F5','E5','D5','C5','B4','A4','G4','F4','E4','D4','C4'],bass:['C4','B3','A3','G3','F3','E3','D3','C3','B2','A2','G2','F2','E2']};
-    function renderRhythmPitchGrid(){const clef=UI.rhythmClef.value;UI.rhythmPitchGrid.innerHTML=`<span class="rhythm-clef-symbol" aria-hidden="true">${clef==='bass'?'𝄢':'𝄞'}</span>`+editorPitches[clef].map((note,index)=>`<button type="button" class="rhythm-position ${index>=2&&index<=10&&index%2===0?'staff-line':''}" data-note="${note}" aria-label="Colocar en ${note}"><span>${note}</span></button>`).join('')}
-    function renderRhythmEditor(message=''){if(!window.CrescendoPractice)return;const meter=UI.rhythmMeter.value,clef=UI.rhythmClef.value;UI.rhythmEditorScore.innerHTML=rhythmEditorEvents.length?window.CrescendoPractice.sequence(rhythmEditorEvents,{meter,clef}):'<p style="padding:44px 18px;text-align:center;color:#666">Pulsa una línea o espacio para comenzar.</p>';const used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),total=rhythmCapacity(meter)*Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1));UI.rhythmEditorStatus.textContent=message||`${used.toFixed(2).replace(/\.00$/,'')} de ${total} tiempos escritos.`}
-    function addRhythmEditorEvent(note){const beats=Number(UI.rhythmDrawDuration.value),capacity=rhythmCapacity(UI.rhythmMeter.value),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),usedInBar=used-bar*capacity;if(bar>=bars)return renderRhythmEditor('El ejercicio ya está completo. Deshaz o limpia para modificarlo.');if(beats>capacity-usedInBar+1e-7)return renderRhythmEditor('Esa duración no cabe en el compás actual. Elige una figura menor o complétalo con silencios.');const kind=UI.rhythmDrawKind.value;rhythmEditorEvents.push({note,beats,bar,kind:kind==='rest'?'rest':undefined});renderRhythmEditor()}
-    function fillEditorWithRests(){const capacity=rhythmCapacity(UI.rhythmMeter.value),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),durations=[4,3,2,1.5,1,.5,.25];while(rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0)<capacity*bars-1e-7){const used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),remaining=Math.min(capacity-(used-bar*capacity),capacity*bars-used),beats=durations.find(d=>d<=remaining+1e-7)||.25;rhythmEditorEvents.push({note:UI.rhythmClef.value==='bass'?'C3':'C5',beats,bar,kind:'rest'})}renderRhythmEditor('Compases completados con silencios.')}
-    UI.rhythmPitchGrid.addEventListener('click',event=>{const button=event.target.closest('[data-note]');if(button)addRhythmEditorEvent(button.dataset.note)});
-    UI.rhythmUndo.addEventListener('click',()=>{rhythmEditorEvents.pop();renderRhythmEditor()});UI.rhythmClear.addEventListener('click',()=>{rhythmEditorEvents=[];renderRhythmEditor('Editor limpio.')});UI.rhythmFillRests.addEventListener('click',fillEditorWithRests);
+    function renderRhythmScore(message=''){if(!window.CrescendoPractice)return;const meter=currentRhythmMeter(),clef=UI.rhythmClef.value,bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),total=rhythmCapacity(meter)*bars;UI.rhythmScore.innerHTML=rhythmEditorEvents.length?window.CrescendoPractice.sequence(rhythmEditorEvents,{meter,clef}):window.CrescendoPractice.sequence([{note:clef==='bass'?'C3':'C5',beats:rhythmCapacity(meter),bar:0,kind:'rest'}],{meter,clef});UI.rhythmStatus.textContent=message||`${bars} ${bars===1?'compás':'compases'} en ${meter} · ${used.toFixed(2).replace(/\.00$/,'')} de ${total} tiempos · clave de ${clef==='bass'?'fa':'sol'} · clic: ${UI.rhythmPlacement.options[UI.rhythmPlacement.selectedIndex].text}`}
+    function addRhythmEditorEvent(note){const beats=activeRhythmTool.beats,capacity=rhythmCapacity(currentRhythmMeter()),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),usedInBar=used-bar*capacity;if(bar>=bars)return renderRhythmScore('El ejercicio ya está completo. Deshaz o limpia para modificarlo.');if(beats>capacity-usedInBar+1e-7)return renderRhythmScore('Esa figura no cabe en el compás actual. Elige una menor o complétalo con silencios.');rhythmEditorEvents.push({note,beats,bar,kind:activeRhythmTool.kind==='rest'?'rest':undefined});renderRhythmScore()}
+    function fillEditorWithRests(){const capacity=rhythmCapacity(currentRhythmMeter()),bars=Math.max(1,Math.min(8,Number(UI.rhythmBars.value)||1)),durations=[4,2,1,.5,.25];while(rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0)<capacity*bars-1e-7){const used=rhythmEditorEvents.reduce((sum,e)=>sum+e.beats,0),bar=Math.floor((used+1e-7)/capacity),remaining=Math.min(capacity-(used-bar*capacity),capacity*bars-used),beats=durations.find(d=>d<=remaining+1e-7)||.25;rhythmEditorEvents.push({note:UI.rhythmClef.value==='bass'?'C3':'C5',beats,bar,kind:'rest'})}renderRhythmScore('Compases completados con silencios.')}
+    UI.rhythmPalette.addEventListener('click',event=>{const button=event.target.closest('[data-kind]');if(!button)return;activeRhythmTool={kind:button.dataset.kind,beats:Number(button.dataset.beats)};UI.rhythmPalette.querySelectorAll('.rhythm-tool').forEach(el=>el.classList.toggle('is-active',el===button))});
+    UI.rhythmScoreOverlay.addEventListener('click',event=>{const rect=UI.rhythmScoreOverlay.getBoundingClientRect(),ratio=Math.max(0,Math.min(1,(event.clientY-rect.top)/rect.height)),index=Math.max(0,Math.min(12,Math.round(ratio*12))),note=editorPitches[UI.rhythmClef.value][index];addRhythmEditorEvent(note)});
+    UI.rhythmUndo.addEventListener('click',()=>{rhythmEditorEvents.pop();renderRhythmScore()});UI.rhythmClear.addEventListener('click',()=>{rhythmEditorEvents=[];renderRhythmScore('Pentagrama limpio. Elige una figura o silencio y pulsa sobre él.')});UI.rhythmFillRests.addEventListener('click',fillEditorWithRests);
     UI.rhythmGenerate.addEventListener('click',generateRhythmExercise);
-    [UI.rhythmMeter,UI.rhythmBars,UI.rhythmClef,UI.rhythmFigure,UI.rhythmExercise,UI.rhythmPlacement].forEach(el=>el.addEventListener('change',()=>{generateRhythmExercise();renderRhythmPitchGrid();renderRhythmEditor()}));
-    generateRhythmExercise();renderRhythmPitchGrid();renderRhythmEditor();
+    [UI.rhythmBars,UI.rhythmClef,UI.rhythmFigure,UI.rhythmExercise,UI.rhythmPlacement].forEach(el=>el.addEventListener('change',renderRhythmScore));
+    UI.beatsSel.addEventListener('change',renderRhythmScore);
+    UI.exerciseToggleBtn.addEventListener('click',()=>{const opening=UI.rhythmLab.hidden;UI.rhythmLab.hidden=!opening;UI.exerciseToggleBtn.classList.toggle('open',opening);UI.exerciseToggleBtn.setAttribute('aria-expanded',String(opening));if(opening){renderRhythmScore();UI.rhythmLab.scrollIntoView({behavior:'smooth',block:'nearest'})}});
+    generateRhythmExercise();
 
     // --- Pantalla completa (para proyectar en clase) ---
     UI.fullscreenBtn.addEventListener('click', () => { UI.fsView.classList.add('open'); });
@@ -1554,7 +1544,7 @@
     })();
 
 
-    setMode((() => { try { return localStorage.getItem('metronomo-modo') || 'basic'; } catch (e) { return 'basic'; } })());
+    setMode('basic');
 
     document.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return; 

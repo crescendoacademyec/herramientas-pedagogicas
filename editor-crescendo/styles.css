@@ -5065,6 +5065,25 @@ body.editor-page .editor-workbench .score-shell {
   position: relative;
 }
 
+.editor-app-menubar__quick-action {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: #242424;
+  cursor: pointer;
+  flex: 0 0 auto;
+  font: inherit;
+  min-height: 24px;
+  padding: 3px 9px;
+}
+
+.editor-app-menubar__quick-action:hover,
+.editor-app-menubar__quick-action.is-active {
+  background: #d4a84f;
+  color: #161616;
+}
+
 .editor-application-menubar .editor-app-menu__summary,
 .editor-application-menubar .exercise-app-menu__summary {
   align-items: center;

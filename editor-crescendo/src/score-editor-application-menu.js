@@ -49,6 +49,7 @@
       label: "Reproducción",
       items: [
         { label: "Reproducir / detener", target: "#playbackButton", shortcut: "Space / P" },
+        { label: "Metrónomo", target: "#metronomeButton" },
         { field: "bpm", label: "BPM" },
         { label: "Interpretación jazz", palette: "jazz" }
       ]
@@ -266,6 +267,22 @@
       });
       bar.appendChild(details);
     });
+    const metronomeTarget = document.getElementById("metronomeButton");
+    if (metronomeTarget) {
+      const quickButton = createElement("button", "editor-app-menubar__quick-action", "Metrónomo");
+      quickButton.type = "button";
+      quickButton.setAttribute("aria-label", "Activar metrónomo");
+      const syncQuickButton = () => {
+        const active = isTargetActive(metronomeTarget);
+        quickButton.classList.toggle("is-active", active);
+        quickButton.setAttribute("aria-pressed", active ? "true" : "false");
+        quickButton.textContent = active ? "Metrónomo activo" : "Metrónomo";
+      };
+      quickButton.addEventListener("click", () => metronomeTarget.click());
+      new MutationObserver(syncQuickButton).observe(metronomeTarget, { attributes: true, attributeFilter: ["class", "aria-pressed"] });
+      syncQuickButton();
+      bar.appendChild(quickButton);
+    }
     if (scenesMenu) bar.appendChild(scenesMenu);
     if (helpMenu) bar.appendChild(helpMenu);
 
