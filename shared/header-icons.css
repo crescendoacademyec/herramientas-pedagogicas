@@ -6,16 +6,23 @@
   box-shadow:none!important;overflow:visible!important;
 }
 :where(.social-bar,.ca-social-bar,.header-social){gap:5px!important}
+:where(a.academy-link,a.ca-school-logo-link,a.school-logo-link){
+  width:38px!important;height:32px!important;flex:0 0 38px!important;padding:1px!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;overflow:visible!important;
+}
 :where(.social-bar,.ca-social-bar,.header-social) a:hover{
   border:0!important;background:transparent!important;box-shadow:none!important;
   color:var(--gold,var(--accent,#d4a84f));transform:translateY(-1px) scale(1.08);
 }
 :where(.academy-link,.ca-school-logo-link,.school-logo-link) :where(img,.school-logo,.ca-school-logo),
 :where(.social-bar,.ca-social-bar,.header-social) img.school-logo{
-  width:29px!important;height:29px!important;border:0!important;border-radius:0!important;
+  width:38px!important;height:30px!important;border:0!important;border-radius:0!important;
   background:transparent!important;object-fit:contain!important;
 }
 @media(max-width:430px){
   :where(.social-bar,.ca-social-bar,.header-social){gap:3px!important}
   :where(.social-bar,.ca-social-bar,.header-social)>a{width:25px!important;flex-basis:25px!important}
+  :where(a.academy-link,a.ca-school-logo-link,a.school-logo-link){width:34px!important;flex-basis:34px!important}
+  :where(.academy-link,.ca-school-logo-link,.school-logo-link) :where(img,.school-logo,.ca-school-logo){width:34px!important}
 }

@@ -29,6 +29,12 @@
       '<path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13"/>'
     ].join(""),
     play: '<polygon points="6 3 20 12 6 21 6 3"/>',
+    metronome: [
+      '<path d="M8 21h8"/>',
+      '<path d="M6.5 21 9.5 3h5l3 18"/>',
+      '<path d="m12 7 4 7"/>',
+      '<circle cx="16" cy="14" r="1"/>'
+    ].join(""),
     pause: [
       '<rect x="6" y="4" width="4" height="16" rx="1"/>',
       '<rect x="14" y="4" width="4" height="16" rx="1"/>'
@@ -413,12 +419,13 @@
     const undoProxy = createIconButton({ icon: "undo-2", label: "Deshacer" });
     const redoProxy = createIconButton({ icon: "redo-2", label: "Rehacer" });
     const playProxy = createIconButton({ icon: "play", label: "Reproducir o detener" });
+    const metronomeProxy = createIconButton({ icon: "metronome", label: "Activar metrónomo" });
     const bpmGroup = element("div", "ipad-bpm-group");
     const bpmDown = createIconButton({ icon: "chevron-down", label: "Bajar tempo", className: "ipad-bpm-step" });
     const bpmValue = element("span", "ipad-bpm-value", "140");
     const bpmUp = createIconButton({ icon: "chevron-up", label: "Subir tempo", className: "ipad-bpm-step" });
     bpmGroup.append(bpmDown, bpmValue, bpmUp);
-    headerCenter.append(clearButton, saveButton, undoProxy, redoProxy, playProxy, bpmGroup);
+    headerCenter.append(clearButton, saveButton, undoProxy, redoProxy, playProxy, metronomeProxy, bpmGroup);
 
     const headerRight = element("div", "ipad-header-actions");
     const saveStatus = element("span", "ipad-save-status");
@@ -680,6 +687,7 @@
     proxyClick(undoProxy, "#undoButton");
     proxyClick(redoProxy, "#redoButton");
     proxyClick(playProxy, "#playbackButton");
+    proxyClick(metronomeProxy, "#metronomeButton");
     proxyClick(saveButton, "#saveExerciseButton");
     proxyClick(clearButton, "#clearScoreButton");
     proxyClick(fullscreenProxy, "#fullscreenButton");
@@ -694,6 +702,21 @@
       };
       syncPlayIcon();
       new MutationObserver(syncPlayIcon).observe(playbackSource, { attributes: true, attributeFilter: ["class"] });
+    }
+
+    const metronomeSource = document.querySelector("#metronomeButton");
+    if (metronomeSource) {
+      const syncMetronomeLabel = () => {
+        const active = metronomeSource.classList.contains("is-active");
+        const label = active ? "Desactivar metrónomo" : "Activar metrónomo";
+        metronomeProxy.setAttribute("aria-label", label);
+        metronomeProxy.title = label;
+      };
+      syncMetronomeLabel();
+      new MutationObserver(syncMetronomeLabel).observe(metronomeSource, {
+        attributes: true,
+        attributeFilter: ["class", "aria-pressed"]
+      });
     }
 
     const bpmSource = document.querySelector("#playbackBpmInput");
