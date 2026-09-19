@@ -20,6 +20,12 @@ const scoreNextBtn = document.getElementById('scoreNextBtn');
 const scoreTempoInput = document.getElementById('scoreTempo');
 const scoreTempoDown = document.getElementById('scoreTempoDown');
 const scoreTempoUp = document.getElementById('scoreTempoUp');
+const scoreAdvancedToggle = document.getElementById('scoreAdvancedToggle');
+scoreAdvancedToggle?.addEventListener('click', () => {
+  const open = scorePlayControls.classList.toggle('advanced-open');
+  scoreAdvancedToggle.setAttribute('aria-expanded', String(open));
+  scoreAdvancedToggle.textContent = open ? 'Ocultar ajustes' : 'Ajustes avanzados';
+});
 function adjustScoreTempo(delta) {
   const min = parseInt(scoreTempoInput.min) || 20;
   const max = parseInt(scoreTempoInput.max) || 300;

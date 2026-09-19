@@ -880,7 +880,7 @@
     padding: 4px 10px;
     border-radius: 14px;
     display: none;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 6px;
     align-items: center;
     justify-content: flex-end;
@@ -890,6 +890,16 @@
   .score-play-controls.visible{
     display: flex;
   }
+  .score-play-controls.advanced-open{flex-wrap:wrap}
+  .score-control-hidden{display:none!important}
+  .score-control-advanced{display:none!important}
+  .score-play-controls.advanced-open .score-control-advanced{display:inline-flex!important}
+  .score-play-controls.advanced-open select.score-control-advanced{display:block!important}
+  .score-advanced-toggle{
+    min-height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.24);border-radius:8px;
+    background:var(--panel-btn-bg);color:var(--panel-text);font:inherit;font-weight:700;white-space:nowrap;cursor:pointer;
+  }
+  .score-advanced-toggle:hover,.score-advanced-toggle[aria-expanded="true"]{background:var(--panel-btn-bg-hover);color:var(--gold,#d4a84f)}
   .score-play-btn{
     display: inline-grid;
     place-items: center;

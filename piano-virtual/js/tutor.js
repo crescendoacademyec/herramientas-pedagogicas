@@ -147,6 +147,7 @@ function toggleLoop() {
     stopPlaybackAudio();
     jumpToStep(loopStart);
     scorePlaying = true;
+    syncTransportButton();
     updateLoopUI();
     scheduleScoreStep();
   }
@@ -154,6 +155,7 @@ function toggleLoop() {
 
 function stopPlaybackAudio() {
   scorePlaying = false;
+  syncTransportButton();
   if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
   scoreActiveMidis.forEach(midi => noteOff(midiToInfo(midi)));
   scoreActiveMidis.clear();
@@ -230,7 +232,7 @@ function playFromCurrentPosition() {
   stopPlaybackAudio(); clearCountIn();
   if (currentStepIndex === -1) osmd.cursor.reset();
   osmd.cursor.show(); beginPracticeSession(); resumePracticeClock(); beginTutorSession(); loopCompletedCount=practiceSession?practiceSession.loops||0:0;
-  runCountIn(()=>{scorePlaying=true;syncScoreMetronome(true);scheduleScoreStep()});
+  runCountIn(()=>{scorePlaying=true;syncTransportButton();syncScoreMetronome(true);scheduleScoreStep()});
 }
 
 function stepForward() {
@@ -283,7 +285,16 @@ function seekToStep(targetIndex) {
   jumpToStep(targetIndex);
 }
 
-scorePlayBtn.addEventListener('click', playFromCurrentPosition);
+function syncTransportButton() {
+  const playing = Boolean(scorePlaying);
+  scorePlayBtn.setAttribute('aria-label', playing ? 'Pausar partitura' : 'Reproducir partitura');
+  scorePlayBtn.title = playing ? 'Pausar partitura (o barra espaciadora)' : 'Reproducir partitura (o barra espaciadora)';
+  scorePlayBtn.innerHTML = playing
+    ? '<svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>'
+    : '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+}
+syncTransportButton();
+scorePlayBtn.addEventListener('click', () => scorePlaying ? pausePlayback() : playFromCurrentPosition());
 scorePauseBtn.addEventListener('click', pausePlayback);
 scoreStopBtn.addEventListener('click', fullStop);
 scoreNextBtn.addEventListener('click', stepForward);
