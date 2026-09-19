@@ -7,7 +7,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
 <title>Piano Virtual Pro</title>
-<link rel="stylesheet" href="css/styles.css?v=20260919-score-toolbar">
+<link rel="stylesheet" href="css/styles.css?v=20260919-score-toolbar-v4">
 <link rel="stylesheet" href="css/chord-bank.css">
 </head>
 <body>
@@ -314,7 +314,7 @@
         <button type="button" class="score-play-btn score-control-hidden" id="scorePauseBtn" title="Pausar (o barra espaciadora)" aria-label="Pausar partitura" tabindex="-1">
           <svg viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
         </button>
-        <button type="button" class="score-play-btn score-control-advanced" id="scoreStopBtn" title="Detener" aria-label="Detener partitura">
+        <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener" aria-label="Detener partitura">
           <svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/></svg>
         </button>
         <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota" aria-label="Avanzar una nota">
@@ -332,16 +332,16 @@
         <select id="scoreCountIn" class="study-select score-control-advanced" aria-label="Cuenta previa" title="Cuenta previa antes de reproducir">
           <option value="0">Sin count-in</option><option value="1" selected>1 compás count-in</option><option value="2">2 compases count-in</option>
         </select>
-        <label class="study-toggle score-control-advanced" title="Mantener el metrónomo sonando durante la partitura"><input type="checkbox" id="scoreMetroSync"> Click</label>
+        <label class="study-toggle" title="Mantener el metrónomo sonando durante la partitura"><input type="checkbox" id="scoreMetroSync"> Click</label>
         <div class="study-group score-control-advanced" title="Repeticiones y aumento automático de tempo">
           <span class="study-group-label">Loop</span><input class="study-number" id="scoreLoopRepeats" type="number" min="0" max="99" value="0" title="0 = infinito" aria-label="Repeticiones del loop; cero es infinito">
           <span class="study-group-label">+BPM</span><input class="study-number" id="scoreAutoTempoStep" type="number" min="0" max="30" value="0" aria-label="Aumento de BPM">
           <span class="study-group-label">cada</span><input class="study-number" id="scoreAutoTempoEvery" type="number" min="1" max="20" value="3" aria-label="Cada cuántas repeticiones subir BPM">
         </div>
-        <button type="button" class="score-play-btn secondary record-btn score-control-advanced" id="midiRecordBtn" title="Grabar interpretación MIDI" aria-label="Grabar interpretación MIDI">●</button>
-        <button type="button" class="score-play-btn secondary score-control-advanced" id="midiRecordStopBtn" title="Detener grabación o reproducción MIDI" aria-label="Detener grabación o reproducción MIDI">■</button>
-        <button type="button" class="score-play-btn secondary score-control-advanced" id="midiRecordPlayBtn" title="Reproducir última grabación MIDI" aria-label="Reproducir última grabación MIDI">▶R</button>
-        <button type="button" class="score-play-btn secondary score-control-advanced" id="practiceDiaryBtn" title="Abrir diario de práctica" aria-label="Abrir diario de práctica">☰</button>
+        <button type="button" class="score-play-btn secondary midi-transport record-btn" id="midiRecordBtn" title="Grabar interpretación MIDI" aria-label="Grabar interpretación MIDI">●</button>
+        <button type="button" class="score-play-btn secondary midi-transport" id="midiRecordStopBtn" title="Detener grabación o reproducción MIDI" aria-label="Detener grabación o reproducción MIDI">■</button>
+        <button type="button" class="score-play-btn secondary midi-transport" id="midiRecordPlayBtn" title="Reproducir última grabación MIDI" aria-label="Reproducir última grabación MIDI">▶R</button>
+        <button type="button" class="score-play-btn secondary" id="practiceDiaryBtn" title="Abrir diario de práctica" aria-label="Abrir diario de práctica">☰</button>
 
         <select id="tutorMode" class="tutor-select score-control-advanced" aria-label="Modo tutor MIDI" title="Tutor interactivo con una partitura MusicXML">
           <option value="off">Tutor: desactivado</option><option value="wait">Tutor: esperar alumno</option><option value="tempo">Tutor: evaluar a tempo</option>
@@ -423,8 +423,8 @@
 <script src="../cuerdas-frotadas/js/live-staff.js"></script>
 <script src="js/staff.js"></script>
 <script src="js/midi.js"></script>
-<script src="js/score.js?v=20260919-score-toolbar"></script>
-<script src="js/tutor.js?v=20260919-score-toolbar"></script>
+<script src="js/score.js?v=20260919-score-toolbar-v3"></script>
+<script src="js/tutor.js?v=20260919-score-toolbar-v3"></script>
 <script src="js/web.js"></script>
 <script src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
 <script src="js/metronome.js"></script>

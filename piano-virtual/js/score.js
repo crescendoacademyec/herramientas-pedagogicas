@@ -21,6 +21,14 @@ const scoreTempoInput = document.getElementById('scoreTempo');
 const scoreTempoDown = document.getElementById('scoreTempoDown');
 const scoreTempoUp = document.getElementById('scoreTempoUp');
 const scoreAdvancedToggle = document.getElementById('scoreAdvancedToggle');
+const scorePrimaryRow = document.createElement('div');
+const scoreSecondaryRow = document.createElement('div');
+scorePrimaryRow.className = 'score-primary-row';
+scoreSecondaryRow.className = 'score-secondary-row';
+[...scorePlayControls.children].forEach(control => {
+  (control.classList.contains('score-control-advanced') ? scoreSecondaryRow : scorePrimaryRow).appendChild(control);
+});
+scorePlayControls.append(scorePrimaryRow, scoreSecondaryRow);
 scoreAdvancedToggle?.addEventListener('click', () => {
   const open = scorePlayControls.classList.toggle('advanced-open');
   scoreAdvancedToggle.setAttribute('aria-expanded', String(open));
