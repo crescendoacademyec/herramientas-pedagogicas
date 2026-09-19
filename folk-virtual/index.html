@@ -369,8 +369,11 @@
 
     /* ===== FILA INFERIOR: carga de partituras (más grande) ===== */
     .bottom-row {
-      flex: 0 0 auto;
-      min-height: 350px;
+      --score-viewer-height: clamp(350px, 38vh, 430px);
+      flex: 0 0 var(--score-viewer-height);
+      height: var(--score-viewer-height);
+      min-height: var(--score-viewer-height);
+      max-height: var(--score-viewer-height);
       background: #f0ede6;
       border-radius: 8px;
       overflow: hidden;
@@ -392,6 +395,7 @@
       justify-content: center;
       padding: 4px;
       position: relative;
+      contain: size layout;
     }
 
     .pdf-viewer {
@@ -834,7 +838,7 @@
       .top-row { flex-direction: column; }
       .staff-left { flex: 0 0 auto; width: 100%; min-height: 120px; }
       .board-wrap { flex: 1; }
-      .bottom-row { min-height: 300px; }
+      .bottom-row { --score-viewer-height: 300px; }
       .pdf-controls { bottom: 6px; right: 12px; }
       .web-controls { top: auto; bottom: 6px; left: 8px; flex-wrap: wrap; }
       .score-play-controls { top: 6px; right: 12px; }
@@ -843,7 +847,7 @@
       .panel { grid-template-columns: 1fr; }
       .hero p { font-size: 0.95rem; }
       .staff-left { min-height: 100px; }
-      .bottom-row { min-height: 250px; }
+      .bottom-row { --score-viewer-height: 250px; }
     }
 
 /* ===== FASE 2 · Controles instrumentales ===== */

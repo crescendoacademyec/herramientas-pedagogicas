@@ -362,8 +362,11 @@
 
     /* ===== FILA INFERIOR: carga de partituras (más grande) ===== */
     .bottom-row {
-      flex: 1;
-      min-height: 350px;
+      --score-viewer-height: clamp(350px, 38vh, 430px);
+      flex: 0 0 var(--score-viewer-height);
+      height: var(--score-viewer-height);
+      min-height: var(--score-viewer-height);
+      max-height: var(--score-viewer-height);
       background: #f0ede6;
       border-radius: 8px;
       overflow: hidden;
@@ -385,6 +388,7 @@
       justify-content: center;
       padding: 4px;
       position: relative;
+      contain: size layout;
     }
 
     .pdf-viewer {
@@ -823,7 +827,7 @@
       .top-row { flex-direction: column; }
       .staff-left { flex: 0 0 auto; width: 100%; min-height: 120px; }
       .board-wrap { flex: 1; }
-      .bottom-row { min-height: 300px; }
+      .bottom-row { --score-viewer-height: 300px; }
       .pdf-controls { bottom: 6px; right: 12px; }
       .web-controls { top: 6px; left: 8px; flex-wrap: wrap; }
       .score-play-controls { top: 6px; right: 12px; }
@@ -832,12 +836,12 @@
       .panel { grid-template-columns: 1fr; }
       .hero p { font-size: 0.95rem; }
       .staff-left { min-height: 100px; }
-      .bottom-row { min-height: 250px; }
+      .bottom-row { --score-viewer-height: 250px; }
     }
   
 /* ===== Integración Cuerdas Frotadas · Fase 1 ===== */
 .app-shell{flex:0 0 auto;min-height:auto;}
-.bottom-row{flex:0 0 auto;min-height:420px;}
+.bottom-row{flex:0 0 var(--score-viewer-height);height:var(--score-viewer-height);min-height:var(--score-viewer-height);max-height:var(--score-viewer-height);}
 .web-controls{top:auto;bottom:10px;left:12px;}
 @media(max-width:860px){.web-controls{top:auto;bottom:6px;left:8px;}}
 .panel{grid-template-columns:repeat(8,minmax(92px,1fr));gap:12px 14px;padding:12px 14px;}
@@ -1051,16 +1055,16 @@
 .panel{grid-template-columns:repeat(10,minmax(88px,1fr));}
 #keySignature{min-width:170px;}
 #spellingMode{min-width:125px;}
-#workspace-panel-score{width:100%;min-height:clamp(520px,62vh,820px);display:flex;align-items:stretch;}
+#workspace-panel-score{--score-viewer-height:clamp(350px,38vh,430px);width:100%;height:var(--score-viewer-height);min-height:var(--score-viewer-height);max-height:var(--score-viewer-height);display:flex;align-items:stretch;}
 #workspace-panel-score[hidden]{display:none !important;}
-#workspace-panel-score > .bottom-row{width:100%;min-height:inherit;flex:1 1 auto;margin:0;}
-#workspace-panel-score .staff-right{width:100%;height:auto;min-height:inherit;flex:1 1 auto;align-items:stretch;justify-content:stretch;}
-#workspace-panel-score .pdf-viewer,#workspace-panel-score .osmd-container,#workspace-panel-score #imageContainer{width:100%;height:100%;min-height:inherit;flex:1 1 auto;}
+#workspace-panel-score > .bottom-row{width:100%;height:100%;min-height:0;max-height:100%;flex:1 1 auto;margin:0;}
+#workspace-panel-score .staff-right{width:100%;height:100%;min-height:0;max-height:100%;flex:1 1 auto;align-items:stretch;justify-content:stretch;}
+#workspace-panel-score .pdf-viewer,#workspace-panel-score .osmd-container,#workspace-panel-score #imageContainer{width:100%;height:100%;min-height:0;max-height:100%;flex:1 1 auto;}
 #workspace-panel-score .osmd-container.visible{display:block;}
 .workspace-panel{width:100%;}
 @media(max-width:1320px){.panel{grid-template-columns:repeat(5,minmax(120px,1fr));}}
-@media(max-width:860px){.panel{grid-template-columns:repeat(2,minmax(0,1fr));}#workspace-panel-score{min-height:480px;}}
-@media(max-width:480px){.panel{grid-template-columns:1fr;}#workspace-panel-score{min-height:400px;}}
+@media(max-width:860px){.panel{grid-template-columns:repeat(2,minmax(0,1fr));}#workspace-panel-score{--score-viewer-height:300px;}}
+@media(max-width:480px){.panel{grid-template-columns:1fr;}#workspace-panel-score{--score-viewer-height:250px;}}
 
 /* ===== Panel principal · dos filas en escritorio ===== */
 @media (min-width: 901px){
