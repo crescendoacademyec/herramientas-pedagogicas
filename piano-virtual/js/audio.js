@@ -166,6 +166,7 @@ function setSustain(on) {
 
 // ---------- NOTE ON / OFF ----------
 function noteOn(n, velocity = 127) {
+  keyElByMidi[n.midi]?.classList.remove('score-note-left', 'score-note-right');
   if(typeof window.evaluateMetroAttack==='function')window.evaluateMetroAttack();
   if (!isNoteInRange(n.midi)) return;
   document.dispatchEvent(new CustomEvent('piano-input',{detail:{midi:n.midi,on:true}}));
@@ -241,7 +242,10 @@ function noteOff(n) {
 // ---------- FUNCIONES AUXILIARES ----------
 function setKeyActive(midi, on) {
   const el = keyElByMidi[midi];
-  if (el) el.classList.toggle('active', on);
+  if (el) {
+    el.classList.toggle('active', on);
+    if (!on) el.classList.remove('score-note-left', 'score-note-right');
+  }
 }
 
 function attachPointer(el, n) {

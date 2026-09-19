@@ -159,6 +159,7 @@ function stopPlaybackAudio() {
   if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
   scoreActiveMidis.forEach(midi => noteOff(midiToInfo(midi)));
   scoreActiveMidis.clear();
+  Object.values(keyElByMidi).forEach(el => el.classList.remove('score-note-left', 'score-note-right'));
 }
 function pausePlayback() { stopPlaybackAudio(); if(tutorSession&&tutorStep){tutorStep.paused=true;tutorStep.pausedAt=performance.now()} pausePracticeClock(); syncScoreMetronome(false); studyStatus.textContent='Pausa'; }
 function fullStop(reason='stop') {
@@ -174,6 +175,7 @@ function fullStop(reason='stop') {
 
 function triggerCurrentStepNotes(tempo, hold) {
   let stepSeconds = null;
+  const stepHands = new Map();
   try {
     const entries = osmd.cursor.Iterator.CurrentVoiceEntries || [];
     entries.forEach(ve => {
@@ -185,6 +187,8 @@ function triggerCurrentStepNotes(tempo, hold) {
         const durSeconds = lengthFraction * 4 * (60 / tempo);
         if (stepSeconds === null || durSeconds < stepSeconds) stepSeconds = durSeconds;
         noteOn(midiToInfo(midi));
+        if (!stepHands.has(midi)) stepHands.set(midi, new Set());
+        stepHands.get(midi).add(scoreNoteHand(midi, ve));
         scoreActiveMidis.add(midi);
         if (!hold) {
           setTimeout(() => {
@@ -193,6 +197,9 @@ function triggerCurrentStepNotes(tempo, hold) {
           }, Math.max(30, durSeconds * 1000 - 30));
         }
       });
+    });
+    stepHands.forEach((hands, midi) => {
+      hands.forEach(hand => keyElByMidi[midi]?.classList.add(`score-note-${hand}`));
     });
   } catch(err) { console.warn('Error leyendo notas de la partitura:', err); }
   if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo);
