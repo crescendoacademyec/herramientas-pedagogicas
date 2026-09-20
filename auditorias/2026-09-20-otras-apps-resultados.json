@@ -1,0 +1,100 @@
+[
+  {
+    "app": "ear-training",
+    "scenario": "Stop during initial sample loading",
+    "expected": 0,
+    "actual": 2,
+    "pass": false
+  },
+  {
+    "app": "ear-training",
+    "scenario": "Scheduled starts must not already be in the past after cold loading",
+    "expected": false,
+    "actual": true,
+    "pass": false
+  },
+  {
+    "app": "diapason-virtual",
+    "scenario": "Whole rest at 120 BPM, seconds",
+    "expected": 2,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "bass-virtual",
+    "scenario": "Whole rest at 120 BPM, seconds",
+    "expected": 2,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "folk-virtual",
+    "scenario": "Whole rest at 120 BPM, seconds",
+    "expected": 2,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "piano-virtual",
+    "scenario": "Whole rest at 120 BPM, seconds",
+    "expected": 2,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "piano-virtual",
+    "scenario": "Filtering a hand must preserve one-quarter timing at 120 BPM",
+    "expected": 0.5,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "cuerdas-frotadas",
+    "scenario": "Whole rest at 120 BPM, seconds",
+    "expected": 2,
+    "actual": 0.25,
+    "pass": false
+  },
+  {
+    "app": "piano-virtual",
+    "scenario": "Continuation of a tied note must not attack again",
+    "expected": 0,
+    "actual": 1,
+    "pass": false
+  },
+  {
+    "app": "afinador",
+    "scenario": "E2 second harmonic: selected string",
+    "expected": 2,
+    "actual": 2,
+    "pass": true
+  },
+  {
+    "app": "afinador",
+    "scenario": "E2 second harmonic: cents after harmonic-aware selection",
+    "expected": 0,
+    "actual": 1200,
+    "pass": false
+  },
+  {
+    "app": "editor-crescendo",
+    "scenario": "Tempo changes: twelve ticks take two seconds",
+    "expected": 2000,
+    "actual": 2000,
+    "pass": true
+  },
+  {
+    "app": "editor-crescendo",
+    "scenario": "Inverse time mapping",
+    "expected": 12,
+    "actual": 12,
+    "pass": true
+  },
+  {
+    "app": "speed",
+    "scenario": "Click at 80% of a 10-second waveform during playback seeks to 8 seconds",
+    "expected": 8,
+    "actual": 1,
+    "pass": false
+  }
+]

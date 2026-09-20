@@ -1,0 +1,41 @@
+<!doctype html><meta charset="utf-8"><title>Auditoría de polifonía del metrónomo</title><h1>Compás de cuatro pulsos: redonda y cuatro negras simultáneas</h1><pre id="result"></pre><script>    function parseMusicXmlEvents(xmlText){
+        const doc=new DOMParser().parseFromString(xmlText,'application/xml');
+        if(doc.querySelector('parsererror')) throw new Error('MusicXML no válido');
+        const firstPart=doc.querySelector('part');
+        if(!firstPart) return [];
+        let divisions=1, cursorDiv=0, lastStart=0;
+        const events=[];
+        const measures=[...firstPart.querySelectorAll(':scope > measure')];
+        measures.forEach((measure,mi)=>{
+            const div=measure.querySelector(':scope > attributes > divisions');
+            if(div) divisions=Math.max(1,parseFloat(div.textContent)||1);
+            [...measure.children].forEach(node=>{
+                const tag=node.localName;
+                if(tag==='backup'){cursorDiv-=parseFloat(node.querySelector('duration')?.textContent||0);return;}
+                if(tag==='forward'){cursorDiv+=parseFloat(node.querySelector('duration')?.textContent||0);return;}
+                if(tag!=='note') return;
+                const dur=Math.max(0,parseFloat(node.querySelector(':scope > duration')?.textContent||0));
+                const chord=!!node.querySelector(':scope > chord');
+                const rest=!!node.querySelector(':scope > rest');
+                const startDiv=chord?lastStart:cursorDiv;
+                if(!chord) lastStart=startDiv;
+                let midi=null;
+                if(!rest){
+                    const step=node.querySelector(':scope > pitch > step')?.textContent;
+                    const alter=parseFloat(node.querySelector(':scope > pitch > alter')?.textContent||0);
+                    const octave=parseInt(node.querySelector(':scope > pitch > octave')?.textContent||'4',10);
+                    const pcs={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+                    if(step in pcs) midi=(octave+1)*12+pcs[step]+alter;
+                }
+                let ev=events.find(e=>e.startDiv===startDiv);
+                if(!ev){ ev={startDiv,durationDiv:dur,divisions,measure:mi+1,midis:[],rest:true}; events.push(ev); }
+                ev.durationDiv=Math.max(ev.durationDiv,dur); ev.divisions=divisions;
+                if(midi!==null){ev.midis.push(midi);ev.rest=false;}
+                if(!chord) cursorDiv+=dur;
+            });
+        });
+        events.sort((a,b)=>a.startDiv-b.startDiv);
+        return events.map((e,i)=>({...e,index:i,quarterDuration:e.durationDiv/Math.max(1,e.divisions)}));
+    }
+
+const events=parseMusicXmlEvents("<score-partwise><part id=\"P1\"><measure number=\"1\"><attributes><divisions>4</divisions></attributes><note><pitch><step>C</step><octave>4</octave></pitch><duration>16</duration></note><backup><duration>16</duration></backup><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration></note><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration></note><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration></note><note><pitch><step>G</step><octave>4</octave></pitch><duration>4</duration></note></measure></part></score-partwise>");document.getElementById("result").textContent=JSON.stringify({expectedQuarterBeats:4,actualQuarterBeats:events.reduce((sum,e)=>sum+e.quarterDuration,0),events},null,2);</script>
