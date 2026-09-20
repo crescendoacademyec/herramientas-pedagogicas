@@ -15,6 +15,14 @@
     {id:'diminishedHalfWhole',name:'Disminuida semitono–tono',steps:[0,1,3,4,6,7,9,10,12]},
     {id:'diminishedWholeHalf',name:'Disminuida tono–semitono',steps:[0,2,3,5,6,8,9,11,12]}
   ];
+  // Non-heptatonic scales repeat or skip letter names; indices are not degrees.
+  const scaleDegrees={
+    bebopDominant:[0,1,2,3,4,5,6,6,7],bebopMajor:[0,1,2,3,4,4,5,6,7],
+    bebopMinor:[0,1,2,3,4,5,5,6,7],minorSixPentatonic:[0,1,2,4,5,7],
+    wholeTone:[0,1,2,3,4,6,7],diminishedHalfWhole:[0,1,1,2,3,4,5,6,7],
+    diminishedWholeHalf:[0,1,2,3,3,4,5,6,7]
+  };
+  function scaleNotes(root,scale){return scale.steps.map((v,i)=>spell(root,v,(scaleDegrees[scale.id]||[])[i]??i));}
   const chords=[['Mayor',[0,4,7]],['Menor',[0,3,7]],['Aumentado',[0,4,8]],['Disminuido',[0,3,6]],['Séptima dominante',[0,4,7,10]],['Séptima mayor',[0,4,7,11]],['Séptima menor',[0,3,7,10]],['Semidisminuido',[0,3,6,10]],['Séptima disminuida',[0,3,6,9]]];
   const intervals=[['2ª menor',1,1],['2ª mayor',2,1],['3ª menor',3,2],['3ª mayor',4,2],['4ª justa',5,3],['4ª aumentada',6,3],['5ª disminuida',6,4],['5ª justa',7,4],['6ª menor',8,5],['6ª mayor',9,5],['7ª menor',10,6],['7ª mayor',11,6],['8ª justa',12,7]];
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -43,14 +51,15 @@
     for(const [bar,notes] of orderedGroups){
       const body=notes.map((e,i)=>{
         const n=e.note?named(e.note):e.midi!==undefined?{...midiNote(e.midi),...e}:rootNote('G',4),beats=e.beats??1;
-        const triplet=e.kind==='triplet'||Math.abs(beats-1/3)<.00001;
-        const base=triplet?.5:beats;
+        const actual=e.tupletActual||(e.kind==='triplet'||Math.abs(beats-1/3)<.00001?3:0);
+        const triplet=actual>0;
+        const base=triplet?(actual===6?.25:.5):beats;
         const type=types.find(([v])=>Math.abs(base-v)<.00001)||types.find(([v])=>Math.abs(base-v*1.5)<.00001)||types.find(([v])=>Math.abs(base-v*1.75)<.00001)||types[2];
         const dots=triplet?0:Math.abs(base-type[0]*1.75)<.00001?2:Math.abs(base-type[0]*1.5)<.00001?1:0;
         const tie=(e.tieStart?'<tie type="start"/>':'')+(e.tied?'<tie type="stop"/>':'');
-        const notation=(e.tieStart?'<tied type="start"/>':'')+(e.tied?'<tied type="stop"/>':'')+(e.fermata?'<fermata/>':'')+(e.articulation?`<articulations><${e.articulation}/></articulations>`:'')+(e.slur?`<slur type="${e.slur}" number="1"/>`:'')+(triplet&&i%3!==1?`<tuplet type="${i%3===0?'start':'stop'}"/>`:'');
+        const notation=(e.tieStart?'<tied type="start"/>':'')+(e.tied?'<tied type="stop"/>':'')+(e.fermata?'<fermata/>':'')+(e.articulation?`<articulations><${e.articulation}/></articulations>`:'')+(e.slur?`<slur type="${e.slur}" number="1"/>`:'')+(triplet?(e.tuplet!==undefined?(e.tuplet?`<tuplet type="${e.tuplet}"/>`:''):(i%3!==1?`<tuplet type="${i%3===0?'start':'stop'}"/>`:'')):'');
         const accidental=e.accidental||({'-2':'flat-flat','-1':'flat',1:'sharp',2:'double-sharp'}[n.alter]);
-        return `<note>${e.kind==='rest'?'<rest/>':`<pitch><step>${letters[((n.diatonic%7)+7)%7]}</step><alter>${n.alter}</alter><octave>${Math.floor(n.diatonic/7)}</octave></pitch>`}<duration>${Math.round(beats*48)}</duration>${tie}<type>${type[1]}</type>${'<dot/>'.repeat(dots)}${accidental&&e.kind!=='rest'?`<accidental>${accidental}</accidental>`:''}${triplet?'<time-modification><actual-notes>3</actual-notes><normal-notes>2</normal-notes><normal-type>eighth</normal-type></time-modification>':''}${e.stem?`<stem>${e.stem}</stem>`:''}${e.beam?`<beam number="1">${e.beam}</beam>`:''}${notation?'<notations>'+notation+'</notations>':''}${labels&&e.kind!=='rest'?'<lyric><text>'+esc(e.label||name(n))+'</text></lyric>':''}</note>`;
+        return `<note>${e.kind==='rest'?'<rest/>':`<pitch><step>${letters[((n.diatonic%7)+7)%7]}</step><alter>${n.alter}</alter><octave>${Math.floor(n.diatonic/7)}</octave></pitch>`}<duration>${Math.round(beats*48)}</duration>${tie}<type>${type[1]}</type>${'<dot/>'.repeat(dots)}${accidental&&e.kind!=='rest'?`<accidental>${accidental}</accidental>`:''}${triplet?`<time-modification><actual-notes>${actual}</actual-notes><normal-notes>${actual===6?4:2}</normal-notes><normal-type>${actual===6?'16th':'eighth'}</normal-type></time-modification>`:''}${e.stem?`<stem>${e.stem}</stem>`:''}${e.beam?`<beam number="1">${e.beam}</beam>`:''}${notation?'<notations>'+notation+'</notations>':''}${labels&&e.kind!=='rest'?'<lyric><text>'+esc(e.label||name(n))+'</text></lyric>':''}</note>`;
       }).join('');
       const systemBreak=measuresPerSystem&&bar>0&&bar%measuresPerSystem===0?'<print new-system="yes"/>':'';
       measures+=`<measure number="${bar+1}" implicit="yes">${systemBreak}${bar===orderedGroups[0][0]?`<attributes><divisions>48</divisions><key><fifths>${key}</fifths></key>${meter?`<time><beats>${Number(meter.split('/')[0])}</beats><beat-type>${Number(meter.split('/')[1])}</beat-type></time>`:'<time print-object="no"><beats>4</beats><beat-type>4</beat-type></time>'}<clef>${clefXML}</clef></attributes>`:''}${body}</measure>`;
@@ -145,7 +154,7 @@
       return {notes:[],key,answer:tonic+' '+(family==='minor'?'menor':'mayor'),choices:roots.map(k=>family==='minor'?name(spell(rootNote(k),9,5)).replace(/\d+$/,'')+' menor':k+' mayor'),detail:'Esta armadura corresponde a '+roots[idx]+' mayor y su relativa '+name(minor).replace(/\d+$/,'')+' menor.'};
     }
     let notes,answer,choices,stack=false;
-    if(kind==='scale'){const s=pick(scales);notes=s.steps.map((v,i)=>spell(r,v,i));answer=s.name;choices=scales.map(s=>s.name);}
+    if(kind==='scale'){const s=pick(scales);notes=scaleNotes(r,s);answer=s.name;choices=scales.map(s=>s.name);}
     else if(kind==='interval'){const iv=pick(intervals);notes=[r,spell(r,iv[1],iv[2])];answer=iv[0];choices=intervals.map(i=>i[0]);stack=true;}
     else {const ch=pick(chords);notes=ch[1].map((v,i)=>spell(r,v,i*2));if(inversions){const count=Math.floor(Math.random()*notes.length);notes=notes.map((n,i)=>i<count?{...n,midi:n.midi+12,diatonic:n.diatonic+7}:n).sort((a,b)=>a.midi-b.midi);}answer=ch[0];choices=chords.map(c=>c[0]);stack=true;}
     return {notes,answer,choices,stack,detail:answer+' · '+notes.map(name).join(' – ')};
@@ -162,7 +171,7 @@
     let drawings;
     if(meta.targetType==='scale'){
       const scale=scales.find(s=>'scale:'+s.id===meta.targetId),root=midiNote(meta.rootMidi);
-      drawings=staff(scale.steps.map((v,i)=>spell(root,v,i)),{clef:root.midi<60?'bass':'treble'});
+      drawings=staff(scaleNotes(root,scale),{clef:root.midi<60?'bass':'treble'});
     }else if(meta.targetType==='interval'){
       const iv=intervals.find(i=>i[1]===meta.semitones),root=midiNote(meta.rootMidi),sign=meta.direction==='descending'?-1:1;
       drawings=staff([root,spell(root,sign*meta.semitones,sign*(iv?iv[2]:0))],{clef:root.midi<60?'bass':'treble',stack:meta.direction==='harmonic'});

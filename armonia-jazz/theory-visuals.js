@@ -28,9 +28,15 @@
   }
   function playNotes(midis, options) {
     options=options||{}; if(options.stop!==false)stopAudio(); var duration=options.duration||.75,delay=options.delay||0,gain=options.gain||.62;
-    piano().then(function(player){midis.forEach(function(midi){if(player){var node=player.play(midi,audioContext().currentTime+delay,{duration:duration,gain:gain});if(node)AUDIO.nodes.push(node);}else fallback(midi,duration,delay,Math.min(.18,gain));});});
+    var token=AUDIO.token;
+    return piano().then(function(player){
+      if(token!==AUDIO.token)return;
+      var ctx=audioContext();if(!ctx)return;var start=ctx.currentTime+delay;
+      midis.forEach(function(midi,i){var offset=options.melodic?i*.42:0;if(player){var node=player.play(midi,start+offset,{duration:duration,gain:gain});if(node)AUDIO.nodes.push(node);}else fallback(midi,duration,delay+offset,Math.min(.18,gain));});
+    });
   }
   function suffixIntervals(suffix) {
+    if (/7alt/.test(suffix)) return [0,4,6,10,13,15];
     if (/m7♭5|m7b5|ø/.test(suffix)) return [0,3,6,10];
     if (/dim|°/.test(suffix)) return [0,3,6,9];
     if (/m\(maj7\)/.test(suffix)) return [0,3,7,11];
@@ -55,7 +61,7 @@
       root.innerHTML = '<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Mapa armónico interactivo</span><h4>' + esc(config.title) + '</h4><p>' + esc(config.note) + '</p></div><div class="tv-controls">' + tonicControl(state.root) + '<button class="tv-toggle" type="button">' + (grades ? 'Ver acordes' : 'Solo grados') + '</button><button class="tv-play" type="button">▶ Escuchar</button></div></div>' + chart(config.steps, state.root, grades) + (config.footer ? '<p class="tv-footer">' + esc(config.footer) + '</p>' : '') + '</section>';
       root.querySelector('.tv-tonic').addEventListener('change', function (e) { state.root = Number(e.target.value); paint(); });
       root.querySelector('.tv-toggle').addEventListener('click', function () { grades = !grades; paint(); });
-      root.querySelector('.tv-play').addEventListener('click', async function () { stopAudio(); var token=AUDIO.token; for(var i=0;i<config.steps.length;i++){if(token!==AUDIO.token)return;var s=config.steps[i],base=48+state.root+s.offset;playNotes(suffixIntervals(s.suffix||"").map(function(n){return base+n;}),{duration:.68,stop:false,gain:.5});await new Promise(function(resolve){setTimeout(resolve,720);});} });
+      root.querySelector('.tv-play').addEventListener('click', async function () { stopAudio(); var token=AUDIO.token; await piano(); for(var i=0;i<config.steps.length;i++){if(token!==AUDIO.token)return;var s=config.steps[i],base=48+state.root+s.offset;var midis=suffixIntervals(s.suffix||"").map(function(n){return base+n;});if(config.pedal)midis.unshift(36+state.root);if(s.top!==undefined){var top=72+state.root+s.top;midis=midis.map(function(m){while(m>=top)m-=12;return m;});midis.push(top);}var gap=(s.beats||1)*720;playNotes(midis,{duration:gap/1000*.9,stop:false,gain:.5});await new Promise(function(resolve){setTimeout(resolve,gap);});} });
     }
     var state = { root: 0 }; paint();
   }
@@ -84,12 +90,12 @@
     paint();
   }
   function renderSequence(root, config) {
-    var state={root:0};
+    var state={root:config.root||0};
     function paint(){
       var cells=config.notes.map(function(n,i){return '<div class="tv-note-step"><small>'+(i+1)+'</small><strong>'+esc(chord(state.root+n.offset,""))+'</strong><span>'+esc(n.label||n.degree||"")+'</span></div>';}).join('<span class="tv-arrow">→</span>');
       root.innerHTML='<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Laboratorio melódico</span><h4>'+esc(config.title)+'</h4><p>'+esc(config.note)+'</p></div><div class="tv-controls">'+tonicControl(state.root)+'<button class="tv-play" type="button">▶ Escuchar</button></div></div><div class="tv-note-line">'+cells+'</div><p class="tv-footer">'+esc(config.footer||"Canta primero y después escucha para comprobar.")+'</p></section>';
       root.querySelector('.tv-tonic').addEventListener('change',function(e){state.root=Number(e.target.value);paint();});
-      root.querySelector('.tv-play').addEventListener('click',function(){playNotes(config.notes.map(function(n){return 60+state.root+n.offset;}),{duration:.36,gain:.7});});
+      root.querySelector('.tv-play').addEventListener('click',function(){playNotes(config.notes.map(function(n){return 60+state.root+n.offset;}),{duration:.36,gain:.7,melodic:true});});
     } paint();
   }
   function renderBebop(root, config) {
@@ -118,7 +124,7 @@
       root.querySelector('.tv-bebop-family').onchange=function(e){state.family=e.target.value;state.start=0;paint();};
       root.querySelector('.tv-bebop-start').onchange=function(e){state.start=Number(e.target.value);paint();};
       root.querySelector('.tv-bebop-direction').onchange=function(e){state.direction=e.target.value;paint();};
-      root.querySelector('.tv-play').onclick=function(){playNotes(notes.map(function(n){return 60+state.root+n.offset;}),{duration:.32,gain:.72});};
+      root.querySelector('.tv-play').onclick=function(){playNotes(notes.map(function(n){return 60+state.root+n.offset;}),{duration:.32,gain:.72,melodic:true});};
     } paint();
   }
 
@@ -167,7 +173,7 @@
     modalInterchange: P("Intercambio modal", "Toma un color de un modo paralelo y conserva una llegada clara al centro tonal.", [S(0,"maj7","Imaj7","Centro"),S(8,"maj7","♭VImaj7","Prestado"),S(5,"m7","ivm7","Prestado"),S(7,"7","V7","Dominante"),S(0,"maj7","Imaj7","Centro")]),
     dominantExt: P("Dominantes sustitutos y extendidos", "La tensión puede llegar por dominante aplicada, sustituto tritonal o dominante alterado.", [S(2,"m7","ii7","Preparación"),S(1,"7","subV7","Sustituto"),S(0,"maj7","Imaj7","Resolución"),S(7,"7alt","V7alt","Alternativa"),S(0,"maj7","Imaj7","Resolución")]),
     reharm: P("Rearmonización: conservar la melodía, cambiar el soporte", "Un mismo punto de llegada admite caminos diatónicos, secundarios y sustitutos.", [S(0,"maj7","Imaj7","Original"),S(9,"7","V7/ii","Aplicado"),S(2,"m7","ii7","Nuevo color"),S(1,"7","subV7","Cromatismo"),S(0,"maj7","Imaj7","Llegada")]),
-    coltrane: P("Ciclo de Coltrane", "Los centros tonales se mueven por terceras mayores; los dominantes conectan cada nuevo centro.", [S(0,"maj7","Imaj7","Centro 1"),S(2,"7","V7/III","Conector"),S(4,"maj7","IIImaj7","Centro 2"),S(8,"7","V7/♭VI","Conector"),S(8,"maj7","♭VImaj7","Centro 3")]),
+    coltrane: P("Ciclo de Coltrane", "Los centros tonales se mueven por terceras mayores; los dominantes conectan cada nuevo centro.", [S(0,"maj7","Imaj7","Centro 1"),S(11,"7","V7/III","Conector"),S(4,"maj7","IIImaj7","Centro 2"),S(3,"7","V7/♭VI","Conector"),S(8,"maj7","♭VImaj7","Centro 3")]),
     constant: P("Constant structure", "Un mismo voicing se desplaza conservando su estructura interna; el bajo define el color global.", [S(0,"m7","Im7","Estructura"),S(2,"m7","IIm7","Desplazamiento"),S(4,"m7","IIIm7","Desplazamiento"),S(5,"m7","IVm7","Desplazamiento"),S(7,"m7","Vm7","Desplazamiento")]),
     modulation: P("Modulación por acorde pivote", "El acorde pivote pertenece a ambos campos y permite cambiar de centro sin corte brusco.", [S(0,"maj7","Imaj7","Centro A"),S(9,"m7","vi7 / ii de V","Pivote"),S(2,"7","V7 del nuevo centro","Dominante"),S(7,"maj7","Imaj7 nuevo","Centro B")]),
     pandiatonic: { type: "table", title: "Pandiatonicismo y no funcionalidad", note: "Aquí el interés está en el color del conjunto y el movimiento de las voces, no en una cadencia obligatoria.", rows: [
@@ -194,14 +200,17 @@
     ] },
     voiceLeading: P("Conducción de voces", "Las líneas cercanas importan más que el nombre aislado de cada acorde. Sigue las notas guía por semitono.", [S(2,"m7","ii7","7ª → 3ª"),S(7,"7","V7","Notas guía"),S(0,"maj7","Imaj7","Resolución"),S(9,"m7","vi7","Conexión"),S(2,"m7","ii7","Continuidad")])
   };
-  VISUALS.harmonicRhythm=P("Un ii–V–I, dos ritmos armónicos","Compara la duración de cada función y observa cómo cambia el impulso.",[S(2,"m7","ii7","2 pulsos"),S(7,"7","V7","2 pulsos"),S(0,"maj7","Imaj7","4 pulsos")]);
+  VISUALS.harmonicRhythm=P("Ritmo armónico ii–V–I: 2–2–4","Escucha dos pulsos de ii, dos de V y cuatro de I.",[S(2,"m7","ii7","2 pulsos"),S(7,"7","V7","2 pulsos"),S(0,"maj7","Imaj7","4 pulsos")]);
+  VISUALS.pedal.pedal=true;
+  VISUALS.harmonicRhythm.steps.forEach(function(step,i){step.beats=i===2?4:2;});
   VISUALS.melodyHarmony={type:"table",title:"Una nota, varias funciones",note:"La misma altura adquiere otro significado según el acorde inferior.",rows:[{name:"Nota del acorde",formula:"C como 7ª de Dm7",value:"Dm7",use:"Estable en tiempo fuerte"},{name:"Tensión",formula:"C como 11 de Gm7",value:"Gm7",use:"Color disponible"},{name:"Aproximación",formula:"C → B sobre G7",value:"G7",use:"Resuelve por semitono"}]};
   VISUALS.melodicModes={type:"table",title:"Mapa completo de menor melódica",note:"Relaciona cada modo con la cualidad que produce.",rows:[{name:"I · menor melódica",formula:"1 2 ♭3 4 5 6 7",example:"m(maj7)",use:"Centro menor"},{name:"III · lidio aumentado",formula:"1 2 3 #4 #5 6 7",example:"maj7#5",use:"Mayor aumentado"},{name:"IV · lidio dominante",formula:"1 2 3 #4 5 6 ♭7",example:"7#11",use:"Dominante brillante"},{name:"VII · alterada",formula:"1 ♭9 #9 3 #11 ♭13 ♭7",example:"7alt",use:"Dominante alterado"}]};
   VISUALS.tonalCenters={type:"table",title:"Cuatro centros tonales",note:"Compara el tercer, sexto y séptimo grado de cada escala madre.",rows:[{name:"Mayor",formula:"1 2 3 4 5 6 7",value:"C mayor",use:"Tónica maj7"},{name:"Mayor armónica",formula:"1 2 3 4 5 ♭6 7",value:"C mayor armónica",use:"Mayor con ♭6"},{name:"Menor armónica",formula:"1 2 ♭3 4 5 ♭6 7",value:"C menor armónica",use:"V7 hacia i"},{name:"Menor melódica",formula:"1 2 ♭3 4 5 6 7",value:"C menor melódica",use:"Color moderno"}]};
   VISUALS.scaleSubstitution={type:"table",title:"Un dominante, cuatro colores",note:"La función permanece; las tensiones disponibles cambian.",rows:[{name:"Mixolidia",formula:"9, 11, 13",example:"7",use:"Dominante diatónico"},{name:"Lidia dominante",formula:"9, #11, 13",example:"7#11",use:"subV / color brillante"},{name:"Disminuida",formula:"♭9, #9, #11, 13",example:"13b9",use:"Dominante simétrico"},{name:"Alterada",formula:"♭9, #9, #11, ♭13",example:"7alt",use:"Máxima tensión"}]};
   VISUALS.melodyReharm={type:"table",title:"Armonizar una nota C",note:"Filtra cada posibilidad por función, registro y acorde siguiente.",rows:[{name:"Como fundamental",formula:"1",value:"Cmaj7",use:"Tónica"},{name:"Como séptima",formula:"♭7",value:"Dm7",use:"Preparación"},{name:"Como tercera",formula:"♭3",value:"Am7",use:"Tónica relativa"},{name:"Como tensión",formula:"11",value:"Gm7",use:"Color"}]};
-  VISUALS.triadPairs={type:"sequence",title:"Triad pair dórico",note:"Alterna Dm y Em para obtener seis notas de D dórico.",notes:[{offset:0,label:"Dm"},{offset:3,label:"Dm"},{offset:7,label:"Dm"},{offset:2,label:"Em"},{offset:5,label:"Em"},{offset:9,label:"Em"}]};
+  VISUALS.triadPairs={type:"sequence",title:"Triad pair dórico",root:2,note:"Alterna las tríadas menores de i y ii del modo dórico.",notes:[{offset:0,label:"i menor"},{offset:3,label:"i menor"},{offset:7,label:"i menor"},{offset:2,label:"ii menor"},{offset:5,label:"ii menor"},{offset:9,label:"ii menor"}]};
   VISUALS.topVoiceOstinato=P("Voz superior y ostinato","La voz aguda permanece reconocible mientras cambian bajo y función.",[S(0,"maj7","Imaj7","Melodía: E"),S(9,"m7","vi7","Melodía: E"),S(2,"m7","ii7","Melodía: F"),S(7,"7","V7","Melodía: F")]);
+  VISUALS.topVoiceOstinato.steps.forEach(function(step,i){step.top=i<2?4:5;step.role=i<2?"Voz superior: 3 de I":"Voz superior: 4 de I";});
   VISUALS.pentatonicLab={type:"sequence",title:"Pentatónica menor y blue note",note:"Escucha 1–♭3–4–♭5–5–♭7–1.",notes:[{offset:0,label:"1"},{offset:3,label:"♭3"},{offset:5,label:"4"},{offset:6,label:"♭5"},{offset:7,label:"5"},{offset:10,label:"♭7"},{offset:12,label:"1"}]};
   VISUALS.swingMap={type:"table",title:"Mapa de articulación jazz",note:"La sensación nace de duración, acento y colocación.",rows:[{name:"Swing",formula:"larga–corta flexible",value:"Corcheas",use:"Flujo"},{name:"Anticipación",formula:"antes del tiempo fuerte",value:"& de 4",use:"Impulso"},{name:"Retardo",formula:"después del punto esperado",value:"Behind",use:"Relajación"},{name:"Ghost note",formula:"ataque muy ligero",value:"(nota)",use:"Textura rítmica"}]};
   VISUALS.bebopLine={type:"bebop"};

@@ -1,0 +1,32 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),vm=require('node:vm');
+(async()=>{
+ const calls=[];let ready;
+ class AudioContext{constructor(){this.currentTime=10;this.state='running';}createGain(){return {gain:{value:1},connect(){}};}}
+ const ctx={AudioContext,Soundfont:{instrument:()=>new Promise(r=>ready=r)}};ctx.window=ctx;vm.createContext(ctx);
+ const source=fs.readFileSync(__dirname+'/theory-visuals.js','utf8');
+ vm.runInContext(source.replace('global.TheoryVisuals = { mount: mount };','global.TheoryVisuals = { mount: mount, playNotes, stopAudio };'),ctx);
+ const api=ctx.TheoryVisuals;
+ const first=api.playNotes([60,63,65,66,67,70,72],{melodic:true,duration:.36});
+ assert.equal(calls.length,0);
+ ready({play:(midi,time,options)=>{calls.push({midi,time,options});return {stop(){}};}});await first;
+ assert.deepEqual(calls.map(n=>n.midi),[60,63,65,66,67,70,72]);
+ calls.slice(1).forEach((n,i)=>assert.ok(n.time>=calls[i].time+calls[i].options.duration));
+ calls.length=0;await api.playNotes([60,64,67],{});assert.equal(new Set(calls.map(n=>n.time)).size,1);
+ calls.length=0;const canceled=api.playNotes([60,62],{melodic:true});api.stopAudio();await canceled;assert.equal(calls.length,0);
+ assert.equal((source.match(/melodic:true/g)||[]).length,2,'Both melodic renderers opt into sequential playback');
+ const functional=fs.readFileSync(__dirname+'/../armonia-funcional/app.js','utf8');
+ const sequence=functional.slice(functional.indexOf('async function playTheorySequence('),functional.indexOf('function theoryToneMidis('));
+ let release;const heard=[],timers=[];
+ const f={THEORY_AUDIO_STATE:{sequenceToken:0},stopTheoryAudio(){this;f.THEORY_AUDIO_STATE.sequenceToken++;},ensureTheoryPianoSoundFont:()=>new Promise(r=>release=r),playTheoryMidi:m=>heard.push(m),setTimeout:r=>timers.push(r)};vm.createContext(f);vm.runInContext(sequence,f);
+ const playing=f.playTheorySequence([60,62,64]);assert.equal(heard.length,0);release();await new Promise(setImmediate);assert.deepEqual(heard,[60]);
+ timers.shift()();await new Promise(setImmediate);assert.deepEqual(heard,[60,62]);timers.shift()();await new Promise(setImmediate);assert.deepEqual(heard,[60,62,64]);timers.shift()();await playing;
+ const theory=fs.readFileSync(__dirname+'/../teoria-lectura-musical/app.js','utf8');
+ const t={AUDIO:{nodes:[],seq:0},ensurePianoSoundFont:()=>Promise.resolve(null),playOscillatorFallback:(m,o)=>t.heard.push({m,o}),playPianoSample:()=>{},clearInterval(){},setTimeout:r=>t.timers.push(r),heard:[],timers:[]};
+ t.window={setTimeout(){}};vm.createContext(t);vm.runInContext(theory.slice(theory.indexOf('function playTone('),theory.indexOf('/* SCALES */')),t);
+ const melody=t.playSequence([60,64,67]);await new Promise(setImmediate);assert.equal(t.heard.length,1);
+ t.stopAllAudio();t.timers.shift()();await melody;assert.equal(t.heard.length,1,'Stop must cancel remaining notes');
+ t.heard=[];t.playChord([60,64,67]);assert.deepEqual(t.heard.map(n=>n.m),[60,64,67]);
+ t.heard=[];t.playTone(60);t.playTone(62);assert.equal(t.heard.length,2,'Cold-load fallback plays at the requested onset, not after loading');
+ console.log('Melodic audio: spaced notes, simultaneous chords, cancellation and cold-load sequencing OK');
+})().catch(e=>{console.error(e);process.exitCode=1;});

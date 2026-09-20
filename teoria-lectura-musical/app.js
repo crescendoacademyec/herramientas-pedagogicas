@@ -215,19 +215,20 @@ function playOscillatorFallback(midi,{duration,volume,delay}){
 }
 function playTone(midi,{duration=.55,volume=.16,delay=0}={}){
   if(AUDIO.sfPlayer) return playPianoSample(AUDIO.sfPlayer,midi,{duration,volume,delay});
-  ensurePianoSoundFont().then(player=>{
-    if(player) playPianoSample(player,midi,{duration,volume,delay});
-    else playOscillatorFallback(midi,{duration,volume,delay});
-  });
+  // Keep the requested onset while samples load; never replay queued notes together.
+  ensurePianoSoundFont();
+  return playOscillatorFallback(midi,{duration,volume,delay});
 }
 function stopAllAudio(){
+  AUDIO.seq=(AUDIO.seq||0)+1;
   AUDIO.nodes.forEach(n=>{try{n.stop()}catch(e){}});
   AUDIO.nodes=[];
   if(AUDIO.metroTimer){clearInterval(AUDIO.metroTimer);AUDIO.metroTimer=null}
 }
-async function playSequence(midis,gap=360,onStep=()=>{}){
-  stopAllAudio();
-  const token=Date.now(); AUDIO.seq=token;
+async function playSequence(midis,gap=360,onStep=()=>{},continuing=false){
+  if(!continuing)stopAllAudio();
+  const token=AUDIO.seq;
+  await ensurePianoSoundFont();
   for(let i=0;i<midis.length;i++){
     if(AUDIO.seq!==token) return;
     onStep(i);playTone(midis[i],{duration:Math.min(.65,gap/1000*.82)});
@@ -235,8 +236,8 @@ async function playSequence(midis,gap=360,onStep=()=>{}){
   }
   onStep(-1);
 }
-function playChord(midis){
-  stopAllAudio();
+function playChord(midis,continuing=false){
+  if(!continuing)stopAllAudio();
   midis.forEach(m=>playTone(m,{duration:1.05,volume:.10}));
 }
 
@@ -473,8 +474,8 @@ function mountRhythmLab(el){
   el.querySelector("[data-stop-metro]").addEventListener("click",()=>{stopAllAudio();el.querySelectorAll(".beat").forEach(b=>b.classList.remove("active"))});
   el.querySelectorAll(".rhythm-step").forEach(btn=>btn.addEventListener("click",()=>btn.classList.toggle("on")));
   el.querySelector("[data-play-pattern]").addEventListener("click",async()=>{
-    stopAllAudio();const steps=[...el.querySelectorAll(".rhythm-step")],gap=(60000/Number(bpm.value))/2;
-    for(let i=0;i<steps.length;i++){steps.forEach((s,j)=>s.classList.toggle("active",i===j));if(steps[i].classList.contains("on"))playTone(i===0?84:79,{duration:.06,volume:.13});await new Promise(r=>setTimeout(r,gap));}
+    stopAllAudio();const playbackToken=AUDIO.seq;const steps=[...el.querySelectorAll(".rhythm-step")],gap=(60000/Number(bpm.value))/2;
+    for(let i=0;i<steps.length;i++){if(playbackToken!==AUDIO.seq)return;steps.forEach((s,j)=>s.classList.toggle("active",i===j));if(steps[i].classList.contains("on"))playTone(i===0?84:79,{duration:.06,volume:.13});await new Promise(r=>setTimeout(r,gap));}
     steps.forEach(s=>s.classList.remove("active"));
   });
 }
@@ -501,7 +502,7 @@ function mountScaleLab(el){
     <div class="controls-row"><label>Tónica <select data-scale-root>${rootOptions()}</select></label><label>Escala <select data-scale-type>${SCALES.map(s=>`<option value="${s.id}">${s.label}</option>`).join("")}</select></label></div>
     <div class="summary-line"><strong data-scale-title></strong><span data-scale-pattern></span></div><div class="note-pills" data-scale-notes></div>
     <div class="visual-three"><section class="visual-box"><div class="diagram-label">Piano</div><div data-scale-piano></div></section><section class="visual-box"><div class="diagram-label">Guitarra</div><div class="scroll-x" data-scale-guitar></div></section><section class="visual-box"><div class="diagram-label">Pentagrama</div><div class="scroll-x" data-scale-staff></div></section></div>
-    <div class="lab-actions"><button class="primary-btn" data-scale-play>▶ Escuchar escala</button><button class="ghost-btn" data-scale-chord>▶ Notas simultáneas</button></div>
+    <div class="lab-actions"><button class="primary-btn" data-scale-play>▶ Escuchar escala</button><button class="ghost-btn" data-scale-descending>▶ Escala descendente</button></div>
     <section class="scale-fluency"><p class="eyebrow">FLUIDEZ EN 12 TONALIDADES</p><h4>Transforma la escala mayor</h4><p>Lee y escucha la misma tonalidad como línea, terceras, tríadas o tétradas. La escritura correcta de cada nota se conserva aunque cambie el recorrido.</p>
       <div class="controls-row"><label>Patrón <select data-fluency-pattern><option value="line">Escala lineal</option><option value="thirds">Terceras diatónicas</option><option value="triads">Tríadas por grado</option><option value="sevenths">Tétradas por grado</option><option value="pentatonic">Pentatónica con saltos</option></select></label><label>Dirección <select data-fluency-direction><option value="up">Ascendente</option><option value="down">Descendente</option><option value="both">Ambas</option></select></label></div>
       <div class="note-pills" data-fluency-notes></div><button class="primary-btn" data-fluency-play>▶ Escuchar patrón</button>
@@ -512,7 +513,7 @@ function mountScaleLab(el){
   const update=()=>{const {s,ts}=current();el.querySelector("[data-scale-title]").textContent=`${ROOTS.find(r=>r.value===root.value)?.label} ${s.label}`;el.querySelector("[data-scale-pattern]").textContent=s.pattern;el.querySelector("[data-scale-notes]").innerHTML=ts.map(t=>`<span>${escapeHtml(t.name)} <small>${escapeHtml(t.token.replace(/b/g,"♭").replace(/#/g,"♯"))}</small></span>`).join("");el.querySelector("[data-scale-piano]").innerHTML=pianoHTML(root.value,ts,{range:12});el.querySelector("[data-scale-guitar]").innerHTML=guitarScaleSVG(root.value,ts);el.querySelector("[data-scale-staff]").innerHTML=staffSVG(root.value,ts,`${s.label}`)};
   [root,sel].forEach(x=>x.addEventListener("change",update));update();
   el.querySelector("[data-scale-play]").addEventListener("click",()=>{const {ts}=current(),m=rootMidi(root.value,4);playSequence(ts.map(t=>m+t.semi),340)});
-  el.querySelector("[data-scale-chord]").addEventListener("click",()=>{const {ts}=current(),m=rootMidi(root.value,4);playChord(ts.slice(0,-1).map(t=>m+t.semi))});
+  el.querySelector("[data-scale-descending]").addEventListener("click",()=>{const {ts}=current(),m=rootMidi(root.value,4);playSequence(ts.map(t=>m+t.semi).reverse(),340)});
   const fluency=()=>{
     const base=[0,2,4,5,7,9,11],kind=el.querySelector("[data-fluency-pattern]").value,degreeSemi=n=>base[n%7]+12*Math.floor(n/7);
     let degrees=kind==="line"?[0,1,2,3,4,5,6,7]:kind==="thirds"?[0,2,1,3,2,4,3,5,4,6,5,7]:kind==="triads"?[0,2,4,1,3,5,2,4,6,3,5,7,4,6,8,5,7,9,6,8,10]:kind==="sevenths"?[0,2,4,6,1,3,5,7,2,4,6,8,3,5,7,9,4,6,8,10,5,7,9,11,6,8,10,12]:[0,2,1,4,2,5,4,7];
@@ -740,9 +741,12 @@ function mountAdvancedRhythmLab(parent){
 
 async function playAdvancedBasePulse(example,bpm){
   stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
   const beatMs=60000/bpm;
   const beats=example.compound?2:4;
   for(let i=0;i<beats;i++){
+      if(playbackToken!==AUDIO.seq)return;
     playTone(i===0?84:79,{duration:.06,volume:.14});
     await new Promise(r=>setTimeout(r,beatMs));
   }
@@ -750,10 +754,13 @@ async function playAdvancedBasePulse(example,bpm){
 
 async function playAdvancedRhythmExample(root,example,bpm){
   stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
   const beatMs=60000/bpm;
   const nodes=[...root.querySelectorAll("[data-ar-event]")];
   let tieHolding=false;
   for(let i=0;i<example.events.length;i++){
+      if(playbackToken!==AUDIO.seq)return;
     nodes.forEach((node,j)=>node.classList.toggle("playing",j===i));
     const ev=example.events[i];
     const ms=ev.beats*beatMs;
@@ -891,10 +898,13 @@ mountRhythmSolfege = function(root){
   }
   async function playCompound(){
     stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
     const bpm=Number(body.querySelector("[data-rs-bpm]")?.value||76);
     const pulseMs=60000/bpm;
     const pulses=[...score.querySelectorAll("[data-compound-pulse]")];
     for(let p=0;p<pulses.length;p++){
+      if(playbackToken!==AUDIO.seq)return;
       pulses.forEach((node,i)=>node.classList.toggle("playing",i===p));
       const [bar,group]=pulses[p].dataset.compoundPulse.split("-").map(Number);
       const events=compoundPattern.filter(ev=>ev.bar===bar&&ev.group===group);
@@ -903,6 +913,7 @@ mountRhythmSolfege = function(root){
         await new Promise(r=>setTimeout(r,pulseMs));
       }else{
         for(let i=0;i<3;i++){
+      if(playbackToken!==AUDIO.seq)return;
           playTone(i===0?82:79,{duration:.05,volume:.13});
           await new Promise(r=>setTimeout(r,pulseMs/3));
         }
@@ -1159,8 +1170,8 @@ function mountRhythmTrainer(root,onResult){
   body.querySelector("[data-rt-next]").addEventListener("click",render);
   body.querySelector("[data-rt-level]").addEventListener("change",render);
   body.querySelector("[data-rt-play]").addEventListener("click",async()=>{
-    stopAllAudio();
-    for(const f of current){playTone(79,{duration:.06,volume:.14});await new Promise(r=>setTimeout(r,f.beats*450))}
+    stopAllAudio();const playbackToken=AUDIO.seq;
+    for(const f of current){if(playbackToken!==AUDIO.seq)return;playTone(79,{duration:.06,volume:.14});await new Promise(r=>setTimeout(r,f.beats*450))}
   });
   render();
 }
@@ -1351,8 +1362,11 @@ function phraseStaffSVG(phrase,{clef="treble",meter="4/4"}={}){
 
 async function playPhrase(root,phrase,bpm){
   stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
   const msPerBeat=60000/bpm;
   for(let i=0;i<phrase.length;i++){
+      if(playbackToken!==AUDIO.seq)return;
     const groups=[...root.querySelectorAll("[data-sol-note-index]")];
     groups.forEach((g,j)=>g.classList.toggle("playing",i===j));
     const ev=phrase[i];
@@ -1393,9 +1407,9 @@ function mountMelodySolfege(root){
   body.querySelector("[data-ms-new]").addEventListener("click",render);
   body.querySelector("[data-ms-play]").addEventListener("click",()=>playPhrase(body,phrase,Number(bpm.value)));
   body.querySelector("[data-ms-count]").addEventListener("click",async()=>{
-    stopAllAudio();
+    stopAllAudio();const playbackToken=AUDIO.seq;
     const ms=60000/Number(bpm.value);
-    for(let i=0;i<4;i++){playTone(i===0?84:79,{duration:.07,volume:.14});await new Promise(r=>setTimeout(r,ms))}
+    for(let i=0;i<4;i++){if(playbackToken!==AUDIO.seq)return;playTone(i===0?84:79,{duration:.07,volume:.14});await new Promise(r=>setTimeout(r,ms))}
   });
   render();
 }
@@ -1423,8 +1437,11 @@ function rhythmNotationHTML(pattern){
 }
 async function playRhythmPattern(root,pattern,bpm){
   stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
   const ms=60000/bpm;
   for(const ev of pattern){
+      if(playbackToken!==AUDIO.seq)return;
     root.querySelectorAll(".rhythm-symbol").forEach(x=>x.classList.remove("playing"));
     const measureEvents=[...root.querySelectorAll(`[data-rhythm-measure="${ev.bar}"] .rhythm-symbol`)];
     const barItems=pattern.filter(x=>x.bar===ev.bar);
@@ -1869,8 +1886,11 @@ function mountExpressionFormLab(el){
 
   async function playExpressivePhrase(config=currentExpression()){
     stopAllAudio();
+    const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
     const beatMs=60000/config.bpm;
     for(let i=0;i<phrase.length;i++){
+      if(playbackToken!==AUDIO.seq)return;
       const accentGain=config.art.accent && (i===0||i===3) ? 1.35 : 1;
       playTone(phrase[i],{
         duration:(beatMs/1000)*config.art.durationFactor,
@@ -1904,19 +1924,22 @@ function mountExpressionFormLab(el){
   textureSel.addEventListener("change",renderTexture);
   el.querySelector("[data-texture-play]").addEventListener("click",async()=>{
     const type=textureSel.value;
-    stopAllAudio();
+    stopAllAudio();const playbackToken=AUDIO.seq;
+    await ensurePianoSoundFont();
     const melody=[60,62,64,67,65,64,62,60];
     if(type==="mono"){
       await playSequence(melody,280);
     }else if(type==="homo"){
       for(let i=0;i<melody.length;i++){
-        playChord([melody[i],melody[i]-5,melody[i]-9]);
+        if(playbackToken!==AUDIO.seq)return;
+        playChord([melody[i],melody[i]-5,melody[i]-9],true);
         await new Promise(r=>setTimeout(r,310));
       }
     }else{
       const second=[67,65,64,62,60,62,64,65];
       const ctx=audioContext();
       for(let i=0;i<melody.length;i++){
+        if(playbackToken!==AUDIO.seq)return;
         playTone(melody[i],{duration:.26,volume:.10});
         playTone(second[i],{duration:.26,volume:.08});
         await new Promise(r=>setTimeout(r,300));
@@ -1935,13 +1958,14 @@ function mountExpressionFormLab(el){
   formSel.addEventListener("change",renderForm);
   el.querySelector("[data-form-play]").addEventListener("click",async()=>{
     const form=FORMS.find(f=>f.id===formSel.value)||FORMS[0];
-    stopAllAudio();
+    stopAllAudio();const playbackToken=AUDIO.seq;
     const A=[60,62,64,67,64,62];
     const B=[65,67,69,67,65,64];
     const nodes=[...el.querySelectorAll("[data-form-section]")];
     for(let i=0;i<form.sections.length;i++){
+      if(playbackToken!==AUDIO.seq)return;
       nodes.forEach((node,j)=>node.classList.toggle("playing",i===j));
-      await playSequence(form.sections[i]==="A"?A:B,220);
+      await playSequence(form.sections[i]==="A"?A:B,220,()=>{},true);
       await new Promise(r=>setTimeout(r,180));
     }
     nodes.forEach(node=>node.classList.remove("playing"));

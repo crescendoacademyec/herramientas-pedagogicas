@@ -18,3 +18,16 @@ for(let root=0;root<12;root++)for(const bank of Object.values(context.testBanks)
   assert.ok(!/NaN|undefined/.test(html));checked++;
 }
 console.log('Jazz: '+checked+' combinaciones de escala/acorde y tónica verificadas para OSMD.');
+// Tuplets can start after ordinary notes, not only at note indices divisible by 3.
+const tuplets=context.CrescendoPractice.sequence([{midi:60,beats:1},{midi:62,beats:1/3,kind:'triplet',tuplet:'start'},{midi:64,beats:1/3,kind:'triplet',tuplet:''},{midi:65,beats:1/3,kind:'triplet',tuplet:'stop'},{kind:'rest',beats:2}],{meter:'4/4'});
+const xml=tuplets.replaceAll('&quot;','"').replaceAll('&lt;','<').replaceAll('&gt;','>');
+assert.equal((xml.match(/<tuplet type="start"/g)||[]).length,1);
+assert.equal((xml.match(/<tuplet type="stop"/g)||[]).length,1);
+assert.match(xml,/<tuplet type="start"\/>[\s\S]*<tuplet type="stop"\/>/);
+const improv=require('./improvisation-engine.js');
+for(const figure of ['triplet','sextuplet']){
+ const rendered=context.CrescendoPractice.sequence(improv.scale('C','triads',{figure}),{meter:'4/4'}).replaceAll('&quot;','"').replaceAll('&lt;','<').replaceAll('&gt;','>');
+ assert.match(rendered,new RegExp('<actual-notes>'+(figure==='sextuplet'?6:3)+'</actual-notes>'));
+ assert.equal((rendered.match(/<tuplet type="start"/g)||[]).length,(rendered.match(/<tuplet type="stop"/g)||[]).length);
+ assert.ok(!/NaN|undefined/.test(rendered));
+}

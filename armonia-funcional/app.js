@@ -2752,6 +2752,7 @@ function mountFunctionalBridgeLab(el, options = {}) {
     const pattern=current(),buttons=[...el.querySelectorAll("[data-bridge-step]")],gap=Number(el.querySelector("[data-bridge-speed]")?.value||850),base=theoryRootMidi(rootSel.value,3);
     stopTheoryAudio();
     const token=THEORY_AUDIO_STATE.sequenceToken;
+    await ensureTheoryPianoSoundFont();
     for(let index=0;index<pattern.steps.length;index+=1){if(token!==THEORY_AUDIO_STATE.sequenceToken)return;buttons.forEach((button,i)=>button.classList.toggle("audio-active",i===index));playTheoryChord(pattern.steps[index].offsets.map(offset=>base+offset),{duration:Math.max(.45,gap/1000*.82),stop:false});await new Promise(resolve=>setTimeout(resolve,gap))}
     buttons.forEach(button=>button.classList.remove("audio-active"));
   });
@@ -3178,7 +3179,9 @@ function playTheoryPianoSample(player, midi, options = {}) {
   }, (duration + Number(options.delay || 0) + .3) * 1000);
 }
 function playTheoryMidi(midi, options = {}) {
-  ensureTheoryPianoSoundFont().then(player => {
+  const token = THEORY_AUDIO_STATE.sequenceToken;
+  return ensureTheoryPianoSoundFont().then(player => {
+    if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
     if (player) playTheoryPianoSample(player, midi, options);
     else playTheoryFallbackMidi(midi, options);
   });
@@ -3197,6 +3200,7 @@ async function playTheorySequence(midis, onStep, options = {}) {
   stopTheoryAudio();
   const token = THEORY_AUDIO_STATE.sequenceToken;
   const gap = Number(options.gap) || 420;
+  await ensureTheoryPianoSoundFont();
   for (let index = 0; index < midis.length; index += 1) {
     if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
     onStep?.(index);
@@ -3260,10 +3264,10 @@ function addScaleAudio(el) {
         pills.forEach((pill, i) => pill.classList.toggle("audio-active", i === index));
       }, { gap: 360 });
     },
-    chordLabel: "▶ Escuchar notas juntas",
+    chordLabel: "▶ Escuchar escala descendente",
     chord: () => {
       const { rootName, tones } = currentScaleSelection(el);
-      playTheoryChord(theoryToneMidis(rootName, tones.slice(0, -1), 4), { duration: 1.1 });
+      playTheorySequence(theoryToneMidis(rootName, tones, 4).reverse(), () => {}, { gap: 360 });
     }
   });
 }
@@ -3464,11 +3468,14 @@ mountConstructionLab = function(el, options) {
   }
   controls.querySelector("[data-build-play]").addEventListener("click", async () => {
     stopTheoryAudio();
+    const token=THEORY_AUDIO_STATE.sequenceToken;
+    await ensureTheoryPianoSoundFont();
     for (let stage = 1; stage <= 3; stage += 1) {
+      if(token!==THEORY_AUDIO_STATE.sequenceToken)return;
       showStage(stage);
       const { rootName, data } = currentData();
       const groups = stage === 1 ? data.triad : stage === 2 ? data.triad.concat(data.support) : data.triad.concat(data.support, data.extensions);
-      playTheoryChord(theoryToneMidis(rootName, groups, 4), { duration: .65 });
+      playTheoryChord(theoryToneMidis(rootName, groups, 4), { duration: .65, stop: false });
       await new Promise(resolve => setTimeout(resolve, 850));
     }
     el.querySelectorAll(".construction-step").forEach(step => step.classList.remove("build-active"));

@@ -15,15 +15,23 @@
   });
 
   const roots=api.roots, mod=n=>(n%12+12)%12, esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  let player=null,ctx=null,voices=[];
+  let player=null,ctx=null,voices=[],loading=null,audioToken=0;
   function respellOctave(note,midi){const octave=note.octave+(midi-note.midi)/12,glyph=note.alter<0?'♭'.repeat(-note.alter):'♯'.repeat(note.alter);return {...note,midi,octave,label:note.letter+glyph+octave};}
   function drop2(notes){const n=notes.map(x=>({...x})).sort((a,b)=>a.midi-b.midi),dropped=n[n.length-2];n[n.length-2]=respellOctave(dropped,dropped.midi-12);return n.sort((a,b)=>a.midi-b.midi).map((x,i)=>({...x,hand:i?'right':'left'}));}
   function withTop(notes,pc){const targetBase=notes.find(n=>mod(n.midi)===pc);if(!targetBase)return notes;let top=targetBase.midi;while(top<67)top+=12;const arranged=notes.map(n=>{if(mod(n.midi)===pc)return respellOctave(n,top);let midi=top-mod(top-n.midi);if(midi===top)midi-=12;return respellOctave(n,midi);}).sort((a,b)=>a.midi-b.midi);return arranged.map((n,i)=>({...n,hand:i<Math.max(1,arranged.length-3)?'left':'right'}));}
   function scoreNotes(notes){return notes.map(n=>({midi:n.midi,diatonic:n.octave*7+"CDEFGAB".indexOf(n.letter),alter:n.alter}));}
   function miniPiano(notes){const active=new Map(notes.map(n=>[mod(n.midi),n.hand]));const whites=[0,2,4,5,7,9,11,12,14,16,17,19,21,23], blacks=[1,3,6,8,10,13,15,18,20,22], blackX=[1,2,4,5,6,8,9,11,12,13];return `<div class="baga-piano">${whites.map((pc,i)=>`<i class="white ${active.has(mod(pc))?active.get(mod(pc)):''}" style="left:${i/14*100}%"></i>`).join("")}${blacks.map((pc,i)=>`<i class="black ${active.has(mod(pc))?active.get(mod(pc)):''}" style="left:${blackX[i]/14*100}%"></i>`).join("")}</div>`;}
   function movement(a,b){const x=a.map(n=>n.midi).sort((p,q)=>p-q),y=b.map(n=>n.midi).sort((p,q)=>p-q);return x.map((n,i)=>{let d=y[i]-n;while(d>6)d-=12;while(d<-6)d+=12;return d>0?`+${d}`:String(d);}).join(" · ");}
-  async function play(notes,delay=0){ctx||=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();if(!player)player=await Soundfont.instrument(ctx,"acoustic_grand_piano",{soundfont:"MusyngKite"});notes.forEach(n=>voices.push(player.play(n.midi,ctx.currentTime+delay,{duration:1.8,gain:.7})));}
-  function stop(){voices.forEach(v=>{try{v.stop();}catch(_){}});voices=[];}
+  async function play(groups){
+    stop();const token=audioToken;
+    ctx||=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();
+    loading||=Soundfont.instrument(ctx,"acoustic_grand_piano",{soundfont:"MusyngKite"});
+    player=await loading;if(token!==audioToken)return;
+    const start=ctx.currentTime+.03;
+    groups.forEach((notes,i)=>notes.forEach(n=>voices.push(player.play(n.midi,start+i*2,{duration:1.8,gain:.7}))));
+  }
+  function stop(){audioToken++;voices.forEach(v=>{try{v.stop();}catch(_){}});voices=[];}
+
 
   function mount(scope){
     const host=scope.querySelector("[data-baga-lab]");if(!host||host.dataset.ready)return;host.dataset.ready="1";
@@ -41,7 +49,7 @@
       get("[data-piano]").href="../piano-virtual/index.html?"+new URLSearchParams({bank:"progression",root,style});
       host.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.step);render();});
     }
-    host.querySelectorAll("select,input").forEach(el=>el.onchange=render);get("[data-play]").onclick=()=>play(host._notes);get("[data-sequence]").onclick=()=>{stop();seq.forEach((v,i)=>play(v.notes,i*2));};get("[data-stop]").onclick=stop;render();
+    host.querySelectorAll("select,input").forEach(el=>el.onchange=render);get("[data-play]").onclick=()=>play([host._notes]);get("[data-sequence]").onclick=()=>play(seq.map(v=>v.notes));get("[data-stop]").onclick=stop;render();
   }
   window.CrescendoBagaLab={mount};
 })();

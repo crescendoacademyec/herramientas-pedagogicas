@@ -6,3 +6,5 @@
 .improv-piano-link{align-self:center;color:var(--accent);font-weight:700;text-decoration:none;padding:9px 0}.improv-piano-link:hover{text-decoration:underline}
 @media(max-width:850px){.improv-layout{grid-template-columns:1fr}.improv-nav{position:static;grid-template-columns:repeat(2,1fr)}.improv-tips{grid-template-columns:1fr}.improv-actions{bottom:6px}.improv-actions button{padding:8px 5px;font-size:.78rem}}
 @media(max-width:520px){.improv-nav{grid-template-columns:1fr}.improv-card{padding:15px}.improv-actions{grid-template-columns:1fr}.improv-score .cp-staff{min-width:430px}}
+
+.improv-controls label[hidden]{display:none}
