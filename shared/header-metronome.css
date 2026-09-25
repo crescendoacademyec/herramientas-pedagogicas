@@ -1,0 +1,36 @@
+/* Shared compact metronome appearance; each app retains its own audio engine. */
+.header-metronome{
+  display:flex;align-items:center;gap:4px;padding:4px 5px;min-height:40px;
+  border:1px solid rgba(255,255,255,.14);border-radius:10px;
+  background:rgba(0,0,0,.22);box-sizing:border-box;max-width:100%;
+}
+.header-metronome button,.header-metronome select{
+  box-sizing:border-box;min-width:0;min-height:29px;height:29px;padding:0 7px;
+  border:1px solid rgba(255,255,255,.16);border-radius:9px;
+  background:rgba(255,255,255,.07);color:var(--text);font-size:.62rem;font-weight:700;
+  cursor:pointer;transition:background-color .15s,border-color .15s,color .15s;
+}
+.header-metronome select{
+  text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;
+}
+.header-metronome #metroToggle{width:30px;padding:0;color:var(--gold)}
+.header-metronome #metroMeter{width:42px}
+.header-metronome #metroPulse{width:92px}
+.header-metronome .metro-bpm{display:flex;flex-direction:column;align-items:center;gap:1px}
+.header-metronome .metro-label{font-size:.48rem;line-height:1.1;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.header-metronome .metro-stepper{display:flex;align-items:center}
+.header-metronome .metro-stepper button{width:21px;height:24px;min-height:24px;padding:0;border:0;border-radius:0;background:rgba(255,255,255,.08)}
+.header-metronome .metro-stepper input,.header-metronome #metroBpmValue{
+  box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;
+  width:36px;height:24px;padding:0;border:0;border-inline:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:var(--gold);font-size:.68rem;font-weight:800;text-align:center;
+}
+.header-metronome #metroBeat{min-width:16px;text-align:center;color:var(--gold);font-size:.78rem}
+.header-metronome button:hover,.header-metronome select:hover,
+.header-metronome button:focus-visible,.header-metronome select:focus-visible,
+.header-metronome .metro-stepper button:hover,.header-metronome .metro-stepper button:focus-visible{
+  border-color:var(--gold);background:rgba(212,168,79,.2);color:var(--gold);
+}
+.header-metronome button:focus-visible,.header-metronome select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.header-metronome #metroToggle.active{background:var(--gold);color:var(--ink,#17130d)}
+@media(max-width:700px){.header-metronome{flex-wrap:wrap;justify-content:center}}

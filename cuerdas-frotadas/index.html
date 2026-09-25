@@ -8,13 +8,14 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
   <link rel="stylesheet" href="css/styles.css?v=20260919-fixed-score-viewer">
+<link rel="stylesheet" href="../shared/header-metronome.css?v=20260925">
 </head>
 <body>
   <header class="topbar">
     <h1 class="brand"><span>Cuerdas Frotadas</span></h1>
     <div class="header-metronome" aria-label="Metrónomo">
       <button class="metro-play" id="metroToggle" type="button" title="Iniciar / detener metrónomo">▶</button>
-      <div class="metro-bpm-wrap"><button id="metroDown" type="button" aria-label="Bajar BPM">−</button><span class="metro-bpm-readout"><small>BPM</small><span id="metroBpmValue">80</span></span><button id="metroUp" type="button" aria-label="Subir BPM">+</button></div>
+      <div class="metro-bpm"><span class="metro-label">BPM</span><div class="metro-stepper"><button id="metroDown" type="button" aria-label="Bajar BPM">−</button><span id="metroBpmValue">80</span><button id="metroUp" type="button" aria-label="Subir BPM">+</button></div></div>
       <button id="metroTap" type="button">Tap</button>
       <select id="metroMeter" title="Compás"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>6/8</option></select>
       <select id="metroPulse" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩</option><option value="eighth">♪</option><option value="dottedQuarter">♩.</option></select>
