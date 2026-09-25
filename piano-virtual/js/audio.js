@@ -26,9 +26,9 @@ let sfPlayer = null;
 let sfLoading = false;
 
 // ---------- SELECTOR DE INSTRUMENTO (SoundFont) ----------
-const ICON_ACOUSTIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4c0 0 11-1.3 15.5 4C20.6 10 20 14 17 15.5H6c-1.7 0-3-1.6-3-3.5V5.3C3 4.7 3.4 4.2 4 4Z"/><line x1="6.5" y1="15.5" x2="6.5" y2="19"/><line x1="9.5" y1="15.5" x2="9.5" y2="19"/><line x1="12.5" y1="15.5" x2="12.5" y2="19"/></svg>';
-const ICON_ELECTRIC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="7" rx="1"/><line x1="6.5" y1="7" x2="6.5" y2="14"/><line x1="10" y1="7" x2="10" y2="14"/><line x1="13.5" y1="7" x2="13.5" y2="14"/><line x1="17" y1="7" x2="17" y2="14"/><line x1="6" y1="14" x2="4" y2="20"/><line x1="18" y1="14" x2="20" y2="20"/><line x1="4" y1="20" x2="20" y2="20"/></svg>';
-const ICON_ORGAN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="10" width="18" height="4" rx="1"/><rect x="3" y="15" width="18" height="4" rx="1"/><line x1="6" y1="4" x2="6" y2="9"/><line x1="10" y1="4" x2="10" y2="9"/><line x1="14" y1="4" x2="14" y2="9"/><line x1="18" y1="4" x2="18" y2="9"/></svg>';
+const ICON_ACOUSTIC = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14V5a2 2 0 0 1 2-2h7c1 4 2 5 5 6a3 3 0 0 1 2 3v2H4Zm0 0v4h16v-4M6 18v3m12-3v3M8 14v4m4-4v4m4-4v4"/></svg>';
+const ICON_ELECTRIC = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="12" rx="2"/><path d="M2 9h20M6 9v8m4-8v8m4-8v8m4-8v8M7 17l-2 4m12-4 2 4"/><path d="M8 9v4m8-4v4" stroke-width="2.6"/></svg>';
+const ICON_ORGAN = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12V6h3v6m2 0V3h4v9m2 0V6h3v6"/><rect x="3" y="12" width="18" height="9" rx="1"/><path d="M3 16h18m-14 0v5m5-5v5m5-5v5"/></svg>';
 
 const INSTRUMENTS = [
   { id: 'acoustic_grand_piano', label: 'Piano Acústico', icon: ICON_ACOUSTIC },

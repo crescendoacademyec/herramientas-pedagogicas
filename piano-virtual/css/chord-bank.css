@@ -60,3 +60,13 @@
   .controlbar .right-indicators .sustain-indicator,
   .controlbar .right-indicators .indicator-button{min-width:52px;width:60px;max-width:60px;gap:2px;font-size:.53rem}
 }
+
+/* Consistent small-control pictograms and truly centered native select labels. */
+.controlbar .right-indicators .hand-btn svg,
+.controlbar .right-indicators .instrument-icon,
+.controlbar .right-indicators .badge-icon,
+.controlbar .right-indicators .pedal-icon{width:19px;height:19px;flex-shrink:0}
+.header-metronome select{
+  text-align:center;text-align-last:center;
+  padding-inline:7px;appearance:none;-webkit-appearance:none;
+}
