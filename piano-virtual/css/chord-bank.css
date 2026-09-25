@@ -1,5 +1,6 @@
 #openChordBank,.chord-bank button,.chord-bank select,.chord-bank input{font:inherit;border:1px solid #736447;border-radius:8px;padding:9px 12px;background:#26231d;color:#f5eddb;cursor:pointer}
 #openChordBank{color:#edc763;white-space:nowrap;flex-shrink:0;font-size:.75rem;min-height:40px;transition:background .18s,color .18s,border-color .18s}
+#openChordBank:hover,#openChordBank:focus-visible{border-color:var(--gold);background:rgba(212,168,79,.12)}
 #openChordBank[aria-pressed="true"]{background:#d5aa4c;color:#17130d;border-color:#edc763;box-shadow:0 0 0 2px rgba(213,170,76,.18)}
 .chord-bank{margin:16px 0;padding:16px;border:1px solid #625234;border-radius:12px;background:#191814;color:#f5eddb}
 .chord-bank[hidden]{display:none!important}
