@@ -1329,6 +1329,15 @@ function centsOffFromTarget(freq, targetFreq){
   return 1200 * Math.log2(freq / targetFreq);
 }
 
+function matchingHarmonic(freq, base){
+  let harmonic = 1, distance = Math.abs(centsOffFromTarget(freq, base));
+  for(let h=2; h<=4; h++){
+    const d = Math.abs(centsOffFromTarget(freq, base*h));
+    if(d < distance && d <= 50){ harmonic=h; distance=d; }
+  }
+  return harmonic;
+}
+
 function closestStringIndex(freq){
   const inst = INSTRUMENTS[currentInstrumentKey];
   let best = 0, bestScore = Infinity;
@@ -1487,7 +1496,9 @@ function handlePitch(freq){
     const inst = INSTRUMENTS[currentInstrumentKey];
     idx = autoMode ? stableAutoString(freq) : selectedStringIndex;
     target = inst.strings[idx];
-    cents = centsOffFromTarget(freq, calibratedFreq(target.freq));
+    const base = calibratedFreq(target.freq);
+    const harmonic = autoMode ? matchingHarmonic(freq, base) : 1;
+    cents = centsOffFromTarget(freq, base * harmonic);
 
     if(autoMode){
       document.querySelectorAll('.peg').forEach(p => p.classList.remove('selected','correct'));

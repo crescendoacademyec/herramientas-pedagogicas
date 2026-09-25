@@ -766,7 +766,7 @@
     const SCORE_OCTAVE_OFFSET = { bass4: -12, bass5: -12 };
 
     function getCurrentStepData(tempo){
-      let stepSeconds=null; const midis=[]; const octaveOffset=SCORE_OCTAVE_OFFSET[instrumentSel.value]||0;
+      const stepSeconds=ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,tempo); const notes=[]; const midis=[]; const octaveOffset=SCORE_OCTAVE_OFFSET[instrumentSel.value]||0;
       try{
         const entries=osmd.cursor.Iterator.CurrentVoiceEntries||[];
         entries.forEach(ve=>(ve.Notes||[]).forEach(note=>{
@@ -774,16 +774,15 @@
           const midi=note.Pitch.halfTone+12+octaveOffset;
           const lengthFraction=(note.Length&&typeof note.Length.RealValue==='number')?note.Length.RealValue:.25;
           const durSeconds=lengthFraction*4*(60/tempo);
-          if(stepSeconds===null||durSeconds<stepSeconds)stepSeconds=durSeconds;
+          notes.push({midi,duration:durSeconds});
           midis.push(midi);
         }));
       }catch(err){console.warn('Error leyendo notas de la partitura:',err)}
-      if(stepSeconds===null)stepSeconds=.5*(60/tempo);
-      return {midis,stepSeconds};
+      return {midis,notes,stepSeconds};
     }
     function triggerCurrentStepNotes(tempo, hold) {
       const data=getCurrentStepData(tempo);
-      data.midis.forEach(midi=>{const playDur=hold?Math.max(data.stepSeconds,1):data.stepSeconds;const handle=playNote(midi,playDur);if(handle)scoreActiveHandles.push(handle)});
+      data.notes.forEach(({midi,duration})=>{const playDur=hold?Math.max(duration,1):duration;const handle=playNote(midi,playDur);if(handle)scoreActiveHandles.push(handle)});
       setScoreHighlight(data.midis);
       return data.stepSeconds;
     }

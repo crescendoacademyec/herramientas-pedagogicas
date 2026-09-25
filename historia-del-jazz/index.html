@@ -2923,8 +2923,6 @@ document.getElementById('fontDown').addEventListener('click',()=>{size=Math.max(
 document.getElementById('focusMode').addEventListener('click',e=>{document.body.classList.toggle('focus-mode');e.target.textContent=document.body.classList.contains('focus-mode')?'Mostrar navegación':'Modo lectura';});
 function goTo(id){const card=document.getElementById(id);if(!card)return;card.hidden=false;card.querySelector('details').open=true;card.scrollIntoView({behavior:'smooth',block:'start'});}
 document.querySelectorAll('[data-target]').forEach(btn=>btn.addEventListener('click',()=>goTo(btn.dataset.target)));
-const observer=new IntersectionObserver(entries=>{entries.forEach(entry=>{if(entry.isIntersecting){document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.target===entry.target.id));}})},{rootMargin:'-20% 0px -70% 0px'});
-cards.forEach(c=>observer.observe(c));
 </script>
 <script>
 (function(){
@@ -2961,16 +2959,25 @@ cards.forEach(c=>observer.observe(c));
   }
 
   if('IntersectionObserver' in window && cards.length){
-    const observer = new IntersectionObserver(entries => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a,b) => Math.abs(a.boundingClientRect.top) - Math.abs(b.boundingClientRect.top));
-      if(visible[0]) setCurrent(visible[0].target.id);
+    let observer;
+    const observeCards = () => {
+    if(observer) observer.disconnect();
+    const headerHeight = header?.getBoundingClientRect().height || 0;
+    observer = new IntersectionObserver(() => {
+      // Entries contains only changed intersections, not every visible card.
+      const visible = cards.filter(card => !card.hidden).map(card => ({card,rect:card.getBoundingClientRect()}))
+        .filter(({rect}) => rect.bottom > headerHeight && rect.top < window.innerHeight)
+        .sort((a,b) => Math.abs(a.rect.top-headerHeight)-Math.abs(b.rect.top-headerHeight));
+      if(visible[0]) setCurrent(visible[0].card.id);
     }, {
-      rootMargin: 'calc(-1 * var(--header-height)) 0px -68% 0px',
+      rootMargin: `-${Math.round(headerHeight)}px 0px -68% 0px`,
       threshold: [0, .15, .4]
     });
     cards.forEach(card => observer.observe(card));
+    };
+    observeCards();
+    window.addEventListener('resize', observeCards);
+    if(header && 'ResizeObserver' in window) new ResizeObserver(observeCards).observe(header);
   }
 })();
 </script>

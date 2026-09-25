@@ -17,6 +17,8 @@
       this.loadingPromise = null;
       this.volume = 0.78;
       this.activeNodes = new Set();
+      this.generation = 0;
+      this.instrumentGeneration = 0;
     }
 
     ensureContext() {
@@ -44,6 +46,8 @@
     }
 
     async setInstrument(id) {
+      this.stopAll();
+      this.instrumentGeneration++;
       this.instrumentId = INSTRUMENTS[id] ? id : 'piano';
       this.player = null;
       this.loadingPromise = null;
@@ -57,14 +61,17 @@
       if (this.loadingPromise) return this.loadingPromise;
       if (!window.Soundfont) return null;
       const ctx = this.ensureContext();
+      const generation = this.instrumentGeneration;
       const sfName = INSTRUMENTS[this.instrumentId].sf;
       this.loadingPromise = window.Soundfont.instrument(ctx, sfName, { destination: this.master })
         .then(player => {
+          if(generation !== this.instrumentGeneration) return null;
           this.player = player;
           this.loadingPromise = null;
           return player;
         })
         .catch(err => {
+          if(generation !== this.instrumentGeneration) return null;
           console.warn('SoundFont no disponible; se usará seno puro.', err);
           this.loadingPromise = null;
           this.player = null;
@@ -74,6 +81,7 @@
     }
 
     stopAll() {
+      this.generation++;
       for (const node of [...this.activeNodes]) {
         try { node.stop(); } catch (_) {}
         this.activeNodes.delete(node);
@@ -98,9 +106,11 @@
       osc.addEventListener('ended', () => this.activeNodes.delete(osc), { once:true });
     }
 
-    async playNotes(notes, when, duration, gainScale = 1) {
+    async playNotes(notes, when, duration, gainScale = 1, generation = this.generation) {
       const ctx = this.ensureContext();
       if (this.instrumentId !== 'sine') await this.loadInstrument();
+      if(generation !== this.generation) return;
+      when = Math.max(ctx.currentTime, when);
       if (this.player) {
         notes.forEach(midi => {
           try {
@@ -108,7 +118,7 @@
             if (note) {
               this.activeNodes.add(note);
               try { note.stop(when + duration + 0.08); } catch (_) {}
-              setTimeout(() => this.activeNodes.delete(note), Math.ceil((duration + 0.2) * 1000));
+              setTimeout(() => this.activeNodes.delete(note), Math.ceil((Math.max(0, when - ctx.currentTime) + duration + 0.2) * 1000));
             }
           } catch (_) {
             this.playSine(midi, when, duration, gainScale);
@@ -122,9 +132,14 @@
 
     async playSequence(sequence) {
       const ctx = this.ensureContext();
+      this.stopAll();
+      const generation = this.generation;
+      if(ctx.state === 'suspended') await ctx.resume();
+      await this.loadInstrument();
+      if(generation !== this.generation) return;
       const t0 = ctx.currentTime + 0.03;
       for (const step of sequence || []) {
-        this.playNotes(step.notes || [], t0 + Number(step.start || 0), Number(step.dur || 1), Number(step.vel || 0.85));
+        await this.playNotes(step.notes || [], t0 + Number(step.start || 0), Number(step.dur || 1), Number(step.vel || 0.85), generation);
       }
     }
   }

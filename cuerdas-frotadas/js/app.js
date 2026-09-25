@@ -1890,7 +1890,7 @@
     }
 
     function triggerCurrentStepNotes(tempo, hold, tutorIndex = null) {
-      let stepSeconds = null;
+      const stepSeconds = ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,tempo);
       const tutorMidis = [];
       try {
         const entries = osmd.cursor.Iterator.CurrentVoiceEntries || [];
@@ -1901,7 +1901,6 @@
             tutorMidis.push(midi);
             const lengthFraction = (note.Length && typeof note.Length.RealValue === 'number') ? note.Length.RealValue : 0.25;
             const durSeconds = lengthFraction * 4 * (60 / tempo);
-            if (stepSeconds === null || durSeconds < stepSeconds) stepSeconds = durSeconds;
             scoreNoteOn(midi);
             scoreActiveMidis.add(midi);
             if (!hold) {
@@ -1914,7 +1913,6 @@
         });
       } catch(err) { console.warn('Error leyendo notas de la partitura:', err); }
       if (tutorMidis.length) updateTutorFromPlayback([...new Set(tutorMidis)], tutorIndex == null ? Math.max(0,currentStepIndex) : tutorIndex);
-      if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo);
       return stepSeconds;
     }
 
@@ -2630,6 +2628,7 @@
     const STRINGS_SETTINGS_KEY='cuerdasFrotadas_settings_v10';
     function saveStringsPrefs(){
       try{localStorage.setItem(STRINGS_SETTINGS_KEY,JSON.stringify({
+        metroBpm:$('metroBpmValue')?.textContent, metroMeter:$('metroMeter')?.value, metroPulse:$('metroPulse')?.value,
         instrument:instrumentSel.value, articulation:articulationSel.value,
         orientation:orientationSel?.value||'right', labelMode:labelModeSel?.value||'notes', keySignature:keySignatureSel?.value||'auto', spellingMode:spellingModeSel?.value||'auto', techPosition:techPositionSel?.value||'free',
         root:rootSel.value, chord:chordTypeSel.value, scale:scaleSel.value, volume:volumeSlider.value, tutorEnabled:!!tutorEnabledEl?.checked, tutorCriterion:tutorCriterionEl?.value||'phrase', tutorOpenStrings:tutorOpenStringsEl?.value||'neutral', tutorBowMode:tutorBowModeEl?.value||'score', tutorPhraseLength:tutorPhraseLengthEl?.value||'8',
@@ -2639,6 +2638,8 @@
     function loadStringsPrefs(){
       try{
         const s=JSON.parse(localStorage.getItem(STRINGS_SETTINGS_KEY)||localStorage.getItem('cuerdasFrotadas_settings_v9')||'{}');
+        if(Number.isFinite(+s.metroBpm)) $('metroBpmValue').textContent=String(Math.max(30,Math.min(300,Math.round(+s.metroBpm))));
+        for(const id of ['metroMeter','metroPulse']) if(s[id] && [...$(id).options].some(o=>o.value===s[id])) $(id).value=s[id];
         if(s.instrument&&INSTRUMENTS[s.instrument])instrumentSel.value=s.instrument;
         if(s.articulation)articulationSel.value=s.articulation;
         if(s.orientation&&orientationSel)orientationSel.value=s.orientation;

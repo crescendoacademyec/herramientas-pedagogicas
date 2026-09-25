@@ -32,3 +32,30 @@
 @media(max-width:650px){.bank-display{grid-template-columns:1fr}.bank-controls label{width:100%;min-width:0;flex-basis:100%}.bank-score{max-width:320px}.bank-tabs button{flex:1}.bank-controls select{width:100%;min-width:0}}
 @media(max-width:800px){.bank-course-progress{grid-template-columns:repeat(6,1fr)}}
 @media(max-width:700px){.chord-bank:not([hidden]){max-height:70vh;flex:none}}
+
+/* One shared height for both sides; wrap controls instead of clipping them. */
+.controlbar{--control-height:38px;flex-direction:row;flex-wrap:wrap;overflow:visible;align-items:center}
+.controlbar .quick-select-box,
+.controlbar .right-indicators .hand-btn,
+.controlbar .right-indicators .instrument-box,
+.controlbar .right-indicators .icon-badge,
+.controlbar .right-indicators .sustain-indicator,
+.controlbar .right-indicators .indicator-button,
+.controlbar #openChordBank{
+  box-sizing:border-box;height:var(--control-height);min-height:var(--control-height);
+  padding:4px 8px;justify-content:center;
+}
+.controlbar #openChordBank{flex:0 1 auto;max-width:100%;white-space:normal;line-height:1.15;font-size:.72rem}
+.controlbar .right-indicators{flex-wrap:wrap;max-width:100%;width:auto}
+.controlbar .right-indicators .hand-btn svg,
+.controlbar .right-indicators .instrument-icon,
+.controlbar .right-indicators .badge-icon{width:17px;height:17px}
+@media(max-width:700px){
+  .controlbar{--control-height:44px;gap:6px}
+  .controlbar .right-indicators{margin-left:0;gap:6px}
+  .controlbar .right-indicators .hand-btn,
+  .controlbar .right-indicators .instrument-box,
+  .controlbar .right-indicators .icon-badge,
+  .controlbar .right-indicators .sustain-indicator,
+  .controlbar .right-indicators .indicator-button{min-width:52px;width:60px;max-width:60px;gap:2px;font-size:.53rem}
+}

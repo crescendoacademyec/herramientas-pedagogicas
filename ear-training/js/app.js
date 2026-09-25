@@ -83,7 +83,13 @@
     </div>`;
   }
 
+  let roundHintTimer=null, autoplayTimer=null;
+  function stopRoundAudio(){
+    clearTimeout(roundHintTimer);clearTimeout(autoplayTimer);
+    roundHintTimer=autoplayTimer=null;audio.stopAll();
+  }
   function renderApp(){
+    stopRoundAudio();
     renderNav();
     const lv=levelInfo();
     app.innerHTML=`<section class="card">
@@ -159,10 +165,11 @@
 
   function newRound(){
     if(state.mode!=='practice')return;
+    stopRoundAudio();
     state.round=G.generate(state.level,effectiveConfig());
     state.round.answered=false;
     renderRound();
-    if(S.getPref('autoplay') && state.audioUnlocked && state.round.seq?.length) setTimeout(playRound,180);
+    if(S.getPref('autoplay') && state.audioUnlocked && state.round.seq?.length) autoplayTimer=setTimeout(playRound,180);
   }
 
   function renderRound(){
@@ -184,9 +191,13 @@
     state.audioUnlocked=true;
     if(!state.round?.seq?.length)return;
     const hint=document.getElementById('stageHint'); if(hint)hint.textContent='Reproduciendo…';
-    await audio.playSequence(state.round.seq);
-    const total=Math.max(...state.round.seq.map(s=>Number(s.start||0)+Number(s.dur||0)),0);
-    setTimeout(()=>{const h=document.getElementById('stageHint');if(h)h.textContent='Repetir · Espacio';},Math.ceil(total*1000));
+    clearTimeout(autoplayTimer);clearTimeout(roundHintTimer);
+    const round=state.round;
+    const pending=audio.playSequence(round.seq), generation=audio.generation;
+    await pending;
+    if(generation!==audio.generation || round!==state.round)return;
+    const total=Math.max(...round.seq.map(s=>Number(s.start||0)+Number(s.dur||0)),0);
+    roundHintTimer=setTimeout(()=>{if(generation!==audio.generation || round!==state.round)return;const h=document.getElementById('stageHint');if(h)h.textContent='Repetir · Espacio';},Math.ceil(total*1000));
   }
 
   function answerRound(index){

@@ -1604,9 +1604,10 @@
                 const rect = waveCanvas.getBoundingClientRect();
                 const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
                 const v = visibleWindow();
-                currentTime = Math.max(0, Math.min(duration, v.start + x * v.duration));
+                const seekTarget = Math.max(0, Math.min(duration, v.start + x * v.duration));
                 const wasPlaying = isPlaying;
                 if (wasPlaying) pausePlayback();
+                currentTime = seekTarget;
                 if (wasPlaying) startPlayback(currentTime);
                 updateTimeDisplay(); drawWaveform();
             });

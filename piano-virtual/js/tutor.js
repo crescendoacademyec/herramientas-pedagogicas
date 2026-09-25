@@ -21,6 +21,7 @@ function getCurrentScoreStepData(){
       });
     });
   }catch(e){}
+  out.duration=ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,getTempo());
   out.target=[...new Set(out.target)].sort((a,b)=>a-b);out.all=[...new Map(out.all.map(x=>[x.midi,x])).values()];if(out.duration===null)out.duration=.5*(60/getTempo());return out;
 }
 function beginTutorSession(){
@@ -153,7 +154,12 @@ function toggleLoop() {
   }
 }
 
+const scoreReleaseTimers = new Map();
+const scoreActiveTies = new Map();
 function stopPlaybackAudio() {
+  scoreReleaseTimers.forEach(clearTimeout);
+  scoreReleaseTimers.clear();
+  scoreActiveTies.clear();
   scorePlaying = false;
   syncTransportButton();
   if (scorePlaybackTimer) { clearTimeout(scorePlaybackTimer); scorePlaybackTimer = null; }
@@ -174,7 +180,7 @@ function fullStop(reason='stop') {
 }
 
 function triggerCurrentStepNotes(tempo, hold) {
-  let stepSeconds = null;
+  const stepSeconds = ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,tempo);
   const stepHands = new Map();
   try {
     const entries = osmd.cursor.Iterator.CurrentVoiceEntries || [];
@@ -183,18 +189,22 @@ function triggerCurrentStepNotes(tempo, hold) {
         if (!note || (note.isRest && note.isRest()) || note.Pitch == null) return;
         const midi = note.Pitch.halfTone + 12;
         if (!shouldPlayScoreNote(midi, ve)) return;
-        const lengthFraction = (note.Length && typeof note.Length.RealValue === 'number') ? note.Length.RealValue : 0.25;
-        const durSeconds = lengthFraction * 4 * (60 / tempo);
-        if (stepSeconds === null || durSeconds < stepSeconds) stepSeconds = durSeconds;
-        noteOn(midiToInfo(midi));
+        const durSeconds = ScorePlaybackTiming.tiedSeconds(note,tempo);
+        const continuing = note.NoteTie && scoreActiveTies.get(note.NoteTie) === midi && scoreActiveMidis.has(midi);
+        if (!continuing) noteOn(midiToInfo(midi));
         if (!stepHands.has(midi)) stepHands.set(midi, new Set());
         stepHands.get(midi).add(scoreNoteHand(midi, ve));
         scoreActiveMidis.add(midi);
+        if (continuing) return;
+        if(note.NoteTie) scoreActiveTies.set(note.NoteTie,midi);
+        clearTimeout(scoreReleaseTimers.get(midi));
         if (!hold) {
-          setTimeout(() => {
+          scoreReleaseTimers.set(midi, setTimeout(() => {
+            scoreReleaseTimers.delete(midi);
+            if(note.NoteTie) scoreActiveTies.delete(note.NoteTie);
             noteOff(midiToInfo(midi));
             scoreActiveMidis.delete(midi);
-          }, Math.max(30, durSeconds * 1000 - 30));
+          }, Math.max(30, durSeconds * 1000)));
         }
       });
     });
@@ -202,7 +212,6 @@ function triggerCurrentStepNotes(tempo, hold) {
       hands.forEach(hand => keyElByMidi[midi]?.classList.add(`score-note-${hand}`));
     });
   } catch(err) { console.warn('Error leyendo notas de la partitura:', err); }
-  if (stepSeconds === null) stepSeconds = 0.5 * (60 / tempo);
   return stepSeconds;
 }
 

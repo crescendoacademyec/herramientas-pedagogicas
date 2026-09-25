@@ -1,0 +1,42 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Regresión musical · código real</title>
+<h1>Pruebas del lector MusicXML</h1><pre id="results">Ejecutando…</pre><div id="score"></div>
+<script src="../shared/opensheetmusicdisplay-1.8.4.min.js"></script><script src="../shared/score-playback-timing.js?v=20260925"></script>
+<script>
+(async()=>{
+const rows=[];const check=(label,actual,expected)=>{const pass=JSON.stringify(actual)===JSON.stringify(expected);rows.push({label,actual,expected,pass});if(!pass)throw Error(label);};
+try{
+const source=await (await fetch('../metronomo/index.html')).text();
+const begin=source.indexOf('function parseMusicXmlEvents('),end=source.indexOf('async function extractMxl',begin);
+const parse=new Function(source.slice(begin,end)+';return parseMusicXmlEvents;')();
+const note=(duration,pitch='C',extra='')=>`<note>${extra}${pitch?`<pitch><step>${pitch}</step><octave>4</octave></pitch>`:'<rest/>'}<duration>${duration}</duration><type>${duration===4?'whole':duration===2?'half':'quarter'}</type></note>`;
+const attrs=div=>`<attributes><divisions>${div}</divisions><key><fifths>0</fifths></key><time><beats>4</beats><beat-type>4</beat-type></time><clef><sign>G</sign><line>2</line></clef></attributes>`;
+const score=measures=>`<?xml version="1.0"?><score-partwise version="3.1"><part-list><score-part id="P1"><part-name>Test</part-name></score-part></part-list><part id="P1">${measures.map((m,i)=>`<measure number="${i+1}">${m}</measure>`).join('')}</part></score-partwise>`;
+const poly=score([attrs(1)+note(4,'C','<voice>1</voice>')+'<backup><duration>4</duration></backup>'+['C','D','E','F'].map(p=>note(1,p,'<voice>2</voice>')).join('')]);
+check('Polifonía: cuatro pulsos',parse(poly).map(e=>e.quarterDuration),[1,1,1,1]);
+check('Duración individual conservada',parse(poly)[0].notes.map(n=>n.quarterDuration),[4,1]);
+check('Cambio de divisions entre compases',parse(score([attrs(1)+note(4),attrs(2)+note(8)])).map(e=>e.quarterDuration),[4,4]);
+check('Silencio de redonda',parse(score([attrs(1)+note(4,null)])).map(e=>e.quarterDuration),[4]);
+check('Acorde simultáneo',parse(score([attrs(1)+note(4)+note(4,'E','<chord/>')])).map(e=>e.midis),[[60,64]]);
+check('Compás siguiente después de voz corta',parse(score([attrs(1)+note(4)+'<backup><duration>4</duration></backup>'+note(1,'G'),note(4)])).map(e=>e.startQuarter),[0,4]);
+const osmd=new opensheetmusicdisplay.OpenSheetMusicDisplay(document.getElementById('score'),{autoResize:false});
+for(const [name,xml,expected] of [['Polifonía OSMD',poly,[.5,.5,.5,.5]],['Silencio OSMD',score([attrs(1)+note(4,null)]),[2]],['Anacrusa OSMD',score([attrs(1)+note(1),note(4)]),[.5,2]]]){
+ await osmd.load(xml);osmd.render();osmd.cursor.reset();const values=[];
+ for(let n=0;n<30&&!osmd.cursor.Iterator.EndReached;n++){
+ const before=osmd.cursor.Iterator.CurrentSourceTimestamp.RealValue;
+ values.push(ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,120));
+ check(name+' cursor estable '+n,osmd.cursor.Iterator.CurrentSourceTimestamp.RealValue,before);
+ osmd.cursor.next();
+ }
+ check(name,values,expected);
+}
+const tied=score([attrs(1)+note(2,'C','<tie type="start"/><notations><tied type="start"/></notations>')+note(2,'C','<tie type="stop"/><notations><tied type="stop"/></notations>')]);
+await osmd.load(tied);osmd.render();osmd.cursor.reset();
+let first=osmd.cursor.Iterator.CurrentVoiceEntries[0].Notes[0];
+check('Ligadura OSMD: duración completa',ScorePlaybackTiming.tiedSeconds(first,120),2);
+osmd.cursor.next();let continuation=osmd.cursor.Iterator.CurrentVoiceEntries[0].Notes[0];
+check('Ligadura OSMD: mismo vínculo',first.NoteTie===continuation.NoteTie,true);
+check('Ligadura OSMD: duración desde selección',ScorePlaybackTiming.tiedSeconds(continuation,120),1);
+}catch(e){rows.push({error:e.message,pass:false});}
+document.getElementById('results').textContent=JSON.stringify({pass:rows.every(r=>r.pass),checks:rows},null,2);
+})();
+</script></html>

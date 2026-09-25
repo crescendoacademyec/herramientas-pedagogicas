@@ -2,7 +2,9 @@
 
 Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
-**Resultado: 9 hallazgos funcionales confirmados por pruebas focalizadas o errores de navegador. No se modificó el código de estas aplicaciones.** La revisión no certifica que cada función sea correcta: incluye inventario de las 16 apps, carga en navegador, dependencias iniciales, scripts incrustados, pruebas existentes y casos focalizados. Las funciones no ejercitadas se identifican al final.
+**Estado actualizado (25 de septiembre): los nueve hallazgos tienen correcciones y pruebas de regresión. Véase [verificación de correcciones](2026-09-25-correcciones.md). Los casos y resultados siguientes documentan la versión original auditada.**
+
+**Resultado original: 9 hallazgos funcionales confirmados por pruebas focalizadas o errores de navegador. No se modificó el código de estas aplicaciones.** La revisión no certifica que cada función sea correcta: incluye inventario de las 16 apps, carga en navegador, dependencias iniciales, scripts incrustados, pruebas existentes y casos focalizados. Las funciones no ejercitadas se identifican al final.
 
 ## Hallazgos y prioridad
 
@@ -109,7 +111,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 - **3 pruebas Python de ChordSync: pasan.**
 - **16 páginas principales:** sin dependencias locales iniciales ausentes tras resolver sus etiquetas `<base>`; scripts incrustados sin errores de sintaxis.
 - Carga en navegador de las **16 apps**, con los errores de Cuerdas Frotadas e Historia del Jazz descritos arriba. La carga correcta no equivale a validar todas sus funciones.
-- [Sondas de comportamiento](2026-09-20-otras-apps-probes.cjs): ejecutar `node auditorias/2026-09-20-otras-apps-probes.cjs`. Imprimen esperado/observado; `pass: false` documenta un defecto, no un fallo de la auditoría.
+- [Sondas de comportamiento](2026-09-20-otras-apps-probes.cjs): ejecutar `node auditorias/2026-09-20-otras-apps-probes.cjs`. Ahora ejecutan las aserciones de regresión sobre el código actual; los resultados anteriores se conservan en el JSON histórico.
 - [Caso MusicXML polifónico](metronomo-polyphony-probe.html): abrir servido por HTTP. Contiene el parser de la versión auditada y un archivo sintético; no necesita archivos del usuario.
 - [Resultados numéricos](2026-09-20-otras-apps-resultados.json).
 
