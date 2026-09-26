@@ -13,7 +13,9 @@
 .header-metronome select{
   text-align:center;text-align-last:center;appearance:none;-webkit-appearance:none;
 }
-.header-metronome #metroToggle{width:30px;padding:0;color:var(--gold)}
+.header-metronome #metroToggle{display:inline-flex;align-items:center;justify-content:center;width:30px;flex:0 0 30px;padding:0;color:var(--gold);font-size:18px;line-height:1}
+.header-metronome #metroToggle[aria-pressed="true"]{font-size:0}
+.header-metronome #metroToggle[aria-pressed="true"]::before{content:"";display:block;width:13px;height:13px;border-radius:1px;background:currentColor}
 .header-metronome #metroMeter{width:42px}
 .header-metronome #metroPulse{width:92px}
 .header-metronome .metro-bpm{display:flex;flex-direction:column;align-items:center;gap:1px}
@@ -25,12 +27,13 @@
   width:36px;height:24px;padding:0;border:0;border-inline:1px solid rgba(255,255,255,.1);
   background:rgba(255,255,255,.04);color:var(--gold);font-size:.68rem;font-weight:800;text-align:center;
 }
-.header-metronome #metroBeat{min-width:16px;text-align:center;color:var(--gold);font-size:.78rem}
+.header-metronome #metroBeat{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:29px;border:1px solid rgba(212,168,79,.45);border-radius:7px;background:rgba(0,0,0,.22);color:var(--gold);font:700 16px/1 system-ui;font-variant-numeric:tabular-nums;text-align:center}
+.header-metronome #metroBeat.is-downbeat{background:var(--gold);border-color:var(--gold);color:var(--ink,#17130d)}
 .header-metronome button:hover,.header-metronome select:hover,
 .header-metronome button:focus-visible,.header-metronome select:focus-visible,
 .header-metronome .metro-stepper button:hover,.header-metronome .metro-stepper button:focus-visible{
   border-color:var(--gold);background:rgba(212,168,79,.2);color:var(--gold);
 }
 .header-metronome button:focus-visible,.header-metronome select:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
-.header-metronome #metroToggle.active{background:var(--gold);color:var(--ink,#17130d)}
+.header-metronome #metroToggle.active,.header-metronome #metroToggle.active:hover,.header-metronome #metroToggle.active:focus-visible{background:var(--gold);color:var(--ink,#17130d)}
 @media(max-width:700px){.header-metronome{flex-wrap:wrap;justify-content:center}}

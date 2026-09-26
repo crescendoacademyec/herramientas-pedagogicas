@@ -913,18 +913,18 @@
 }
 
 </style>
-<link rel="stylesheet" href="../shared/header-metronome.css?v=20260925">
+<link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
 </head>
 <body>
   <header class="topbar">
     <h1 class="brand"><span>Folk Virtual</span></h1>
     <div class="header-metronome" aria-label="Metrónomo">
-      <button class="metro-play" id="metroToggle" type="button" title="Iniciar / detener metrónomo">▶</button>
+      <button class="metro-play" id="metroToggle" aria-label="Iniciar metrónomo" type="button" title="Iniciar / detener metrónomo">▶</button>
       <div class="metro-bpm"><span class="metro-label">BPM</span><div class="metro-stepper"><button id="metroDown" type="button" aria-label="Bajar BPM">−</button><span id="metroBpmValue">80</span><button id="metroUp" type="button" aria-label="Subir BPM">+</button></div></div>
       <button id="metroTap" type="button">Tap</button>
       <select id="metroMeter" title="Compás"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>6/8</option></select>
       <select id="metroPulse" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩</option><option value="eighth">♪</option><option value="dottedQuarter">♩.</option></select>
-      <span id="metroBeat">1</span>
+      <span class="metro-beat" id="metroBeat" aria-label="Metrónomo detenido">—</span>
     </div>
     <div class="social-bar">
       <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
@@ -2490,9 +2490,10 @@
       return {pulses:Math.max(1,Math.round(pulses)),secondsPerPulse:60/Math.max(30,Math.min(300,bpm))};
     }
     function metroClick(time,accent=false){const c=ensureCtx(),o=c.createOscillator(),g=c.createGain();o.frequency.value=accent?1450:980;g.gain.setValueAtTime(.0001,time);g.gain.exponentialRampToValueAtTime(accent?.18:.11,time+.003);g.gain.exponentialRampToValueAtTime(.0001,time+.045);o.connect(g);g.connect(masterBus);o.start(time);o.stop(time+.055)}
-    function metroSchedule(){if(!metroRunning)return;const c=ensureCtx(),timing=getMeterTiming(),beats=timing.pulses;while(metroNextTime<c.currentTime+.12){const idx=metroBeatIndex%beats;metroClick(metroNextTime,idx===0);const shown=idx+1;setTimeout(()=>{if(metroRunning)metroBeat.textContent=shown},Math.max(0,(metroNextTime-c.currentTime)*1000));metroBeatIndex++;metroNextTime+=timing.secondsPerPulse}metroTimer=setTimeout(metroSchedule,25)}
-    function startMetro(){if(metroRunning)return;const c=ensureCtx();metroRunning=true;metroBeatIndex=0;metroNextTime=c.currentTime+.06;metroToggle.textContent='■';metroSchedule()}
-    function stopMetro(){metroRunning=false;if(metroTimer)clearTimeout(metroTimer);metroTimer=null;metroToggle.textContent='▶';metroBeat.textContent='1'}
+    function showMetroBeat(beat){metroBeat.textContent=beat?String(beat):'—';metroBeat.classList.toggle('is-downbeat',beat===1);metroBeat.setAttribute('aria-label',beat?'Tiempo '+beat:'Metrónomo detenido')}
+    function metroSchedule(){if(!metroRunning)return;const c=ensureCtx(),timing=getMeterTiming(),beats=timing.pulses;while(metroNextTime<c.currentTime+.12){const idx=metroBeatIndex%beats;metroClick(metroNextTime,idx===0);const shown=idx+1;setTimeout(()=>{if(metroRunning)showMetroBeat(shown)},Math.max(0,(metroNextTime-c.currentTime)*1000));metroBeatIndex++;metroNextTime+=timing.secondsPerPulse}metroTimer=setTimeout(metroSchedule,25)}
+    function startMetro(){if(metroRunning)return;const c=ensureCtx();metroRunning=true;metroBeatIndex=0;metroNextTime=c.currentTime+.06;metroToggle.textContent='■';metroToggle.classList.add('active');metroToggle.setAttribute('aria-pressed','true');metroToggle.setAttribute('aria-label','Detener metrónomo');metroSchedule()}
+    function stopMetro(){metroRunning=false;if(metroTimer)clearTimeout(metroTimer);metroTimer=null;metroToggle.textContent='▶';metroToggle.classList.remove('active');metroToggle.setAttribute('aria-pressed','false');metroToggle.setAttribute('aria-label','Iniciar metrónomo');showMetroBeat(0)}
     function setMetroBpm(v){metroBpmValue.textContent=String(Math.max(30,Math.min(300,Math.round(v))));saveSettings()}
     metroToggle.addEventListener('click',()=>metroRunning?stopMetro():startMetro()); metroDown.addEventListener('click',()=>setMetroBpm(+metroBpmValue.textContent-1)); metroUp.addEventListener('click',()=>setMetroBpm(+metroBpmValue.textContent+1));
     metroTap.addEventListener('click',()=>{const now=performance.now();metroTapTimes=metroTapTimes.filter(t=>now-t<2500);metroTapTimes.push(now);if(metroTapTimes.length>=2){const ds=metroTapTimes.slice(1).map((t,i)=>t-metroTapTimes[i]);setMetroBpm(60000/(ds.reduce((a,b)=>a+b,0)/ds.length))}});

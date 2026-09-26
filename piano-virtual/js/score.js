@@ -257,7 +257,7 @@ function shouldPlayScoreNote(midi,ve){
   if(tutorMode && tutorMode.value!=='off'){const target=tutorHand.value;const hand=scoreNoteHand(midi,ve);return target==='both'?false:hand!==target}
   const mode=scoreHandMode.value;return mode==='both'||scoreNoteHand(midi,ve)===mode
 }
-function clearCountIn(){countInTimerIds.forEach(clearTimeout);countInTimerIds=[]}
+function clearCountIn(){countInTimerIds.forEach(clearTimeout);countInTimerIds=[];if(!metroRunning)showMetroBeat(0)}
 function syncScoreMetronome(start){
   if(start&&scoreMetroSync.checked){metroBpm.value=Math.round(getTempo()); if(!metroRunning){setMetro(true);scoreStartedMetro=true}}
   else if(!start&&scoreStartedMetro){setMetro(false);scoreStartedMetro=false}
@@ -278,7 +278,7 @@ function getMeterTiming(bpmValue=+metroBpm.value||80){
 function runCountIn(done){
   clearCountIn(); const bars=Math.max(0,Math.min(2,+scoreCountIn.value||0)); if(!bars){done();return}
   const timing=getMeterTiming(getTempo()),beats=timing.pulses,tempo=getTempo(),ms=timing.secondsPerPulse*1000,total=bars*beats; studyStatus.textContent=`Count-in ${bars} compás${bars>1?'es':''}`;
-  const ctx=ensureCtx(),start=ctx.currentTime+.08; for(let i=0;i<total;i++){metroClick(start+i*timing.secondsPerPulse,i%beats===0);const id=setTimeout(()=>{metroBeat.textContent=String((i%beats)+1)},Math.max(0,(start-ctx.currentTime)*1000+i*ms));countInTimerIds.push(id)}
+  const ctx=ensureCtx(),start=ctx.currentTime+.08; for(let i=0;i<total;i++){metroClick(start+i*timing.secondsPerPulse,i%beats===0);const id=setTimeout(()=>{showMetroBeat((i%beats)+1)},Math.max(0,(start-ctx.currentTime)*1000+i*ms));countInTimerIds.push(id)}
   countInTimerIds.push(setTimeout(()=>{studyStatus.textContent='';done()},Math.max(0,(start-ctx.currentTime)*1000+total*ms)));
 }
 const PRACTICE_KEY='pianoVirtual_practiceDiary_v1'; let practiceSession=null;
