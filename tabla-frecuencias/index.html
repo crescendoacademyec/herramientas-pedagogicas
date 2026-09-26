@@ -65,7 +65,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ===== HERO ===== */
-.app-shell { margin: 0 auto; max-width: 1440px; padding: clamp(28px, 5vw, 56px) clamp(18px, 4vw, 48px) 70px; position: relative; z-index: 1; }
+.app-shell { margin: 0 auto; max-width: 1600px; padding: clamp(28px, 5vw, 56px) clamp(12px, 2vw, 32px) 70px; position: relative; z-index: 1; }
 .tool-hero { display: grid; gap: 12px; margin-bottom: 30px; max-width: 900px; }
 .eyebrow { color: #9ab8aa; font-size: 0.78rem; font-weight: 1000; letter-spacing: 0.16em; margin: 0; text-transform: uppercase; }
 .tool-hero h1 { color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4.6vw, 3.7rem); line-height: 0.98; margin: 0; }
@@ -97,7 +97,7 @@ a { color: inherit; text-decoration: none; }
     padding: 8px clamp(10px,2vw,22px) 18px; overflow-x: auto;
     box-shadow: 0 22px 60px rgba(0,0,0,0.28);
 }
-.chart-inner { min-width: 1000px; position: relative; }
+.chart-inner { min-width: 0; width:100%; position: relative; }
 
 /* regla de frecuencias */
 .freq-ruler { position: relative; height: 34px; margin-left: var(--label-w, 168px); border-bottom: 1px solid var(--line); }
@@ -382,7 +382,7 @@ a { color: inherit; text-decoration: none; }
 .analyzer-axis-row .axis-tick:first-child { transform: translateX(0); }
 .analyzer-axis-row .axis-tick:last-child { transform: translateX(-100%); }
 .analyzer-ref-wrap { margin-top: 18px; padding: 8px clamp(10px,2vw,22px) 12px; }
-.analyzer-ref-wrap .chart-inner { min-width: 720px; }
+.analyzer-ref-wrap .chart-inner { min-width: 0; }
 .analyzer-ref-wrap .row { padding: 3px 0; }
 .analyzer-ref-wrap .row-label { font-size: 0.68rem; }
 .analyzer-ref-wrap .row-track { height: 16px; }
@@ -504,6 +504,30 @@ a { color: inherit; text-decoration: none; }
     .practice-session-metrics{ grid-template-columns:1fr; }
 }
 
+/* Keep filters and viewing tools in separate, predictable rows. */
+.controls-bar { display:grid; gap:14px; }
+.filter-row { display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
+#categoryChips { flex:1 1 480px; }
+.filter-row .search-input { flex:0 1 240px; min-width:0; }
+.view-options { display:flex; flex-wrap:wrap; align-items:center; gap:10px; border-top:1px solid var(--line); padding-top:14px; }
+.tick:last-child { transform:translateX(-1px); }
+.tick:last-child span { left:auto; right:4px; }
+.row-track { min-width:0; }
+@media(max-width:700px) {
+  .mode-tabs { flex-direction:column; }
+  .mode-tab { min-width:0; }
+  .chart-inner { --label-w:120px; }
+  .row-label { font-size:.7rem; padding-right:8px; }
+  .band-label { display:none; }
+  .tick:nth-child(even):not(:last-child) span { display:none; }
+  .filter-row .search-input { flex:1 1 100%; }
+}
+@media(max-width:440px) {
+  .chart-inner { --label-w:96px; }
+  .tick span { font-size:.58rem; }
+  .tick:nth-child(3) span,.tick:nth-child(7) span,.tick:nth-child(9) span { display:none; }
+  .view-options .toggle-label { white-space:normal; }
+}
 </style>
 </head>
 <body>
@@ -562,7 +586,8 @@ a { color: inherit; text-decoration: none; }
 
     <section class="view-section active" id="viewChart">
     <div class="controls-bar">
-        <div class="chip-group" id="categoryChips">
+        <div class="filter-row">
+        <div class="chip-group" id="categoryChips" role="group" aria-label="Familia de instrumentos">
             <button class="chip active" data-cat="todos">Todos</button>
             <button class="chip" data-cat="voz">Voz</button>
             <button class="chip" data-cat="percusion">Percusión</button>
@@ -570,7 +595,9 @@ a { color: inherit; text-decoration: none; }
             <button class="chip" data-cat="viento">Viento</button>
             <button class="chip" data-cat="teclas">Teclas</button>
         </div>
-        <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…">
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…" aria-label="Buscar instrumento">
+        </div>
+        <div class="view-options" role="group" aria-label="Opciones de visualización">
         <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
         <button class="mode-btn active" id="rangeModeToggle" title="Alterna entre registro acústico y zona práctica de mezcla">Rango: Registro real</button>
         <button class="mode-btn" id="compareToggle">Comparar dos</button>
@@ -580,6 +607,7 @@ a { color: inherit; text-decoration: none; }
             <input type="checkbox" id="bandsToggle" checked>
             Mostrar rangos generales
         </label>
+        </div>
     </div>
 
     <div class="chart-wrap">
