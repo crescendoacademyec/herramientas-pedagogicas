@@ -144,3 +144,50 @@ pop latino y electrónica. Paneo, registro relativo, amplitud, profundidad y
 protagonismo son variables visuales, no mediciones ni reglas universales.
 No se trasladan afirmaciones esotéricas del libro a la app. La vista no procesa
 audio; el analizador sigue siendo la herramienta de medición.
+
+## Ampliación de mapas y profundidad (26-09-2026)
+
+Catálogo de **135 escenarios en 18 familias**. Están representados todos los
+estilos generales de los visuales A–M de Gibson (páginas impresas 5–11), incluidos
+blues, rap, reggae, metal, new age, rock alternativo, bluegrass, big band y las
+dos perspectivas de orquesta. Son nuevas interpretaciones visuales; no copias
+de las ilustraciones ni reconstrucciones de canciones comerciales.
+
+Las demás entradas son propuestas editoriales de conjuntos y arreglos concretos.
+Los subgéneros no se reducen a nombres intercambiados: cambian instrumentos,
+funciones, planos y panorama. No se afirma una taxonomía universal ni cobertura
+exhaustiva de todos los géneros del mundo. Los mapas personalizados permiten
+representar otras tradiciones y fusiones; se guardan localmente y se exportan JSON.
+Las coordenadas, tamaños y unidades visuales no son datos medidos o avalados
+por las instituciones citadas.
+
+Referencias consultadas para los principios profesionales:
+- [Berklee Online, Mixing Music](https://online.berklee.edu/takenote/mixing-music-what-is-sound-audio-mixing/):
+  balance, panorama, profundidad y decisiones según el arreglo.
+- [iZotope, Panning with Intention](https://www.izotope.com/community/blog/11-mixing-tips-for-panning-music-with-intention):
+  decisiones de paneo, dobles de guitarra y contexto de género.
+- [iZotope, Mixing Jazz](https://www.izotope.com/community/blog/9-tips-for-mixing-jazz):
+  integridad de la captación y espacio del conjunto.
+- [iZotope, Mixing Rap and Hip-Hop](https://www.izotope.com/community/blog/8-tips-for-mixing-rap-and-hip-hop):
+  relación entre voz, beat, bombo y bajo.
+- [iZotope, Drum Panning](https://www.izotope.com/community/blog/drum-panning):
+  coherencia de imagen y perspectiva de batería.
+- [Vienna Symphonic Library, Instrumentology](https://www.vsl.co.at/academy):
+  familias e instrumentos de orquesta, no coordenadas obligatorias de mezcla.
+- [Smithsonian Folkways, Gamelan](https://folkways.si.edu/genre/gamelan):
+  variedad de conjuntos y tradiciones; el ejemplo no representa todo el gamelán.
+
+La vista inicial usa **profundidad vertical** (0 primer plano, 100 fondo), con
+eje graduado y flechas. Un selector permite volver a **registro vertical**
+(graves abajo, agudos arriba). Nunca se identifica profundidad con frecuencia.
+Las etiquetas se separan con líneas de referencia para escenas densas; seleccionar
+un instrumento lo destaca. La lista de instrumentos ofrece una alternativa al SVG.
+
+Validación: integridad de los 135 escenarios, 13 estilos del libro, ausencia de
+arreglos duplicados, coordenadas acotadas y fuentes resolubles por ID. Navegador:
+búsqueda sin acentos, filtros, resultado vacío que conserva el mapa, ambos ejes,
+edición, guardado y restauración tras recargar.
+Se verificó además el renderizado de los 135 escenarios en navegador (mismo
+número de figuras e instrumentos, sin valores inválidos), la eliminación de un
+mapa de prueba y el manejo móvil a 390 px sin desbordamiento horizontal. Las
+14 pruebas de catálogo, cursor, almacenamiento y ciclo del analizador pasaron.
