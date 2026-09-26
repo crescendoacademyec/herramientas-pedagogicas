@@ -71,8 +71,8 @@
         const fLow = pct(refRange[0]), fHigh = pct(refRange[1]);
         let harmHtml = '';
         if (inst.harm) {
-          const hLow = pct(refRange[0]), hHigh = pct(inst.harm[1]);
-          harmHtml = `<div class="bar-harm" style="left:${hLow}%;width:${Math.max(0.5, hHigh - hLow)}%;"></div>`;
+          const hLow = pct(inst.harm[0]), hHigh = pct(inst.harm[1]);
+          harmHtml = `<div class="bar-harm" role="img" aria-label="${inst.name}: ${fmtHz(inst.harm[0])} – ${fmtHz(inst.harm[1])}. ${inst.harmNote}" title="${inst.harmNote}" style="left:${hLow}%;width:${Math.max(0.5, hHigh - hLow)}%;"></div>`;
         }
         return `<div class="row">
           <div class="row-label"><span class="dot"></span>${inst.name}</div>

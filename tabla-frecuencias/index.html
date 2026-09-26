@@ -628,13 +628,13 @@ a { color: inherit; text-decoration: none; }
         </div>
         <div class="legend">
             <div class="legend-item"><span class="legend-swatch fund"></span> <span id="primaryLegendLabel">Registro fundamental orientativo</span></div>
-            <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / cuerpo del sonido</div>
+            <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / parciales y ataque</div>
             <div class="legend-item">Clic sobre una barra → recomendaciones de EQ</div>
         </div>
     </div>
 
     <p class="sources-note">
-        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. En las fichas nuevas sin banda de mezcla documentada se conserva el registro, sin inventar un espectro fijo de armónicos.
+        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. Todos los instrumentos incluyen una franja de armónicos o parciales. En los instrumentos tonales detallados muestra los armónicos 2.º–16.º calculados sobre su registro; en percusión detallada es una ventana de exploración hasta 20 kHz. No indica energía uniforme ni un límite acústico. Consulta el alcance en cada ficha.
     </p>
 
     <details class="catalog-sources">
@@ -1035,14 +1035,14 @@ a { color: inherit; text-decoration: none; }
     <div id="techContent"></div>
 </aside>
 
-<script src="data.js?v=20260925-catalog"></script>
-<script src="instrument-catalog.js?v=20260925-catalog"></script>
-<script src="app.js?v=20260925-catalog"></script>
+<script src="data.js?v=20260926-harmonics"></script>
+<script src="instrument-catalog.js?v=20260926-harmonics"></script>
+<script src="app.js?v=20260926-harmonics"></script>
 <script src="ear.js?v=20260926"></script>
 <script src="processing-dsp.js?v=20260926"></script>
 <script src="processing-exercises.js?v=20260926"></script>
 <script src="processing-lab.js?v=20260926"></script>
-<script src="analyzer.js?v=20260925-catalog"></script>
+<script src="analyzer.js?v=20260926-harmonics"></script>
 <script>
 document.getElementById('modeTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.mode-tab');

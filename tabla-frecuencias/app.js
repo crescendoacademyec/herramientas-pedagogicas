@@ -141,9 +141,12 @@
 
       const shownRange = displayRange(inst);
       if (inst.harm && !simpleMode) {
-        const hLow = pct(shownRange[0]), hHigh = pct(inst.harm[1]);
+        const hLow = pct(inst.harm[0]), hHigh = pct(inst.harm[1]);
         const harmBar = document.createElement('div');
         harmBar.className = 'bar-harm';
+        harmBar.title = inst.harmNote;
+        harmBar.setAttribute('role', 'img');
+        harmBar.setAttribute('aria-label', `${inst.name}: ${fmtHz(inst.harm[0])} – ${fmtHz(inst.harm[1])}. ${inst.harmNote}`);
         harmBar.style.left = hLow + '%';
         harmBar.style.width = Math.max(0.5, hHigh - hLow) + '%';
         track.appendChild(harmBar);
@@ -211,10 +214,10 @@
 
   function sourceHtml(inst) {
     if (!inst.sources) return '';
-    return `<details class="instrument-sources"><summary>Fuentes y alcance</summary><ul>${inst.sources.map(id => {
+    return `<p class="detail-tips"><b>${inst.harmKind === 'partials' ? 'Parciales y ataque' : 'Armónicos'} · ${fmtHz(inst.harm[0])} – ${fmtHz(inst.harm[1])}</b><br>${inst.harmNote}</p><details class="instrument-sources"><summary>Fuentes y alcance</summary><ul>${inst.sources.map(id => {
       const source = FREQUENCY_SOURCES[id];
       return `<li>${source.url ? `<a href="${source.url}" target="_blank" rel="noopener noreferrer">${source.label}</a>` : source.label}</li>`;
-    }).join('')}</ul><p>El registro está documentado; los consejos de mezcla son una síntesis orientativa, no ajustes prescritos por estas instituciones.</p></details>`;
+    }).join('')}</ul><p>Las fuentes explican registros y principios acústicos. Las ventanas de visualización y los consejos de mezcla son una síntesis orientativa; no son espectros medidos por estas instituciones.</p></details>`;
   }
 
   function eqHtml(inst) {

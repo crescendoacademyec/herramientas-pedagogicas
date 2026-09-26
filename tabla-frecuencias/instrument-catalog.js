@@ -1,5 +1,6 @@
 // Concert pitch, equal temperament, A4=440 Hz. See SOURCES.md for scope and decisions.
 const FREQUENCY_SOURCES = {
+  unsw: { label: 'UNSW · Espectro, armónicos y parciales', url: 'https://phys.unsw.edu.au/jw/sound.spectrum.html' },
   adler: { label: 'Samuel Adler · The Study of Orchestration, cap. 3–4 (material de consulta)', note: 'Registros y afinación; edición PDF facilitada por el usuario.' },
   mac: { label: 'Macalester College · Registros y transposición', url: 'https://pressbooks.macalester.digital/multimodalmusicianship/chapter/instrument-transpositions-ranges/' },
   yale: { label: 'Yale University Library · Registros vocales', url: 'https://yalelibrary.atlassian.net/wiki/spaces/YMD/pages/202030334' },
@@ -76,4 +77,27 @@ for (const [id,name,cat,low,high,eqFamily,source,note] of INSTRUMENT_PROFILES) {
     cuts:eq.cuts.map(x=>({...x})),boosts:eq.boosts.map(x=>({...x})),tip:eq.tip,
     sources:[source, ...(eqFamily==='vocal'?['vocal']:eqFamily==='bowed'?['strings']:['eq'])],
   });
+}
+
+// Display conventions, not measured upper limits of an instrument's spectrum.
+// For tonal profiles, show the envelope of harmonics 2–16 across the register.
+// For percussion, do not invent an integer harmonic series for inharmonic modes.
+for (const instrument of INSTRUMENTS) {
+  if (instrument.detail) {
+    const [low, high] = instrument.realRange;
+    if (instrument.cat === 'percusion') {
+      instrument.harm = [low, 20000];
+      instrument.harmKind = 'partials';
+      instrument.harmNote = 'Parciales y ataque: ventana de exploración desde la nota más grave hasta 20 kHz, no un espectro medido ni energía uniforme. Las láminas y membranas tienen modos propios que no siguen necesariamente múltiplos enteros. La maza, la nota y el tiempo desde el golpe cambian su presencia.';
+    } else {
+      instrument.harm = [Math.round(2 * low * 10) / 10, Math.min(20000, Math.round(16 * high * 10) / 10)];
+      instrument.harmKind = 'harmonic-model';
+      instrument.harmNote = 'Armónicos 2.º–16.º: envolvente calculada como n × fundamental para el registro de este instrumento, recortada a 20 kHz. Es una referencia didáctica, no un límite acústico ni una banda continua para una sola nota. Pueden existir armónicos superiores; su intensidad depende de nota, técnica y dinámica. Las cuerdas reales pueden presentar inarmonicidad.';
+      if (instrument.id === 'clarinete') instrument.harmNote += ' En el registro grave del clarinete suelen destacar los impares; los pares no están necesariamente ausentes.';
+    }
+  } else {
+    instrument.harmKind = instrument.cat === 'percusion' ? 'partials' : 'mix-reference';
+    instrument.harmNote = 'Franja orientativa de mezcla para armónicos, parciales y ataque; no es una medición ni el límite del espectro. La intensidad depende de la nota, la técnica y la grabación.';
+  }
+  instrument.sources = [...new Set([...(instrument.sources || []), 'unsw'])];
 }

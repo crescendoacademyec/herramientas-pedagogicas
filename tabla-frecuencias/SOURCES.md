@@ -74,3 +74,25 @@ Incluye respuesta del filtro, compresión sostenida, ataque, extremos del parale
 techo del limitador, selectividad de de-esser, RMS, barajado y las 66 combinaciones
 de ejercicio/respuesta/dificultad. Revisión en navegador de reproducción A/B,
 respuestas, cambio de vista y diseño móvil de 390 px.
+
+## Franjas de armónicos y parciales (26-09-2026)
+
+Los 46 instrumentos incluyen `harm` y una explicación `harmNote`, compartidas por
+la tabla y el analizador. Se conserva la banda de mezcla de las 15 referencias
+originales. Para los 28 perfiles tonales nuevos se representa la envolvente de
+los armónicos 2.º–16.º sobre todo su registro: `[2*f_min, 16*f_max]`, limitada
+al eje de 20 kHz. **16 es una decisión de visualización**, no el último armónico
+producido ni una cifra atribuida a una universidad. Una nota aislada tiene líneas
+espectrales; la franja agrega muchas notas y no indica intensidad uniforme.
+
+Los tres perfiles nuevos de percusión tienen una ventana de exploración de
+parciales/ataque desde su nota más grave hasta 20 kHz. No se les asigna una serie
+entera ficticia, ni se afirma que tengan energía apreciable en toda la ventana.
+No se presentan estas franjas como registros espectrales medidos. Esta adición
+sustituye la decisión anterior de omitir las franjas nuevas.
+
+Fundamento: [UNSW, What is a Sound Spectrum?](https://phys.unsw.edu.au/jw/sound.spectrum.html)
+y [How harmonic are harmonics?](https://phys.unsw.edu.au/jw/harmonics.html): múltiplos
+de la fundamental, variación entre notas y técnicas, particularidad de los
+impares en el registro grave del clarinete e inarmonicidad de la percusión.
+Las fichas explican su alcance y enlazan la fuente.

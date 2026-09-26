@@ -11,7 +11,7 @@ test('catalog has unique IDs, documented ranges and valid sources in every famil
  assert.equal(new Set(data.instruments.map(i=>i.id)).size,46);
  for(const i of data.instruments){
   for(const range of [i.range,i.realRange,i.harm].filter(Boolean))assert.ok(range.every(Number.isFinite)&&range[0]>0&&range[1]>range[0],i.id);
-  if(i.detail){assert.ok(i.rangeNote&&i.registerOnly);assert.ok(!i.harm);assert.ok(i.sources.length);for(const id of i.sources)assert.ok(data.sources[id],id);}
+  if(i.detail){assert.ok(i.rangeNote&&i.registerOnly);assert.ok(i.harm);assert.ok(i.sources.length);for(const id of i.sources)assert.ok(data.sources[id],id);}
  }
  for(const cat of ['voz','cuerdas','viento','teclas','percusion'])assert.ok(data.instruments.some(i=>i.cat===cat&&i.detail));
 });
@@ -22,4 +22,19 @@ test('concert pitches retain octaves, transpositions and enharmonic octave bound
  assert.equal(low('contrabajo'),41.2);assert.equal(low('cello'),65.4);assert.equal(low('viola'),130.8);assert.equal(low('violin'),196);
  assert.equal(low('piccolo'),587.3);assert.equal(low('saxo-tenor'),103.8);assert.equal(low('trompeta'),164.8);
  assert.equal(low('arpa'),30.9);assert.equal(low('marimba'),65.4);
+});
+
+test('every instrument has an explained audible harmonic or partial band',()=>{
+ for(const i of data.instruments){
+  assert.ok(i.harm && i.harm.length===2, i.id);
+  assert.ok(i.harm[0]>=20 && i.harm[1]<=20000 && i.harm[1]>i.harm[0], i.id);
+  assert.ok(i.harmNote && i.harmKind && i.sources.includes('unsw'),i.id);
+  if(i.detail && i.cat!=='percusion'){
+   assert.equal(i.harmKind,'harmonic-model');
+   assert.equal(i.harm[0],Math.round(i.realRange[0]*20)/10);
+   assert.equal(i.harm[1],Math.min(20000,Math.round(i.realRange[1]*160)/10));
+   assert.ok(i.harm[1]>i.realRange[1],i.id);
+  }
+  if(i.cat==='percusion')assert.equal(i.harmKind,'partials',i.id);
+ }
 });
