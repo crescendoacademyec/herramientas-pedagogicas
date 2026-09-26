@@ -46,3 +46,7 @@ test('requested instruments and additional percussion have honest complete profi
  const synth=data.instruments.find(i=>i.id==='sintetizador');assert.equal(synth.rangeKind,'window');assert.equal(synth.harmKind,'variable-spectrum');
  const requinto=data.instruments.find(i=>i.id==='requinto');assert.equal(requinto.realRange[0],110);assert.equal(requinto.realRange[1],880);
 });
+
+test('all instruments include objective-led compression guidance',()=>{
+ for(const i of data.instruments)for(const field of ['tipo','ratio','attack','release','nota'])assert.ok(typeof i.comp?.[field]==='string' && i.comp[field].length>3,`${i.id}: ${field}`);
+});

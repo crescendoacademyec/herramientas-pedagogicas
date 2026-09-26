@@ -282,9 +282,15 @@
       ${tabButtons(!!inst.comp)}
       <div id="tabContent">${activeTab === 'comp' && inst.comp ? compHtml(inst) : eqHtml(inst)}</div>
       ${sourceHtml(inst)}
+      <button class="mode-btn" id="measureInstrument">Contrastar con una grabación</button><p class="detail-tips">Compara notas, dinámicas y técnicas en el analizador usando tu audio o micrófono. Las franjas son orientativas; el espectro de esa toma muestra la distribución real.</p>
       ${notesHtml(inst.id)}
     `;
     wireTabButtons(inst);
+    $('measureInstrument').addEventListener('click',()=>{
+      closeDetail();activeCat=inst.cat;searchTerm=normalizeSearch(inst.name);searchInput.value=inst.name;
+      [...categoryChips.querySelectorAll('.chip')].forEach(c=>c.classList.toggle('active',c.dataset.cat===activeCat));
+      renderRows();document.querySelector('.mode-tab[data-view="analyzer"]').click();
+    });
     wireNotes(inst.id);
     showPanel(true);
   }
@@ -319,7 +325,7 @@
         </div>
         ${overlaps
           ? `<div class="detail-tips">Las franjas mostradas se superponen entre <b style="color:var(--gold);">${fmtHz(overlapLow)} – ${fmtHz(overlapHigh)}</b>. Esto no demuestra enmascaramiento: depende de las notas simultáneas, el nivel y el timbre. Escucha primero el arreglo y el balance; ecualiza solo si hay un conflicto audible.</div>`
-          : `<div class="detail-tips">Las franjas mostradas <b>no se superponen</b> — buena señal, cada uno puede vivir en su propia franja de frecuencias sin competir directamente.</div>`}
+          : `<div class="detail-tips">Las franjas mostradas <b>no se superponen</b>. Esto no descarta competencia entre armónicos, ataques o sonidos fuera de estas ventanas. Comprueba la mezcla escuchando.</div>`}
       </div>
       <div class="detail-section"><h4>${a.name}: qué realzar</h4>${a.boosts.length ? '<ul class="detail-list boost">' + a.boosts.slice(0,3).map(x=>`<li><span class="freq-tag">${x.f}</span>${x.r}</li>`).join('') + '</ul>' : '<p class="detail-tips">Sin realces específicos.</p>'}</div>
       <div class="detail-section"><h4>${b.name}: qué realzar</h4>${b.boosts.length ? '<ul class="detail-list boost">' + b.boosts.slice(0,3).map(x=>`<li><span class="freq-tag">${x.f}</span>${x.r}</li>`).join('') + '</ul>' : '<p class="detail-tips">Sin realces específicos.</p>'}</div>

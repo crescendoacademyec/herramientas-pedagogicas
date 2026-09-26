@@ -34,6 +34,7 @@
     let audioCtx = null;
     let analyser = null;
     let sourceNode = null;
+    let mediaSource = null, fileUrl = null, operation = 0;
     let micStream = null;       // stream activo por micrófono O por "compartir pestaña"
     let activeExternalKind = null; // 'mic' | 'tab' | null
     let rafId = null;
@@ -53,6 +54,8 @@
     }
 
     function disconnectSource() {
+      operation++;
+      if (analyser) analyser.disconnect();
       if (sourceNode) { try { sourceNode.disconnect(); } catch (e) {} sourceNode = null; }
       if (micStream) { micStream.getTracks().forEach((t) => t.stop()); micStream = null; }
       activeExternalKind = null;
@@ -243,8 +246,8 @@
     canvasWrapEl.addEventListener('mousemove', (e) => handleHoverMove(e.clientX));
     canvasWrapEl.addEventListener('mouseleave', hideHover);
     canvasWrapEl.addEventListener('touchmove', (e) => {
-      if (e.touches && e.touches[0]) { handleHoverMove(e.touches[0].clientX); e.preventDefault(); }
-    }, { passive: false });
+      if (e.touches && e.touches[0]) { handleHoverMove(e.touches[0].clientX); }
+    }, { passive: true });
     canvasWrapEl.addEventListener('touchend', hideHover);
 
     function startLoop() {
@@ -268,17 +271,30 @@
       resetCaptureUI();
       const embedBlockEl = $('analyzerEmbedBlock');
       if (embedBlockEl) embedBlockEl.style.display = 'none';
-      const url = URL.createObjectURL(file);
+      audioEl.pause();
+      if (fileUrl) URL.revokeObjectURL(fileUrl);
+      const url = fileUrl = URL.createObjectURL(file);
+      peakHold = null;
+      peakHoldEl.textContent = peakNowEl.textContent = '—';
       audioEl.src = url;
       audioEl.style.display = '';
       fileNameEl.textContent = file.name;
-      sourceNode = audioCtx.createMediaElementSource(audioEl);
+      mediaSource ||= audioCtx.createMediaElementSource(audioEl);
+      sourceNode = mediaSource;
       sourceNode.connect(analyser);
       analyser.connect(audioCtx.destination);
-      audioEl.play().catch(() => {});
+      fileNameEl.textContent = file.name + ' · Pulsa reproducir.';
     });
 
-    audioEl.addEventListener('play', () => { if (audioCtx.state === 'suspended') audioCtx.resume(); startLoop(); });
+    audioEl.addEventListener('play', () => {
+      if (!$('viewAnalyzer').classList.contains('active')) { audioEl.pause(); return; }
+      ensureAudio(); disconnectSource(); resetCaptureUI();
+      mediaSource ||= audioCtx.createMediaElementSource(audioEl); sourceNode = mediaSource;
+      sourceNode.connect(analyser); analyser.connect(audioCtx.destination);
+      const request=operation;
+      audioCtx.resume().then(()=>{if(request===operation && $('viewAnalyzer').classList.contains('active'))startLoop();}).catch(() => { fileNameEl.textContent = 'No se pudo iniciar el audio. Pulsa reproducir para intentar de nuevo.'; });
+    });
+    audioEl.addEventListener('error', () => { audioEl.pause(); disconnectSource(); resetCaptureUI(); stopLoopIfIdle(); fileNameEl.textContent = 'No se pudo leer este audio. Prueba un archivo WAV o MP3 válido.'; });
     audioEl.addEventListener('pause', stopLoopIfIdle);
     audioEl.addEventListener('ended', stopLoopIfIdle);
 
@@ -304,15 +320,19 @@
       }
       disconnectSource();
       audioEl.pause();
+      resetCaptureUI();
+      const request = operation;
       let stream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       } catch (err) {
-        fileNameEl.textContent = 'No se pudo acceder al micrófono.';
+        if (request === operation) fileNameEl.textContent = 'No se pudo acceder al micrófono.';
         return;
       }
+      if (request !== operation || !$('viewAnalyzer').classList.contains('active')) { stream.getTracks().forEach(t => t.stop()); return; }
       micStream = stream;
       activeExternalKind = 'mic';
+      for(const track of stream.getTracks())track.addEventListener?.('ended',()=>{if(micStream===stream){disconnectSource();resetCaptureUI();stopLoopIfIdle();}});
       sourceNode = audioCtx.createMediaStreamSource(micStream);
       sourceNode.connect(analyser);
       // el micrófono NO se conecta a destination, para evitar retroalimentación (feedback)
@@ -356,6 +376,8 @@
       disconnectSource();
       audioEl.pause();
       audioEl.removeAttribute('src');
+      if(fileUrl){URL.revokeObjectURL(fileUrl);fileUrl=null;}
+      resetCaptureUI();
       audioEl.style.display = 'none';
 
       const ytId = parseYouTube(url);
@@ -406,12 +428,15 @@
         embedHint.textContent = 'Tu navegador no soporta compartir audio de pestaña. Prueba con Chrome o Edge actualizados.';
         return;
       }
+      disconnectSource(); resetCaptureUI(); audioEl.pause();
+      const request = operation;
       let stream;
       try {
         stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       } catch (err) {
         return; // el usuario canceló el diálogo de permiso
       }
+      if (request !== operation || !$('viewAnalyzer').classList.contains('active')) { stream.getTracks().forEach(t => t.stop()); return; }
       const audioTracks = stream.getAudioTracks();
       if (!audioTracks.length) {
         stream.getTracks().forEach((t) => t.stop());
@@ -431,7 +456,7 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
       startLoop();
       // si el usuario cierra el diálogo de compartir desde la barra del navegador
-      audioTracks[0].addEventListener('ended', () => { disconnectSource(); resetCaptureUI(); stopLoopIfIdle(); });
+      audioTracks[0].addEventListener('ended', () => { if(micStream===stream){disconnectSource(); resetCaptureUI(); stopLoopIfIdle();} });
     });
 
     window.addEventListener('resize', () => { if (hasSignal) resizeCanvas(); });
@@ -444,11 +469,12 @@
       } else {
         // pausar todo al salir de la vista para no dejar audio/mic/captura corriendo de fondo
         audioEl.pause();
+        operation++;
         if (micActive || tabShareActive) { disconnectSource(); resetCaptureUI(); }
         if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
       }
     });
 
-    window.addEventListener('beforeunload', () => { disconnectSource(); });
+    window.addEventListener('pagehide', () => { audioEl.pause(); disconnectSource(); resetCaptureUI(); if(fileUrl) { URL.revokeObjectURL(fileUrl); fileUrl=null; } });
   });
 })();

@@ -60,8 +60,7 @@ Fuentes de los principios (no de presets universales):
 - Berklee Online y el material privado aportado, citados arriba: EQ contextual,
   balance, filtros y compresión en serie/paralela. No se redistribuyen los PDF.
 
-Implementación y límites: señales sintéticas originales, procesamiento mono local
-(32 kHz), grabaciones cargadas limitadas a los primeros ocho segundos. Igualación
+Implementación y límites: señales sintéticas originales, procesamiento local a 32 kHz, mono o estéreo; fragmentos elegibles de hasta 20 segundos de grabaciones propias. Igualación
 RMS aproximada, no LUFS; se aplica atenuación común adicional para conservar
 margen de salida. Limitador anticipado de picos de muestra, sin medición dBTP ni
 sobremuestreo. De-esser/EQ dinámica usan una banda y detector de envolvente
@@ -126,3 +125,22 @@ de nombres. Incluye guía vertical y etiqueta en Hz/kHz tanto en tabla como en
 referencia del analizador. No intercepta los clics ni el desplazamiento; se oculta
 al salir, desplazar o cambiar de sección. Pruebas numéricas en varios anchos y
 comprobación en navegador de 75/80 Hz, las 57 filas y acceso al último instrumento.
+
+
+## Correcciones y mapas de mezcla (26-09-2026)
+
+El analizador reutiliza su fuente multimedia, libera URLs y separa captura de
+reproducción. Descarta permisos tardíos al salir. Las comparaciones antiguas de
+EQ igualan RMS. Las pistas de enmascaramiento tienen melodía, registro, timbre
+y ritmo distintos; bajar una octava conserva los inicios y duraciones.
+Compresión y limitación estéreo comparten detector; EQ dinámica y de-esser
+se aplican por canal. Las 57 fichas incluyen orientación de dinámica por objetivos.
+El entrenamiento nuevo participa en el resumen de sesión y exportación JSON.
+
+Mapas de mezcla: David Gibson, The Art of Mixing, 4.ª edición, capítulos 2, 3 y 6.
+PDF proporcionado por el usuario. No se distribuyen páginas ni ilustraciones.
+Los seis arreglos y gráficos son originales: pop, rock, jazz acústico, folk,
+pop latino y electrónica. Paneo, registro relativo, amplitud, profundidad y
+protagonismo son variables visuales, no mediciones ni reglas universales.
+No se trasladan afirmaciones esotéricas del libro a la app. La vista no procesa
+audio; el analizador sigue siendo la herramienta de medición.

@@ -135,3 +135,19 @@ for (const instrument of INSTRUMENTS) {
   }
   instrument.sources = [...new Set([...(instrument.sources || []), 'unsw'])];
 }
+
+// Objective-led dynamics guidance: no mandatory threshold/ratio presets.
+FREQUENCY_SOURCES.dynamics = {label:'iZotope · Controles y objetivos de dinámica',url:'https://downloads.izotope.com/docs/ozone8/dynamics/index.html'};
+const DYNAMICS_GOALS={
+ voz:['Nivelar frases sin borrar dicción','Conserva consonantes; acorta solo si hay picos molestos.','Suelta entre frases; evita que respiraciones y ruido salten al frente.'],
+ cuerdas:['Conservar articulación y controlar cambios de intensidad','Escucha arco o pulsación; un ataque demasiado rápido borra el comienzo.','Ajusta a la caída y al fraseo; evita respiración artificial de la caja.'],
+ viento:['Estabilizar frases y ataques sobresalientes','Conserva lengua y entrada de aire; controla solo los ataques que distraen.','Recupera entre frases sin elevar ruido de llaves o respiración.'],
+ percusion:['Elegir entre controlar picos o reforzar cuerpo','Rápido reduce el golpe; lento conserva más ataque. Compara según el papel del instrumento.','Debe soltar antes del siguiente golpe si buscas independencia; alargar une la cola pero puede apagarlo.'],
+ teclas:['Controlar dinámica según el sonido y su función','Conserva el martillo o ataque del patch si necesita definición; pads pueden requerir otro objetivo.','Sigue la duración de notas y acordes; evita sostener la reducción sobre la siguiente frase.']
+};
+for(const instrument of INSTRUMENTS)if(!instrument.comp){
+ const [goal,attack,release]=DYNAMICS_GOALS[instrument.cat];
+ instrument.sources.push('dynamics');
+ instrument.comp={tipo:goal,ratio:'Empieza sin compresión; aumenta gradualmente solo si mejora el objetivo. El umbral depende de esta grabación.',attack,release,
+ nota:`${instrument.name}: escucha a igual volumen y compara bypass. Para picos aislados considera automatización; para resonancias puntuales, EQ dinámica. No comprimas por el nombre del instrumento.`};
+}

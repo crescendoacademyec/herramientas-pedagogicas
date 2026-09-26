@@ -25,6 +25,18 @@
     guide.setAttribute('aria-hidden', 'true');
     chart.appendChild(guide);
     guides.push(guide);
+    const control=document.createElement('label');control.className='frequency-touch-control';
+    control.append('Explorar frecuencia (táctil o flechas) ');
+    const slider=document.createElement('input');slider.type='range';slider.min='0';slider.max='1000';slider.step='1';slider.value='0';slider.setAttribute('aria-label','Explorar frecuencia');
+    const output=document.createElement('output');output.textContent='20 Hz';
+    control.append(slider,output);chart.after(control);
+    slider.addEventListener('input',()=>{
+      const hz=frequencyAtPosition(Number(slider.value),0,1000),bounds=ruler.getBoundingClientRect();
+      const text=hz<1000?`${Math.round(hz)} Hz`:`${(hz/1000).toLocaleString('es',{maximumFractionDigits:2})} kHz`;
+      output.textContent=text;slider.setAttribute('aria-valuetext',text);
+      guide.hidden=false;guide.style.left=`${bounds.left-chart.getBoundingClientRect().left+bounds.width*Number(slider.value)/1000}px`;
+    });
+
     chart.addEventListener('pointermove', event => {
       if (event.pointerType === 'touch') return;
       const bounds = ruler.getBoundingClientRect();

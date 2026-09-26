@@ -6,14 +6,21 @@ function metrics(x){let sum=0,peak=0;for(const v of x){sum+=v*v;peak=Math.max(pe
 function gain(x,g){return Float32Array.from(x,v=>v*g);}
 function mix(a,b,wet=.5){return Float32Array.from(a,(v,i)=>v*(1-wet)+b[i]*wet);}
 function rng(seed){let s=seed>>>0;return ()=>{s=(Math.imul(s,1664525)+1013904223)>>>0;return s/4294967296;};}
-function synth(kind='music',seed=1,sr=32000,seconds=6){
- const rand=rng(seed),out=new Float32Array(sr*seconds),notes=[130.81,164.81,196,146.83],transpose=2**((Math.floor(rand()*5)-2)/12);let brown=0;
+function synth(kind='music',seed=1,sr=32000,seconds=6,options={}){
+ const rand=rng(seed),out=new Float32Array(sr*seconds),scale=[0,2,4,5,7,9,11],transpose=2**((Math.floor(rand()*12)-6)/12);let brown=0;
+ const role=options.role||'lead',octave=(role==='backing'?.5:2)*(options.transpose??1);
+ const notes=Array.from({length:8},()=>130.81*2**(scale[Math.floor(rand()*scale.length)]/12)*octave);
+ const durations=Array.from({length:8},()=>[.25,.375,.5,.75][Math.floor(rand()*4)]);
+ const starts=[0];durations.forEach(d=>starts.push(starts.at(-1)+d));
+ const cycle=starts.at(-1);const timbre=role==='backing'?2:1;
  // Precompute a periodic waveform instead of evaluating 32–36 oscillators per sample.
  const size=4096,wave=new Float32Array(size+1),f0=160*transpose;
- if(kind==='music'||kind==='voice')for(let j=0;j<=size;j++)for(let h=1;h<=(kind==='voice'?36:32);h++){const f=h*f0,weight=kind==='voice'?.06+Math.exp(-(((f-700)/170)**2))+.6*Math.exp(-(((f-1400)/230)**2))+.2*Math.exp(-(((f-2700)/330)**2)):1;wave[j]+=Math.sin(2*Math.PI*h*j/size)*weight/h;}
+ const harmonics=kind==='voice'?Math.min(36,Math.floor(sr*.45/f0)):Math.min(32,Math.floor(sr*.45/(Math.max(...notes)*transpose)));
+ if(kind==='music'||kind==='voice')for(let j=0;j<=size;j++)for(let h=1;h<=harmonics;h++){const f=h*f0,weight=kind==='voice'?.06+Math.exp(-(((f-700)/170)**2))+.6*Math.exp(-(((f-1400)/230)**2))+.2*Math.exp(-(((f-2700)/330)**2)):1;wave[j]+=Math.sin(2*Math.PI*h*j/size)*weight/(h**timbre);}
  const sample=phase=>{const p=(phase-Math.floor(phase))*size,k=Math.floor(p);return wave[k]+(wave[k+1]-wave[k])*(p-k);};
  for(let i=0;i<out.length;i++){
-  const t=i/sr,beat=t%0.5,n=notes[Math.floor(t/.5)%4]*transpose,noise=rand()*2-1;
+  const t=i/sr,position=t%cycle;let event=0;while(event<7&&position>=starts[event+1])event++;
+  const beat=kind==='music'?position-starts[event]:t%.5,n=notes[event]*transpose,noise=rand()*2-1;
   brown=.985*brown+.015*noise;
   if(kind==='noise')out[i]=brown*2.5+noise*.07;
   else if(kind==='drums')out[i]=.7*Math.sin(2*Math.PI*(55*beat+3*(1-Math.exp(-beat*35))))*Math.exp(-beat*22)+noise*.35*Math.exp(-beat*70)+noise*.05*Math.exp(-(t%.25)*90);
@@ -71,5 +78,17 @@ function matchLevels(buffers,enabled=true){
  const peak=Math.max(...scaled.map(b=>metrics(b).peak)),s=Math.min(1,.7/Math.max(peak,1e-9));return scaled.map(b=>gain(b,s));
 }
 function shuffledBag(items,random=Math.random){let pool=[],last;return ()=>{if(!pool.length){pool=items.slice();for(let i=pool.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}if(pool.length>1&&pool[pool.length-1]===last)[pool[0],pool[pool.length-1]]=[pool[pool.length-1],pool[0]];}return last=pool.pop();};}
-root.ProcessingDSP={db,amp,metrics,gain,mix,rng,synth,filter,compressor,dynamicBand,limiter,process,matchLevels,shuffledBag};
+function stems(seed,sr=32000,seconds=6,transpose=1){return [synth('music',seed,sr,seconds,{role:'lead'}),synth('music',seed+7919,sr,seconds,{role:'backing',transpose})];}
+function channels(audio){return Array.isArray(audio)?audio:[audio];}
+function channelMetrics(audio){const list=channels(audio),ms=list.map(metrics);const peak=Math.max(...ms.map(m=>m.peak)),rms=Math.sqrt(ms.reduce((s,m)=>s+m.rms*m.rms,0)/ms.length);return {peak,rms,peakDb:db(peak),rmsDb:db(rms),crest:db(peak)-db(rms)};}
+function matchChannels(pair,enabled=true){const ms=pair.map(channelMetrics),target=Math.min(...ms.map(m=>m.rms).filter(v=>v>1e-8));const factors=ms.map(m=>enabled&&m.rms>1e-8?target/m.rms:1);const peak=Math.max(...ms.map((m,i)=>m.peak*factors[i])),headroom=Math.min(1,.7/Math.max(peak,1e-9));return pair.map((audio,i)=>channels(audio).map(c=>gain(c,factors[i]*headroom)));}
+function processChannels(audio,sr,mode,p){const list=channels(audio);if(list.length===1){const result=process(list[0],sr,mode,p);return {...result,audio:[result.audio]};}
+ if(['compression','series','parallel','limit'].includes(mode)){
+  const detector=Float32Array.from(list[0],(_,i)=>Math.max(...list.map(c=>Math.abs(c[i]))));
+  const response=process(detector,sr,mode,p);
+  return {audio:list.map(c=>Float32Array.from(c,(v,i)=>detector[i]>1e-9?v*response.audio[i]/detector[i]:v)),reduction:response.reduction};
+ }
+ const processed=list.map(c=>process(c,sr,mode,p));return {audio:processed.map(r=>r.audio),reduction:Math.max(...processed.map(r=>r.reduction))};
+}
+root.ProcessingDSP={channels,channelMetrics,matchChannels,processChannels,stems,db,amp,metrics,gain,mix,rng,synth,filter,compressor,dynamicBand,limiter,process,matchLevels,shuffledBag};
 })(typeof module==='object'?module.exports:window);

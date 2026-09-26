@@ -12,7 +12,7 @@
   const SESSION_GOAL_KEY = 'crescendo-ear-practice-goal-v4';
 
   function loadStats(key) {
-    try { return JSON.parse(localStorage.getItem(key) || '{}'); } catch (_) { return {}; }
+    try { const value=JSON.parse(localStorage.getItem(key) || '{}'); return value && typeof value==='object' && !Array.isArray(value) ? value : {}; } catch (_) { return {}; }
   }
   function saveStats(key, stats) {
     try { localStorage.setItem(key, JSON.stringify(stats)); } catch (_) {}
@@ -65,7 +65,8 @@
     let timerId = null;
     let rounds = 0, correct = 0;
     let byModule = { noise:{total:0,correct:0}, direction:{total:0,correct:0}, tone:{total:0,correct:0} };
-    let goal = Number(localStorage.getItem(SESSION_GOAL_KEY) || 20);
+    let goal = 20;
+    try { goal = Number(localStorage.getItem(SESSION_GOAL_KEY) || 20); } catch (_) {}
     if (![10,20,30,50].includes(goal)) goal = 20;
 
     function loadHistory() {
@@ -93,7 +94,7 @@
       if (note) note.textContent = 'Sesión activa. Tus resultados se registran solo en este navegador.';
     }
     function moduleLabel(k) {
-      return k === 'noise' ? 'Frecuencias EQ' : k === 'direction' ? 'Boost/Cut' : 'Tono puro';
+      return k === 'noise' ? 'Frecuencias EQ' : k === 'direction' ? 'Boost/Cut' : k === 'tone' ? 'Tono puro' : 'Mezcla · '+k.replace('processing-','');
     }
     function weakestFocus() {
       const used = Object.entries(byModule).filter(([,v]) => v.total > 0);
@@ -106,6 +107,7 @@
       startIfNeeded();
       rounds++;
       if (ok) correct++;
+      if (!byModule[moduleName]) byModule[moduleName] = {total:0,correct:0};
       if (byModule[moduleName]) {
         byModule[moduleName].total++;
         if (ok) byModule[moduleName].correct++;
@@ -193,7 +195,7 @@
       });
       renderHistory(); render();
     }
-    return { wire, record, finish, render };
+    return { wire, record, finish, render, snapshot:()=>({rounds,correct,duration:elapsed(),byModule}) };
   })();
 
   function chooseWeakTarget(freqs, stats) {
@@ -267,7 +269,7 @@
      MÓDULO: RUIDO ROSA
      ========================================================= */
   const Noise = (function () {
-    let source = null, filterNode = null, dryGain = null, wetGain = null;
+    let source = null, wetSource = null, filterNode = null, dryGain = null, wetGain = null;
     let isPlaying = false, hearingWet = true;
     let selGain = 6, numOptions = 5;
     let round = null, answered = false;
@@ -303,19 +305,19 @@
       resumeAudio();
       setupGraph();
       stop();
-      const buf = makePinkNoiseBuffer(audioCtx, 4);
-      source = audioCtx.createBufferSource();
-      source.buffer = buf;
-      source.loop = true;
-      source.connect(dryGain);
-      source.connect(filterNode);
-      filterNode.frequency.setValueAtTime(targetFreq, audioCtx.currentTime);
-      filterNode.gain.setValueAtTime(gainDb, audioCtx.currentTime);
-      source.start();
+      const raw = makePinkNoiseBuffer(audioCtx, 4).getChannelData(0);
+      const D = window.ProcessingDSP;
+      const pair = D.matchLevels([raw,D.filter(raw,audioCtx.sampleRate,'peaking',targetFreq,1.4,gainDb)]);
+      [source,wetSource] = pair.map((data,index) => {
+        const buffer=audioCtx.createBuffer(1,data.length,audioCtx.sampleRate);buffer.copyToChannel(data,0);
+        const node=audioCtx.createBufferSource();node.buffer=buffer;node.loop=true;node.connect(index?wetGain:dryGain);return node;
+      });
+      const when=audioCtx.currentTime+.01;source.start(when);wetSource.start(when);
       isPlaying = true;
     }
     function stop() {
       if (source) { try { source.stop(); source.disconnect(); } catch (e) {} source = null; }
+      if (wetSource) { try { wetSource.stop(); wetSource.disconnect(); } catch (_) {} wetSource = null; }
       isPlaying = false;
     }
     function setWet(wet) {
@@ -678,7 +680,7 @@
      la dirección del cambio para aislar esta habilidad auditiva.
      ========================================================= */
   const Direction = (function () {
-    let source = null, filterNode = null, dryGain = null, wetGain = null;
+    let source = null, wetSource = null, filterNode = null, dryGain = null, wetGain = null;
     let isPlaying = false, hearingWet = true;
     let selGain = 6, bandMode = 'adaptive';
     let round = null, answered = false, learnFreq = null;
@@ -704,19 +706,19 @@
       resumeAudio();
       setupGraph();
       stop();
-      const buf = makePinkNoiseBuffer(audioCtx, 4);
-      source = audioCtx.createBufferSource();
-      source.buffer = buf;
-      source.loop = true;
-      source.connect(dryGain);
-      source.connect(filterNode);
-      filterNode.frequency.setValueAtTime(freq, audioCtx.currentTime);
-      filterNode.gain.setValueAtTime(gainDb, audioCtx.currentTime);
-      source.start();
+      const raw = makePinkNoiseBuffer(audioCtx, 4).getChannelData(0);
+      const D = window.ProcessingDSP;
+      const pair = D.matchLevels([raw,D.filter(raw,audioCtx.sampleRate,'peaking',freq,1.4,gainDb)]);
+      [source,wetSource] = pair.map((data,index) => {
+        const buffer=audioCtx.createBuffer(1,data.length,audioCtx.sampleRate);buffer.copyToChannel(data,0);
+        const node=audioCtx.createBufferSource();node.buffer=buffer;node.loop=true;node.connect(index?wetGain:dryGain);return node;
+      });
+      const when=audioCtx.currentTime+.01;source.start(when);wetSource.start(when);
       isPlaying = true;
     }
     function stop() {
       if (source) { try { source.stop(); source.disconnect(); } catch (_) {} source = null; }
+      if (wetSource) { try { wetSource.stop(); wetSource.disconnect(); } catch (_) {} wetSource = null; }
       isPlaying = false;
     }
     function setWet(wet) {
@@ -948,6 +950,15 @@
     wireModeTabs('earTone', () => Tone.stopLearn(), () => Tone.stop());
   });
 
+  window.addEventListener('crescendo:export-progress',()=>{
+    const data={date:new Date().toISOString(),currentSession:PracticeSession.snapshot(),saved:{}};
+    for(const key of [STATS_NOISE_KEY,STATS_TONE_KEY,STATS_DIR_KEY,HISTORY_NOISE_KEY,HISTORY_TONE_KEY,HISTORY_DIR_KEY,SESSION_HISTORY_KEY,'crescendo-processing-practice-v1']){
+      try{data.saved[key]=JSON.parse(localStorage.getItem(key)||'null');}catch(_){data.saved[key]=null;}
+    }
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    const link=document.createElement('a');link.href=url;link.download='crescendo-progreso.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
+  window.addEventListener('crescendo:practice-result', e => { if(e.detail && typeof e.detail.correct==='boolean') PracticeSession.record(e.detail.module,e.detail.correct); });
   window.addEventListener('crescendo:view-change', () => { Noise.stopLearn(); Direction.stopLearn(); Tone.stopLearn(); });
   window.addEventListener('crescendo:audio-owner', e => { if(e.detail !== 'ear') { Noise.stopLearn(); Direction.stopLearn(); Tone.stopLearn(); } });
   window.addEventListener('beforeunload', () => { Noise.stop(); Direction.stop(); Tone.stop(); });
