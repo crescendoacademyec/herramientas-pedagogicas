@@ -7722,9 +7722,7 @@
     if (gridDurationSelect && gridDurationSelect.value !== (state.gridDurationId || DEFAULT_GRID_DURATION_ID)) {
       gridDurationSelect.value = state.gridDurationId || DEFAULT_GRID_DURATION_ID;
     }
-    if (playbackBpmInput && Number(playbackBpmInput.value) !== normalizePlaybackBpm(state.playbackBpm)) {
-      playbackBpmInput.value = String(normalizePlaybackBpm(state.playbackBpm));
-    }
+    syncEditorTempoDisplay();
     if (activeItemColorInput) activeItemColorInput.value = selectedItemColor();
     if (activeZoomLabel) activeZoomLabel.textContent = Viewport.zoomLabel(state.zoom || 1);
     activeHideMeasureButton?.classList.toggle("is-active", measureIsHidden(selectedMeasureIndex()));
@@ -10564,13 +10562,35 @@
     return Math.max(20, Math.min(320, bpm));
   }
 
+  function editorScoreTempo() {
+    const selected = selectedTempoMarks().find(mark => mark.type === "tempo");
+    const locations = [...selectedEntryLocations().map(absoluteTickForLocation), ...selectedNoteLocations().map(absoluteTickForLocation)].filter(Number.isFinite);
+    const tick = selected ? absoluteTickForMark(selected) : locations.length ? Math.min(...locations) : (playbackSelectedItemAbsoluteTick() ?? 0);
+    const marks = (state.marks || []).filter(mark => mark.type === "tempo" && tempoMarkBpm(mark) && absoluteTickForMark(mark) <= tick + EPSILON)
+      .sort((a,b) => absoluteTickForMark(a) - absoluteTickForMark(b));
+    const mark = selected || marks[marks.length - 1];
+    return { mark, bpm: mark ? tempoMarkBpm(mark) : normalizePlaybackBpm(state.playbackBpm), unitTicks: mark ? tempoUnitTicks(mark.unitDurationId || "quarter", mark.dots || 0) : 4 };
+  }
+
+  function syncEditorTempoDisplay() {
+    const bpm = editorScoreTempo().bpm;
+    if (playbackBpmInput && document.activeElement !== playbackBpmInput) playbackBpmInput.value = String(bpm);
+    document.dispatchEvent(new CustomEvent("editor-tempo-change", { detail: { bpm } }));
+  }
+
   function setPlaybackBpm(value) {
+    if (!String(value).trim() || !Number.isFinite(Number(value))) { syncEditorTempoDisplay(); return editorScoreTempo().bpm; }
     const nextBpm = normalizePlaybackBpm(value);
-    state.playbackBpm = nextBpm;
-    if (playbackBpmInput && Number(playbackBpmInput.value) !== nextBpm) {
-      playbackBpmInput.value = String(nextBpm);
+    const current = editorScoreTempo();
+    if (current.bpm !== nextBpm) {
+      saveHistory();
+      if (current.mark) current.mark.value = String(nextBpm);
+      else state.playbackBpm = nextBpm;
+      if (state.midiPlayback.active) stopMidiPlayback();
+      render();
     }
-    if (state.midiPlayback.active) stopMidiPlayback();
+    if (playbackBpmInput) playbackBpmInput.value = String(nextBpm);
+    syncEditorTempoDisplay();
     return nextBpm;
   }
 
@@ -11952,7 +11972,28 @@
     });
   }
 
-  const editorMetronome = { active: false, context: null, timer: null, nextTime: 0, beat: 0 };
+  const editorMetronome = { active: false, context: null, timer: null, nextTime: 0, beat: 0, runId: 0, visualTimers: new Set(), nodes: new Set() };
+
+  function showEditorMetronomeBeat(beat, total = 4) {
+    document.querySelectorAll("[data-editor-metronome-beat]").forEach(indicator => {
+      indicator.textContent = beat ? String(beat) : "—";
+      indicator.classList.toggle("is-downbeat", beat === 1);
+      indicator.setAttribute("aria-label", beat ? `Tiempo ${beat} de ${total}` : "Metrónomo detenido");
+    });
+  }
+
+  function stopEditorMetronome() {
+    editorMetronome.active = false;
+    editorMetronome.runId++;
+    window.clearTimeout(editorMetronome.timer);
+    editorMetronome.timer = null;
+    editorMetronome.visualTimers.forEach(timer => window.clearTimeout(timer));
+    editorMetronome.visualTimers.clear();
+    editorMetronome.nodes.forEach(node => { try { node.stop(); } catch (_) {} });
+    editorMetronome.nodes.clear();
+    showEditorMetronomeBeat(0);
+    updateEditorMetronomeButton();
+  }
 
   function editorMetronomeMeter() {
     const index = Number.isFinite(state.selectedMeasureIndex) ? state.selectedMeasureIndex : 0;
@@ -11971,6 +12012,8 @@
     gain.gain.exponentialRampToValueAtTime(accented ? 0.18 : 0.1, time + 0.002);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.055);
     oscillator.connect(gain).connect(context.destination);
+    editorMetronome.nodes.add(oscillator);
+    oscillator.onended = () => { editorMetronome.nodes.delete(oscillator); oscillator.disconnect(); gain.disconnect(); };
     oscillator.start(time);
     oscillator.stop(time + 0.065);
   }
@@ -11980,8 +12023,16 @@
     const context = editorMetronome.context;
     while (editorMetronome.nextTime < context.currentTime + 0.12) {
       const meter = editorMetronomeMeter();
+      editorMetronome.beat %= meter.top;
+      const beat = editorMetronome.beat + 1, runId = editorMetronome.runId;
+      const visualTimer = window.setTimeout(() => {
+        editorMetronome.visualTimers.delete(visualTimer);
+        if (editorMetronome.active && editorMetronome.runId === runId) showEditorMetronomeBeat(beat, meter.top);
+      }, Math.max(0, (editorMetronome.nextTime - context.currentTime) * 1000));
+      editorMetronome.visualTimers.add(visualTimer);
       soundEditorMetronomeClick(editorMetronome.nextTime, editorMetronome.beat === 0);
-      editorMetronome.nextTime += (60 / normalizePlaybackBpm(state.playbackBpm)) * (4 / meter.bottom);
+      const tempo = editorScoreTempo();
+      editorMetronome.nextTime += (60 / tempo.bpm) * (16 / meter.bottom) / tempo.unitTicks;
       editorMetronome.beat = (editorMetronome.beat + 1) % meter.top;
     }
     editorMetronome.timer = window.setTimeout(scheduleEditorMetronome, 25);
@@ -11998,18 +12049,17 @@
   }
 
   async function toggleEditorMetronome() {
-    if (editorMetronome.active) {
-      editorMetronome.active = false;
-      if (editorMetronome.timer) window.clearTimeout(editorMetronome.timer);
-      editorMetronome.timer = null;
-      updateEditorMetronomeButton();
-      return;
-    }
+    if (editorMetronome.active) { stopEditorMetronome(); return; }
     const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextCtor) return;
     editorMetronome.context ||= new AudioContextCtor();
-    if (editorMetronome.context.state === "suspended") await editorMetronome.context.resume();
     editorMetronome.active = true;
+    const runId = ++editorMetronome.runId;
+    updateEditorMetronomeButton();
+    try {
+      if (editorMetronome.context.state === "suspended") await editorMetronome.context.resume();
+    } catch (_) { if (runId === editorMetronome.runId) stopEditorMetronome(); return; }
+    if (!editorMetronome.active || runId !== editorMetronome.runId) return;
     editorMetronome.beat = 0;
     editorMetronome.nextTime = editorMetronome.context.currentTime + 0.04;
     updateEditorMetronomeButton();
@@ -22329,6 +22379,7 @@
   editModeButton?.addEventListener("click", toggleEditMode);
   playbackButton?.addEventListener("click", () => toggleMidiPlayback());
   metronomeButton?.addEventListener("click", () => toggleEditorMetronome());
+  window.addEventListener("pagehide", stopEditorMetronome);
   reflowButton?.addEventListener("click", reflowScoreLayout);
   textModeButton?.addEventListener("click", toggleTextMode);
   chordModeButton?.addEventListener("click", toggleChordMode);

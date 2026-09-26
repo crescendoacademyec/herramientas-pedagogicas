@@ -42,8 +42,8 @@
     <!-- Los módulos del editor viven en src/. Esta base conserva el HTML en la raíz
          y permite que las dependencias se resuelvan correctamente en GitHub Pages. -->
     <base href="src/">
-    <link rel="stylesheet" href="../styles.css?v=20260918-metronome">
-    <link rel="stylesheet" href="../ipad-shell.css?v=20260814">
+    <link rel="stylesheet" href="../styles.css?v=20260925-beat-tempo-v2">
+    <link rel="stylesheet" href="../ipad-shell.css?v=20260925-beat-tempo-v2">
   </head>
   <body class="editor-page">
     <div class="page-bg" aria-hidden="true"></div>
@@ -223,7 +223,7 @@
             <span>BPM</span>
             <input id="playbackBpmInput" type="number" min="20" max="320" step="1" value="140" inputmode="numeric" aria-label="BPM de reproducción">
           </label>
-          <button class="icon-chip music-icon" id="metronomeButton" type="button" aria-label="Activar metrónomo" aria-pressed="false" title="Activar metrónomo"><span aria-hidden="true">Metrónomo</span></button>
+          <button class="icon-chip music-icon" id="metronomeButton" type="button" aria-label="Activar metrónomo" aria-pressed="false" title="Activar metrónomo"><span aria-hidden="true">Metrónomo</span></button><output class="editor-metronome-beat" data-editor-metronome-beat aria-label="Metrónomo detenido">—</output>
           <div id="recordingPanelHost" class="exercise-app-menu__panel exercise-app-menu__panel--recording" role="menu" aria-label="Grabación sincronizada" hidden></div>
           <div id="versionHistoryHost" class="exercise-app-menu__panel exercise-app-menu__panel--versions" role="menu" aria-label="Historial de versiones" hidden></div>
           <button class="icon-chip music-icon palette-trigger jazz-mode-button" id="jazzModeButton" data-palette="jazz" type="button" aria-label="Jazz mode" aria-expanded="false" aria-controls="durationDrawer" title="Jazz mode"><span aria-hidden="true">Jazz</span></button>
@@ -392,7 +392,7 @@
     <script src="score-editor-context-menu.js?v=20260814"></script>
     <script src="score-editor-icon-html.js?v=20260814"></script>
     <script src="score-editor-menu-renderer.js?v=20260814"></script>
-    <script src="score-editor-application-menu.js?v=20260918-metronome"></script>
+    <script src="score-editor-application-menu.js?v=20260925-beat-tempo-v2"></script>
     <script src="score-editor-auto-voicing.js?v=20260814"></script>
     <script src="score-editor-progress.js?v=20260814"></script>
     <script src="score-editor-exercise-library.js?v=20260814"></script>
@@ -412,7 +412,7 @@
     <script src="score-editor-performance.js?v=20260814"></script>
     <script src="score-editor-engraving.js?v=20260814"></script>
     <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-    <script src="score-editor-ipad-shell.js?v=20260918-metronome"></script>
-  <script src="app.js?v=20260918-metronome"></script>
+    <script src="score-editor-ipad-shell.js?v=20260925-beat-tempo-v2"></script>
+  <script src="app.js?v=20260925-beat-tempo-v2"></script>
   </body>
 </html>

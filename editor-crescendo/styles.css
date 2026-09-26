@@ -5711,3 +5711,6 @@ body.editor-page .editor-workbench .score-shell {
     display: none;
   }
 }
+
+.editor-metronome-beat{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;box-sizing:border-box;border:1px solid #736447;border-radius:7px;background:#26231d;color:#edc763;font:700 18px/1 system-ui;font-variant-numeric:tabular-nums}
+.editor-metronome-beat.is-downbeat{background:#d5aa4c;color:#17130d;border-color:#edc763}

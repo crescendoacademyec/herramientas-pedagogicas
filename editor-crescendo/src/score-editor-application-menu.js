@@ -282,6 +282,10 @@
       new MutationObserver(syncQuickButton).observe(metronomeTarget, { attributes: true, attributeFilter: ["class", "aria-pressed"] });
       syncQuickButton();
       bar.appendChild(quickButton);
+      const beatIndicator = createElement("output", "editor-metronome-beat", "—");
+      beatIndicator.dataset.editorMetronomeBeat = "";
+      beatIndicator.setAttribute("aria-label", "Metrónomo detenido");
+      bar.appendChild(beatIndicator);
     }
     if (scenesMenu) bar.appendChild(scenesMenu);
     if (helpMenu) bar.appendChild(helpMenu);

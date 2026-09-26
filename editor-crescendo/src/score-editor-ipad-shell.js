@@ -422,10 +422,16 @@
     const metronomeProxy = createIconButton({ icon: "metronome", label: "Activar metrónomo" });
     const bpmGroup = element("div", "ipad-bpm-group");
     const bpmDown = createIconButton({ icon: "chevron-down", label: "Bajar tempo", className: "ipad-bpm-step" });
-    const bpmValue = element("span", "ipad-bpm-value", "140");
+    const bpmValue = element("input", "ipad-bpm-value");
+    bpmValue.type = "number"; bpmValue.min = "20"; bpmValue.max = "320"; bpmValue.step = "1";
+    bpmValue.value = "140"; bpmValue.inputMode = "numeric";
+    bpmValue.setAttribute("aria-label", "Tempo de la partitura en BPM");
+    const beatIndicator = element("output", "editor-metronome-beat", "—");
+    beatIndicator.dataset.editorMetronomeBeat = "";
+    beatIndicator.setAttribute("aria-label", "Metrónomo detenido");
     const bpmUp = createIconButton({ icon: "chevron-up", label: "Subir tempo", className: "ipad-bpm-step" });
     bpmGroup.append(bpmDown, bpmValue, bpmUp);
-    headerCenter.append(clearButton, saveButton, undoProxy, redoProxy, playProxy, metronomeProxy, bpmGroup);
+    headerCenter.append(clearButton, saveButton, undoProxy, redoProxy, playProxy, metronomeProxy, beatIndicator, bpmGroup);
 
     const headerRight = element("div", "ipad-header-actions");
     const saveStatus = element("span", "ipad-save-status");
@@ -607,6 +613,7 @@
       };
       input.addEventListener("change", commit);
       originalBpm.addEventListener("change", () => { input.value = originalBpm.value; });
+      document.addEventListener("editor-tempo-change", e => { if(document.activeElement !== input) input.value = String(e.detail.bpm); });
       label.appendChild(input);
       bpmSection.appendChild(label);
     }
@@ -726,7 +733,24 @@
         bpmSource.value = String(clamped);
         bpmSource.dispatchEvent(new Event("change", { bubbles: true }));
       };
-      const syncBpmDisplay = () => { bpmValue.textContent = bpmSource.value; };
+      let bpmDraft = null;
+      const syncBpmDisplay = () => { if(bpmDraft === null && document.activeElement !== bpmValue) bpmValue.value = bpmSource.value; };
+      document.addEventListener("editor-tempo-change", e => { if(bpmDraft === null && document.activeElement !== bpmValue) bpmValue.value = String(e.detail.bpm); });
+      const commitDraft = () => {
+        if(bpmDraft !== null) {
+          const value = bpmDraft; bpmDraft = null;
+          if(value.trim() && Number.isFinite(Number(value))) commitBpm(Number(value));
+        }
+        bpmValue.value = bpmSource.value;
+      };
+      bpmValue.addEventListener("input", () => { bpmDraft = bpmValue.value; });
+      bpmValue.addEventListener("focus", () => bpmValue.select());
+      bpmValue.addEventListener("change", commitDraft);
+      bpmValue.addEventListener("blur", commitDraft);
+      bpmValue.addEventListener("keydown", e => {
+        if(e.key === "Enter") { e.preventDefault(); commitDraft(); bpmValue.blur(); }
+        if(e.key === "Escape") { e.preventDefault(); bpmDraft = null; bpmValue.value = bpmSource.value; bpmValue.blur(); }
+      });
       syncBpmDisplay();
       bpmSource.addEventListener("change", syncBpmDisplay);
       bpmSource.addEventListener("input", syncBpmDisplay);

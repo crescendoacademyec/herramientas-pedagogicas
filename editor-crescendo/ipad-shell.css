@@ -1596,3 +1596,8 @@ body.editor-page .editor-workbench.is-ipad-workbench .score-shell {
     transition: none;
   }
 }
+
+.ipad-bpm-group input.ipad-bpm-value{width:48px;min-width:0;height:34px;padding:0 2px;border:1px solid transparent;border-radius:4px;background:transparent;font-family:inherit;font-size:14px;font-weight:700;line-height:1;appearance:textfield;-moz-appearance:textfield}
+.ipad-bpm-group input.ipad-bpm-value::-webkit-inner-spin-button,.ipad-bpm-group input.ipad-bpm-value::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.ipad-bpm-group input.ipad-bpm-value:hover,.ipad-bpm-group input.ipad-bpm-value:focus{border-color:var(--ipad-accent,#d5aa4c);outline:none;background:var(--ipad-surface-raised)}
+.ipad-header-center .editor-metronome-beat{height:44px;width:40px}
