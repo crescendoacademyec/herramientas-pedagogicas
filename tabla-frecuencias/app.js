@@ -16,6 +16,8 @@
   let activeCat = 'todos';
   let searchTerm = '';
   let simpleMode = false;
+  let detailedView = false;
+  const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   let compareMode = false;
   let selectedIds = [];       // modo normal: máx 1 ; modo comparar: máx 2
   let activeTab = 'eq';       // 'eq' | 'comp'
@@ -88,7 +90,7 @@
     return inst.realRange || inst.range;
   }
   function rangeDescriptor(inst) {
-    if (rangeMode === 'mezcla') return 'zona práctica de mezcla';
+    if (rangeMode === 'mezcla') return inst.registerOnly ? 'registro (sin banda de mezcla fija)' : 'zona práctica de mezcla';
     return inst.rangeKind === 'energy' ? 'energía principal' : 'registro fundamental orientativo';
   }
   function syncRangeModeUI() {
@@ -103,7 +105,8 @@
 
   function matchesFilters(inst) {
     if (activeCat !== 'todos' && inst.cat !== activeCat) return false;
-    if (searchTerm && !inst.name.toLowerCase().includes(searchTerm)) return false;
+    if (!detailedView && !searchTerm && inst.detail) return false;
+    if (searchTerm && !normalizeSearch(inst.name).includes(searchTerm)) return false;
     return true;
   }
 
@@ -112,6 +115,9 @@
   function renderRows() {
     rowsEl.innerHTML = '';
     const list = INSTRUMENTS.filter(matchesFilters);
+    window.CrescendoVisibleInstruments = list;
+    window.dispatchEvent(new CustomEvent("crescendo:catalog-filter"));
+    $("catalogCount").textContent = `${list.length} referencias`;
     if (!list.length) {
       const empty = document.createElement('div');
       empty.style.cssText = 'padding:30px 10px;text-align:center;color:var(--text-dim);font-size:0.85rem;';
@@ -203,23 +209,28 @@
       </div>`;
   }
 
+  function sourceHtml(inst) {
+    if (!inst.sources) return '';
+    return `<details class="instrument-sources"><summary>Fuentes y alcance</summary><ul>${inst.sources.map(id => {
+      const source = FREQUENCY_SOURCES[id];
+      return `<li>${source.url ? `<a href="${source.url}" target="_blank" rel="noopener noreferrer">${source.label}</a>` : source.label}</li>`;
+    }).join('')}</ul><p>El registro está documentado; los consejos de mezcla son una síntesis orientativa, no ajustes prescritos por estas instituciones.</p></details>`;
+  }
+
   function eqHtml(inst) {
     const cutsHtml = inst.cuts.length
       ? '<ul class="detail-list cut">' + inst.cuts.map(c => `<li><span class="freq-tag">${c.f}</span>${c.r}</li>`).join('') + '</ul>'
-      : '<p class="detail-tips">No suele necesitar cortes específicos — normalmente se trabaja con volumen y filtrado suave.</p>';
+      : '<p class="detail-tips">Sin corte fijo recomendado: decide según la grabación.</p>';
     const boostsHtml = inst.boosts.length
       ? '<ul class="detail-list boost">' + inst.boosts.map(b => `<li><span class="freq-tag">${b.f}</span>${b.r}</li>`).join('') + '</ul>'
-      : '<p class="detail-tips">Aquí normalmente se resta más de lo que se añade (ver nota abajo).</p>';
+      : '<p class="detail-tips">Sin realce fijo recomendado: comprueba primero el balance.</p>';
     let deesserHtml = '';
     if (inst.deesser) {
-      deesserHtml = `<div class="detail-section"><h4>De-esser — rango de sibilancia por tipo de voz</h4>
-        <table class="sib-table"><tbody>
-        ${SIBILANCE_TABLE.map(s => `<tr><td>${s.tipo}</td><td>${s.rango}</td></tr>`).join('')}
-        </tbody></table></div>`;
+      deesserHtml = `<div class="detail-section"><h4>De-esser</h4><p class="detail-tips">Localiza la sibilancia en esta grabación y atenúa solo durante las consonantes. El registro vocal, por sí solo, no determina la frecuencia del de-esser.</p></div>`;
     }
     return `
-      <div class="detail-section"><h4>▾ Qué cortar</h4>${cutsHtml}</div>
-      <div class="detail-section"><h4>▴ Qué realzar</h4>${boostsHtml}</div>
+      <div class="detail-section"><h4>▾ Qué revisar si hay exceso</h4>${cutsHtml}</div>
+      <div class="detail-section"><h4>▴ Qué revisar si falta definición</h4>${boostsHtml}</div>
       ${inst.tip ? `<div class="detail-section"><h4>Nota</h4><div class="detail-tips">${inst.tip}</div></div>` : ''}
       ${deesserHtml}
     `;
@@ -268,6 +279,7 @@
       ${inst.rangeNote && (rangeMode === 'registro' || inst.rangeKind === 'energy') ? `<div class="detail-tips" style="margin:-8px 0 16px;font-size:.74rem;">${inst.rangeNote}</div>` : ''}
       ${tabButtons(!!inst.comp)}
       <div id="tabContent">${activeTab === 'comp' && inst.comp ? compHtml(inst) : eqHtml(inst)}</div>
+      ${sourceHtml(inst)}
       ${notesHtml(inst.id)}
     `;
     wireTabButtons(inst);
@@ -304,7 +316,7 @@
           <div style="flex:1;"><span class="freq-tag" style="color:${COMPARE_COLORS[1]};">${b.name}</span><br><span style="font-size:0.82rem;color:var(--text-dim);">${fmtHz(displayRange(b)[0])} – ${fmtHz(displayRange(b)[1])}</span></div>
         </div>
         ${overlaps
-          ? `<div class="detail-tips">Las franjas mostradas se superponen entre <b style="color:var(--gold);">${fmtHz(overlapLow)} – ${fmtHz(overlapHigh)}</b>. Considera recortar uno de los dos en esa zona para que el otro tenga espacio — o, como sugiere el manual, mueve el realce de uno a una frecuencia ligeramente distinta.</div>`
+          ? `<div class="detail-tips">Las franjas mostradas se superponen entre <b style="color:var(--gold);">${fmtHz(overlapLow)} – ${fmtHz(overlapHigh)}</b>. Esto no demuestra enmascaramiento: depende de las notas simultáneas, el nivel y el timbre. Escucha primero el arreglo y el balance; ecualiza solo si hay un conflicto audible.</div>`
           : `<div class="detail-tips">Las franjas mostradas <b>no se superponen</b> — buena señal, cada uno puede vivir en su propia franja de frecuencias sin competir directamente.</div>`}
       </div>
       <div class="detail-section"><h4>${a.name}: qué realzar</h4>${a.boosts.length ? '<ul class="detail-list boost">' + a.boosts.slice(0,3).map(x=>`<li><span class="freq-tag">${x.f}</span>${x.r}</li>`).join('') + '</ul>' : '<p class="detail-tips">Sin realces específicos.</p>'}</div>
@@ -352,11 +364,19 @@
     const btn = e.target.closest('.chip');
     if (!btn) return;
     activeCat = btn.dataset.cat;
+    detailedView = activeCat !== "todos";
+    syncCatalogToggle();
     [...categoryChips.querySelectorAll('.chip')].forEach((c) => c.classList.toggle('active', c === btn));
     renderRows();
   });
 
-  searchInput.addEventListener('input', () => { searchTerm = searchInput.value.trim().toLowerCase(); renderRows(); });
+  function syncCatalogToggle() {
+    $('catalogToggle').setAttribute('aria-pressed', String(detailedView));
+    $('catalogToggle').classList.toggle('active', detailedView);
+    $('catalogToggle').textContent = detailedView ? 'Vista: Instrumentos' : 'Vista: General';
+  }
+  $('catalogToggle').addEventListener('click', () => { detailedView = !detailedView; syncCatalogToggle(); renderRows(); });
+  searchInput.addEventListener('input', () => { searchTerm = normalizeSearch(searchInput.value.trim()); renderRows(); });
 
   simpleToggle.addEventListener('click', () => {
     simpleMode = !simpleMode;

@@ -528,6 +528,12 @@ a { color: inherit; text-decoration: none; }
   .tick:nth-child(3) span,.tick:nth-child(7) span,.tick:nth-child(9) span { display:none; }
   .view-options .toggle-label { white-space:normal; }
 }
+.catalog-hint { color:var(--text-dim); font-size:.8rem; margin:0 0 12px; }
+#catalogCount { color:var(--gold); margin-left:8px; }
+.catalog-sources,.instrument-sources { margin:18px 0; color:var(--text-dim); font-size:.8rem; line-height:1.65; }
+.catalog-sources summary,.instrument-sources summary { color:var(--gold); cursor:pointer; }
+.catalog-sources a,.instrument-sources a { color:var(--gold); }
+.catalog-sources ul,.instrument-sources ul { padding-left:20px; }
 </style>
 </head>
 <body>
@@ -598,6 +604,7 @@ a { color: inherit; text-decoration: none; }
         <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…" aria-label="Buscar instrumento">
         </div>
         <div class="view-options" role="group" aria-label="Opciones de visualización">
+        <button class="mode-btn" id="catalogToggle" aria-pressed="false">Vista: General</button>
         <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
         <button class="mode-btn active" id="rangeModeToggle" title="Alterna entre registro acústico y zona práctica de mezcla">Rango: Registro real</button>
         <button class="mode-btn" id="compareToggle">Comparar dos</button>
@@ -610,6 +617,7 @@ a { color: inherit; text-decoration: none; }
         </div>
     </div>
 
+    <p class="catalog-hint">Elige una familia para ver sus instrumentos. <span id="catalogCount" aria-live="polite"></span></p>
     <div class="chart-wrap">
         <div class="chart-inner" id="chartInner">
             <div class="band-overlay" id="bandOverlay"></div>
@@ -624,9 +632,21 @@ a { color: inherit; text-decoration: none; }
     </div>
 
     <p class="sources-note">
-        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos.
+        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. En las fichas nuevas sin banda de mezcla documentada se conserva el registro, sin inventar un espectro fijo de armónicos.
     </p>
 
+    <details class="catalog-sources">
+      <summary>Fuentes y cómo leer los rangos</summary>
+      <p>Notas en sonido real, con Do central = C4 y La4 = 440 Hz. Las voces usan la referencia de catalogación de Yale; no indican límites fisiológicos. Los registros instrumentales dependen del modelo, el repertorio y la técnica. Un rango de notas no describe por sí solo el espectro de una grabación.</p>
+      <ul>
+        <li><a href="https://pressbooks.macalester.digital/multimodalmusicianship/chapter/instrument-transpositions-ranges/" target="_blank" rel="noopener noreferrer">Macalester College</a>: registros y transposición.</li>
+        <li><a href="https://yalelibrary.atlassian.net/wiki/spaces/YMD/pages/202030334" target="_blank" rel="noopener noreferrer">Yale University Library</a>: referencias vocales.</li>
+        <li><a href="https://cmtext.indiana.edu/appendices/appendix_B.php" target="_blank" rel="noopener noreferrer">Indiana University</a>: notas y frecuencias.</li>
+        <li><a href="https://online.berklee.edu/takenote/what-is-eq-in-music-10-audio-equalization-tips/" target="_blank" rel="noopener noreferrer">Berklee Online</a>: fundamentos de EQ, no recetas por instrumento.</li>
+        <li>Adler, <i>The Study of Orchestration</i>; VSL Academy; documentación de Yamaha y The Met: registros y variantes. Cada ficha incluye su referencia.</li>
+      </ul>
+      <p>Consejos de mezcla sintetizados del material de estudio aportado: <i>Vocal Mixing Reference Guide</i>, <i>Sección de Cuerdas HTC</i>, <i>Chapter 5</i> y <i>Aprende a utilizar tu ecualizador</i>. No representan una certificación ni un aval institucional.</p>
+    </details>
     <div class="golden-rules">
         <h3>Reglas de oro fáciles de recordar</h3>
         <ul id="goldenRulesList"></ul>
@@ -929,7 +949,7 @@ a { color: inherit; text-decoration: none; }
             <div class="ear-settings" style="border-bottom:none;padding-bottom:0;">
                 <label class="toggle-label">
                     <input type="checkbox" id="analyzerOverlayToggle" checked>
-                    Mostrar instrumentos de referencia
+                    Mostrar instrumentos según filtros de la tabla
                 </label>
                 <label class="toggle-label">
                     <input type="checkbox" id="analyzerFreezeToggle">
@@ -1011,10 +1031,11 @@ a { color: inherit; text-decoration: none; }
     <div id="techContent"></div>
 </aside>
 
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=20260925-catalog"></script>
+<script src="instrument-catalog.js?v=20260925-catalog"></script>
+<script src="app.js?v=20260925-catalog"></script>
 <script src="ear.js"></script>
-<script src="analyzer.js"></script>
+<script src="analyzer.js?v=20260925-catalog"></script>
 <script>
 document.getElementById('modeTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.mode-tab');

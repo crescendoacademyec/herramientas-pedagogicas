@@ -33,10 +33,10 @@ const SIBILANCE_TABLE = [
 const TECHNIQUES = {
   serie: {
     title: 'Compresión en serie',
-    body: 'El compresor se inserta directamente en el canal y actúa sobre toda la señal de esa pista. Ideal para elementos individuales que necesitan consistencia: voz principal, bajo, o cualquier instrumento donde el control preciso de la dinámica es prioritario.',
+    body: 'Dos o más compresores procesan la misma señal uno después de otro. Permite repartir el control de picos y de nivel entre etapas; un solo compresor insertado no constituye compresión en serie.',
     tips: [
-      'Apunta a una reducción de 2–6 dB — más que eso suele aplastar la señal y quitarle naturalidad.',
-      'Es la opción por defecto para pistas solistas o protagonistas de la mezcla.',
+      'Reparte el trabajo entre etapas y compara con bypass a un volumen similar; la reducción necesaria depende de la grabación.',
+      'Puede separar el control de picos del control de nivel sostenido; úsala solo si mejora el resultado.',
     ],
   },
   paralela: {
@@ -56,12 +56,13 @@ const GLOSSARY = [
   { t: 'Ratio', d: 'Relación de reducción de ganancia aplicada por cada dB que excede el umbral. Ej: 4:1 deja pasar 1 dB por cada 4 que sobran.' },
   { t: 'Release', d: 'Tiempo que tarda el procesador en dejar de actuar una vez que la señal cae por debajo del umbral.' },
   { t: 'Knee (Rodilla)', d: 'Forma en que la compresión se aplica alrededor del umbral: "duro" (abrupto) o "suave" (gradual).' },
-  { t: 'Makeup / Gain Reduction', d: 'Ganancia añadida tras comprimir para compensar los dB perdidos por la reducción de nivel.' },
+  { t: 'Makeup gain', d: 'Ganancia de salida para compensar la reducción de nivel del compresor.' },
+  { t: 'Gain reduction', d: 'Atenuación que aplica el compresor, expresada en dB; no es la ganancia de compensación.' },
   { t: 'Range (de Gate)', d: 'Cuánto se atenúa la señal cuando el gate está cerrado.' },
   { t: 'Hold', d: 'Tiempo que un gate permanece abierto después de que la señal cae por debajo del umbral, antes de iniciar el release.' },
   { t: 'Gate', d: 'Procesador que bloquea la señal por debajo de un umbral, usado para reducir bleed y ruido de fondo.' },
   { t: 'De-Esser', d: 'Compresor enfocado solo en una banda de frecuencia (típicamente 5–10 kHz) para controlar sibilancias vocales.' },
-  { t: 'Compresión en Serie', d: 'El compresor procesa toda la señal de un canal de forma directa y uniforme.' },
+  { t: 'Compresión en Serie', d: 'Dos o más compresores procesan la señal consecutivamente, repartiendo el trabajo entre etapas.' },
   { t: 'Compresión Paralela', d: 'Se mezcla una copia muy comprimida con la señal original, sumando cuerpo sin perder transitorios.' },
   { t: 'Limiter', d: 'Compresor con ratio muy alto, usado para evitar que la señal sobrepase un techo y distorsione.' },
   { t: 'Transient (Transiente)', d: 'La parte inicial y más rápida de un sonido — el golpe o ataque, clave para la claridad y definición.' },
@@ -94,7 +95,7 @@ const INSTRUMENTS = [
       { f: '7–10 kHz', r: 'Sibilancia excesiva en las "s" — considera un de-esser en vez de un corte fijo.' },
       { f: '2 kHz', r: 'Zona estridente o "shrill" si hay demasiada energía aquí.' },
       { f: '500 Hz', r: 'Nasalidad; cortar aquí ayuda a desenmascarar la voz del resto de la mezcla.' },
-      { f: 'Por debajo de 80–100 Hz', r: 'Retumbo, pops de "p" y ruido de proximidad sin información útil.' },
+      { f: 'Graves no musicales', r: 'Reduce retumbo o golpes de aire sin cortar la fundamental de voces graves; ajusta el filtro a la frase.' },
     ],
     boosts: [
       { f: '10–15 kHz', r: 'Aire y sensación de cercanía sin agregar dureza.' },
@@ -112,7 +113,7 @@ const INSTRUMENTS = [
     deesser: true,
   },
   {
-    id: 'piano', name: 'Piano / Keys', cat: 'teclas',
+    id: 'piano', name: 'Piano · 88 teclas', cat: 'teclas',
     range: [80, 4600],
     realRange: [27.5, 4186.0], rangeKind: 'register', rangeNote: 'Piano acústico estándar de 88 teclas: A0–C8.', harm: [4600, 12000],
     cuts: [
@@ -346,12 +347,12 @@ const INSTRUMENTS = [
     cuts: [
       { f: '3 kHz', r: 'Puede sonar estridente en secciones grandes.' },
       { f: '600 Hz', r: 'Zona hueca ("hollow") si predomina.' },
-      { f: 'Por debajo de 120–200 Hz', r: 'Turbiedad si se acumula con otros graves.' },
+      { f: 'Graves acumulados', r: 'Comprueba el balance antes de filtrar: cello y contrabajo tienen notas fundamentales en esta zona.' },
     ],
     boosts: [
       { f: '2–5 kHz', r: 'Ataque nítido del frotado del arco.' },
       { f: '400–600 Hz', r: 'Sonido "lush" — pleno y envolvente en secciones de cuerdas.' },
-      { f: '6 kHz', r: 'Brillo superior, con moderación (es el límite alto útil típico).' },
+      { f: '6 kHz', r: 'Puede modificar el brillo; no es un límite superior del espectro útil.' },
     ],
     tip: 'El cuerpo del instrumento vive cerca de 700 Hz, y el "mordido" del arco sobre la cuerda aparece alrededor de 2 kHz.',
     comp: {
@@ -368,7 +369,7 @@ const INSTRUMENTS = [
     realRange: [41.2, 1174.7], rangeKind: 'register', rangeNote: 'Rango agregado orientativo para familia de metales; depende del instrumento y del intérprete.', harm: [5000, 15000],
     cuts: [
       { f: '1 kHz', r: 'Color nasal ("honky") si hay exceso.' },
-      { f: 'Por debajo de 120 Hz', r: 'Solo aporta barro, no fundamento real del instrumento.' },
+      { f: 'Graves no musicales', r: 'Filtra únicamente ruido o retumbo: tuba, trompa y trombón sí tienen fundamentales por debajo de 120 Hz.' },
     ],
     boosts: [
       { f: '2 kHz', r: 'Claridad general.' },
@@ -395,9 +396,9 @@ const INSTRUMENTS = [
     boosts: [
       { f: '80 Hz', r: 'Plenitud y fondo del registro grave.' },
       { f: '2–5 kHz', r: 'Presencia en el registro medio-agudo.' },
-      { f: '6 kHz en adelante', r: 'Brillo, útil en sonidos tipo Rhodes o registros agudos (1–3 kHz también ayuda ahí).' },
+      { f: '6 kHz en adelante', r: 'Brillo de los registros agudos; revisa las mezclas de tubos o drawbars antes de ecualizar.' },
     ],
-    tip: 'En sonidos tipo Rhodes, lo "hermoso" del timbre suele estar entre 160–200 Hz, con un carácter medio ("mellow") cerca de 600 Hz.',
+    tip: 'El espectro del órgano depende de la registración. No existe una banda de cuerpo única para todas las combinaciones de tubos o drawbars.',
     comp: {
       tipo: 'Suave, Óptico o VCA.',
       ratio: '2:1 – 3:1',

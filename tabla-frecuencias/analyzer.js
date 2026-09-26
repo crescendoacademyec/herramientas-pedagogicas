@@ -66,7 +66,7 @@
         return `<div class="tick" style="left:${p}%;"><span>${fmtHz(f)}</span></div>`;
       }).join('');
 
-      refRows.innerHTML = (typeof INSTRUMENTS !== 'undefined' ? INSTRUMENTS : []).map((inst) => {
+      refRows.innerHTML = (window.CrescendoVisibleInstruments || (typeof INSTRUMENTS !== 'undefined' ? INSTRUMENTS : [])).map((inst) => {
         const refRange = (window.CrescendoRangeMode !== 'mezcla' && inst.realRange) ? inst.realRange : inst.range;
         const fLow = pct(refRange[0]), fHigh = pct(refRange[1]);
         let harmHtml = '';
@@ -84,6 +84,7 @@
       }).join('');
     }
     renderRefChart();
+    window.addEventListener("crescendo:catalog-filter", renderRefChart);
 
     // ---------- eje de frecuencias bajo el espectro (mismas marcas log que la rejilla) ----------
     function renderAxisRow() {
