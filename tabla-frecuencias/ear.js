@@ -299,6 +299,7 @@
     }
 
     function start(targetFreq, gainDb) {
+      window.dispatchEvent(new CustomEvent('crescendo:audio-owner', {detail:'ear'}));
       resumeAudio();
       setupGraph();
       stop();
@@ -515,6 +516,7 @@
     let recentResults = [];
 
     function start(freq) {
+      window.dispatchEvent(new CustomEvent('crescendo:audio-owner', {detail:'ear'}));
       resumeAudio();
       stop();
       osc = audioCtx.createOscillator();
@@ -698,6 +700,7 @@
       filterNode.connect(wetGain);
     }
     function start(freq, gainDb) {
+      window.dispatchEvent(new CustomEvent('crescendo:audio-owner', {detail:'ear'}));
       resumeAudio();
       setupGraph();
       stop();
@@ -945,5 +948,7 @@
     wireModeTabs('earTone', () => Tone.stopLearn(), () => Tone.stop());
   });
 
+  window.addEventListener('crescendo:view-change', () => { Noise.stopLearn(); Direction.stopLearn(); Tone.stopLearn(); });
+  window.addEventListener('crescendo:audio-owner', e => { if(e.detail !== 'ear') { Noise.stopLearn(); Direction.stopLearn(); Tone.stopLearn(); } });
   window.addEventListener('beforeunload', () => { Noise.stop(); Direction.stop(); Tone.stop(); });
 })();

@@ -41,3 +41,36 @@ La tabla combina dos clases de información que no son intercambiables: registro
 `node --test tabla-frecuencias/tests/catalog.test.cjs`
 
 Revisión en navegador de familias, búsqueda sin tildes, comparación, fuentes, cambio de vista y ausencia de desbordamiento horizontal. El analizador comparte las referencias seleccionadas en la tabla.
+
+## Procesamiento y entrenamiento auditivo (26-09-2026)
+
+Se añaden nueve laboratorios: EQ estática, pasa-altos, EQ dinámica, compresión,
+de-esser, serie, paralelo, limitación y enmascaramiento. Ocho ejercicios comparan
+frecuencia/dirección, Q, filtrado, ataque, recuperación, de-esser, balance y
+limitación/recorte. Cada ciclo baraja todas las respuestas antes de repetir;
+material y semilla cambian entre rondas. Tres dificultades, repetición A/B y
+estadísticas locales por ejercicio/nivel. El historial nuevo es independiente
+de las sesiones existentes de ruido rosa y tono puro.
+
+Fuentes de los principios (no de presets universales):
+- [iZotope Ozone Dynamics](https://downloads.izotope.com/docs/ozone8/dynamics/index.html): umbral, ratio, envolventes, mezcla paralela.
+- [iZotope, compressor vs. limiter](https://www.izotope.com/community/blog/compressor-vs-limiter): control dinámico y techo.
+- [FabFilter Pro-DS](https://www.fabfilter.com/help/pro-ds): detección y reducción de sibilantes.
+- [EBU R128](https://tech.ebu.ch/publications/r128) y [Tech 3343](https://tech.ebu.ch/docs/tech/tech3343.pdf): distinción entre sonoridad y picos reales. No se presenta el objetivo de radiodifusión como un objetivo universal de streaming.
+- Berklee Online y el material privado aportado, citados arriba: EQ contextual,
+  balance, filtros y compresión en serie/paralela. No se redistribuyen los PDF.
+
+Implementación y límites: señales sintéticas originales, procesamiento mono local
+(32 kHz), grabaciones cargadas limitadas a los primeros ocho segundos. Igualación
+RMS aproximada, no LUFS; se aplica atenuación común adicional para conservar
+margen de salida. Limitador anticipado de picos de muestra, sin medición dBTP ni
+sobremuestreo. De-esser/EQ dinámica usan una banda y detector de envolvente
+simplificados. Pasa-altos mediante secciones de segundo orden en cascada;
+pendiente asintótica de 12–48 dB/oct. No son procesadores certificados de mastering.
+
+Verificación:
+`node --test tabla-frecuencias/tests/processing.test.cjs tabla-frecuencias/tests/catalog.test.cjs auditorias/playback-regression.test.cjs`
+Incluye respuesta del filtro, compresión sostenida, ataque, extremos del paralelo,
+techo del limitador, selectividad de de-esser, RMS, barajado y las 66 combinaciones
+de ejercicio/respuesta/dificultad. Revisión en navegador de reproducción A/B,
+respuestas, cambio de vista y diseño móvil de 390 px.

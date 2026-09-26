@@ -535,6 +535,7 @@ a { color: inherit; text-decoration: none; }
 .catalog-sources a,.instrument-sources a { color:var(--gold); }
 .catalog-sources ul,.instrument-sources ul { padding-left:20px; }
 </style>
+<link rel="stylesheet" href="processing.css?v=20260926">
 </head>
 <body>
 
@@ -582,8 +583,9 @@ a { color: inherit; text-decoration: none; }
         </button>
         <button class="mode-tab" data-view="ear">
             <b>Entrenamiento auditivo</b>
-            <span>Reconoce a oído qué frecuencia fue modificada en ruido rosa y tonos puros</span>
+            <span>Entrena frecuencias, EQ, compresión y balance con comparaciones auditivas</span>
         </button>
+        <button class="mode-tab" data-view="processing"><b>Procesamiento y dinámica</b><span>EQ, filtros, compresión y limitación con ejemplos A/B</span></button>
         <button class="mode-tab" data-view="analyzer">
             <b>Analizador de espectro</b>
             <span>Sube o graba audio y compáralo contra la tabla de instrumentos</span>
@@ -653,7 +655,9 @@ a { color: inherit; text-decoration: none; }
     </div>
     </section>
 
+    <section class="view-section" id="viewProcessing"><div class="processing-module" id="processingLab"></div></section>
     <section class="view-section" id="viewEar">
+        <details class="processing-module"><summary>Entrenamiento de mezcla y dinámica · EQ, compresión y limitación</summary><div id="processingPractice"></div></details>
 
         <div class="practice-session-card" id="practiceSessionCard">
             <div class="practice-session-head">
@@ -1034,7 +1038,10 @@ a { color: inherit; text-decoration: none; }
 <script src="data.js?v=20260925-catalog"></script>
 <script src="instrument-catalog.js?v=20260925-catalog"></script>
 <script src="app.js?v=20260925-catalog"></script>
-<script src="ear.js"></script>
+<script src="ear.js?v=20260926"></script>
+<script src="processing-dsp.js?v=20260926"></script>
+<script src="processing-exercises.js?v=20260926"></script>
+<script src="processing-lab.js?v=20260926"></script>
 <script src="analyzer.js?v=20260925-catalog"></script>
 <script>
 document.getElementById('modeTabs').addEventListener('click', (e) => {
@@ -1044,6 +1051,7 @@ document.getElementById('modeTabs').addEventListener('click', (e) => {
   document.querySelectorAll('.mode-tab').forEach((t) => t.classList.toggle('active', t === btn));
   document.getElementById('viewChart').classList.toggle('active', view === 'chart');
   document.getElementById('viewEar').classList.toggle('active', view === 'ear');
+  document.getElementById('viewProcessing').classList.toggle('active', view === 'processing');
   document.getElementById('viewAnalyzer').classList.toggle('active', view === 'analyzer');
   window.dispatchEvent(new CustomEvent('crescendo:view-change', { detail: { view } }));
 });
