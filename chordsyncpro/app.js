@@ -2670,11 +2670,22 @@
   // pre-calienta el worker (empieza a cargar Essentia) apenas se abre la página
   ensureWorker();
   if (runtime.mode === 'pages') {
-    const notice=document.createElement('div');
-    notice.style.cssText='max-width:1180px;margin:12px auto;padding:10px 16px;border:1px solid rgba(212,168,79,.35);border-radius:10px;color:#d4a84f;background:rgba(212,168,79,.08);font-size:13px;text-align:center';
-    notice.textContent='Edición web · análisis HPCP dentro del navegador · no usa Madmom ni sube tu audio';
-    const main=document.querySelector('main');
-    if(main) main.insertBefore(notice,main.firstChild);
-    if(autoStemBtn){autoStemBtn.disabled=true;autoStemBtn.title='Disponible en la edición de escritorio';}
+    if(autoStemBtn) autoStemBtn.hidden=true;
+    const exportRow=document.querySelector('.export-row');
+    if(exportRow){
+      const primaryIds=new Set(['exportJsonBtn','exportChordProBtn','saveSessionBtn']);
+      const secondary=[...exportRow.children].filter(el=>!primaryIds.has(el.id));
+      if(secondary.length){
+        const details=document.createElement('details');
+        details.className='secondary-options';
+        const summary=document.createElement('summary');
+        summary.textContent='Herramientas de evaluación';
+        const controls=document.createElement('div');
+        controls.className='export-row';
+        secondary.forEach(el=>controls.appendChild(el));
+        details.append(summary,controls);
+        exportRow.after(details);
+      }
+    }
   }
 })();

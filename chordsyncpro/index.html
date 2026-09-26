@@ -360,6 +360,12 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
 }
 
 .section-structure-marker{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:1px 5px;white-space:nowrap;transform:translateY(-2px);}
+#autoStemBtn[hidden] { display:none; }
+.secondary-options { margin-top:16px; color:var(--text-dim); font-size:.82rem; }
+.secondary-options summary { cursor:pointer; color:var(--gold); padding:8px 0; }
+.secondary-options summary:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
+.secondary-options p { line-height:1.6; }
+.secondary-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
 </style>
 </head>
 <body>
@@ -398,17 +404,17 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
     <section class="tool-hero">
         <p class="eyebrow">Análisis musical</p>
         <h1>ChordSync Pro</h1>
-        <p>Sube una canción (o un video) y detecta automáticamente su <b>tonalidad</b>, <b>progresión de acordes</b>, <b>tempo</b> y <b>compás</b>, sincronizados con la reproducción — o activa el micrófono para reconocer acordes en vivo. Motor híbrido v62: <b>Essentia.js + HPCP probabilístico + Viterbi + ONNX multi-checkpoint + Demucs opcional + fusión adaptativa de stems + BeatNet opcional + vocabulario avanzado + decodificación jerárquica + contexto armónico + seguimiento de modulaciones + estructura A/B/C + clasificación semántica Intro/Verse/Pre-Chorus/Chorus/Bridge/Solo/Outro + Transformer ONNX neuronal de estructura + detector neuronal de fronteras estructurales + Transformer multi-task conjunto (boundary + label) + contexto secuencial TRAIN-only entre secciones + consenso multimodal de repeticiones con armonía invariante a transposición + grados funcionales relativos a la tonalidad local + matching tolerante a reharmonizaciones + distancia funcional suave + voice-leading/common-tone + voicings aproximados con registro e inversiones + evidencia multi-pitch Basic Pitch fusionada por heads root/triad/seventh/extension/bass antes del Viterbi</b>. El análisis armónico corre principalmente en el navegador; stems, ritmo neuronal y estructura neural usan el backend local cuando están instalados.</p>
+        <p>Descubre los acordes, la tonalidad y el tempo de una canción, o reconoce acordes con el micrófono.</p>
     </section>
 
     <div class="mode-tabs" id="modeTabs">
         <button class="mode-tab active" data-mode="file">
             <b>Analizar archivo</b>
-            <span>Sube audio o video y obtén la progresión completa</span>
+            <span>Audio o video</span>
         </button>
         <button class="mode-tab" data-mode="live">
             <b>Micrófono en vivo</b>
-            <span>Reconoce acordes en tiempo real mientras tocas</span>
+            <span>Reconoce lo que tocas</span>
         </button>
     </div>
 
@@ -423,12 +429,15 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
             <input type="file" id="fileInput" accept="audio/*,video/*,.mp3,.wav,.wave,.aiff,.aif,.aifc,.m4a,.aac,.ogg,.oga,.opus,.flac,.wma,.amr,.3gp,.3gpp,.webm,.caf,.au,.mp4,.m4v,.mov,.mkv,.avi,.wmv,.flv,.f4v,.mpg,.mpeg,.mpe,.m2ts,.mts,.ts,.3g2,.ogv,.vob,.mxf,.asf,.rm,.rmvb,.divx,.dv,.qt" style="display:none">
             <input type="file" id="autoStemInput" accept="audio/*,.mp3,.wav,.wave,.aiff,.aif,.m4a,.aac,.ogg,.flac,.webm" style="display:none">
             <input type="file" id="stemInput" accept="audio/*,.mp3,.wav,.wave,.aiff,.aif,.m4a,.aac,.ogg,.flac,.webm" multiple style="display:none">
-            <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px;"><button class="btn-ghost" id="autoStemBtn">🧬 Separar + analizar automáticamente</button><button class="btn-ghost" id="stemAnalyzeBtn">🎚 Analizar paquete de stems</button></div>
-            <div class="format-note">La separación automática requiere iniciar el backend v62 con <code>python server/start.py</code>. Para activar beat/downbeat neuronal instala además <code>server/requirements-neural-rhythm.txt</code>; para estructura neuronal instala <code>server/requirements-structure-neural.txt</code> y coloca/entrena <code>models/structure_model.onnx</code>, <code>models/structure_boundary_model.onnx</code> o el nuevo <code>models/structure_joint_model.onnx</code>. Para activar evidencia de notas multi-pitch instala además <code>server/requirements-neural-notes.txt</code>. Para multi-stream manual selecciona juntos el <b>MIX</b> y cualquiera de <b>OTHER</b>, <b>BASS</b>, <b>DRUMS</b> o <b>VOCALS</b>. ChordSync reconoce el rol por el nombre del archivo; OTHER aporta armonía, BASS aporta raíz/inversiones, DRUMS se fusiona con el beat map del MIX y VOCALS ayuda al clasificador semántico de secciones cuando está disponible. </div>
-            <div class="format-note">Acepta formatos de <b>audio y video que tu navegador pueda decodificar</b>. En video se analiza únicamente la pista de audio. La compatibilidad exacta depende del navegador y del códec.</div>
+            <div class="format-note">Tu archivo se analiza en este navegador, sin subirlo.</div>
+            <details class="secondary-options">
+                <summary>Analizar pistas separadas</summary>
+                <div class="secondary-actions"><button class="btn-ghost" id="autoStemBtn">Separar y analizar</button><button class="btn-ghost" id="stemAnalyzeBtn">Elegir pistas</button></div>
+                <p class="format-note">Selecciona la mezcla (MIX) junto con las pistas disponibles: OTHER, BASS, DRUMS o VOCALS. Incluye esas etiquetas en los nombres de archivo.</p>
+            </details>
             <div class="status-row" id="statusRow" style="display:none;"><span class="spinner"></span><span id="statusText"></span></div>
 
-            <div class="link-divider"><span>o desde un link</span></div>
+            <details class="secondary-options"><summary>Usar un enlace de YouTube o Spotify</summary>
             <div class="analyzer-link-row">
                 <input type="text" class="link-input" id="linkInput" placeholder="Pega un link de YouTube o Spotify…">
                 <button class="btn-ghost" id="linkBtn">Cargar</button>
@@ -442,6 +451,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
                 <div class="record-status" id="recordStatus" style="display:none;"></div>
                 <p class="embed-hint" id="embedHint"></p>
             </div>
+            </details>
         </div>
 
         <div class="card" id="resultsCard" style="display:none;">
@@ -461,6 +471,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
             </div>
 
 
+            <details class="secondary-options"><summary>Corregir tonalidad y tempo</summary>
             <div class="analysis-corrections" id="analysisCorrections">
                 <div class="correction-field">
                     <label for="keyCorrectionSelect">Tonalidad</label>
@@ -495,13 +506,14 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
                     </div>
                 </div>
                 <button type="button" class="btn-ghost correction-apply" id="applyAnalysisCorrectionsBtn">Aplicar correcciones</button>
-                <span class="correction-note">Las correcciones manuales se conservan al exportar o guardar la sesión.</span>
+                <span class="correction-note">Los cambios se incluyen al guardar y exportar.</span>
             </div>
 
+            </details>
             <div class="toolbar-row">
                 <label class="toggle-label"><input type="checkbox" id="nashvilleToggle"> Números de Nashville</label>
                 <label class="toggle-label">Detalle de acorde <select id="chordLevelSelect" class="select-control" aria-label="Nivel de detalle de acordes"><option value="easy">Fácil</option><option value="medium" selected>Medio</option><option value="advanced">Avanzado</option></select></label>
-                <span style="color:var(--text-dim);font-size:0.78rem;">Pasa el mouse sobre un acorde: ✎ corregir · ✂ dividir en dos · ↻ loop · 🗑 eliminar. Arrastra el borde izq./der. para ajustar la duración. Haz clic en un espacio vacío para añadir un acorde ahí.</span>
+                <details class="secondary-options"><summary>Cómo editar acordes</summary><p>Pasa el cursor sobre un acorde para corregirlo, dividirlo, repetirlo o eliminarlo. Arrastra sus bordes para cambiar la duración. Haz clic en un espacio vacío para añadir otro.</p></details>
             </div>
 
             <div class="beat-grid" id="beatGrid"></div>
@@ -542,13 +554,13 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
             </div>
 
             <div class="info-note" style="margin-top:14px;">
-                El detector automático puede simplificar extensiones. Puedes corregir manualmente acordes como Cmaj7, Dm7, G7, F#m7b5, Bdim7, sus2/sus4, 6, add9 y 9. La tonalidad manual también controla la grafía preferida (por ejemplo Bb/Eb/Ab o F#/C#). El compás sigue siendo una estimación experimental; confía en tu oído para confirmarlo.
+                Revisa el resultado escuchando la canción; puedes corregir los acordes y el tempo.
             </div>
         </div>
 
         <div class="card" id="sessionsCard">
             <div class="file-title" style="margin-bottom:4px;">Sesiones guardadas</div>
-            <div class="session-storage-note">Se guardan localmente en este navegador. No contienen el archivo de audio/video original.</div>
+            <div class="session-storage-note">Guardadas en este navegador, sin el audio original.</div>
             <div class="session-list" id="sessionList"><span style="color:var(--text-dim);font-size:0.82rem;">Todavía no has guardado ninguna sesión.</span></div>
         </div>
     </section>
@@ -573,7 +585,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
                 <span>Nivel: <b id="liveLevelValue" style="color:var(--gold);">—</b></span>
             </div>
             <div class="info-note" style="text-align:left;margin-top:22px;">
-                El modo en vivo usa ventanas solapadas y estabilización temporal para evitar cambios falsos. La confianza mostrada es relativa al detector, no una probabilidad calibrada. El centro tonal necesita varias lecturas consistentes antes de actualizarse. Funciona mejor con un instrumento armónico claro y poco ruido de fondo.
+                Toca con poco ruido de fondo para mejorar la detección.
             </div>
         </div>
     </section>
@@ -590,7 +602,7 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
 <script src="chorddata.js"></script>
 <script src="evaluator.js"></script>
 <script src="structure_evaluator.js"></script>
-<script src="app.js?v=63.1.0"></script>
+<script src="app.js?v=63.1.1-clean-ui"></script>
 <script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
 </body>
 </html>
