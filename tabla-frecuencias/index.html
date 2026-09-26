@@ -534,6 +534,9 @@ a { color: inherit; text-decoration: none; }
 .catalog-sources summary,.instrument-sources summary { color:var(--gold); cursor:pointer; }
 .catalog-sources a,.instrument-sources a { color:var(--gold); }
 .catalog-sources ul,.instrument-sources ul { padding-left:20px; }
+.frequency-cursor-line { position:absolute; top:0; bottom:0; width:1px; background:#f0cd74; box-shadow:0 0 4px #16130c; z-index:4; pointer-events:none; }
+.frequency-cursor-label { position:fixed; z-index:1000; pointer-events:none; padding:6px 10px; border:1px solid #d4a84f; border-radius:7px; color:#fff4d3; background:#17150f; font:600 13px/1.3 system-ui,sans-serif; box-shadow:0 3px 12px #0006; white-space:nowrap; }
+.frequency-cursor-line[hidden],.frequency-cursor-label[hidden] { display:none; }
 </style>
 <link rel="stylesheet" href="processing.css?v=20260926">
 </head>
@@ -606,7 +609,6 @@ a { color: inherit; text-decoration: none; }
         <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…" aria-label="Buscar instrumento">
         </div>
         <div class="view-options" role="group" aria-label="Opciones de visualización">
-        <button class="mode-btn" id="catalogToggle" aria-pressed="false">Vista: General</button>
         <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
         <button class="mode-btn active" id="rangeModeToggle" title="Alterna entre registro acústico y zona práctica de mezcla">Rango: Registro real</button>
         <button class="mode-btn" id="compareToggle">Comparar dos</button>
@@ -619,7 +621,7 @@ a { color: inherit; text-decoration: none; }
         </div>
     </div>
 
-    <p class="catalog-hint">Elige una familia para ver sus instrumentos. <span id="catalogCount" aria-live="polite"></span></p>
+    <p class="catalog-hint">Todos muestra el catálogo completo. Desplázate hacia abajo o filtra por familia. <span id="catalogCount" aria-live="polite"></span></p>
     <div class="chart-wrap">
         <div class="chart-inner" id="chartInner">
             <div class="band-overlay" id="bandOverlay"></div>
@@ -629,12 +631,12 @@ a { color: inherit; text-decoration: none; }
         <div class="legend">
             <div class="legend-item"><span class="legend-swatch fund"></span> <span id="primaryLegendLabel">Registro fundamental orientativo</span></div>
             <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / parciales y ataque</div>
-            <div class="legend-item">Clic sobre una barra → recomendaciones de EQ</div>
+            <div class="legend-item">Pasa el cursor → frecuencia · Clic en una barra → EQ</div>
         </div>
     </div>
 
     <p class="sources-note">
-        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal</b>. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. Todos los instrumentos incluyen una franja de armónicos o parciales. En los instrumentos tonales detallados muestra los armónicos 2.º–16.º calculados sobre su registro; en percusión detallada es una ventana de exploración hasta 20 kHz. No indica energía uniforme ni un límite acústico. Consulta el alcance en cada ficha.
+        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal o una ventana orientativa de exploración</b>, según la ficha. El sintetizador muestra la ventana audible, porque su espectro depende del patch. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. Todos los instrumentos incluyen una franja de armónicos o parciales. En los instrumentos tonales detallados muestra los armónicos 2.º–16.º calculados sobre su registro; en percusión detallada es una ventana de exploración hasta 20 kHz. No indica energía uniforme ni un límite acústico. Consulta el alcance en cada ficha.
     </p>
 
     <details class="catalog-sources">
@@ -1035,14 +1037,15 @@ a { color: inherit; text-decoration: none; }
     <div id="techContent"></div>
 </aside>
 
-<script src="data.js?v=20260926-harmonics"></script>
-<script src="instrument-catalog.js?v=20260926-harmonics"></script>
-<script src="app.js?v=20260926-harmonics"></script>
+<script src="data.js?v=20260926-full-catalog"></script>
+<script src="instrument-catalog.js?v=20260926-full-catalog"></script>
+<script src="app.js?v=20260926-full-catalog"></script>
 <script src="ear.js?v=20260926"></script>
 <script src="processing-dsp.js?v=20260926"></script>
 <script src="processing-exercises.js?v=20260926"></script>
 <script src="processing-lab.js?v=20260926"></script>
-<script src="analyzer.js?v=20260926-harmonics"></script>
+<script src="analyzer.js?v=20260926-full-catalog"></script>
+<script src="frequency-cursor.js?v=20260926"></script>
 <script>
 document.getElementById('modeTabs').addEventListener('click', (e) => {
   const btn = e.target.closest('.mode-tab');

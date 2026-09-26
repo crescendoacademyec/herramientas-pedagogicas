@@ -1,5 +1,9 @@
 // Concert pitch, equal temperament, A4=440 Hz. See SOURCES.md for scope and decisions.
 const FREQUENCY_SOURCES = {
+  ortega: { label: 'Ortega Guitars · Afinación de requinto', url: 'https://ortegaguitars.com/en/wiki' },
+  lp: { label: 'Latin Percussion · Instrumentos de percusión', url: 'https://www.lpmusic.com/percussion/' },
+  lpBongos: { label: 'Latin Percussion · Bongós', url: 'https://www.lpmusic.com/drums/bongos/' },
+  moog: { label: 'Moog · Manual Sub 37: osciladores, ruido y filtro', url: 'https://api.moogmusic.com/sites/default/files/2018-09/SUB_37_MANUAL_v1.1_0.pdf' },
   unsw: { label: 'UNSW · Espectro, armónicos y parciales', url: 'https://phys.unsw.edu.au/jw/sound.spectrum.html' },
   adler: { label: 'Samuel Adler · The Study of Orchestration, cap. 3–4 (material de consulta)', note: 'Registros y afinación; edición PDF facilitada por el usuario.' },
   mac: { label: 'Macalester College · Registros y transposición', url: 'https://pressbooks.macalester.digital/multimodalmusicianship/chapter/instrument-transpositions-ranges/' },
@@ -38,6 +42,7 @@ const CATALOG_EQ = {
 };
 // id, name, family, lowest/highest sounding pitch, EQ family, range source, scope.
 const INSTRUMENT_PROFILES = [
+  ['requinto','Requinto de guitarra · 12 trastes','cuerdas','A2','A5','plucked','ortega','Requinto latinoamericano de seis cuerdas, A2–D3–G3–C4–E4–A4; ventana hasta el traste 12. No corresponde al clarinete requinto ni a otras afinaciones regionales.'],
   ['violin','Violín','cuerdas','G3','E7','bowed','adler','Registro orquestal práctico; el solo y los armónicos pueden extenderlo.'],
   ['viola','Viola','cuerdas','C3','E6','bowed','adler','Referencia orquestal; posiciones y técnicas avanzadas amplían el extremo agudo.'],
   ['cello','Violonchelo (cello)','cuerdas','C2','A5','bowed','cello','Referencia de VSL; existen extensiones solistas y armónicos por encima.'],
@@ -79,11 +84,40 @@ for (const [id,name,cat,low,high,eqFamily,source,note] of INSTRUMENT_PROFILES) {
   });
 }
 
+// Editorial listening windows, not manufacturer measurements or fixed pitches.
+const PERCUSSION_ADDITIONS = [
+  ['bongos','Bongós',150,6000,'Dos parches (macho y hembra): escucha tono abierto, golpe seco y dedos por separado.','lpBongos'],
+  ['shaker','Shaker',1000,16000,'El relleno, la carcasa y el movimiento cambian la textura y el brillo.','lp'],
+  ['cajon','Cajón',50,6000,'Distingue el golpe grave, el ataque de la tapa y la bordonera si existe.','lp'],
+  ['pandereta','Pandereta',1000,16000,'Las sonajas aportan brillo; los modelos con parche también pueden aportar cuerpo grave fuera de esta ventana.','lp'],
+  ['guiro','Güiro',500,12000,'La velocidad del raspado, el material y la presión cambian la articulación.','lp'],
+  ['claves','Claves',500,10000,'Golpe breve de madera: escucha resonancia, ataque y reflexiones de sala.','lp'],
+  ['maracas','Maracas',800,16000,'El tamaño, el material y las semillas modifican la textura; no tienen registro de notas fijo.','lp'],
+  ['cencerro','Cencerro / cowbell',300,10000,'Resonancias metálicas inarmónicas; boca y cuerpo producen ataques distintos.','lp'],
+  ['triangulo','Triángulo',1500,18000,'Parciales metálicos y caída prolongada; la varilla y el lugar del golpe cambian el sonido.','lp'],
+];
+for (const [id,name,low,high,note,source] of PERCUSSION_ADDITIONS) {
+  INSTRUMENTS.push({id,name,cat:'percusion',detail:true,range:[low,high],realRange:[low,high],rangeKind:'window',
+    rangeNote:'Ventana orientativa para empezar a escuchar cuerpo y ataque; no es una medición ni un límite del instrumento. '+note,
+    harm:[low,20000],harmKind:'partials',harmNote:'Ventana de parciales y ataque hasta el límite de 20 kHz del gráfico. No implica energía uniforme ni una serie de armónicos enteros.',
+    cuts:[{f:'Resonancias y aspereza',r:'Localiza la zona molesta en la grabación; atenúa solo si distrae o enmascara otros instrumentos.'}],
+    boosts:[{f:'Articulación',r:'Revisa primero nivel y posición del micrófono. Si falta definición, prueba un realce suave y compara al mismo volumen.'}],
+    tip:note+' Las cifras son una guía editorial de exploración; las fuentes documentan el instrumento, no estas bandas de EQ.',sources:[source,'berklee']});
+}
+INSTRUMENTS.push({id:'sintetizador',name:'Sintetizador',cat:'teclas',detail:true,range:[20,20000],realRange:[20,20000],rangeKind:'window',
+  rangeNote:'Se muestra la ventana audible del gráfico, no la extensión de un teclado. El patch, los osciladores, el ruido y los filtros determinan el espectro; también puede haber contenido fuera de esta ventana.',
+  harm:[20,20000],harmKind:'variable-spectrum',harmNote:'Espectro dependiente del patch: una senoide ideal no tiene armónicos superiores, otras formas sí; ruido, FM y modulación pueden añadir componentes no armónicos. La franja completa no significa energía en todas las frecuencias.',
+  cuts:[{f:'Según el patch',r:'Comprueba subgraves, resonancia del filtro y acumulación con otros instrumentos antes de recortar.'}],
+  boosts:[{f:'Según su función',r:'Decide si actúa como bajo, lead, pad o efecto; ajusta el propio sonido antes de aplicar EQ externa.'}],
+  tip:'No existe una banda de fundamentales ni de armónicos única para todos los sintetizadores.',sources:['moog','berklee']});
+
 // Display conventions, not measured upper limits of an instrument's spectrum.
 // For tonal profiles, show the envelope of harmonics 2–16 across the register.
 // For percussion, do not invent an integer harmonic series for inharmonic modes.
 for (const instrument of INSTRUMENTS) {
-  if (instrument.detail) {
+  if (instrument.harmNote) {
+    // Preserve explicitly described inharmonic and patch-dependent windows.
+  } else if (instrument.detail) {
     const [low, high] = instrument.realRange;
     if (instrument.cat === 'percusion') {
       instrument.harm = [low, 20000];

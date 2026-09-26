@@ -16,7 +16,6 @@
   let activeCat = 'todos';
   let searchTerm = '';
   let simpleMode = false;
-  let detailedView = false;
   const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   let compareMode = false;
   let selectedIds = [];       // modo normal: máx 1 ; modo comparar: máx 2
@@ -90,6 +89,7 @@
     return inst.realRange || inst.range;
   }
   function rangeDescriptor(inst) {
+    if (inst.rangeKind === 'window') return 'ventana de exploración, no registro fijo';
     if (rangeMode === 'mezcla') return inst.registerOnly ? 'registro (sin banda de mezcla fija)' : 'zona práctica de mezcla';
     return inst.rangeKind === 'energy' ? 'energía principal' : 'registro fundamental orientativo';
   }
@@ -98,14 +98,13 @@
       rangeModeToggle.classList.toggle('active', rangeMode === 'registro');
       rangeModeToggle.textContent = rangeMode === 'registro' ? 'Rango: Registro real' : 'Rango: Zona de mezcla';
     }
-    if (primaryLegendLabel) primaryLegendLabel.textContent = rangeMode === 'registro' ? 'Registro fundamental / energía principal' : 'Zona práctica de mezcla';
+    if (primaryLegendLabel) primaryLegendLabel.textContent = rangeMode === 'registro' ? 'Registro / zona orientativa' : 'Zona práctica de mezcla';
     window.CrescendoRangeMode = rangeMode;
     window.dispatchEvent(new CustomEvent('crescendo:range-mode', { detail: { mode: rangeMode } }));
   }
 
   function matchesFilters(inst) {
     if (activeCat !== 'todos' && inst.cat !== activeCat) return false;
-    if (!detailedView && !searchTerm && inst.detail) return false;
     if (searchTerm && !normalizeSearch(inst.name).includes(searchTerm)) return false;
     return true;
   }
@@ -279,7 +278,7 @@
       <p class="detail-eyebrow">${inst.cat}</p>
       <h3 class="detail-title">${inst.name}</h3>
       <div class="detail-range">${fmtHz(displayRange(inst)[0])} – ${fmtHz(displayRange(inst)[1])} · ${rangeDescriptor(inst)}</div>
-      ${inst.rangeNote && (rangeMode === 'registro' || inst.rangeKind === 'energy') ? `<div class="detail-tips" style="margin:-8px 0 16px;font-size:.74rem;">${inst.rangeNote}</div>` : ''}
+      ${inst.rangeNote && (rangeMode === 'registro' || inst.rangeKind === 'energy' || inst.rangeKind === 'window') ? `<div class="detail-tips" style="margin:-8px 0 16px;font-size:.74rem;">${inst.rangeNote}</div>` : ''}
       ${tabButtons(!!inst.comp)}
       <div id="tabContent">${activeTab === 'comp' && inst.comp ? compHtml(inst) : eqHtml(inst)}</div>
       ${sourceHtml(inst)}
@@ -367,18 +366,11 @@
     const btn = e.target.closest('.chip');
     if (!btn) return;
     activeCat = btn.dataset.cat;
-    detailedView = activeCat !== "todos";
-    syncCatalogToggle();
+    if (activeCat === "todos") { searchTerm = ""; searchInput.value = ""; }
     [...categoryChips.querySelectorAll('.chip')].forEach((c) => c.classList.toggle('active', c === btn));
     renderRows();
   });
 
-  function syncCatalogToggle() {
-    $('catalogToggle').setAttribute('aria-pressed', String(detailedView));
-    $('catalogToggle').classList.toggle('active', detailedView);
-    $('catalogToggle').textContent = detailedView ? 'Vista: Instrumentos' : 'Vista: General';
-  }
-  $('catalogToggle').addEventListener('click', () => { detailedView = !detailedView; syncCatalogToggle(); renderRows(); });
   searchInput.addEventListener('input', () => { searchTerm = normalizeSearch(searchInput.value.trim()); renderRows(); });
 
   simpleToggle.addEventListener('click', () => {

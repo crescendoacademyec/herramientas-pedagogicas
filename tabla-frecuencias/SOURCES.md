@@ -96,3 +96,33 @@ y [How harmonic are harmonics?](https://phys.unsw.edu.au/jw/harmonics.html): mú
 de la fundamental, variación entre notas y técnicas, particularidad de los
 impares en el registro grave del clarinete e inarmonicidad de la percusión.
 Las fichas explican su alcance y enlazan la fuente.
+
+## Catálogo completo y nuevas referencias (26-09-2026)
+
+Se elimina el filtro de «Vista: General» que ocultaba los perfiles detallados al
+seleccionar «Todos». Se muestran las 57 referencias desde la carga inicial;
+«Todos» también limpia la búsqueda, y las familias conservan todos sus miembros.
+La tabla crece con su contenido y se recorre con el desplazamiento de la página.
+
+Nuevas referencias: requinto de guitarra, sintetizador, bongós, shaker, cajón,
+pandereta, güiro, claves, maracas, cencerro y triángulo.
+- [Ortega, Wiki](https://ortegaguitars.com/en/wiki): requinto A–D–G–C–E–A.
+  Se explicita la ventana de 12 trastes A2–A5; no se afirma que sea su extensión máxima.
+- [Latin Percussion](https://www.lpmusic.com/percussion/) y su sección de
+  [bongós](https://www.lpmusic.com/drums/bongos/): identificación y construcción.
+  Las bandas de escucha son orientaciones editoriales para cuerpo/ataque, no
+  mediciones del fabricante ni registros de alturas determinados. Se distinguen
+  de la ventana más amplia de parciales, cuyo límite de 20 kHz pertenece al gráfico.
+- [Moog Sub 37, manual](https://api.moogmusic.com/sites/default/files/2018-09/SUB_37_MANUAL_v1.1_0.pdf):
+  osciladores, ruido, modulación y filtros. La ventana 20 Hz–20 kHz no es un registro
+  fijo del sintetizador ni significa que todos sus patches llenen ese espectro.
+
+Todos los nuevos perfiles incluyen franja de armónicos/parciales, explicación,
+orientaciones de EQ y fuentes. Las pruebas validan 57 IDs únicos y perfiles completos.
+
+El cursor de frecuencia invierte la escala logarítmica mediante
+`20 * 1000 ** posición`, usando el ancho real de la regla, sin incluir la columna
+de nombres. Incluye guía vertical y etiqueta en Hz/kHz tanto en tabla como en
+referencia del analizador. No intercepta los clics ni el desplazamiento; se oculta
+al salir, desplazar o cambiar de sección. Pruebas numéricas en varios anchos y
+comprobación en navegador de 75/80 Hz, las 57 filas y acceso al último instrumento.
