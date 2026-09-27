@@ -96,7 +96,7 @@
       loading ||= global.Soundfont.instrument(audio,'acoustic_grand_piano');player ||= await loading;
       if(mine!==token)return;player.stop();
       let offset=0;
-      groups.forEach(group=>{group.forEach((n,i)=>player.play(n.midi,audio.currentTime+offset+(melodic?i*.45:0),{duration:melodic?.4:.85,gain:.8}));offset+=melodic?group.length*.45:1;});
+      groups.forEach(group=>{let cursor=0;group.forEach(n=>{const duration=n.beats!==undefined?n.beats*.5:(melodic?.45:1);if(n.kind!=='rest')player.play(n.midi,audio.currentTime+offset+(melodic?cursor:0),{duration:n.beats!==undefined?duration*.9:(melodic?.4:.85),gain:.8});if(melodic)cursor+=duration;});offset+=melodic?cursor:Math.max(1,...group.map(n=>(n.beats||2)*.5));});
     }catch(e){loading=null;throw e;}
   }
   function mount(host,course){
@@ -107,6 +107,7 @@
     const get=id=>host.querySelector('[data-pl="'+id+'"]'),val=id=>get(id).value;
     host.querySelector('.pl-controls').insertAdjacentHTML('beforeend','<label hidden data-dictation-length>Notas del dictado<select data-pl="length">'+[2,3,4,5,6,7,8].map(n=>'<option '+(n===4?'selected':'')+'>'+n+'</option>').join('')+'</select></label>');
     let q,chosen=[],written=[],revealed=false;
+    const interactive=course==='ear';let tool={beats:1,kind:'note',alter:0,dotted:false},editClef='treble';
     if(course==='ear'){get('sense').value='audio';get('mode').value='identify';}
     const sounding=async(groups,melodic)=>{try{await play(groups,melodic);}catch(e){get('feedback').textContent=e.message;}};
     function draw(){
@@ -132,7 +133,15 @@
         if(mode==='build')get('editor').innerHTML='<label>Armadura <select data-key-input>'+KEYS.map(k=>'<option value="'+k[1]+'" '+(key===k[1]?'selected':'')+'>'+Math.abs(k[1])+' '+(k[1]<0?'bemoles':k[1]>0?'sostenidos':'alteraciones')+'</option>').join('')+'</select></label>';
       }else if(surface==='staff'){
         get('display').innerHTML=show&&q.progression?q.progression.map(ns=>global.CrescendoPractice.staff(ns,{stack:true})).join(''):(mode==='build'&&q.progression?q.progression.slice(0,-1).map(ns=>global.CrescendoPractice.staff(ns,{stack:true})).join(''):'')+global.CrescendoPractice.staff(show?q.notes:written,{stack:q.stack,clef:shown.length&&Math.max(...shown)<60?'bass':'treble'});
+        if(mode==='build'&&interactive){
+          if(!revealed)get('display').innerHTML=(q.progression?q.progression.slice(0,-1).map(ns=>global.CrescendoPractice.staff(ns,{stack:true})).join(''):'')+global.CrescendoPractice.sequence(written.map((n,i)=>({...n,chord:q.stack&&i>0})),{clef:editClef});
+          get('display').classList.toggle('pl-editable',!revealed);
+          get('editor').innerHTML='<div class="pl-palette" aria-label="Figuras musicales">'+[[4,'𝅝','Redonda'],[2,'𝅗𝅥','Blanca'],[1,'♩','Negra'],[.5,'♪','Corchea'],[.25,'♬','Semicorchea'],[.125,'𝅘𝅥𝅯','Fusa'],[.0625,'𝅘𝅥𝅰','Semifusa']].map(([v,g,t])=>'<button type="button" data-figure="'+v+'" aria-pressed="'+(tool.beats===v)+'" aria-label="'+t+'"><span aria-hidden="true">'+g+'</span><small>'+t+'</small></button>').join('')+'</div><div class="pl-controls"><label>Tipo<select data-edit-kind><option value="note">Nota</option><option value="rest" '+(q.stack?'disabled':'')+'>Silencio</option></select></label><label>Alteración<select data-edit-alter><option value="0">Natural ♮</option><option value="1">Sostenido ♯</option><option value="-1">Bemol ♭</option><option value="2">Doble sostenido 𝄪</option><option value="-2">Doble bemol 𝄫</option></select></label><label>Clave<select data-edit-clef><option value="treble">Sol</option><option value="bass">Fa</option></select></label><label>Puntillo<input type="checkbox" data-edit-dot></label><button type="button" data-action="listen-written">Escuchar construcción</button></div><p>Elige una figura y pulsa una línea o espacio. Las notas se añaden en orden; los acordes se apilan. Las figuras no cambian la evaluación de alturas. Usa Deshacer para corregir.</p><div class="pl-controls"><label>Nota (alternativa al mouse)<select data-note-letter>'+LETTERS.map((l,i)=>'<option value="'+i+'">'+SOLFEGE[i]+' / '+l+'</option>').join('')+'</select></label><label>Octava<select data-note-octave>'+[2,3,4,5,6].map(o=>'<option '+(o===4?'selected':'')+'>'+o+'</option>').join('')+'</select></label><button data-action="add">Añadir nota</button></div>';
+          host.querySelector('[data-edit-kind]').value=q.stack?'note':tool.kind;host.querySelector('[data-edit-alter]').value=tool.alter;host.querySelector('[data-edit-clef]').value=editClef;host.querySelector('[data-edit-dot]').checked=tool.dotted;
+        }else{
+          get('display').classList.remove('pl-editable');
         if(mode==='build')get('editor').innerHTML='<div class="pl-controls"><label>Nota<select data-note-letter>'+LETTERS.map((l,i)=>'<option value="'+i+'">'+SOLFEGE[i]+' / '+l+'</option>').join('')+'</select></label><label>Alteración<select data-note-alter><option value="0">Natural</option><option value="1">Sostenido</option><option value="-1">Bemol</option><option value="2">Doble sostenido</option><option value="-2">Doble bemol</option></select></label><label>Octava<select data-note-octave>'+[2,3,4,5,6].map(o=>'<option '+(o===4?'selected':'')+'>'+o+'</option>').join('')+'</select></label><button data-action="add">Añadir nota</button></div>';
+        }
       }else if(surface==='piano'){
         get('display').innerHTML=pianoMarkup(shown,mode==='explore'||revealed,['note','inversion','leading'].includes(q.kind));
       }else{
@@ -140,13 +149,28 @@
         get('display').innerHTML='<div class="pl-board-wrap"><p>'+ins.name+' · '+(ins.fretless?'Posiciones de semitono orientativas: el violín no tiene trastes.':'Cuerda al aire = 0; posiciones hasta el traste XII.')+(q.kind==='inversion'?' Se adapta la octava al instrumento conservando el bajo.':'')+'</p><div class="pl-board '+(ins.fretless?'pl-fretless':'')+'">'+ins.tuning.map((open,s)=>'<div class="pl-string"><b>'+ins.labels[s]+'</b>'+Array.from({length:13},(_,f)=>'<button data-midi="'+(open+f)+'" class="'+(positions.some(n=>['note','inversion'].includes(q.kind)?n===open+f:pc(n)===pc(open+f))?'selected':'')+'" aria-label="Cuerda '+(s+1)+', '+(ins.fretless?'posición':'traste')+' '+f+', '+NAMES[pc(open+f)]+'">'+(mode==='explore'||revealed?NAMES[pc(open+f)]:f)+'</button>').join('')+'</div>').join('')+'</div></div>';
       }
       get('answers').innerHTML=mode==='identify'&&!revealed?[...new Set(q.choices.map(answerName))].map(c=>'<button data-answer="'+esc(c)+'">'+esc(c)+'</button>').join(''):'';
-      if(mode==='build'&&chosen.length&&q.kind!=='key')get('editor').insertAdjacentHTML('beforeend','<p>Tu respuesta: '+written.map(n=>esc(label(n))).join(' · ')+'</p>');
+      if(mode==='build'&&chosen.length&&q.kind!=='key')get('editor').insertAdjacentHTML('beforeend','<p>Tu respuesta: '+written.map(n=>n.kind==='rest'?'Silencio':esc(label(n))).join(' · ')+'</p>');
     }
-    function next(){token++;player?.stop();q=makeQuestion(val('kind'),{length:Number(val('length'))});chosen=[];written=[];revealed=false;get('feedback').textContent='';if(q.kind==='dictation')get('mode').value='build';draw();}
+    function next(){token++;player?.stop();q=makeQuestion(val('kind'),{length:Number(val('length'))});chosen=[];written=[];revealed=false;tool.kind='note';editClef=Math.max(...q.notes.map(n=>n.midi))<60?'bass':'treble';get('feedback').textContent='';if(q.kind==='dictation')get('mode').value='build';draw();}
     function feedback(ok){revealed=true;get('feedback').textContent=(ok?'Correcto. ':'Revisa la solución. ')+q.answer+(q.detail?' · '+q.detail:'')+(q.kind==='key'?' · '+Math.abs(q.key)+' alteraciones.':'');draw();}
+    function addWritten(n){const event={...n,beats:tool.beats*(tool.dotted?1.5:1),kind:q.stack?'note':tool.kind};written.push(event);if(event.kind!=='rest')chosen.push(event.midi);draw();}
+    get('display').addEventListener('click',e=>{
+      if(!interactive||val('mode')!=='build'||val('surface')!=='staff'||q.kind==='key'||revealed)return;
+      const staffs=get('display').querySelectorAll('.cp-staff'),staff=staffs[staffs.length-1];if(!staff?.contains(e.target))return;
+      const svg=staff.querySelector('svg');if(!svg)return;
+      const rect=svg.getBoundingClientRect(),ys=Array.from(svg.querySelectorAll('line,path')).map(el=>el.getBoundingClientRect()).filter(b=>b.width>rect.width*.12&&b.height<3).map(b=>b.top+b.height/2).sort((a,b)=>a-b),unique=[];
+      ys.forEach(y=>{if(!unique.length||y-unique[unique.length-1]>2)unique.push(y);});
+      const systems=[];for(let i=0;i+4<unique.length;i+=5)systems.push(unique.slice(i,i+5));
+      const lines=systems.sort((a,b)=>Math.abs((a[0]+a[4])/2-e.clientY)-Math.abs((b[0]+b[4])/2-e.clientY))[0];if(!lines)return;
+      const diatonic=(editClef==='bass'?3*7+5:5*7+3)-Math.round((e.clientY-lines[0])/((lines[4]-lines[0])/8));
+      if(diatonic<14||diatonic>48)return;
+      const octave=Math.floor(diatonic/7),letter=((diatonic%7)+7)%7;addWritten({diatonic,alter:tool.alter,midi:12*(octave+1)+NATURAL[letter]+tool.alter});
+    });
+    host.addEventListener('change',e=>{if(e.target.matches('[data-edit-kind]'))tool.kind=e.target.value;if(e.target.matches('[data-edit-alter]'))tool.alter=Number(e.target.value);if(e.target.matches('[data-edit-dot]'))tool.dotted=e.target.checked;if(e.target.matches('[data-edit-clef]')){editClef=e.target.value;draw();}});
     host.addEventListener('change',e=>{if(e.target.matches('[data-key-input]')){chosen=[Number(e.target.value)];draw();}else if(e.target===get('kind')||e.target===get('length'))next();else if(e.target.matches('[data-pl]')){chosen=[];written=[];revealed=false;get('feedback').textContent='';draw();}});
     host.addEventListener('click',e=>{
       const b=e.target.closest('button');if(!b)return;
+      if(b.dataset.figure){tool.beats=Number(b.dataset.figure);host.querySelectorAll('[data-figure]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));return;}
       if(b.dataset.midi){const m=Number(b.dataset.midi);if(val('mode')==='build'){chosen.push(m);written.push(note(m));draw();}sounding([[note(m)]],false);return;}
       if(b.dataset.answer){feedback(b.dataset.answer===q.answer||(b.dataset.answer==='Tritono'&&['4ª aumentada','5ª disminuida'].includes(q.answer)));return;}
       switch(b.dataset.action){
@@ -154,8 +178,9 @@
         case 'stop':token++;player?.stop();break;
         case 'play':sounding(q.progression||[q.notes],!q.stack);break;
         case 'reference':sounding([[q.reference]],false);break;
-        case 'add':{const i=Number(host.querySelector('[data-note-letter]').value),a=Number(host.querySelector('[data-note-alter]').value),o=Number(host.querySelector('[data-note-octave]').value),m=(o+1)*12+NATURAL[i]+a;chosen.push(m);written.push({midi:m,diatonic:o*7+i,alter:a});draw();break;}
-        case 'undo':chosen.pop();written.pop();draw();break;
+        case 'listen-written':sounding(q.stack?[written.filter(n=>n.kind!=='rest')]:written.map(n=>[n]),!q.stack);break;
+        case 'add':{if(interactive){const i=Number(host.querySelector('[data-note-letter]').value),o=Number(host.querySelector('[data-note-octave]').value);addWritten({midi:(o+1)*12+NATURAL[i]+tool.alter,diatonic:o*7+i,alter:tool.alter});break;}const i=Number(host.querySelector('[data-note-letter]').value),a=Number(host.querySelector('[data-note-alter]').value),o=Number(host.querySelector('[data-note-octave]').value),m=(o+1)*12+NATURAL[i]+a;chosen.push(m);written.push({midi:m,diatonic:o*7+i,alter:a});draw();break;}
+        case 'undo':{const n=written.pop();if(n&&n.kind!=='rest')chosen.pop();draw();break;}
         case 'clear':chosen=[];written=[];revealed=false;draw();break;
         case 'reveal':feedback(false);break;
         case 'check':{
@@ -163,7 +188,7 @@
           if(q.kind==='inversion'&&val('surface')==='board')ok=ok&&pc(Math.min(...chosen))===pc(q.notes[0].midi);
           if(val('surface')==='staff'&&q.kind!=='key'){
             const spelling=ns=>ns.map(n=>((n.diatonic%7)+7)%7+':'+n.alter).sort().join('|');
-            ok=ok&&spelling(written)===spelling(q.notes);
+            ok=ok&&spelling(written.filter(n=>n.kind!=='rest'))===spelling(q.notes);
           }
           feedback(ok);break;
         }

@@ -37,3 +37,10 @@ for(const scale of P.scales){
   assert.ok(P.review(round).includes('cp-staff'));
 }
 console.log('800 preguntas verificadas: grafía, respuestas, claves, inversiones y 4 escalas auditivas.');
+const builtChord=decode(P.sequence([{midi:60,diatonic:28,alter:0,beats:2},{midi:64,diatonic:30,alter:0,beats:2,chord:true}],{clef:'bass'}));
+assert.equal((builtChord.match(/<chord\/>/g)||[]).length,1);
+assert.ok(builtChord.includes('<sign>F</sign>'));
+assert.equal((builtChord.match(/<type>half<\/type>/g)||[]).length,2);
+const dottedFlat=decode(P.sequence([{midi:63,diatonic:30,alter:-1,beats:1.5}]));
+assert.ok(dottedFlat.includes('<step>E</step><alter>-1</alter>'));
+assert.ok(dottedFlat.includes('<dot/>'));
