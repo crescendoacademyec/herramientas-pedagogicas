@@ -30,3 +30,11 @@ assert.ok(!L.sameNotes([64,60],[60,64],{ordered:true}));
 assert.ok(!L.sameNotes([48,52,55],[60,64,67],{exact:true}));
 for(let length=2;length<=8;length++)assert.equal(L.makeQuestion('dictation',{length}).notes.length,length);
 console.log('1600 ejercicios: respuestas, grafías, registros, afinaciones y dictados de 2–8 notas verificados.');
+
+for(const intervalMode of ['harmonic','melodic']){
+  const q=L.makeQuestion('interval',{intervalMode});
+  assert.equal(q.stack,intervalMode==='harmonic');
+  assert.equal(q.notes.length,2);
+  const midis=q.notes.map(n=>n.midi);
+  assert.equal(L.sameNotes([...midis].reverse(),midis,{ordered:!q.stack}),q.stack);
+}

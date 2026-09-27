@@ -20,11 +20,11 @@
   const label=n=>SOLFEGE[((n.diatonic%7)+7)%7]+({'-2':'𝄫','-1':'♭',0:'',1:'♯',2:'𝄪'}[n.alter]||'')+Math.floor(n.diatonic/7);
   function note(midi){const p=pc(midi),i=NATURAL.findIndex(x=>x===p);const d=i>=0?i:NATURAL.findLastIndex(x=>x<p);return {midi,diatonic:Math.floor(midi/12-1)*7+d,alter:p-NATURAL[d]};}
   function build(root,steps,degrees){return steps.map((s,i)=>global.CrescendoPractice.spell(root,s,degrees[i]));}
-  function makeQuestion(kind,{length=4}={}){
+  function makeQuestion(kind,{length=4,intervalMode='harmonic'}={}){
     const P=global.CrescendoPractice, tonic=pick(['C','D','E','F','G','A','Bb']),r=P.rootNote(tonic,4);
     let q={kind,tonic,reference:r,stack:true};
     const set=(name,steps,degrees,choices)=>Object.assign(q,{answer:name,notes:build(r,steps,degrees),choices});
-    if(['interval','scale'].includes(kind)) return {...P.question(kind),kind,stack:kind==='interval'};
+    if(['interval','scale'].includes(kind)) return {...P.question(kind),kind,stack:kind==='interval'&&intervalMode!=='melodic'};
     if(kind==='key'){const k=pick(KEYS);return {...q,notes:[],key:k[1],answer:k[0]+' mayor',choices:KEYS.map(x=>x[0]+' mayor'),instruction:'Construye la armadura de '+k[0]+' mayor.'};}
     if(kind==='note'){q.notes=[note(60+Math.floor(Math.random()*12))];q.answer=label(q.notes[0]);q.choices=Array.from({length:12},(_,i)=>label(note(60+i)));q.reference=P.rootNote('C',4);q.stack=false;q.tonic='';}
     if(kind==='triad'){const b=pick([['Mayor',[0,4,7]],['Menor',[0,3,7]],['Disminuida',[0,3,6]],['Aumentada',[0,4,8]]]);set(b[0],b[1],[0,2,4],['Mayor','Menor','Disminuida','Aumentada']);}
@@ -106,6 +106,7 @@
       [['kind','Contenido',BANKS[course]],['mode','Actividad',[['explore','Explorar'],['identify','Identificar'],['build','Construir']]],['surface','Representación',[['staff','Pentagrama'],['piano','Piano'],['board','Diapasón']]],['instrument','Instrumento',Object.entries(INSTRUMENTS).map(([k,v])=>[k,v.name])],['sense','Presentación',[['visual','Visual'],['audio','Solo auditiva'],['both','Audiovisual guiada']]]].map(([id,title,opts])=>'<label>'+title+'<select data-pl="'+id+'">'+opts.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('')+'</select></label>').join('')+'</div><p data-pl="prompt"></p><div class="pl-actions"><button data-action="play">▶ Escuchar</button><button data-action="reference">Escuchar referencia</button><button data-action="stop">■ Detener</button></div><div data-pl="display"></div><div data-pl="editor"></div><div class="pl-answers" data-pl="answers"></div><div class="pl-actions"><button data-action="check">Comprobar construcción</button><button data-action="undo">Deshacer nota</button><button data-action="clear">Limpiar</button><button data-action="reveal">Mostrar explicación</button><button data-action="next">Nuevo ejemplo</button></div><p role="status" data-pl="feedback"></p><small>En piano y diapasón se comparan clases de altura, salvo los dictados (orden) y las inversiones (registro exacto). Los diagramas de cuerdas son mapas de notas, no digitaciones obligatorias.</small>';
     const get=id=>host.querySelector('[data-pl="'+id+'"]'),val=id=>get(id).value;
     host.querySelector('.pl-controls').insertAdjacentHTML('beforeend','<label hidden data-dictation-length>Notas del dictado<select data-pl="length">'+[2,3,4,5,6,7,8].map(n=>'<option '+(n===4?'selected':'')+'>'+n+'</option>').join('')+'</select></label>');
+    host.querySelector('.pl-controls').insertAdjacentHTML('beforeend','<label hidden data-interval-mode>Tipo de intervalo<select data-pl="intervalMode"><option value="harmonic">Armónico · notas simultáneas</option><option value="melodic">Melódico · notas sucesivas</option></select></label>');
     let q,chosen=[],written=[],revealed=false;
     const interactive=course==='ear';let tool={beats:1,kind:'note',alter:0,dotted:false},editClef='treble';
     if(course==='ear'){get('sense').value='audio';get('mode').value='identify';}
@@ -121,6 +122,7 @@
       const answerName=c=>val('sense')==='audio'&&q.kind==='interval'&&['4ª aumentada','5ª disminuida'].includes(c)?'Tritono':c;
       get('instrument').closest('label').hidden=surface!=='board';
       host.querySelector('[data-dictation-length]').hidden=q.kind!=='dictation';
+      host.querySelector('[data-interval-mode]').hidden=q.kind!=='interval';
       get('sense').disabled=q.kind==='key'||mode==='explore';get('surface').disabled=q.kind==='key';
       get('prompt').textContent=(q.context||'')+' '+(mode==='build'?(q.kind==='dictation'?'Reconstruye la melodía escuchada.':q.kind==='note'?'Ubica '+q.answer+'.':q.progression?'Completa '+q.answer+': construye el acorde final.':q.instruction||'Construye: '+(q.tonic||label(q.notes[0]))+' · '+q.answer+'.'):(mode==='explore'?q.answer:'Identifica el ejemplo.'));
       if(show&&['scale','jazzscale'].includes(q.kind))get('prompt').textContent+=' Tónica: '+label(q.notes[0])+'. Lectura ascendente.';
@@ -151,7 +153,7 @@
       get('answers').innerHTML=mode==='identify'&&!revealed?[...new Set(q.choices.map(answerName))].map(c=>'<button data-answer="'+esc(c)+'">'+esc(c)+'</button>').join(''):'';
       if(mode==='build'&&chosen.length&&q.kind!=='key')get('editor').insertAdjacentHTML('beforeend','<p>Tu respuesta: '+written.map(n=>n.kind==='rest'?'Silencio':esc(label(n))).join(' · ')+'</p>');
     }
-    function next(){token++;player?.stop();q=makeQuestion(val('kind'),{length:Number(val('length'))});chosen=[];written=[];revealed=false;tool.kind='note';editClef=Math.max(...q.notes.map(n=>n.midi))<60?'bass':'treble';get('feedback').textContent='';if(q.kind==='dictation')get('mode').value='build';draw();}
+    function next(){token++;player?.stop();q=makeQuestion(val('kind'),{length:Number(val('length')),intervalMode:val('intervalMode')});chosen=[];written=[];revealed=false;tool.kind='note';editClef=Math.max(...q.notes.map(n=>n.midi))<60?'bass':'treble';get('feedback').textContent='';if(q.kind==='dictation')get('mode').value='build';draw();}
     function feedback(ok){revealed=true;get('feedback').textContent=(ok?'Correcto. ':'Revisa la solución. ')+q.answer+(q.detail?' · '+q.detail:'')+(q.kind==='key'?' · '+Math.abs(q.key)+' alteraciones.':'');draw();}
     function addWritten(n){const event={...n,beats:tool.beats*(tool.dotted?1.5:1),kind:q.stack?'note':tool.kind};written.push(event);if(event.kind!=='rest')chosen.push(event.midi);draw();}
     get('display').addEventListener('click',e=>{
@@ -167,7 +169,7 @@
       const octave=Math.floor(diatonic/7),letter=((diatonic%7)+7)%7;addWritten({diatonic,alter:tool.alter,midi:12*(octave+1)+NATURAL[letter]+tool.alter});
     });
     host.addEventListener('change',e=>{if(e.target.matches('[data-edit-kind]'))tool.kind=e.target.value;if(e.target.matches('[data-edit-alter]'))tool.alter=Number(e.target.value);if(e.target.matches('[data-edit-dot]'))tool.dotted=e.target.checked;if(e.target.matches('[data-edit-clef]')){editClef=e.target.value;draw();}});
-    host.addEventListener('change',e=>{if(e.target.matches('[data-key-input]')){chosen=[Number(e.target.value)];draw();}else if(e.target===get('kind')||e.target===get('length'))next();else if(e.target.matches('[data-pl]')){chosen=[];written=[];revealed=false;get('feedback').textContent='';draw();}});
+    host.addEventListener('change',e=>{if(e.target.matches('[data-key-input]')){chosen=[Number(e.target.value)];draw();}else if(e.target===get('kind')||e.target===get('length')||e.target===get('intervalMode'))next();else if(e.target.matches('[data-pl]')){chosen=[];written=[];revealed=false;get('feedback').textContent='';draw();}});
     host.addEventListener('click',e=>{
       const b=e.target.closest('button');if(!b)return;
       if(b.dataset.figure){tool.beats=Number(b.dataset.figure);host.querySelectorAll('[data-figure]').forEach(el=>el.setAttribute('aria-pressed',String(el===b)));return;}
@@ -184,7 +186,7 @@
         case 'clear':chosen=[];written=[];revealed=false;draw();break;
         case 'reveal':feedback(false);break;
         case 'check':{
-          let ok=q.kind==='key'?Number(chosen[0]||0)===q.key:sameNotes(chosen,q.notes.map(n=>n.midi),{ordered:['dictation','scale','jazzscale'].includes(q.kind),exact:['inversion','leading'].includes(q.kind)&&val('surface')!=='board'});
+          let ok=q.kind==='key'?Number(chosen[0]||0)===q.key:sameNotes(chosen,q.notes.map(n=>n.midi),{ordered:['dictation','scale','jazzscale'].includes(q.kind)||(q.kind==='interval'&&!q.stack),exact:['inversion','leading'].includes(q.kind)&&val('surface')!=='board'});
           if(q.kind==='inversion'&&val('surface')==='board')ok=ok&&pc(Math.min(...chosen))===pc(q.notes[0].midi);
           if(val('surface')==='staff'&&q.kind!=='key'){
             const spelling=ns=>ns.map(n=>((n.diatonic%7)+7)%7+':'+n.alter).sort().join('|');
