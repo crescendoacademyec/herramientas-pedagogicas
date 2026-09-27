@@ -22,7 +22,7 @@
   document.getElementById('year').textContent = new Date().getFullYear();
 
   const state = {
-    level: Number(S.getPref('activeLevel') || 1),
+    level: D.LEVELS.find(l=>l.id===Number(S.getPref('activeLevel')))?.id ?? D.LEVELS[0].id,
     mode: S.getPref('mode') || 'practice',
     round: null,
     session: { correct:0,total:0,streak:0,streakMax:0 },
@@ -67,7 +67,9 @@
   }
 
   function renderNav(){
-    levelNav.innerHTML=D.LEVELS.map(l=>`<button class="level-btn ${l.id===state.level?'active':''}" data-action="level" data-level="${l.id}" ${state.challenge?'disabled':''}><b>${l.id}</b>${esc(l.short)}</button>`).join('');
+    const index=D.LEVELS.findIndex(l=>l.id===state.level),current=levelInfo();
+    levelNav.innerHTML=`<div class="level-bar"><button type="button" class="level-step" data-action="level" data-direction="previous" data-level="${D.LEVELS[index-1]?.id||state.level}" aria-label="Nivel anterior" ${state.challenge||index===0?'disabled':''}>‹ <span>Anterior</span></button><div class="level-current" aria-live="polite"><span>Nivel ${current.id}</span><strong>${esc(current.short)}</strong></div><button type="button" class="level-step" data-action="level" data-direction="next" data-level="${D.LEVELS[index+1]?.id||state.level}" aria-label="Nivel siguiente" ${state.challenge||index===D.LEVELS.length-1?'disabled':''}><span>Siguiente</span> ›</button><details class="level-picker"><summary ${state.challenge?'aria-disabled="true"':''}><span aria-hidden="true">☰</span> Niveles</summary><div class="level-list" aria-label="Elegir nivel">${D.LEVELS.map(l=>`<button type="button" class="level-btn ${l.id===state.level?'active':''}" data-action="level" data-level="${l.id}" ${l.id===state.level?'aria-current="true"':''} ${state.challenge?'disabled':''}><b>${l.id}</b>${esc(l.short)}</button>`).join('')}</div></details></div>`;
+
   }
 
   function statsHtml(){
@@ -382,8 +384,12 @@
   });
 
   levelNav.addEventListener('click',e=>{
-    const b=e.target.closest('[data-action="level"]');if(!b||state.challenge)return;state.level=Number(b.dataset.level);S.setPref('activeLevel',state.level);state.session={correct:0,total:0,streak:0,streakMax:0};state.errorPractice=null;renderApp();
+    const b=e.target.closest('[data-action="level"]');if(!b||state.challenge||b.disabled)return;const direction=b.dataset.direction;state.level=Number(b.dataset.level);S.setPref('activeLevel',state.level);state.session={correct:0,total:0,streak:0,streakMax:0};state.errorPractice=null;renderApp();const focus=direction?levelNav.querySelector(`[data-direction="${direction}"]`):null;(focus&&!focus.disabled?focus:levelNav.querySelector('summary')).focus();
   });
+
+  levelNav.addEventListener('click',e=>{if(state.challenge&&e.target.closest('summary'))e.preventDefault();});
+  levelNav.addEventListener('keydown',e=>{if(e.key==='Escape'){const menu=levelNav.querySelector('details');menu.open=false;menu.querySelector('summary').focus();e.stopPropagation();}});
+  document.addEventListener('click',e=>{if(!levelNav.contains(e.target)){const menu=levelNav.querySelector('details');if(menu)menu.open=false;}});
 
   app.addEventListener('change',e=>{
     const el=e.target;
@@ -405,7 +411,7 @@
   });
 
   document.addEventListener('keydown',e=>{
-    if(e.target.closest('[data-practice-workshop]'))return;
+    if(e.target.closest('[data-practice-workshop],#levelNav'))return;
     if(state.mode!=='practice')return;
     const tag=e.target?.tagName?.toLowerCase();if(['input','select','textarea','button'].includes(tag))return;
     if(e.code==='Space'){e.preventDefault();playRound();return;}

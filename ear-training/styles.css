@@ -64,3 +64,10 @@ a{color:inherit}
 .chord-clef-btn{min-width:0;min-height:38px;padding:8px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel2);color:var(--cream);font:inherit;font-size:.65rem;cursor:pointer}
 .chord-clef-btn[aria-pressed="true"]{border-color:var(--gold);background:var(--gold);color:#171411;font-weight:700}
 .chord-clef-btn:focus-visible{outline:2px solid var(--gold2);outline-offset:2px}
+
+/* Compact navigation for ongoing practice, without completion states. */
+.levels{display:block}.level-bar{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--card,#191815)}
+.level-current{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}.level-current>span{font-size:.72rem;color:var(--gold2)}.level-current strong{font-size:.95rem;color:var(--cream)}
+.level-step,.level-picker summary{border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--cream);padding:10px 12px;min-height:44px;font:inherit;font-size:.85rem;cursor:pointer;white-space:nowrap}.level-step:hover:not(:disabled),.level-picker summary:hover{border-color:var(--gold);background:#d9ae4915}.level-step:disabled{opacity:.35;cursor:default}.level-picker summary[aria-disabled=true]{opacity:.4;cursor:default}
+.level-picker{position:relative}.level-picker summary{list-style:none;color:var(--gold2)}.level-picker summary::-webkit-details-marker{display:none}.level-list{position:absolute;right:0;top:calc(100% + 10px);z-index:30;width:min(360px,calc(100vw - 56px));max-height: min(65vh,520px);overflow:auto;padding:8px;display:grid;gap:5px;border:1px solid var(--line);border-radius:12px;background:#191815;box-shadow:0 12px 36px #0008}.level-list .level-btn{min-height:44px;font-size:.8rem}.level-bar :focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
+@media(max-width:560px){.level-bar{gap:6px;padding:8px}.level-step span{display:none}.level-step{font-size:1.3rem;padding:6px 10px}.level-current strong{font-size:.78rem}.level-picker summary{font-size:.75rem;padding:10px 8px}}
