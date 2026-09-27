@@ -173,3 +173,11 @@ navegador: cargas sucesivas, fragmento estéreo, reproducción A/B, progreso,
 teclado del cursor y controles del mapa. Captura con micrófono real y compartir
 pantalla no se validaron con hardware. RMS y pico de muestras siguen siendo
 medidores educativos, no LUFS ni true peak certificado.
+
+## Seguimiento: mapas de mezcla
+
+Se detectó que la prioridad de la etiqueta seleccionada alteraba la colocación
+de las demás etiquetas. No variaban paneo ni profundidad, pero el gráfico sugería
+un cambio de posición. Corregido: asignación y orden de dibujo estables. Prueba en
+navegador de 1.277 selecciones en los 184 escenarios sin variación de coordenadas.
+Se amplió el catálogo, se añadieron alias de búsqueda y nombres de pistas en inglés.

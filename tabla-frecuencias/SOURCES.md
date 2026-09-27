@@ -191,3 +191,54 @@ Se verificó además el renderizado de los 135 escenarios en navegador (mismo
 número de figuras e instrumentos, sin valores inválidos), la eliminación de un
 mapa de prueba y el manejo móvil a 390 px sin desbordamiento horizontal. Las
 14 pruebas de catálogo, cursor, almacenamiento y ciclo del analizador pasaron.
+
+## Más estilos, búsqueda y estabilidad visual (26-09-2026)
+
+Se amplía de 135 a **184 mapas** (+49). Las nuevas escenas incluyen city pop,
+indie pop/folk/dance, bedroom pop, ambient chill, chillout, chillwave, downtempo,
+lounge, ambient house, dark ambient, psybient, un ejemplo EDM de festival y
+variantes de house, bass music, jungle, neurofunk, phonk, reguetón, K-pop y
+producciones africanas contemporáneas. Los arreglos son propuestas propias.
+
+Investigación adicional y alcance de las fuentes:
+- [Native Instruments, What is EDM music](https://blog.native-instruments.com/what-is-edm-music/):
+  EDM como familia amplia y exploración de house, techno, trance y otras ramas.
+- [Native Instruments, producción ambiental](https://blog.native-instruments.com/7-ways-to-amp-up-the-atmosphere/):
+  capas, efectos, grabaciones de campo y contraste. «Ambient chill» se presenta
+  como escenario de escucha, no como una categoría histórica de límites fijos.
+- [Roland, City Fusion](https://www.roland.com/BR/products/rc_sdz051_city_fusion/)
+  y [Chillwave](https://www.roland.com/jp/products/rc_chillwave/): paletas de producción.
+  No se atribuyen a estos productos los paneos o valores del mapa.
+- [Native Instruments, Global Shake](https://blog.native-instruments.com/global-shake-how-africa-became-the-sound-of-now/):
+  afrobeats (distinto de afrobeat), kuduro, kizomba y afro house.
+- [Native Instruments, Echo](https://blog.native-instruments.com/making-hits-with-latin-urban-production-powerhouse-echo/):
+  decisiones de producción urbana y protagonismo vocal.
+- [Future bass](https://blog.native-instruments.com/how-to-make-future-bass/),
+  [slap house](https://blog.native-instruments.com/how-to-make-a-slap-house-track/),
+  [indie/pop](https://www.native-instruments.com/collections/indie-pop),
+  [The Stereotypes](https://www.native-instruments.com/es/products/komplete/expansions/artist-expansion-the-stereotypes/)
+  y [Hypr](https://www.native-instruments.com/products/hypr): referencias de paletas
+  y producción. Las fichas distinguen estas fuentes de los arreglos editoriales.
+
+La búsqueda admite acentos, espacios, guiones y alias: regueton/reggaeton/reguetón,
+kpop/K-pop, citypop/city pop, R&B/rnb y DnB, entre otros. Una consulta nueva busca
+por defecto en todas las familias. Hay accesos directos a los siete estilos
+solicitados y un botón Ver todos. No se añaden copias para resolver ortografías.
+
+Se reemplaza el menú de eje vertical por una cápsula Profundidad/Registro,
+con estado pulsado accesible, foco y flechas de teclado. El estilo visual sigue
+la cápsula Básico/Pro del metrónomo.
+
+Se corrige el salto de etiquetas al seleccionar instrumentos: la geometría,
+la distribución de etiquetas y el orden de dibujo son independientes de la
+selección. Las líneas son guías entre etiquetas y figuras, no rutas de audio.
+Seleccionar solo cambia el resaltado y el panel; mover un control sí modifica
+el mapa. Los nombres de pistas incluidos usan inglés. Se mantienen los nombres
+tradicionales de instrumentos como bajo sexto, requinto o charango; no se renombran
+los mapas personalizados guardados por el usuario.
+
+Validación: seis pruebas de catálogo/búsqueda/nombres. En navegador, 1.277
+selecciones (cada instrumento de los 184 mapas) conservaron exactamente las
+coordenadas SVG de figuras, etiquetas y guías en la vista de profundidad; el caso
+K-pop también se comprobó en la vista de registro. Se probaron las siete consultas
+solicitadas, recuperación de un filtro incompatible y cápsula con clic/flechas.
