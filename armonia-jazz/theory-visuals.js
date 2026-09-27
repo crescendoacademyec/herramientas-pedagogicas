@@ -52,13 +52,14 @@
   function chart(steps, root, grades) {
     return '<div class="tv-chart">' + steps.map(function (s, i) {
       var label = grades ? s.degree : chord(root + s.offset, s.suffix || "");
-      return '<div class="tv-step"><span class="tv-step-num">' + (i + 1) + '</span><strong>' + esc(label) + '</strong><small>' + esc(grades ? (s.role || "función") : s.degree) + '</small></div>';
+      return '<button type="button" class="tv-step" data-tv-chord="'+i+'"><span class="tv-step-num">' + (i + 1) + '</span><strong>' + esc(label) + '</strong><small>' + esc(grades ? (s.role || "función") : s.degree) + '</small></button>';
     }).join('<span class="tv-arrow">→</span>') + '</div>';
   }
   function renderProgression(root, config) {
     var grades = false;
     function paint() {
       root.innerHTML = '<section class="theory-viz"><div class="tv-head"><div><span class="tv-kicker">Mapa armónico interactivo</span><h4>' + esc(config.title) + '</h4><p>' + esc(config.note) + '</p></div><div class="tv-controls">' + tonicControl(state.root) + '<button class="tv-toggle" type="button">' + (grades ? 'Ver acordes' : 'Solo grados') + '</button><button class="tv-play" type="button">▶ Escuchar</button></div></div>' + chart(config.steps, state.root, grades) + (config.footer ? '<p class="tv-footer">' + esc(config.footer) + '</p>' : '') + '</section>';
+      root.querySelectorAll('[data-tv-chord]').forEach(function(button){button.addEventListener('click',function(){var s=config.steps[Number(button.dataset.tvChord)],base=48+state.root+s.offset,midis=suffixIntervals(s.suffix||'').map(function(n){return base+n;});if(config.pedal)midis.unshift(36+state.root);if(s.top!==undefined){var top=72+state.root+s.top;midis=midis.map(function(m){while(m>=top)m-=12;return m;});midis.push(top);}playNotes(midis,{duration:1,gain:.5});});});
       root.querySelector('.tv-tonic').addEventListener('change', function (e) { state.root = Number(e.target.value); paint(); });
       root.querySelector('.tv-toggle').addEventListener('click', function () { grades = !grades; paint(); });
       root.querySelector('.tv-play').addEventListener('click', async function () { stopAudio(); var token=AUDIO.token; await piano(); for(var i=0;i<config.steps.length;i++){if(token!==AUDIO.token)return;var s=config.steps[i],base=48+state.root+s.offset;var midis=suffixIntervals(s.suffix||"").map(function(n){return base+n;});if(config.pedal)midis.unshift(36+state.root);if(s.top!==undefined){var top=72+state.root+s.top;midis=midis.map(function(m){while(m>=top)m-=12;return m;});midis.push(top);}var gap=(s.beats||1)*720;playNotes(midis,{duration:gap/1000*.9,stop:false,gain:.5});await new Promise(function(resolve){setTimeout(resolve,gap);});} });
@@ -245,5 +246,5 @@
     else if (config.type === "bebop") renderBebop(root, config);
     else renderProgression(root, config);
   }
-  global.TheoryVisuals = { mount: mount };
+  global.TheoryVisuals = { mount: mount, playNotes: playNotes };
 })(window);

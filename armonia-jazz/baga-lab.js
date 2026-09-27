@@ -47,7 +47,7 @@
       let notes=withTop(current.notes,Number(get("[data-top]").value));if(get("[data-bass]").checked){const midi=36+chordRoot;notes=[{...api.spell(midi,chordRoot,1),degree:1,hand:'left'},...notes];}
       host._notes=notes;get("[data-title]").textContent=current.roman+" · "+current.symbol;get("[data-notes]").textContent=notes.map(n=>n.label+" ("+n.degree+")").join(" · ");get("[data-keyboard]").innerHTML=miniPiano(notes);get("[data-score]").innerHTML=P.staff(scoreNotes(notes),{stack:true,clef:notes.some(n=>n.midi<52)?'bass':'treble'});get("[data-movement]").textContent=selected?"Movimiento desde el acorde anterior: "+movement(seq[selected-1].notes,current.notes)+" semitonos por voz.":"Compara la misma familia a lo largo del ii–V–I.";
       get("[data-piano]").href="../piano-virtual/index.html?"+new URLSearchParams({bank:"progression",root,style});
-      host.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.step);render();});
+      host.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.step);render();play([host._notes]);});
     }
     host.querySelectorAll("select,input").forEach(el=>el.onchange=render);get("[data-play]").onclick=()=>play([host._notes]);get("[data-sequence]").onclick=()=>play(seq.map(v=>v.notes));get("[data-stop]").onclick=stop;render();
   }

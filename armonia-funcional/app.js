@@ -2284,9 +2284,10 @@ function mountTonalityLab(el) {
       <div class="function-chip-row">${list.map(item => {
         const tone = scaleNotes[item.degree - 1];
         const chordLabel = `${tone?.name || "?"}${item.suffix}`;
-        return `<span class="function-chip"><b>${item.roman}</b> ${escapeHtml(chordLabel)}</span>`;
+        return `<button type="button" class="function-chip" data-function-degree="${item.degree}"><b>${item.roman}</b> ${escapeHtml(chordLabel)}</button>`;
       }).join("")}</div>
     </section>`).join("");
+    el.querySelectorAll('[data-function-degree]').forEach(button=>button.addEventListener('click',()=>{const degree=Number(button.dataset.functionDegree)-1,base=theoryRootMidi(rootSel.value,4);playTheoryChord([0,2,4].map(step=>{const index=degree+step;return base+scaleNotes[index%7].semi+12*Math.floor(index/7);}),{duration:1.1});}));
   };
   rootSel.addEventListener("change", update);
   modeSel.addEventListener("change", update);
