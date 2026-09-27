@@ -4,3 +4,14 @@
 
 /* Keep the main map controls together, wrapping only on smaller screens. */
 .mix-catalog{grid-template-columns:minmax(120px,1fr) minmax(130px,1fr) minmax(160px,1.3fr) auto auto;gap:12px}.mix-catalog .mix-axis-pill{min-height:44px}.mix-catalog .mix-axis-pill button{padding:7px 12px;min-height:34px}.mix-catalog #mixReset{white-space:nowrap}.mix-catalog input,.mix-catalog select{box-sizing:border-box;height:44px}@media(max-width:1100px){.mix-catalog{grid-template-columns:repeat(3,minmax(0,1fr))}.mix-catalog .mix-axis-field{grid-column:1/3;justify-self:start}.mix-catalog #mixReset{justify-self:end}}@media(max-width:600px){.mix-catalog{grid-template-columns:minmax(0,1fr)}.mix-catalog .mix-axis-field{grid-column:auto}.mix-catalog #mixReset{justify-self:start}}
+
+/* Map, instrument controls, customization and guide share the desktop workspace. */
+.mix-layout{grid-template-columns:minmax(0,2.4fr) minmax(170px,1fr) minmax(180px,1fr) minmax(180px,1fr);max-width:1600px;gap:16px}
+.mix-layout>details{min-width:0;padding:14px;background:#ffffff05;border:1px solid #ffffff15;border-radius:12px;font-size:.85rem;overflow-wrap:anywhere}
+#mixMap .mix-layout>details summary{padding:0;line-height:1.5;font-weight:600}
+#mixEditor .mix-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin:14px 0}
+#mixEditor input{display:block;width:100%;margin-top:6px}
+#mixEditor button{width:100%;padding:9px;font-size:.85rem}
+#mixSources{padding-left:18px}
+@media(max-width:1000px){.mix-layout{grid-template-columns:minmax(0,1fr) 230px}.mix-layout>details{grid-column:auto}}
+@media(max-width:600px){.mix-layout{grid-template-columns:minmax(0,1fr)}}
