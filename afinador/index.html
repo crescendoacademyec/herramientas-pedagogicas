@@ -163,8 +163,6 @@
         z-index: 1;
     }
 
-    /* Scale the complete tuner together, preserving instrument and peg alignment. */
-    .app-shell { zoom: .8; }
 
 
     .tool-hero { display: grid; gap: 10px; margin-bottom: 22px; text-align: center; }
@@ -410,6 +408,8 @@
     .signal-hint{font-size:10px;color:var(--muted);min-height:14px;}
     @media(max-width:560px){.tuner-settings{grid-template-columns:1fr}.tuner-setting select,.tuner-setting input[type=number]{width:105px;}}
 
+/* Only the instrument illustration is reduced; controls retain their original size. */
+.headstock-zone .headstock-realistic,.headstock-zone .headstock-svg{zoom:.65}
 </style>
 </head>
 <body>
@@ -541,21 +541,7 @@
     <p>&copy; <span id="footerYear"></span> Crescendo Academy. Todos los derechos reservados.</p>
 </footer>
 
-<script>
-// Keep the entire tuner proportional; taller instruments also fit the available height.
-(()=>{
-  const shell=document.querySelector('.app-shell');let frame;
-  function fit(){
-    cancelAnimationFrame(frame);frame=requestAnimationFrame(()=>{
-      const scale=parseFloat(getComputedStyle(shell).zoom)||1;
-      const rect=shell.getBoundingClientRect(),naturalHeight=rect.height/scale;
-      const next=innerWidth>=700?Math.max(.45,Math.min(.8,(innerHeight-rect.top-16)/naturalHeight)):.8;
-      if(Math.abs(scale-next)>.001)shell.style.zoom=String(next);
-    });
-  }
-  new ResizeObserver(fit).observe(shell);window.addEventListener('resize',fit);fit();
-})();
-</script>
+
 <script type="module">
 import { PitchDetector } from "https://esm.sh/pitchy@4.1.0";
 
