@@ -132,8 +132,20 @@
         if(!host.isConnected){mounted.delete(host);return;}
         const earPage=document.body.classList.contains('ear-training-page');
         osmd.Zoom=earPage&&host.closest('[data-practice-workshop]')?1.65:earPage?(host.classList.contains('cp-compact')?.76:1.08):(host.classList.contains('cp-compact')?.6:.85);osmd.render();
+        // Remove engraving page margins, keeping the workshop viewport compact.
+        function fitWorkshop(){
+          if(!earPage||!host.closest('[data-practice-workshop]'))return;
+          surface.querySelectorAll('svg').forEach(svg=>{
+            const box=svg.getBBox();if(!box.height)return;
+            const width=svg.viewBox.baseVal.width||Number(svg.getAttribute('width'))||surface.clientWidth;
+            svg.setAttribute('viewBox',`0 ${box.y-5} ${width} ${box.height+10}`);
+            svg.setAttribute('height','116');svg.style.height='116px';
+            svg.setAttribute('preserveAspectRatio','xMinYMid meet');
+          });
+        }
+        fitWorkshop();
         let width=host.clientWidth;
-        const resize=new ResizeObserver(()=>{if(host.isConnected&&host.clientWidth>0&&host.clientWidth!==width){width=host.clientWidth;osmd.render();}});
+        const resize=new ResizeObserver(()=>{if(host.isConnected&&host.clientWidth>0&&host.clientWidth!==width){width=host.clientWidth;osmd.render();fitWorkshop();}});
         resize.observe(host);mounted.set(host,resize);host.dataset.cpRendered='true';
       }catch(error){host.textContent='No se pudo mostrar la partitura. Recarga la página para volver a cargar el motor de notación.';host.dataset.cpError='true';console.error(error);}
     }

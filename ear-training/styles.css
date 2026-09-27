@@ -79,5 +79,5 @@ a{color:inherit}
 .level-neighbor{display:flex;flex-direction:column;gap:4px;min-width:0}.level-neighbor small{color:var(--muted);font-size:.72rem;line-height:1.35;font-weight:400}.level-neighbor>span{font-size:.75rem}.level-picker{flex-shrink:0}
 @media(max-width:700px){.level-forward{display:contents}.level-bar{position:relative;padding-bottom:54px}.level-bar>.level-step{grid-column:1}.level-current{grid-column:2}.level-forward>.level-step{grid-column:3;justify-self:end}.level-picker{position:absolute;right:8px;bottom:6px}.level-list{top:calc(100% + 8px)}.level-step .level-neighbor,.level-step .level-arrow{display:flex}.level-neighbor>span{display:block}.level-step{padding:6px;gap:5px}.level-current strong{font-size:.8rem}.level-neighbor small{font-size:.67rem}}
 /* Enlarge workshop notation without changing the learning cards. */
-.ear-training-page .practice-lab .cp-staff[data-cp-xml]{height:230px;min-height:230px;max-height:230px;overflow:auto}
+.ear-training-page .practice-lab .cp-staff[data-cp-xml]{height:130px;min-height:130px;max-height:130px;overflow:auto}
 .ear-training-page .practice-lab .cp-staff[data-cp-xml]>div{transform:none}
