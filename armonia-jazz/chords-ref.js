@@ -188,6 +188,17 @@
     return parts.join("");
   }
 
+  /* Una única digitación movible para los paneles que necesitan mostrar cómo
+     tocar el acorde, en vez de todas las apariciones de sus notas en el mástil. */
+  function singleGuitarShapeSVG(formula, rootPc) {
+    var root = ((rootPc % 12) + 12) % 12, rootFret = 0, bestDistance = Infinity;
+    for (var fret = 1; fret <= 12; fret++) {
+      if ((STRING_ABS_OPEN_LOW_TO_HIGH[5] + fret) % 12 !== root) continue;
+      if (Math.abs(fret - 5) < bestDistance) { rootFret = fret; bestDistance = Math.abs(fret - 5); }
+    }
+    return guitarShapeSVG(computeDrop2Shape(formula, 5, rootFret));
+  }
+
   function renderDropVoicingCard(symbol, formula) {
     var shape6 = computeDrop2Shape(formula, 6, 8);  // raíz en Do, traste 8, 6ª cuerda
     var shape5 = computeDrop2Shape(formula, 5, 3);  // raíz en Do, traste 3, 5ª cuerda
@@ -536,6 +547,7 @@
   global.ChordRef = {
     pianoSVG: pianoSVG,
     guitarSVG: guitarSVG,
+    guitarShapeSVG: singleGuitarShapeSVG,
     renderChordReferenceGrid: renderChordReferenceGrid,
     renderOctatonicSection: renderOctatonicSection,
     renderOctatonicChord: renderOctatonicChord,
