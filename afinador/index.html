@@ -408,8 +408,9 @@
     .signal-hint{font-size:10px;color:var(--muted);min-height:14px;}
     @media(max-width:560px){.tuner-settings{grid-template-columns:1fr}.tuner-setting select,.tuner-setting input[type=number]{width:105px;}}
 
-/* Only the instrument illustration is reduced; controls retain their original size. */
-.headstock-zone .headstock-realistic,.headstock-zone .headstock-svg{zoom:.65}
+/* Scale the complete instrument visualization, including pegs and light markers.
+   The heading, instrument selector and other controls retain their original size. */
+.headstock-zone{zoom:.65}
 </style>
 </head>
 <body>
