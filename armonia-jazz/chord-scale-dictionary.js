@@ -31,6 +31,35 @@
   function scaleFor(row, degree){ return row.modes[degree]; }
   function scaleNotes(root, id){ return SCALE[id].map(function(i){ return pc(root + i); }); }
   function chordNotes(root, quality){ return (INTERVALS[quality] || INTERVALS["7"]).map(function(i){ return pc(root + i); }); }
+  var INTERVAL_NAMES={0:"1",1:"♭2",2:"2",3:"♭3",4:"3",5:"4",6:"♭5",7:"5",8:"♭6",9:"6",10:"♭7",11:"7"};
+  var TENSION_NAMES={1:"♭9",2:"9",3:"♯9",5:"11",6:"♯11",8:"♭13",9:"13"};
+  function modeIntervals(scale, degree){
+    var source=SCALE[scale], base=source[degree], out=[];
+    for(var i=0;i<source.length;i++) out.push(pc(source[(degree+i)%source.length]-base));
+    return out;
+  }
+  function qualityFromIntervals(intervals){
+    var key=intervals.join(","), known={"0,4,7,11":"maj7","0,3,7,10":"m7","0,4,7,10":"7","0,3,6,10":"m7♭5","0,3,7,11":"m(maj7)","0,4,8,11":"maj7♯5","0,3,6,9":"°7","0,4,8,10":"7♯5","0,4,6,10":"7♯11"};
+    return known[key] || "("+intervals.map(function(n){return INTERVAL_NAMES[n];}).join("–")+")";
+  }
+  function generatedRow(scaleId){
+    var source=SCALE[scaleId], modes=[], qualities=[], chords=[];
+    for(var d=0;d<source.length;d++){
+      var mode=modeIntervals(scaleId,d), key="generated-"+scaleId+"-"+d;
+      SCALE[key]=mode; SCALE_NAMES[key]=SCALE_NAMES[scaleId]+" · modo "+(d+1);
+      modes.push(key);
+      var chord=[]; for(var step=0;step<4;step++) chord.push(mode[(step*2)%mode.length]);
+      qualities.push(qualityFromIntervals(chord)); chords.push(chord);
+    }
+    return {id:"generated-"+scaleId,name:SCALE_NAMES[scaleId],scale:scaleId,qualities:qualities,modes:modes,chords:chords};
+  }
+  function allRows(){
+    var known={}; ROWS.forEach(function(row){known[row.scale]=true;});
+    return ROWS.concat(Object.keys(SCALE).filter(function(id){return !known[id]&&id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);}).map(generatedRow));
+  }
+  function tensions(notes, chord, root){
+    return notes.filter(function(n){return chord.indexOf(n)<0;}).map(function(n){var rel=pc(n-root);return TENSION_NAMES[rel]||INTERVAL_NAMES[rel];}).filter(function(v,i,a){return a.indexOf(v)===i;});
+  }
   function piano(root, notes, chord) {
     var out = '<div class="csd-piano" aria-label="Piano con notas de la escala">';
     for(var i=0;i<24;i++){var tone=pc(root+i); var black=[1,3,6,8,10].indexOf(tone)>-1; out += '<span class="'+(black?'black ':'white ')+(notes.indexOf(tone)>-1?'scale ':'')+(chord.indexOf(tone)>-1?'chord ':'')+'" title="'+NAMES[tone]+'">'+(!black?'<i>'+NAMES[tone]+'</i>':'')+'</span>';}
@@ -59,22 +88,25 @@
   }
   function mount(el) {
     if(!el) return;
-    var state={key:0,row:0,degree:0,alternative:0,libraryScale:""};
-    function selected(){var row=ROWS[state.row], offset=SCALE[row.scale][state.degree], root=pc(state.key+offset), quality=row.qualities[state.degree], primary=scaleFor(row,state.degree), options=alternatives(quality,primary), scale=state.libraryScale||options[state.alternative]||primary; return {row:row,root:root,quality:quality,primary:primary,options:options,scale:scale};}
+    var baseIds=ROWS.map(function(row){return row.scale;}), state={key:0,rowId:"major",degree:0,alternative:0,libraryScale:"",shown:baseIds.slice()};
+    function selected(rows){var row=rows.filter(function(item){return item.id===state.rowId;})[0]||rows[0], offset=SCALE[row.scale][state.degree], root=pc(state.key+offset), quality=row.qualities[state.degree], primary=scaleFor(row,state.degree), options=alternatives(quality,primary), scale=state.libraryScale||options[state.alternative]||primary, chordIntervals=row.chords?row.chords[state.degree]:(INTERVALS[quality]||INTERVALS["7"]); return {row:row,root:root,quality:quality,primary:primary,options:options,scale:scale,chordIntervals:chordIntervals};}
     function render(){
-      var pick=selected(), notes=scaleNotes(pick.root,pick.scale), chord=chordNotes(pick.root,pick.quality);
-      var table='<div class="csd-table-wrap"><table class="csd-table"><thead><tr><th>Colección</th>'+ROMAN.map(function(r){return '<th>'+r+'</th>';}).join('')+'</tr></thead><tbody>';
-      ROWS.forEach(function(row,ri){table+='<tr><th>'+row.name+'</th>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=ri===state.row&&di===state.degree;table+='<td><button class="csd-cell '+(active?'active':'')+'" data-row="'+ri+'" data-degree="'+di+'"><b>'+chordName(root,q)+'</b><small>'+SCALE_NAMES[scaleFor(row,di)]+'</small></button></td>';});table+='</tr>';});table+='</tbody></table></div>';
-      var libraryOptions=Object.keys(SCALE).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);});
-      el.innerHTML='<section class="csd"><header><div><p class="kicker">Mapa de improvisación</p><h3>Diccionario escala–acorde</h3><p>Selecciona una tonalidad y una celda. Las escalas sugeridas son puntos de partida: confirma siempre la melodía, función y resolución.</p></div><div class="csd-selectors"><label>Tonalidad <select data-key>'+NAMES.map(function(n,i){return '<option value="'+i+'" '+(i===state.key?'selected':'')+'>'+n+'</option>';}).join('')+'</select></label><label>Explorar escala / modo <select data-library-scale><option value="">Sugerencias del acorde</option>'+libraryOptions.map(function(id){return '<option value="'+id+'" '+(id===state.libraryScale?'selected':'')+'>'+SCALE_NAMES[id]+'</option>';}).join('')+'</select></label></div></header>'+table+'<div class="csd-detail"><div><p class="kicker">'+pick.row.name+' · grado '+ROMAN[state.degree]+'</p><h3>'+chordName(pick.root,pick.quality)+'</h3><p class="csd-tones">Notas del acorde: <b>'+chord.map(function(n){return NAMES[n];}).join(' · ')+'</b></p><div class="csd-scales">'+pick.options.map(function(id,i){return '<button data-scale="'+i+'" class="'+(!state.libraryScale&&i===state.alternative?'active':'')+'">'+SCALE_NAMES[id]+'<small>'+scaleNotes(pick.root,id).map(function(n){return NAMES[n];}).join(' · ')+'</small></button>';}).join('')+'</div><p class="small-note">Escala activa: <b>'+SCALE_NAMES[pick.scale]+'</b>. El menú «Explorar escala / modo» reúne todas las escalas y modos del laboratorio; úsalo para estudiar la colección, y las tarjetas para partir de una opción apropiada para el acorde.</p><div class="csd-actions"><button data-play="chord">▶ Escuchar acorde</button><button data-play="scale">▶ Escuchar escala</button></div></div><div class="csd-visuals"><div><h4>Piano</h4>'+piano(pick.root,notes,chord)+'</div><div><h4>Diapasón</h4>'+fretboard(pick.root,notes,chord)+'</div></div></div></section>';
+      var rows=allRows(), visible=rows.filter(function(row){return state.shown.indexOf(row.scale)>-1;}), pick=selected(visible.length?visible:rows), notes=scaleNotes(pick.root,pick.scale), chord=pick.chordIntervals.map(function(interval){return pc(pick.root+interval);}), available=tensions(notes,chord,pick.root);
+      var table='<div class="csd-table-wrap"><div class="csd-table">';
+      visible.forEach(function(row){table+='<div class="csd-table-row" style="--csd-degrees:'+row.qualities.length+'"><h4>'+row.name+'<small>'+row.qualities.length+' grados</small></h4>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=row.id===pick.row.id&&di===state.degree;table+='<button class="csd-cell '+(active?'active':'')+'" data-row="'+row.id+'" data-degree="'+di+'"><em>'+ROMAN[di]||("G"+(di+1))+'</em><b>'+chordName(root,q)+'</b><small>'+SCALE_NAMES[scaleFor(row,di)]+'</small></button>';});table+='</div>';});table+='</div></div>';
+      var libraryOptions=Object.keys(SCALE).filter(function(id){return id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);});
+      el.innerHTML='<section class="csd"><header><div><p class="kicker">Mapa de improvisación</p><h3>Diccionario escala–acorde</h3><p>Selecciona una tonalidad y una celda. Las escalas sugeridas son puntos de partida: confirma siempre la melodía, función y resolución.</p></div><div class="csd-selectors"><label>Tonalidad <select data-key>'+NAMES.map(function(n,i){return '<option value="'+i+'" '+(i===state.key?'selected':'')+'>'+n+'</option>';}).join('')+'</select></label><details class="csd-scale-picker"><summary>Escalas en tabla · '+visible.length+' de '+rows.length+'</summary><div><button type="button" data-show-all>Todas las escalas</button><button type="button" data-show-base>Campos principales</button><div class="csd-scale-checks">'+libraryOptions.filter(function(id){return id.indexOf("generated-")!==0;}).map(function(id){return '<label><input type="checkbox" data-show-scale="'+id+'" '+(state.shown.indexOf(id)>-1?'checked':'')+'> '+SCALE_NAMES[id]+'</label>';}).join('')+'</div></div></details><label>Explorar escala / modo <select data-library-scale><option value="">Sugerencias del acorde</option>'+libraryOptions.map(function(id){return '<option value="'+id+'" '+(id===state.libraryScale?'selected':'')+'>'+SCALE_NAMES[id]+'</option>';}).join('')+'</select></label></div></header>'+table+'<div class="csd-detail"><div><p class="kicker">'+pick.row.name+' · grado '+(ROMAN[state.degree]||("G"+(state.degree+1)))+'</p><h3>'+chordName(pick.root,pick.quality)+'</h3><p class="csd-tones">Notas del acorde: <b>'+chord.map(function(n){return NAMES[n];}).join(' · ')+'</b></p><div class="csd-scales">'+pick.options.map(function(id,i){return '<button data-scale="'+i+'" class="'+(!state.libraryScale&&i===state.alternative?'active':'')+'">'+SCALE_NAMES[id]+'<small>'+scaleNotes(pick.root,id).map(function(n){return NAMES[n];}).join(' · ')+'</small></button>';}).join('')+'</div><p class="csd-tensions"><b>Tensiones disponibles:</b> '+(available.length?available.join(' · '):'No añade tensiones fuera de la estructura.')+'</p><p class="small-note">Escala activa: <b>'+SCALE_NAMES[pick.scale]+'</b>. Estas tensiones se derivan de la colección activa; elige según melodía, función y resolución.</p><div class="csd-actions"><button data-play="chord">▶ Escuchar acorde</button><button data-play="scale">▶ Escuchar escala</button></div></div><div class="csd-visuals"><div><h4>Piano</h4>'+piano(pick.root,notes,chord)+'</div><div><h4>Diapasón</h4>'+fretboard(pick.root,notes,chord)+'</div></div></div></section>';
       el.querySelector('[data-key]').onchange=function(e){state.key=Number(e.target.value);state.alternative=0;state.libraryScale="";render();};
       el.querySelector('[data-library-scale]').onchange=function(e){state.libraryScale=e.target.value;render();};
-      el.querySelectorAll('[data-row]').forEach(function(btn){btn.onclick=function(){state.row=Number(btn.dataset.row);state.degree=Number(btn.dataset.degree);state.alternative=0;state.libraryScale="";render();};});
+      el.querySelector('[data-show-all]').onclick=function(){state.shown=rows.map(function(row){return row.scale;});render();};
+      el.querySelector('[data-show-base]').onclick=function(){state.shown=baseIds.slice();render();};
+      el.querySelectorAll('[data-show-scale]').forEach(function(box){box.onchange=function(){var id=box.dataset.showScale;if(box.checked&&state.shown.indexOf(id)<0)state.shown.push(id);if(!box.checked)state.shown=state.shown.filter(function(item){return item!==id;});if(!state.shown.length)state.shown=baseIds.slice(0,1);render();};});
+      el.querySelectorAll('[data-row]').forEach(function(btn){btn.onclick=function(){state.rowId=btn.dataset.row;state.degree=Number(btn.dataset.degree);state.alternative=0;state.libraryScale="";render();};});
       el.querySelectorAll('[data-scale]').forEach(function(btn){btn.onclick=function(){state.alternative=Number(btn.dataset.scale);state.libraryScale="";render();};});
       el.querySelectorAll('[data-play]').forEach(function(btn){btn.onclick=function(){if(!global.TheoryVisuals)return;var midi=(btn.dataset.play==='chord'?chord:notes).map(function(n,i){return 60+n+(btn.dataset.play==='scale'?i*0:0);});global.TheoryVisuals.playNotes(midi,{melodic:btn.dataset.play==='scale',duration:btn.dataset.play==='scale'?.3:1.3,gain:.55});};});
     }
     render();
   }
-  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes};
+  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes,allRows:allRows};
   if(typeof module!=="undefined") module.exports=global.ChordScaleDictionary;
 })(typeof window!=="undefined"?window:globalThis);
