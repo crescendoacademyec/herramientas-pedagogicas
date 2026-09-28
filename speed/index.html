@@ -1025,15 +1025,41 @@
                 const inputs = Array.from({length: input.numberOfChannels}, (_, ch) => input.getChannelData(ch));
                 const outputs = Array.from({length: input.numberOfChannels}, (_, ch) => out.getChannelData(ch));
 
+                // WSOLA: align overlapping waveforms before mixing grains. Use the
+                // same offset for every channel to preserve the stereo image.
+                const searchRadius = Math.round(input.sampleRate * .012);
+                let previousStart = null;
+                function alignedStart(expected) {
+                    if (previousStart === null) return expected;
+                    const reference = previousStart + hop * pitchFactor;
+                    const overlap = grainSize - hop;
+                    let best = expected, bestScore = -Infinity;
+                    const score = candidate => {
+                        let dot=0, energyA=0, energyB=0;
+                        for(let j=0;j<overlap;j+=16){
+                            const a=reference+j*pitchFactor,b=candidate+j*pitchFactor;
+                            if(a<0||b<0||a>=input.length-1||b>=input.length-1)continue;
+                            for(const channel of inputs){const x=linearSample(channel,a),y=linearSample(channel,b);dot+=x*y;energyA+=x*x;energyB+=y*y;}
+                        }
+                        if(energyA*energyB<1e-12)return -Infinity;
+                        return dot/Math.sqrt(energyA*energyB)-Math.abs(candidate-expected)*1e-7;
+                    };
+                    for(let delta=-searchRadius;delta<=searchRadius;delta+=8){const candidate=expected+delta,value=score(candidate);if(value>bestScore){bestScore=value;best=candidate;}}
+                    const coarse=best;
+                    for(let delta=-7;delta<=7;delta++){const candidate=coarse+delta,value=score(candidate);if(value>bestScore){bestScore=value;best=candidate;}}
+                    return best;
+                }
                 let grainCount = 0;
                 for (let outStart = -half; outStart < outLength; outStart += hop) {
                     if (token !== processToken) throw new Error('__PROCESS_CANCELLED__');
-                    const sourceCenter = Math.max(0, outStart * tempo + half * tempo);
+                    const expectedStart = (outStart + half) * tempo - half * pitchFactor;
+                    const sourceStart = alignedStart(expectedStart);
+                    previousStart = sourceStart;
                     for (let j = 0; j < grainSize; j++) {
                         const outIdx = outStart + j;
                         if (outIdx < 0 || outIdx >= outLength) continue;
                         const w = window[j];
-                        const srcPos = sourceCenter + (j - half) * pitchFactor;
+                        const srcPos = sourceStart + j * pitchFactor;
                         if (srcPos < 0 || srcPos >= input.length - 1) continue;
                         norm[outIdx] += w;
                         for (let ch = 0; ch < outputs.length; ch++) {
@@ -1041,7 +1067,7 @@
                         }
                     }
                     grainCount++;
-                    if (grainCount % 180 === 0) await new Promise(requestAnimationFrame);
+                    if (grainCount % 24 === 0) await new Promise(requestAnimationFrame);
                 }
 
                 for (let i = 0; i < outLength; i++) {
@@ -1737,7 +1763,7 @@
             try {
                 const p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}');
                 if (p.tempo) updateTempo(p.tempo, false);
-                if (p.pitch !== undefined) updatePitch(p.pitch, false);
+                updatePitch(0, false);
                 refreshPresetStates();
             } catch (_) { refreshPresetStates(); }
 

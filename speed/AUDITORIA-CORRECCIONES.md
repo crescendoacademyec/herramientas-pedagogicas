@@ -2,7 +2,7 @@
 
 ## Corregido
 1. Tempo y tono dejan de depender de `playbackRate + detune`.
-2. Se usa un procesador granular OLA con dos controles independientes:
+2. Se usa un procesador granular con alineación WSOLA con dos controles independientes:
    - tempo determina la duración final;
    - pitch factor determina la altura local de los granos.
 3. La reproducción usa el buffer procesado a velocidad 1.0.
@@ -12,7 +12,10 @@
 7. Se añadieron presets y atajos.
 
 ## Consideración de calidad
-El algoritmo granular es intencionalmente autocontenido y no depende de un segundo CDN. Es robusto para práctica musical y cambios moderados. Para mastering o cambios extremos, un phase-vocoder/WSOLA nativo especializado puede ofrecer menos artefactos.
+El procesador es autocontenido. Alinea los solapamientos por correlación normalizada y comparte el desplazamiento entre canales para preservar la imagen estéreo. Los cambios extremos y mezclas polifónicas pueden conservar artefactos; no se presenta como procesamiento de mastering.
+
+## Regresión de tono
+`node speed/tests/pitch-preservation.cjs` comprueba 440 Hz a velocidades 50 %, 75 %, 150 % y 200 %, cambio explícito a 880 Hz, duración, estéreo en contrafase y bypass. El tono comienza en cero al abrir la app; la velocidad guardada se conserva.
 
 ## Validación recomendada en navegador
 - voz: 75% con pitch 0;
