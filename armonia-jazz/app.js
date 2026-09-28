@@ -79,15 +79,27 @@
     if (chordMount) chordMount.innerHTML = window.ChordRef.renderChordReferenceGrid();
     var octChordMount = scope.querySelector("#octatonicChordMount");
     if(octChordMount){
-      octChordMount.innerHTML = window.ChordRef.renderOctatonicChord();
-      octChordMount.querySelectorAll('[data-octatonic-play]').forEach(function(button){
-        button.addEventListener('click', function(){
-          if(window.TheoryVisuals) window.TheoryVisuals.playNotes(
-            button.dataset.octatonicPlay === 'triad' ? [53,58,62] : [47,53,58,62],
-            {duration:1.8, gain:.5}
-          );
+      var octRoot = 10;
+      function drawOctChord(){
+        octChordMount.innerHTML = window.ChordRef.renderOctatonicChord(octRoot);
+        octChordMount.querySelector('[data-octatonic-root]').addEventListener('change', function(event){
+          octRoot = Number(event.target.value);
+          drawOctChord();
+          octChordMount.querySelector('[data-octatonic-root]').focus();
         });
-      });
+        octChordMount.querySelectorAll('[data-octatonic-play]').forEach(function(button){
+          button.addEventListener('click', function(){
+            var notes = button.dataset.octatonicPlay === 'guitar'
+              ? window.ChordRef.octatonicGuitar(octRoot).midis
+              : window.ChordRef.octatonicChord(octRoot).midis;
+            if(window.TheoryVisuals) window.TheoryVisuals.playNotes(
+              button.dataset.octatonicPlay === 'triad' ? notes.slice(1) : notes,
+              {duration:1.8, gain:.5}
+            );
+          });
+        });
+      }
+      drawOctChord();
     }
     var octMount = scope.querySelector("#octatonicMount");
     if (octMount && window.ChordLab) window.ChordLab.mount(octMount, { group: "scale", item: "diminishedWH", title: "Escalas octatónicas" });

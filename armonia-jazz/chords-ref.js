@@ -365,37 +365,91 @@
   var OCTATONIC_TS = [0, 2, 3, 5, 6, 8, 9, 11];  // tono-semitono
   var OCTATONIC_ST = [0, 1, 3, 4, 6, 7, 9, 10];  // semitono-tono
 
-  // Absolute pitches preserve the inversion and the separate bass (B2–F3–Bb3–D4).
-  function renderOctatonicChord() {
-    var active = {47:'B2',53:'F3',58:'B♭3',62:'D4'};
+  var OCT_TRIADS = [
+    ['C','E','G'], ['D♭','F','A♭'], ['D','F♯','A'], ['E♭','G','B♭'],
+    ['E','G♯','B'], ['F','A','C'], ['F♯','A♯','C♯'], ['G','B','D'],
+    ['A♭','C','E♭'], ['A','C♯','E'], ['B♭','D','F'], ['B','D♯','F♯']
+  ];
+  var OCT_NAMES = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+  function octatonicChord(root) {
+    root = Number.isInteger(root) ? ((root % 12) + 12) % 12 : 10;
+    var triad = OCT_TRIADS[root], bass = OCT_NAMES[(root+1)%12];
+    // Same register and second inversion as the original B2–F3–Bb3–D4 example.
+    var midis = [37+root,43+root,48+root,52+root];
+    var names = [bass,triad[2],triad[0],triad[1]];
+    return {root:root, triad:triad, bass:bass, symbol:triad[0]+'/'+bass,
+      midis:midis, names:names, labels:names.map(function(n,i){return n+(Math.floor(midis[i]/12)-1);})};
+  }
+  function octatonicGuitar(root){
+    var chord=octatonicChord(root), opens=[40,45,50,55,59,64], best=null;
+    [0,12,-12].forEach(function(shift){
+      for(var a=0;a<3;a++) for(var b=a+1;b<4;b++) for(var c=b+1;c<5;c++) for(var d=c+1;d<6;d++){
+        var strings=[a,b,c,d], notes=chord.midis.map(function(n){return n+shift;});
+        var frets=strings.map(function(n,i){return notes[i]-opens[n];});
+        if(frets.some(function(f){return f<0||f>19;})) continue;
+        var pressed=frets.filter(function(f){return f>0;}), span=Math.max.apply(null,pressed)-Math.min.apply(null,pressed);
+        if(span>4) continue;
+        var score=span*10+Math.max.apply(null,frets)+Math.abs(shift);
+        if(!best||score<best.score) best={strings:strings,frets:frets,midis:notes,score:score};
+      }
+    });
+    return best;
+  }
+  function octatonicGuitarSVG(root){
+    var chord=octatonicChord(root), shape=octatonicGuitar(root);
+    if(!shape) return '<p>No se encontró una digitación compacta para esta disposición.</p>';
+    var pressed=shape.frets.filter(function(f){return f>0;}), start=Math.max(1,Math.min.apply(null,pressed)), rows=Math.max(4,Math.max.apply(null,pressed)-start+1);
+    var svg='<svg viewBox="0 0 240 '+(70+rows*30)+'" role="img" aria-label="Guitarra '+chord.symbol+', cuerdas de sexta a primera" style="display:block;width:100%;max-width:280px;margin:auto">';
+    for(var f=0;f<=rows;f++) svg+='<line x1="40" x2="200" y1="'+(40+f*30)+'" y2="'+(40+f*30)+'" stroke="#aaa"/>';
+    for(var j=0;j<rows;j++) svg+='<text x="15" y="'+(60+j*30)+'" fill="currentColor" font-size="12">'+(start+j)+'</text>';
+    var fretLabels=[];
+    for(var k=0;k<6;k++){
+      var x=40+k*32,index=shape.strings.indexOf(k),fret=index<0?null:shape.frets[index];
+      fretLabels.push(fret===null?'×':fret);
+      svg+='<line x1="'+x+'" x2="'+x+'" y1="40" y2="'+(40+rows*30)+'" stroke="#aaa"/><text x="'+x+'" y="'+(60+rows*30)+'" fill="currentColor" font-size="12" text-anchor="middle">'+(6-k)+'</text>';
+      if(fret===null||fret===0) svg+='<text x="'+x+'" y="26" fill="currentColor" text-anchor="middle">'+(fret===null?'×':'○')+'</text>';
+      if(index>=0){var y=fret===0?12:55+(fret-start)*30;
+        svg+='<circle cx="'+x+'" cy="'+y+'" r="12" fill="'+(index===0?'#55a9db':'#d9ad49')+'"/><text x="'+x+'" y="'+(y+4)+'" text-anchor="middle" font-size="10" fill="#111">'+chord.names[index]+'</text>';
+      }
+    }
+    return svg+'</svg><p>Trastes (6ª → 1ª): <b>'+fretLabels.join(' · ')+'</b>. ×: silenciar. Afinación estándar E–A–D–G–B–E. Se conserva el orden de las voces; puede cambiar la octava para facilitar la digitación.</p>';
+  }
+  function renderOctatonicChord(root) {
+    var chord = octatonicChord(root), active = {};
+    chord.midis.forEach(function(m,i){active[m]=chord.labels[i];});
     var whites = [], blacks = [], x = 0;
-    for(var midi = 47; midi <= 62; midi++){
-      if([1,3,6,8,10].indexOf(midi % 12) >= 0) blacks.push({midi:midi,x:x-9});
+    var isBlack = function(m){return [1,3,6,8,10].indexOf(m%12)>=0;};
+    var first=chord.midis[0], last=chord.midis[3];
+    if(isBlack(first)) first--; if(isBlack(last)) last++;
+    for(var midi = first; midi <= last; midi++){
+      if(isBlack(midi)) blacks.push({midi:midi,x:x-9});
       else { whites.push({midi:midi,x:x}); x += 30; }
     }
-    var svg = '<svg viewBox="0 0 '+x+' 128" role="img" aria-label="Piano: B2 en el bajo; F3, B bemol 3 y D4 en la tríada" style="width:100%;max-width:560px;display:block;margin:16px auto">';
+    var svg = '<svg viewBox="0 0 '+x+' 116" role="img" aria-label="Piano: '+chord.labels.join('–')+'" style="width:100%;max-width:560px;display:block;margin:16px auto">';
     whites.concat(blacks).forEach(function(key){
-      var black = [1,3,6,8,10].indexOf(key.midi%12)>=0, on=active[key.midi];
-      svg += '<rect x="'+key.x+'" y="1" width="'+(black?18:29)+'" height="'+(black?70:102)+'" rx="2" fill="'+(on?(key.midi===47?'#55a9db':'#d9ad49'):(black?'#191919':'#fffaf0'))+'" stroke="#333"/>';
-      if(on) svg += '<text x="'+(key.x+(black?9:14.5))+'" y="'+(black?57:90)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#111">'+on+'</text>';
+      var black = isBlack(key.midi), on=active[key.midi];
+      svg += '<rect x="'+key.x+'" y="1" width="'+(black?18:29)+'" height="'+(black?70:102)+'" rx="2" fill="'+(on?(key.midi===chord.midis[0]?'#55a9db':'#d9ad49'):(black?'#191919':'#fffaf0'))+'" stroke="#333"/>';
+      if(on) svg += '<text x="'+(key.x+(black?9:14.5))+'" y="'+(black?57:90)+'" text-anchor="middle" font-size="'+(black?8:11)+'" font-weight="700" fill="#111">'+on+'</text>';
     });
     svg += '</svg>';
+    var upper=chord.names.slice(1).join('–');
     return '<section class="chord-card" aria-label="Construcción del acorde octatónico">'+
-      '<h3>Acorde octatónico · B♭/B</h3>'+
+      '<label class="lab-field">Fundamental de la tríada<select data-octatonic-root>'+OCT_TRIADS.map(function(t,i){return '<option value="'+i+'"'+(i===chord.root?' selected':'')+'>'+t[0]+'</option>';}).join('')+'</select></label>'+
+      '<h3>Acorde octatónico · '+chord.symbol+'</h3>'+
       '<p>Una disposición práctica: <b>tríada mayor en segunda inversión + bajo un semitono por encima de la fundamental de la tríada</b>.</p>'+
-      '<ol><li>Forma la tríada de <b>B♭ mayor: B♭–D–F</b>.</li>'+
-      '<li>Colócala en segunda inversión: <b>F–B♭–D</b> (5ª–fundamental–3ª).</li>'+
-      '<li>Añade <b>B en el bajo</b>, un semitono por encima de B♭ como clase de altura, pero en un registro más grave que la tríada.</li></ol>'+
-      '<p>De grave a agudo: <b>B2–F3–B♭3–D4</b>. Mano izquierda: B2; mano derecha: F3–B♭3–D4.</p>'+svg+
+      '<ol><li>Forma la tríada de <b>'+chord.triad[0]+' mayor: '+chord.triad.join('–')+'</b>.</li>'+
+      '<li>Colócala en segunda inversión: <b>'+upper+'</b> (5ª–fundamental–3ª).</li>'+
+      '<li>Añade <b>'+chord.bass+' en el bajo</b>, un semitono por encima de '+chord.triad[0]+' como clase de altura, pero en un registro más grave que la tríada.</li></ol>'+
+      '<p>De grave a agudo: <b>'+chord.labels.join('–')+'</b>. Mano izquierda: '+chord.labels[0]+'; mano derecha: '+chord.labels.slice(1).join('–')+'.</p><h4>Piano</h4>'+svg+'<h4>Guitarra</h4>'+octatonicGuitarSVG(chord.root)+
       '<p><span style="color:#55a9db">Azul: bajo</span> · <span style="color:#d9ad49">Dorado: tríada mayor</span></p>'+
-      '<button type="button" class="soft-btn" data-octatonic-play="triad">▶ Escuchar tríada F–B♭–D</button> '+
-      '<button type="button" class="soft-btn" data-octatonic-play="chord">▶ Escuchar acorde B♭/B</button>'+
+      '<button type="button" class="soft-btn" data-octatonic-play="triad">▶ Escuchar tríada '+upper+'</button> '+
+      '<button type="button" class="soft-btn" data-octatonic-play="chord">▶ Escuchar acorde '+chord.symbol+'</button> '+
+      '<button type="button" class="soft-btn" data-octatonic-play="guitar">▶ Escuchar registro de guitarra</button>'+
       '<h4>Qué acorde resulta</h4>'+
-      '<p>Desde el bajo B, las notas son <b>1–♭3–♭5–7</b>: B–D–F–A♯. Por enarmonía, A♯ suena igual que B♭; por eso <b>B♭/B</b> también puede entenderse como <b>Bdim(maj7)</b>. El cifrado con barra muestra la tríada superior; el cifrado disminuido con séptima mayor describe sus intervalos desde B.</p>'+
-      '<p>No es B°7: ese acorde lleva A♭ como séptima disminuida. Aquí la séptima es mayor (A♯), lo que crea una sonoridad más tensa. Ambas estructuras pueden encontrarse dentro de la octatónica de B tono–semitono.</p>'+
-      '<h4>Cómo practicarlo</h4><p>Escucha primero F–B♭–D y luego añade B2. Mantén el bajo separado de la mano derecha para reconocer la tríada. Después transpón la fórmula y explora una resolución por semitonos, escuchando cómo se mueve cada voz; el contexto determina su función armónica.</p>'+
-      '<p>Para transponerlo: con C mayor, toca <b>G–C–E sobre D♭</b> (C/D♭). La segunda inversión describe la tríada superior; el bajo añadido no pertenece a esa tríada.</p>'+
-      '<p>Este voicing de cuatro notas pertenece a la <b>octatónica de B tono–semitono</b>: B–C♯–D–E–F–G–A♭–B♭. «Octatónico» indica aquí su relación con esa colección de ocho notas; no es un acorde de ocho sonidos ni el único acorde que puede formarse con ella.</p></section>';
+      '<p>Desde el bajo '+chord.bass+', los intervalos son <b>1–♭3–♭5–7</b>. Por equivalencia enarmónica, <b>'+chord.symbol+'</b> puede entenderse como <b>'+chord.bass+'dim(maj7)</b>. El cifrado con barra muestra la tríada superior; el cifrado disminuido con séptima mayor describe sus intervalos desde el bajo. La escritura de algunas notas cambia según ese análisis.</p>'+
+      '<p>No es '+chord.bass+'°7: aquí la séptima es mayor, no disminuida. Ambas estructuras pueden encontrarse dentro de la octatónica de '+chord.bass+' tono–semitono.</p>'+
+      '<h4>Cómo practicarlo</h4><p>Escucha primero '+upper+' y luego añade '+chord.labels[0]+'. Cambia la fundamental en el selector para practicar las doce transposiciones. Mantén el bajo separado de la mano derecha y explora resoluciones por semitonos; el contexto determina su función armónica.</p>'+
+      '<p>La segunda inversión describe la tríada superior; el bajo añadido no pertenece a esa tríada. «Octatónico» indica la relación con una colección de ocho notas: este voicing tiene cuatro sonidos y no es el único acorde que puede formarse con ella.</p></section>';
   }
 
   function renderOctatonicSection() {
@@ -484,6 +538,8 @@
     renderChordReferenceGrid: renderChordReferenceGrid,
     renderOctatonicSection: renderOctatonicSection,
     renderOctatonicChord: renderOctatonicChord,
+    octatonicChord: octatonicChord,
+    octatonicGuitar: octatonicGuitar,
     renderUpperStructuresSection: renderUpperStructuresSection,
     renderDropVoicingsSection: renderDropVoicingsSection,
     renderProgressionGrid: renderProgressionGrid
