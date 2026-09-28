@@ -400,6 +400,10 @@
         font:inherit; font-size:12px; outline:none;
     }
     .tuner-setting select:focus,.tuner-setting input[type=number]:focus{border-color:var(--gold);}
+    #tuningPicker{margin-top:12px;}
+    #tuningPicker[hidden]{display:none;}
+    #tuningPreset{width:min(100%,440px);flex:1;}
+    #tuningHint{font-size:11px;color:var(--muted);margin:6px 0;}
     .input-meter-wrap{width:min(420px,100%); display:flex; align-items:center; gap:9px;}
     .input-meter-label{font-size:10px;color:var(--muted);min-width:38px;text-transform:uppercase;letter-spacing:.08em;}
     .input-meter{height:6px; flex:1; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.10); position:relative;}
@@ -485,6 +489,11 @@
       </div>
     </div>
 
+    <div class="tuner-setting" id="tuningPicker">
+      <label for="tuningPreset">Afinación</label>
+      <select id="tuningPreset" aria-describedby="tuningHint"></select>
+    </div>
+    <p id="tuningHint" aria-live="polite"></p>
     <div class="tuner-settings" aria-label="Ajustes del afinador">
       <div class="tuner-setting">
         <label for="a4Calibration">Calibración A4</label>
@@ -544,6 +553,7 @@
 
 
 <script type="module">
+import { TUNINGS, getTuning, tuningTargets } from "./tunings.mjs";
 import { PitchDetector } from "https://esm.sh/pitchy@4.1.0";
 
 document.getElementById('footerYear').textContent = new Date().getFullYear();
@@ -641,12 +651,14 @@ function loadPrefs(){
 }
 const savedPrefs = loadPrefs();
 let currentInstrumentKey = INSTRUMENTS[savedPrefs.instrument] ? savedPrefs.instrument : 'guitarra';
+const tuningSelections = Object.fromEntries(Object.keys(TUNINGS).map(key =>
+  [key, getTuning(key, savedPrefs.tunings?.[key]).id]));
 let selectedStringIndex = null;
 let autoMode = savedPrefs.autoMode !== false;
 let a4Reference = Math.min(445, Math.max(438, Number(savedPrefs.a4Reference) || 440));
 let spellingMode = savedPrefs.spellingMode === 'flats' ? 'flats' : 'sharps';
 function savePrefs(){
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({instrument:currentInstrumentKey,autoMode,a4Reference,spellingMode})); } catch {}
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({instrument:currentInstrumentKey,autoMode,a4Reference,spellingMode,tunings:tuningSelections})); } catch {}
 }
 function calibratedFreq(baseFreq){ return baseFreq * (a4Reference / 440); }
 
@@ -662,9 +674,35 @@ Object.entries(INSTRUMENTS).forEach(([key, inst]) => {
   instrumentSelect.appendChild(btn);
 });
 
+const tuningPreset = document.getElementById('tuningPreset');
+tuningPreset.addEventListener('change', () => {
+  tuningSelections[currentInstrumentKey] = getTuning(currentInstrumentKey, tuningPreset.value).id;
+  selectInstrument(currentInstrumentKey);
+});
 function selectInstrument(key){
   currentInstrumentKey = key;
-  selectedStringIndex = null;
+  const tuning = getTuning(key, tuningSelections[key]);
+  document.getElementById('tuningPicker').hidden = !tuning;
+  tuningPreset.replaceChildren();
+  if(tuning){
+    INSTRUMENTS[key].strings = tuningTargets(key, tuning.id);
+    INSTRUMENTS[key].tuning = `${tuning.label} (${tuning.notes.map(n => n.slice(0,-1)).join(' ')})`;
+    for(const item of TUNINGS[key]){
+      const option = document.createElement('option');
+      option.value = item.id;
+      option.textContent = `${item.label} · ${item.notes.join(' ')}`;
+      tuningPreset.appendChild(option);
+    }
+    tuningPreset.value = tuning.id;
+  }
+  document.getElementById('tuningHint').textContent = tuning?.hint || '';
+  selectedStringIndex = autoMode || !tuning ? null : 0;
+  freqReadout.textContent = '—';
+  centsReadout.textContent = '—';
+  dialNote.textContent = '—';
+  dial.classList.remove('in-tune','flat-warn','sharp-warn');
+  centsFill.style.left = '50%';
+  dialArrow.style.opacity = '0';
   resetPitchStability();
   savePrefs();
   [...instrumentSelect.children].forEach(b => b.classList.toggle('active', b.dataset.key === key));
