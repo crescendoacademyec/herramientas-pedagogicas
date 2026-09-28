@@ -88,12 +88,14 @@
     return midis;
   }
   let audio,player,loading,token=0;
+  global.CourseSound?.onChange(()=>{token++;player?.stop();});
   async function play(groups,melodic=false){
     const mine=++token;
     try{
       audio ||= new (global.AudioContext||global.webkitAudioContext)();await audio.resume();
       if(!global.Soundfont?.instrument)throw new Error('No se ha cargado el piano. Comprueba la conexión y vuelve a intentar.');
-      loading ||= global.Soundfont.instrument(audio,'acoustic_grand_piano');player ||= await loading;
+      if(global.CourseSound) player=await global.CourseSound.getPlayer(audio);
+      else {loading ||= global.Soundfont.instrument(audio,'acoustic_grand_piano');player ||= await loading;}
       if(mine!==token)return;player.stop();
       let offset=0;
       groups.forEach(group=>{let cursor=0;group.forEach(n=>{const duration=n.beats!==undefined?n.beats*.5:(melodic?.45:1);if(n.kind!=='rest')player.play(n.midi,audio.currentTime+offset+(melodic?cursor:0),{duration:n.beats!==undefined?duration*.9:(melodic?.4:.85),gain:.8});if(melodic)cursor+=duration;});offset+=melodic?cursor:Math.max(1,...group.map(n=>(n.beats||2)*.5));});

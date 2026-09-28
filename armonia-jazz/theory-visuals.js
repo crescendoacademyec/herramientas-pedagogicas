@@ -14,7 +14,9 @@
     if (AUDIO.context.state === "suspended") AUDIO.context.resume();
     return AUDIO.context;
   }
-  function piano() {
+  global.CourseSound?.onChange(stopAudio);
+  function piano(instrument) {
+    if(global.CourseSound) return global.CourseSound.getPlayer(audioContext(),{destination:AUDIO.bus,instrument:instrument}).catch(function(){return null;});
     var ctx = audioContext();
     if (!ctx || AUDIO.failed) return Promise.resolve(null);
     if (AUDIO.player) return Promise.resolve(AUDIO.player);
@@ -29,10 +31,10 @@
   function playNotes(midis, options) {
     options=options||{}; if(options.stop!==false)stopAudio(); var duration=options.duration||.75,delay=options.delay||0,gain=options.gain||.62;
     var token=AUDIO.token;
-    return piano().then(function(player){
+    return piano(options.instrument).then(function(player){
       if(token!==AUDIO.token)return;
       var ctx=audioContext();if(!ctx)return;var start=ctx.currentTime+delay;
-      midis.forEach(function(midi,i){var offset=options.melodic?i*.42:0;if(player){var node=player.play(midi,start+offset,{duration:duration,gain:gain});if(node)AUDIO.nodes.push(node);}else fallback(midi,duration,delay+offset,Math.min(.18,gain));});
+      midis.forEach(function(midi,i){var offset=options.melodic?i*.42:0;if(player){var node=player.play(midi,start+offset,{duration:duration,gain:gain});if(node)AUDIO.nodes.push(node);}else if(!global.CourseSound) fallback(midi,duration,delay+offset,Math.min(.18,gain));});
     });
   }
   function suffixIntervals(suffix) {

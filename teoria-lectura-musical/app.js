@@ -174,7 +174,9 @@ function audioContext(){
   return AUDIO.ctx;
 }
 function midiFreq(m){return 440*Math.pow(2,(m-69)/12)}
+window.CourseSound?.onChange(()=>stopAllAudio());
 function ensurePianoSoundFont(){
+  if(window.CourseSound) return window.CourseSound.getPlayer(audioContext(),{destination:AUDIO.masterBus}).catch(()=>null);
   if(AUDIO.sfPlayer) return Promise.resolve(AUDIO.sfPlayer);
   if(AUDIO.sfFailed) return Promise.resolve(null);
   if(AUDIO.sfPromise) return AUDIO.sfPromise;
@@ -214,6 +216,12 @@ function playOscillatorFallback(midi,{duration,volume,delay}){
   osc.addEventListener("ended",()=>{AUDIO.nodes=AUDIO.nodes.filter(n=>n!==osc);try{osc.disconnect();gain.disconnect()}catch(e){}})
 }
 function playTone(midi,{duration=.55,volume=.16,delay=0}={}){
+  if(window.CourseSound){
+    const player=window.CourseSound.peek(audioContext(),{destination:AUDIO.masterBus});
+    if(player) return playPianoSample(player,midi,{duration,volume,delay});
+    const token=AUDIO.seq;
+    return ensurePianoSoundFont().then(loaded=>{if(loaded&&token===AUDIO.seq)playPianoSample(loaded,midi,{duration,volume,delay});});
+  }
   if(AUDIO.sfPlayer) return playPianoSample(AUDIO.sfPlayer,midi,{duration,volume,delay});
   // Keep the requested onset while samples load; never replay queued notes together.
   ensurePianoSoundFont();

@@ -22,11 +22,13 @@
   function scoreNotes(notes){return notes.map(n=>({midi:n.midi,diatonic:n.octave*7+"CDEFGAB".indexOf(n.letter),alter:n.alter}));}
   function miniPiano(notes){const active=new Map(notes.map(n=>[mod(n.midi),n.hand]));const whites=[0,2,4,5,7,9,11,12,14,16,17,19,21,23], blacks=[1,3,6,8,10,13,15,18,20,22], blackX=[1,2,4,5,6,8,9,11,12,13];return `<div class="baga-piano">${whites.map((pc,i)=>`<i class="white ${active.has(mod(pc))?active.get(mod(pc)):''}" style="left:${i/14*100}%"></i>`).join("")}${blacks.map((pc,i)=>`<i class="black ${active.has(mod(pc))?active.get(mod(pc)):''}" style="left:${blackX[i]/14*100}%"></i>`).join("")}</div>`;}
   function movement(a,b){const x=a.map(n=>n.midi).sort((p,q)=>p-q),y=b.map(n=>n.midi).sort((p,q)=>p-q);return x.map((n,i)=>{let d=y[i]-n;while(d>6)d-=12;while(d<-6)d+=12;return d>0?`+${d}`:String(d);}).join(" · ");}
+  window.CourseSound?.onChange(stop);
   async function play(groups){
     stop();const token=audioToken;
     ctx||=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();
-    loading||=Soundfont.instrument(ctx,"acoustic_grand_piano",{soundfont:"MusyngKite"});
-    player=await loading;if(token!==audioToken)return;
+    if(window.CourseSound){try{player=await window.CourseSound.getPlayer(ctx);}catch(_){return;}}
+    else {loading ||= window.Soundfont.instrument(ctx,"acoustic_grand_piano",{soundfont:"MusyngKite"});player=await loading;}
+    if(token!==audioToken)return;
     const start=ctx.currentTime+.03;
     groups.forEach((notes,i)=>notes.forEach(n=>voices.push(player.play(n.midi,start+i*2,{duration:1.8,gain:.7}))));
   }

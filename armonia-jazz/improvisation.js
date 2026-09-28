@@ -29,12 +29,14 @@
 
   function save() { localStorage.setItem("aj-improv-current", index); localStorage.setItem("aj-improv-completed", JSON.stringify(completed)); }
   function score(events, labels) { return P.sequence(events, { meter: "4/4", labels: !!labels }); }
+  window.CourseSound?.onChange(stopPlayback);
   async function play(events, bpm, placement="all") {
     stopPlayback();const token=audioToken;
     audioContext ||= new (window.AudioContext || window.webkitAudioContext)();
     await audioContext.resume();
-    loading ||= window.Soundfont.instrument(audioContext, "acoustic_grand_piano", { soundfont: "MusyngKite" });
-    player = await loading;if(token!==audioToken)return;
+    if(window.CourseSound){try{player=await window.CourseSound.getPlayer(audioContext);}catch(_){return;}}
+    else {loading ||= window.Soundfont.instrument(audioContext,"acoustic_grand_piano",{soundfont:"MusyngKite"});player=await loading;}
+    if(token!==audioToken)return;
     const beat = 60 / bpm; let when = audioContext.currentTime + .08;
     const total=events.reduce((sum,event)=>sum+Number(event.beats||0),0),R=window.CrescendoRhythm,spec=R?.PLACEMENTS[placement],division=spec?.division||1;
     if(R){for(let step=0;step<Math.ceil(total*division);step++){const frame=R.placementFrame(placement,step,4);if(!frame.audible)continue;const t=when+step*beat/division,o=audioContext.createOscillator(),g=audioContext.createGain();o.frequency.value=frame.accent?1500:930;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(frame.accent?.13:.075,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.045);o.connect(g).connect(audioContext.destination);voices.push(o);o.start(t);o.stop(t+.055);}}

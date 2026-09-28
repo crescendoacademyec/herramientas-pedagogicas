@@ -3111,7 +3111,9 @@ function ensureTheoryAudioContext() {
   if (THEORY_AUDIO_STATE.context.state === "suspended") THEORY_AUDIO_STATE.context.resume();
   return THEORY_AUDIO_STATE.context;
 }
+window.CourseSound?.onChange(()=>stopTheoryAudio());
 function ensureTheoryPianoSoundFont() {
+  if(window.CourseSound) return window.CourseSound.getPlayer(ensureTheoryAudioContext(),{destination:THEORY_AUDIO_STATE.masterBus}).catch(()=>null);
   const ctx = ensureTheoryAudioContext();
   if (!ctx || THEORY_AUDIO_STATE.sfFailed) return Promise.resolve(null);
   if (THEORY_AUDIO_STATE.sfPlayer) return Promise.resolve(THEORY_AUDIO_STATE.sfPlayer);
@@ -3184,7 +3186,7 @@ function playTheoryMidi(midi, options = {}) {
   return ensureTheoryPianoSoundFont().then(player => {
     if (token !== THEORY_AUDIO_STATE.sequenceToken) return;
     if (player) playTheoryPianoSample(player, midi, options);
-    else playTheoryFallbackMidi(midi, options);
+    else if(!window.CourseSound) playTheoryFallbackMidi(midi, options);
   });
 }
 function playTheoryChord(midis, options = {}) {

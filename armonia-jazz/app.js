@@ -94,7 +94,7 @@
               : window.ChordRef.octatonicChord(octRoot).midis;
             if(window.TheoryVisuals) window.TheoryVisuals.playNotes(
               button.dataset.octatonicPlay === 'triad' ? notes.slice(1) : notes,
-              {duration:1.8, gain:.5}
+              {duration:1.8, gain:.5, instrument:button.dataset.octatonicPlay === 'guitar' ? 'guitar' : undefined}
             );
           });
         });
