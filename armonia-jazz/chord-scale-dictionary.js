@@ -28,6 +28,15 @@
   var ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
   function pc(n){ return ((n % 12) + 12) % 12; }
   function chordName(root, quality){ return NAMES[pc(root)] + quality; }
+  function degreeCipher(row, degree, quality){
+    /* El cifrado se compara contra la escala mayor paralela: ♭IIImaj7,
+       V7, Imaj7… Así muestra la fórmula del campo, no solo el ordinal. */
+    var reference=[0,2,4,5,7,9,11], interval=SCALE[row.scale][degree];
+    if(degree>=reference.length) return "G"+(degree+1)+quality;
+    var delta=pc(interval-reference[degree]), accidental=delta===11?"♭":delta===1?"♯":delta===10?"♭♭":delta===2?"♯♯":"", numeral=ROMAN[degree];
+    if((quality.indexOf("m")===0 && quality.indexOf("maj")!==0) || quality.indexOf("°")===0) numeral=numeral.toLowerCase();
+    return accidental+numeral+quality;
+  }
   function scaleFor(row, degree){ return row.modes[degree]; }
   function scaleNotes(root, id){ return SCALE[id].map(function(i){ return pc(root + i); }); }
   function chordNotes(root, quality){ return (INTERVALS[quality] || INTERVALS["7"]).map(function(i){ return pc(root + i); }); }
@@ -38,6 +47,23 @@
     for(var i=0;i<source.length;i++) out.push(pc(source[(degree+i)%source.length]-base));
     return out;
   }
+  var ROW_MODE_NAMES={
+    major:["Jónica / mayor","Dórica","Frigia","Lidia","Mixolidia","Eólica","Locria"],
+    harmonic:["Menor armónica","Locria ♮6","Jónica ♯5","Dórica ♯4","Frigia dominante","Lidia ♯2","Superlocria ♭♭7"],
+    melodic:["Menor melódica","Dórica ♭2","Lidia aumentada","Lidia dominante","Mixolidia ♭6","Locria ♯2","Alterada"],
+    harmonicMajor:["Mayor armónica","Locria ♯2 ♮6","Dórica ♭2","Lidia ♭3","Mixolidia ♭2","Lidia ♯2","Superlocria ♭♭7"]
+  };
+  /* Las sugerencias deben partir del modo real de cada campo. Reutilizar
+     una escala genérica (p. ej. Frigia para V de menor armónica) alteraba
+     notas del acorde y, por tanto, también las tensiones disponibles. */
+  ROWS.forEach(function(row){
+    row.modes=row.modes.map(function(_, degree){
+      var id="dictionary-"+row.id+"-mode-"+degree;
+      SCALE[id]=modeIntervals(row.scale,degree);
+      SCALE_NAMES[id]=(ROW_MODE_NAMES[row.id]||[])[degree]||row.name+" · modo "+(degree+1);
+      return id;
+    });
+  });
   function qualityFromIntervals(intervals){
     var key=intervals.join(","), known={"0,4,7,11":"maj7","0,3,7,10":"m7","0,4,7,10":"7","0,3,6,10":"m7♭5","0,3,7,11":"m(maj7)","0,4,8,11":"maj7♯5","0,3,6,9":"°7","0,4,8,10":"7♯5","0,4,6,10":"7♯11"};
     return known[key] || "("+intervals.map(function(n){return INTERVAL_NAMES[n];}).join("–")+")";
@@ -58,7 +84,12 @@
     return ROWS.concat(Object.keys(SCALE).filter(function(id){return !known[id]&&id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);}).map(generatedRow));
   }
   function tensions(notes, chord, root){
-    return notes.filter(function(n){return chord.indexOf(n)<0;}).map(function(n){var rel=pc(n-root);return TENSION_NAMES[rel]||INTERVAL_NAMES[rel];}).filter(function(v,i,a){return a.indexOf(v)===i;});
+    var hasMajorThird=chord.indexOf(pc(root+4))>-1;
+    return notes.filter(function(n){return chord.indexOf(n)<0;}).map(function(n){var rel=pc(n-root);return TENSION_NAMES[rel]||INTERVAL_NAMES[rel];}).filter(function(v,i,a){
+      /* La 11 natural contra una tercera mayor es una avoid note: por
+         ejemplo Imaj7 usa 9 y 13; Lidia propondrá ♯11, que sí es tensión. */
+      return !(hasMajorThird&&v==="11") && a.indexOf(v)===i;
+    });
   }
   function piano(root, notes, chord) {
     var out = '<div class="csd-piano" aria-label="Piano con notas de la escala">';
@@ -93,7 +124,7 @@
     function render(){
       var rows=allRows(), visible=rows.filter(function(row){return state.shown.indexOf(row.scale)>-1;}), pick=selected(visible.length?visible:rows), notes=scaleNotes(pick.root,pick.scale), chord=pick.chordIntervals.map(function(interval){return pc(pick.root+interval);}), available=tensions(notes,chord,pick.root);
       var table='<div class="csd-table-wrap"><table class="csd-table"><tbody>';
-      visible.forEach(function(row){table+='<tr><th scope="row">'+row.name+'<small>'+row.qualities.length+' grados</small></th>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=row.id===pick.row.id&&di===state.degree, degree=ROMAN[di]||("G"+(di+1));table+='<td><button class="csd-cell '+(active?'active':'')+'" data-row="'+row.id+'" data-degree="'+di+'" aria-label="'+chordName(root,q)+', '+SCALE_NAMES[scaleFor(row,di)]+'"><em class="csd-cell-copy">'+degree+'<br><strong>'+chordName(root,q)+'</strong><br><i>'+SCALE_NAMES[scaleFor(row,di)]+'</i></em></button></td>';});table+='</tr>';});
+      visible.forEach(function(row){table+='<tr><th scope="row">'+row.name+'<small>'+row.qualities.length+' grados</small></th>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=row.id===pick.row.id&&di===state.degree, cipher=degreeCipher(row,di,q), mode=SCALE_NAMES[scaleFor(row,di)];table+='<td><button class="csd-cell '+(active?'active':'')+'" data-row="'+row.id+'" data-degree="'+di+'" aria-label="'+cipher+', '+chordName(root,q)+', '+mode+'"><em class="csd-cell-copy">'+cipher+'<br>'+chordName(root,q)+'<br>'+mode+'</em></button></td>';});table+='</tr>';});
       if(!visible.length)table+='<tr><td class="csd-empty" colspan="9">No hay escalas seleccionadas. Abre “Escalas en tabla” para elegir una o pulsa “Campos principales”.</td></tr>';
       table+='</tbody></table></div>';
       var libraryOptions=Object.keys(SCALE).filter(function(id){return id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);});
@@ -110,6 +141,6 @@
     }
     render();
   }
-  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes,allRows:allRows};
+  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes,allRows:allRows,degreeCipher:degreeCipher,tensions:tensions};
   if(typeof module!=="undefined") module.exports=global.ChordScaleDictionary;
 })(typeof window!=="undefined"?window:globalThis);
