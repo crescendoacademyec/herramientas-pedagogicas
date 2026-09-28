@@ -361,5 +361,5 @@
     };
   }
 
-  global.ChordLab={mount:mount, mountProgression:mountProgression,notationNotes:notationNotes};
+  global.ChordLab={mount:mount, mountProgression:mountProgression,notationNotes:notationNotes,scales:SCALES};
 })(window);

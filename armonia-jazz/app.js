@@ -508,7 +508,8 @@
   function bindEvents() {
     document.querySelectorAll(".nav-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        setView(btn.getAttribute("data-view"));
+        var view = btn.getAttribute("data-view");
+        if (view) setView(view);
       });
     });
 
