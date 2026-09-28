@@ -11,6 +11,7 @@
     try{global.localStorage.setItem(key,value);}catch(_){}
     listeners.forEach(fn=>fn());
     global.document?.querySelectorAll('[data-course-sound]').forEach(el=>{el.value=value;});
+    global.document?.querySelectorAll('[data-course-sound-toggle]').forEach(updateToggle);
   }
   function entry(ctx,options){
     const instrument=choices[options.instrument] ? options.instrument : selected;
@@ -35,9 +36,19 @@
     }
   }
   function peek(ctx,options={}){return ctx?entry(ctx,options).state.player:null;}
+  function updateToggle(button){
+    const guitar=selected==='guitar';
+    button.textContent='Sonido: '+(guitar?'Guitarra':'Piano');
+    button.setAttribute('aria-pressed',String(guitar));
+    button.setAttribute('aria-label','Cambiar sonido; actual: '+(guitar?'guitarra acústica':'piano'));
+  }
   global.CourseSound={getPlayer,peek,set,get:()=>selected,onChange:fn=>listeners.add(fn)};
   function mount(){
     global.document.querySelectorAll('[data-course-sound]').forEach(el=>{el.value=selected;el.addEventListener('change',()=>{set(el.value);const status=global.document.querySelector('[data-course-sound-status]');if(status)status.textContent='';});});
+    global.document.querySelectorAll('[data-course-sound-toggle]').forEach(button=>{
+      updateToggle(button);
+      button.addEventListener('click',()=>set(selected==='piano'?'guitar':'piano'));
+    });
   }
   if(global.document){if(global.document.readyState==='loading')global.document.addEventListener('DOMContentLoaded',mount);else mount();}
 })(window);

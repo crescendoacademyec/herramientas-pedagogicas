@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <link rel="stylesheet" href="../shared/music-practice.css">
-  <script defer src="../shared/course-sound.js?v=20260928"></script>
-<link rel="stylesheet" href="../shared/course-sound.css?v=20260928">
+  <script defer src="../shared/course-sound.js?v=20260928-toggle"></script>
+<link rel="stylesheet" href="../shared/course-sound.css?v=20260928-toggle">
 <script defer src="../shared/opensheetmusicdisplay-1.8.4.min.js"></script>
   <script defer src="../shared/music-practice.js?v=20260920-musical-audit"></script>
   <link rel="stylesheet" href="../shared/practice-lab.css">
@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="styles.css?v=20260909-4">
   <script defer src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script defer src="data.js?v=20260909-4"></script>
-  <script defer src="app.js?v=20260928-timbres"></script>
+  <script defer src="app.js?v=20260928-timbres-v2"></script>
 <link rel="stylesheet" href="../shared/course-actions.css">
 <link rel="stylesheet" href="../shared/course-interactions.css?v=20260927">
 </head>
@@ -63,8 +63,8 @@
       <button class="nav-btn" data-view="curso" type="button">Curso</button>
       <button class="nav-btn" data-view="mapa" type="button">Mapa conceptual</button>
       <button class="nav-btn" data-view="evaluacion" type="button">Evaluación</button>
+      <button type="button" class="nav-btn course-sound-toggle" data-course-sound-toggle></button>
     </nav>
-<label class="course-sound-control">Sonido<select data-course-sound aria-label="Sonido de los ejemplos"><option value="piano">Piano</option><option value="guitar">Guitarra acústica</option></select><span role="status" data-course-sound-status></span></label>
   </header>
 
   <main id="mainContent" tabindex="-1">

@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
 <link rel="stylesheet" href="./styles.css?v=20260928-octatonic-layout">
 <link rel="stylesheet" href="../shared/music-practice.css">
-<script defer src="../shared/course-sound.js?v=20260928"></script>
-<link rel="stylesheet" href="../shared/course-sound.css?v=20260928">
+<script defer src="../shared/course-sound.js?v=20260928-toggle"></script>
+<link rel="stylesheet" href="../shared/course-sound.css?v=20260928-toggle">
 <script defer src="../shared/opensheetmusicdisplay-1.8.4.min.js"></script>
 <script defer src="../shared/music-practice.js?v=20260920-musical-audit"></script>
 <link rel="stylesheet" href="../shared/practice-lab.css">
@@ -36,13 +36,13 @@
 <script defer src="./chords-ref.js?v=20260928-octatonic-layout"></script>
 <script defer src="./instrument-lab.js?v=20260927-interactions"></script>
 <script defer src="./blues-form.js"></script>
-<script defer src="./theory-visuals.js?v=20260928-timbres"></script>
+<script defer src="./theory-visuals.js?v=20260928-timbres-v2"></script>
 <script defer src="./ata-library-index.js"></script>
 <script defer src="./ata-library.js"></script>
 <script defer src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
 <script defer src="./improvisation-engine.js?v=20260919-full-generators"></script>
 <script defer src="./improvisation.js?v=20260928-timbres"></script>
-<script defer src="./app.js?v=20260928-timbres"></script>
+<script defer src="./app.js?v=20260928-timbres-v2"></script>
 <link rel="stylesheet" href="../shared/course-actions.css">
 <link rel="stylesheet" href="./piano-bank.css">
 <link rel="stylesheet" href="./baga-lab.css">
@@ -115,8 +115,8 @@
         <button class="nav-btn" data-view="improv" type="button">Improvisación</button>
         <button class="nav-btn" data-view="library" type="button">Standards ATA</button>
         <button class="nav-btn" data-view="quiz" type="button">Cuestionario</button>
+        <button type="button" class="nav-btn course-sound-toggle" data-course-sound-toggle></button>
       </nav>
-<label class="course-sound-control">Sonido<select data-course-sound aria-label="Sonido de los ejemplos"><option value="piano">Piano</option><option value="guitar">Guitarra acústica</option></select><span role="status" data-course-sound-status></span></label>
     </div>
   </header>
 
