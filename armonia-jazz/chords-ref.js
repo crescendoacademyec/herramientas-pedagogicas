@@ -365,6 +365,39 @@
   var OCTATONIC_TS = [0, 2, 3, 5, 6, 8, 9, 11];  // tono-semitono
   var OCTATONIC_ST = [0, 1, 3, 4, 6, 7, 9, 10];  // semitono-tono
 
+  // Absolute pitches preserve the inversion and the separate bass (B2–F3–Bb3–D4).
+  function renderOctatonicChord() {
+    var active = {47:'B2',53:'F3',58:'B♭3',62:'D4'};
+    var whites = [], blacks = [], x = 0;
+    for(var midi = 47; midi <= 62; midi++){
+      if([1,3,6,8,10].indexOf(midi % 12) >= 0) blacks.push({midi:midi,x:x-9});
+      else { whites.push({midi:midi,x:x}); x += 30; }
+    }
+    var svg = '<svg viewBox="0 0 '+x+' 128" role="img" aria-label="Piano: B2 en el bajo; F3, B bemol 3 y D4 en la tríada" style="width:100%;max-width:560px;display:block;margin:16px auto">';
+    whites.concat(blacks).forEach(function(key){
+      var black = [1,3,6,8,10].indexOf(key.midi%12)>=0, on=active[key.midi];
+      svg += '<rect x="'+key.x+'" y="1" width="'+(black?18:29)+'" height="'+(black?70:102)+'" rx="2" fill="'+(on?(key.midi===47?'#55a9db':'#d9ad49'):(black?'#191919':'#fffaf0'))+'" stroke="#333"/>';
+      if(on) svg += '<text x="'+(key.x+(black?9:14.5))+'" y="'+(black?57:90)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#111">'+on+'</text>';
+    });
+    svg += '</svg>';
+    return '<section class="chord-card" aria-label="Construcción del acorde octatónico">'+
+      '<h3>Acorde octatónico · B♭/B</h3>'+
+      '<p>Una disposición práctica: <b>tríada mayor en segunda inversión + bajo un semitono por encima de la fundamental de la tríada</b>.</p>'+
+      '<ol><li>Forma la tríada de <b>B♭ mayor: B♭–D–F</b>.</li>'+
+      '<li>Colócala en segunda inversión: <b>F–B♭–D</b> (5ª–fundamental–3ª).</li>'+
+      '<li>Añade <b>B en el bajo</b>, un semitono por encima de B♭ como clase de altura, pero en un registro más grave que la tríada.</li></ol>'+
+      '<p>De grave a agudo: <b>B2–F3–B♭3–D4</b>. Mano izquierda: B2; mano derecha: F3–B♭3–D4.</p>'+svg+
+      '<p><span style="color:#55a9db">Azul: bajo</span> · <span style="color:#d9ad49">Dorado: tríada mayor</span></p>'+
+      '<button type="button" class="soft-btn" data-octatonic-play="triad">▶ Escuchar tríada F–B♭–D</button> '+
+      '<button type="button" class="soft-btn" data-octatonic-play="chord">▶ Escuchar acorde B♭/B</button>'+
+      '<h4>Qué acorde resulta</h4>'+
+      '<p>Desde el bajo B, las notas son <b>1–♭3–♭5–7</b>: B–D–F–A♯. Por enarmonía, A♯ suena igual que B♭; por eso <b>B♭/B</b> también puede entenderse como <b>Bdim(maj7)</b>. El cifrado con barra muestra la tríada superior; el cifrado disminuido con séptima mayor describe sus intervalos desde B.</p>'+
+      '<p>No es B°7: ese acorde lleva A♭ como séptima disminuida. Aquí la séptima es mayor (A♯), lo que crea una sonoridad más tensa. Ambas estructuras pueden encontrarse dentro de la octatónica de B tono–semitono.</p>'+
+      '<h4>Cómo practicarlo</h4><p>Escucha primero F–B♭–D y luego añade B2. Mantén el bajo separado de la mano derecha para reconocer la tríada. Después transpón la fórmula y explora una resolución por semitonos, escuchando cómo se mueve cada voz; el contexto determina su función armónica.</p>'+
+      '<p>Para transponerlo: con C mayor, toca <b>G–C–E sobre D♭</b> (C/D♭). La segunda inversión describe la tríada superior; el bajo añadido no pertenece a esa tríada.</p>'+
+      '<p>Este voicing de cuatro notas pertenece a la <b>octatónica de B tono–semitono</b>: B–C♯–D–E–F–G–A♭–B♭. «Octatónico» indica aquí su relación con esa colección de ocho notas; no es un acorde de ocho sonidos ni el único acorde que puede formarse con ella.</p></section>';
+  }
+
   function renderOctatonicSection() {
     var html = "";
     html += '<p>La escala <b>octatónica</b> (también llamada escala disminuida) tiene 8 notas y se construye ' +
@@ -378,14 +411,8 @@
       '<div class="chord-card-notes">' + noteListLabel(OCTATONIC_ST) + '</div>' +
       '<div class="chord-diagrams"><div class="diagram-block"><span class="diagram-label">Piano</span>' + pianoSVG(OCTATONIC_ST) + '</div></div></div>';
     html += "</div>";
-    html += '<p>Como es una escala <b>simétrica</b>, solo existen <b>3 escalas octatónicas distintas</b> en total ' +
-      '(cada una se repite a sí misma cada 3 semitonos). Por eso, cada escala octatónica contiene exactamente ' +
-      '<b>4 acordes °7</b> distintos que comparten las mismas 8 notas (por ejemplo: C°7, Eb°7, Gb°7 y A°7 son, en ' +
-      'realidad, el mismo conjunto de notas visto desde 4 fundamentales distintas).</p>';
-    html += '<p><b>Acordes/voicings derivados de la octatónica (tono-semitono):</b> al apilar terceras dentro de esta ' +
-      'escala se pueden formar voicings de "acorde dominante con todas las tensiones disponibles no alteradas" ' +
-      '— por eso esta forma se usa sobre <b>V7(b9,#9,#11,13)</b>, un dominante muy denso y colorido característico ' +
-      'del vocabulario post-bop.</p>';
+    html += '<p>Por su simetría hay <b>3 colecciones octatónicas distintas</b>, invariantes al transponerlas una tercera menor. Cada colección reúne <b>dos conjuntos de séptima disminuida</b>; las cuatro inversiones de cada conjunto no son cuatro conjuntos distintos.</p>';
+    html += '<p>La forma <b>tono–semitono</b> desde la fundamental se usa sobre °7; la forma <b>semitono–tono</b>, sobre dominantes, aporta 1, ♭9, ♯9, 3, ♯11, 5, 13 y ♭7.</p>';
     return html;
   }
 
@@ -456,6 +483,7 @@
     guitarSVG: guitarSVG,
     renderChordReferenceGrid: renderChordReferenceGrid,
     renderOctatonicSection: renderOctatonicSection,
+    renderOctatonicChord: renderOctatonicChord,
     renderUpperStructuresSection: renderUpperStructuresSection,
     renderDropVoicingsSection: renderDropVoicingsSection,
     renderProgressionGrid: renderProgressionGrid

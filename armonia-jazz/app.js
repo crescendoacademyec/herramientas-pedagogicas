@@ -77,6 +77,18 @@
     if (!window.ChordRef) return; // chords-ref.js no cargó: continuar sin diagramas
     var chordMount = scope.querySelector("#chordRefMount");
     if (chordMount) chordMount.innerHTML = window.ChordRef.renderChordReferenceGrid();
+    var octChordMount = scope.querySelector("#octatonicChordMount");
+    if(octChordMount){
+      octChordMount.innerHTML = window.ChordRef.renderOctatonicChord();
+      octChordMount.querySelectorAll('[data-octatonic-play]').forEach(function(button){
+        button.addEventListener('click', function(){
+          if(window.TheoryVisuals) window.TheoryVisuals.playNotes(
+            button.dataset.octatonicPlay === 'triad' ? [53,58,62] : [47,53,58,62],
+            {duration:1.8, gain:.5}
+          );
+        });
+      });
+    }
     var octMount = scope.querySelector("#octatonicMount");
     if (octMount && window.ChordLab) window.ChordLab.mount(octMount, { group: "scale", item: "diminishedWH", title: "Escalas octatónicas" });
     else if (octMount) octMount.innerHTML = window.ChordRef.renderOctatonicSection();

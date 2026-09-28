@@ -657,6 +657,7 @@ const LEVELS = [
       {
         title: "3.6b La escala y los acordes octatónicos",
         html: `
+          <div id="octatonicChordMount"></div>
           <div id="octatonicMount"></div>
         `
       },
