@@ -434,13 +434,14 @@
     svg += '</svg>';
     var upper=chord.names.slice(1).join('–');
     return '<section class="chord-card" aria-label="Construcción del acorde octatónico">'+
-      '<label class="lab-field">Fundamental de la tríada<select data-octatonic-root>'+OCT_TRIADS.map(function(t,i){return '<option value="'+i+'"'+(i===chord.root?' selected':'')+'>'+t[0]+'</option>';}).join('')+'</select></label>'+
       '<h3>Acorde octatónico · '+chord.symbol+'</h3>'+
       '<p>Una disposición práctica: <b>tríada mayor en segunda inversión + bajo un semitono por encima de la fundamental de la tríada</b>.</p>'+
       '<ol><li>Forma la tríada de <b>'+chord.triad[0]+' mayor: '+chord.triad.join('–')+'</b>.</li>'+
       '<li>Colócala en segunda inversión: <b>'+upper+'</b> (5ª–fundamental–3ª).</li>'+
       '<li>Añade <b>'+chord.bass+' en el bajo</b>, un semitono por encima de '+chord.triad[0]+' como clase de altura, pero en un registro más grave que la tríada.</li></ol>'+
-      '<p>De grave a agudo: <b>'+chord.labels.join('–')+'</b>. Mano izquierda: '+chord.labels[0]+'; mano derecha: '+chord.labels.slice(1).join('–')+'.</p><h4>Piano</h4>'+svg+'<h4>Guitarra</h4>'+octatonicGuitarSVG(chord.root)+
+      '<p>De grave a agudo: <b>'+chord.labels.join('–')+'</b>. Mano izquierda: '+chord.labels[0]+'; mano derecha: '+chord.labels.slice(1).join('–')+'.</p>'+
+      '<label class="lab-field">Fundamental de la tríada<select data-octatonic-root>'+OCT_TRIADS.map(function(t,i){return '<option value="'+i+'"'+(i===chord.root?' selected':'')+'>'+t[0]+'</option>';}).join('')+'</select></label>'+
+      '<div class="octatonic-instruments"><div class="octatonic-instrument"><h4>Piano</h4>'+svg+'</div><div class="octatonic-instrument"><h4>Guitarra</h4>'+octatonicGuitarSVG(chord.root)+'</div></div>'+
       '<p><span style="color:#55a9db">Azul: bajo</span> · <span style="color:#d9ad49">Dorado: tríada mayor</span></p>'+
       '<button type="button" class="soft-btn" data-octatonic-play="triad">▶ Escuchar tríada '+upper+'</button> '+
       '<button type="button" class="soft-btn" data-octatonic-play="chord">▶ Escuchar acorde '+chord.symbol+'</button> '+
