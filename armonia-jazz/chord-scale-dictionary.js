@@ -68,11 +68,24 @@
     var key=intervals.join(","), known={"0,4,7,11":"maj7","0,3,7,10":"m7","0,4,7,10":"7","0,3,6,10":"m7♭5","0,3,7,11":"m(maj7)","0,4,8,11":"maj7♯5","0,3,6,9":"°7","0,4,8,10":"7♯5","0,4,6,10":"7♯11"};
     return known[key] || "("+intervals.map(function(n){return INTERVAL_NAMES[n];}).join("–")+")";
   }
+  function readableModeName(intervals, fallback){
+    var match=Object.keys(SCALE).filter(function(id){
+      return id.indexOf("generated-")!==0 && SCALE[id].length===intervals.length && SCALE[id].every(function(note,index){return note===intervals[index];});
+    })[0];
+    /* Algunas rotaciones de colecciones simétricas no tienen un nombre
+       universal. Se mantiene el nombre de la colección, nunca “modo 1”. */
+    return match ? SCALE_NAMES[match] : SCALE_NAMES[fallback];
+  }
+  function displayQuality(quality){
+    /* Las fórmulas internas son necesarias para dibujar y escuchar la
+       estructura; no pertenecen a la tabla resumida. */
+    return quality.charAt(0)==="(" ? "" : quality;
+  }
   function generatedRow(scaleId){
     var source=SCALE[scaleId], modes=[], qualities=[], chords=[];
     for(var d=0;d<source.length;d++){
       var mode=modeIntervals(scaleId,d), key="generated-"+scaleId+"-"+d;
-      SCALE[key]=mode; SCALE_NAMES[key]=SCALE_NAMES[scaleId]+" · modo "+(d+1);
+      SCALE[key]=mode; SCALE_NAMES[key]=readableModeName(mode,scaleId);
       modes.push(key);
       var chord=[]; for(var step=0;step<4;step++) chord.push(mode[(step*2)%mode.length]);
       qualities.push(qualityFromIntervals(chord)); chords.push(chord);
@@ -81,7 +94,7 @@
   }
   function allRows(){
     var known={}; ROWS.forEach(function(row){known[row.scale]=true;});
-    return ROWS.concat(Object.keys(SCALE).filter(function(id){return !known[id]&&id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);}).map(generatedRow));
+    return ROWS.concat(Object.keys(SCALE).filter(function(id){return !known[id]&&id.indexOf("generated-")!==0&&id.indexOf("dictionary-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);}).map(generatedRow));
   }
   function tensions(notes, chord, root){
     var hasMajorThird=chord.indexOf(pc(root+4))>-1;
@@ -124,10 +137,10 @@
     function render(){
       var rows=allRows(), visible=rows.filter(function(row){return state.shown.indexOf(row.scale)>-1;}), pick=selected(visible.length?visible:rows), notes=scaleNotes(pick.root,pick.scale), chord=pick.chordIntervals.map(function(interval){return pc(pick.root+interval);}), available=tensions(notes,chord,pick.root);
       var table='<div class="csd-table-wrap"><table class="csd-table"><tbody>';
-      visible.forEach(function(row){table+='<tr><th scope="row">'+row.name+'<small>'+row.qualities.length+' grados</small></th>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=row.id===pick.row.id&&di===state.degree, cipher=degreeCipher(row,di,q), mode=SCALE_NAMES[scaleFor(row,di)];table+='<td><button class="csd-cell '+(active?'active':'')+'" data-row="'+row.id+'" data-degree="'+di+'" aria-label="'+cipher+', '+chordName(root,q)+', '+mode+'"><em class="csd-cell-copy"><span class="csd-degree">'+cipher+'</span><span class="csd-chord">'+chordName(root,q)+'</span><span class="csd-mode">'+mode+'</span></em></button></td>';});table+='</tr>';});
+      visible.forEach(function(row){table+='<tr><th scope="row">'+row.name+'<small>'+row.qualities.length+' grados</small></th>';row.qualities.forEach(function(q,di){var root=pc(state.key+SCALE[row.scale][di]), active=row.id===pick.row.id&&di===state.degree, quality=displayQuality(q), cipher=degreeCipher(row,di,quality), mode=SCALE_NAMES[scaleFor(row,di)], chordLabel=chordName(root,quality);table+='<td><button class="csd-cell '+(active?'active':'')+'" data-row="'+row.id+'" data-degree="'+di+'" aria-label="'+cipher+', '+chordLabel+', '+mode+'"><em class="csd-cell-copy"><span class="csd-degree">'+cipher+'</span><span class="csd-chord">'+chordLabel+'</span><span class="csd-mode">'+mode+'</span></em></button></td>';});table+='</tr>';});
       if(!visible.length)table+='<tr><td class="csd-empty" colspan="9">No hay escalas seleccionadas. Abre “Escalas en tabla” para elegir una o pulsa “Campos principales”.</td></tr>';
       table+='</tbody></table></div>';
-      var libraryOptions=Object.keys(SCALE).filter(function(id){return id.indexOf("generated-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);});
+      var libraryOptions=Object.keys(SCALE).filter(function(id){return id.indexOf("generated-")!==0&&id.indexOf("dictionary-")!==0;}).sort(function(a,b){return SCALE_NAMES[a].localeCompare(SCALE_NAMES[b]);});
       var chordPiano=global.ChordRef?global.ChordRef.pianoSVG(chord,pick.root):piano(pick.root,chord,chord), chordGuitar=global.ChordRef&&global.ChordRef.guitarShapeSVG?global.ChordRef.guitarShapeSVG(pick.chordIntervals,pick.root):fretboard(pick.root,chord,chord), scalePiano=global.ChordRef?global.ChordRef.pianoSVG(notes,pick.root):piano(pick.root,notes,chord), scaleGuitar=fretboard(pick.root,notes,chord);
       el.innerHTML='<section class="csd"><header><div><p class="kicker">Mapa de improvisación</p><h3>Diccionario escala–acorde</h3><p>Selecciona una tonalidad y una celda. Las escalas sugeridas son puntos de partida: confirma siempre la melodía, función y resolución.</p></div><div class="csd-selectors"><label>Tonalidad <select data-key>'+NAMES.map(function(n,i){return '<option value="'+i+'" '+(i===state.key?'selected':'')+'>'+n+'</option>';}).join('')+'</select></label><details class="csd-scale-picker" '+(state.pickerOpen?'open':'')+'><summary>Escalas en tabla · '+visible.length+' de '+rows.length+'</summary><div><button type="button" data-show-all>Todas las escalas</button><button type="button" data-show-base>Campos principales</button><button type="button" data-show-none>Deseleccionar escalas</button><div class="csd-scale-checks">'+libraryOptions.map(function(id){return '<label><input type="checkbox" data-show-scale="'+id+'" '+(state.shown.indexOf(id)>-1?'checked':'')+'> '+SCALE_NAMES[id]+'</label>';}).join('')+'</div></div></details></div></header>'+table+'<div class="csd-detail"><div><p class="kicker">'+pick.row.name+' · grado '+(ROMAN[state.degree]||("G"+(state.degree+1)))+'</p><h3>'+chordName(pick.root,pick.quality)+'</h3><p class="csd-tones">Notas del acorde: <b>'+chord.map(function(n){return NAMES[n];}).join(' · ')+'</b></p><div class="csd-scales">'+pick.options.map(function(id,i){return '<button data-scale="'+i+'" class="'+(i===state.alternative?'active':'')+'">'+SCALE_NAMES[id]+'<small>'+scaleNotes(pick.root,id).map(function(n){return NAMES[n];}).join(' · ')+'</small></button>';}).join('')+'</div><p class="csd-tensions"><b>Tensiones disponibles:</b> '+(available.length?available.join(' · '):'No añade tensiones fuera de la estructura.')+'</p><p class="small-note">Escala activa: <b>'+SCALE_NAMES[pick.scale]+'</b>. Estas tensiones se derivan de la colección activa; elige según melodía, función y resolución.</p><div class="csd-actions"><button data-play="chord">▶ Escuchar acorde</button><button data-play="scale">▶ Escuchar escala</button></div></div><div class="csd-visuals"><div><h4>Acorde · Piano</h4>'+chordPiano+'</div><div><h4>Acorde · Diapasón</h4>'+chordGuitar+'</div><div><h4>Escala y tensiones · Piano</h4>'+scalePiano+'</div><div><h4>Escala y tensiones · Diapasón</h4>'+scaleGuitar+'</div></div></div></section>';
       el.querySelector('[data-key]').onchange=function(e){state.key=Number(e.target.value);state.alternative=0;state.pickerOpen=false;render();};
@@ -141,6 +154,6 @@
     }
     render();
   }
-  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes,allRows:allRows,degreeCipher:degreeCipher,tensions:tensions};
+  global.ChordScaleDictionary={mount:mount,ROWS:ROWS,SCALE:SCALE,chordName:chordName,scaleNotes:scaleNotes,allRows:allRows,degreeCipher:degreeCipher,tensions:tensions,displayQuality:displayQuality};
   if(typeof module!=="undefined") module.exports=global.ChordScaleDictionary;
 })(typeof window!=="undefined"?window:globalThis);

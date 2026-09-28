@@ -6,9 +6,12 @@ assert.equal(d.ROWS.length, 4);
 assert.ok(d.SCALE.harmonicMajor);
 assert.ok(d.allRows().length >= d.ROWS.length);
 assert.ok(d.allRows().some(row => row.scale === 'wholeTone'));
+assert.ok(!d.allRows().some(row => row.scale.startsWith('dictionary-')));
 assert.equal(d.degreeCipher(d.ROWS[0], 0, 'maj7'), 'Imaj7');
 assert.equal(d.degreeCipher(d.ROWS[1], 2, 'maj7♯5'), '♭IIImaj7♯5');
 assert.equal(d.degreeCipher(d.ROWS[0], 1, 'm7'), 'iim7');
+assert.equal(d.displayQuality('(1–♭2–3–5)'), '');
+assert.equal(d.displayQuality('7♯11'), '7♯11');
 assert.deepEqual(d.tensions(d.scaleNotes(0, 'ionian'), [0,4,7,11], 0), ['9', '13']);
 for (const row of d.ROWS) {
   assert.equal(row.qualities.length, 7);
