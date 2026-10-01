@@ -244,6 +244,14 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
 .tlm-key.root.white{background:#d4a84f}.tlm-key.root.black{background:#9e7420}
 .tlm-key span{font-size:.64rem;font-weight:900;padding-bottom:5px;color:#111}
 .tlm-key.black span{color:#fff}
+.chromatic-piano{height:154px}
+.chromatic-piano .tlm-key{appearance:none;border:0;cursor:pointer;align-items:flex-end;align-content:flex-end;flex-wrap:wrap;padding:0 2px 5px;font-family:inherit}
+.chromatic-piano .tlm-key.white{height:152px;border-right:1px solid #aaa}
+.chromatic-piano .tlm-key.black{height:96px}
+.chromatic-piano .tlm-key:hover,.chromatic-piano .tlm-key:focus-visible{outline:2px solid var(--gold);outline-offset:-3px;filter:brightness(1.08)}
+.chromatic-piano .chromatic-key-name{width:100%;padding:0;font-size:.58rem;line-height:1.05;text-align:center}
+.chromatic-piano small{width:100%;font-size:.52rem;line-height:1.1;text-align:center;color:#5b554b;font-weight:800}
+.chromatic-piano .black small{color:#ddd}
 .tlm-staff,.tlm-guitar,.reading-staff{width:100%;height:auto;min-width:260px}
 .tlm-staff line,.reading-staff line{stroke:#c7c0b7;stroke-width:1}
 .tlm-staff .ledger,.reading-staff .ledger{stroke:#c7c0b7}.tlm-staff .note,.reading-staff .student-note{fill:#e7e0d6}

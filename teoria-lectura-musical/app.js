@@ -212,14 +212,30 @@ function mountChromaticInstrumentReference(){
   const chromaticTokens=["1","b2","2","b3","3","4","b5","5","b6","6","b7","7","8"];
   const chromaticTones=tones("C",chromaticTokens);
   mount.innerHTML=`<div class="diagram-label">Cromatismo en el instrumento</div>
-    <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. En la guitarra, cada traste consecutivo avanza un semitono.</p>
-    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${pianoHTML("C",chromaticTones,{range:12})}</section><section class="visual-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="scroll-x">${guitarScaleSVG("C",chromaticTones)}</div></section></div>
+    <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. Pulsa una tecla para escucharla. La segunda y tercera línea muestran el solfeo ascendente y descendente.</p>
+    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="scroll-x">${guitarScaleSVG("C",chromaticTones)}</div></section></div>
     <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
   const practiceNote=mount.nextElementSibling;
   if(practiceNote?.tagName==="P"&&practiceNote.textContent.includes("Solfeo cromático")){
     practiceNote.innerHTML="<b>Practica:</b> usa el laboratorio «Solfeo cromático guiado» de esta unidad: escucha, canta y elige la sílaba correspondiente.";
   }
+  mount.querySelectorAll("[data-chromatic-key]").forEach(key=>key.addEventListener("click",()=>playTone(Number(key.dataset.chromaticKey),{duration:.75,volume:.2})));
   mount.querySelector("[data-chromatic-play]").addEventListener("click",()=>playSequence(chromaticTones.map(t=>rootMidi("C",4)+t.semi),190));
+}
+function chromaticPianoHTML(){
+  const keys=[
+    {pc:0,name:"C",up:"Do",down:"Do",white:true},{pc:1,name:"C♯ / D♭",up:"Di",down:"Ra"},
+    {pc:2,name:"D",up:"Re",down:"Re",white:true},{pc:3,name:"D♯ / E♭",up:"Ri",down:"Me"},
+    {pc:4,name:"E",up:"Mi",down:"Mi",white:true},{pc:5,name:"F",up:"Fa",down:"Fa",white:true},
+    {pc:6,name:"F♯ / G♭",up:"Fi",down:"Se"},{pc:7,name:"G",up:"Sol",down:"Sol",white:true},
+    {pc:8,name:"G♯ / A♭",up:"Si",down:"Le"},{pc:9,name:"A",up:"La",down:"La",white:true},
+    {pc:10,name:"A♯ / B♭",up:"Li",down:"Te"},{pc:11,name:"B",up:"Ti",down:"Ti",white:true}
+  ];
+  const blacks={1:.72,3:1.72,6:3.72,8:4.72,10:5.72};
+  const label=key=>`<span class="chromatic-key-name">${key.name}</span><small>↑ ${key.up}</small><small>↓ ${key.down}</small>`;
+  const white=keys.filter(key=>key.white).map((key,index)=>`<button type="button" class="tlm-key white chromatic-key" data-chromatic-key="${60+key.pc}" style="left:${(index/7)*100}%;width:${100/7}%" aria-label="${key.name}; ascendente ${key.up}; descendente ${key.down}">${label(key)}</button>`).join("");
+  const black=keys.filter(key=>!key.white).map(key=>`<button type="button" class="tlm-key black chromatic-key" data-chromatic-key="${60+key.pc}" style="left:${(blacks[key.pc]/7)*100}%;width:${60/7}%" aria-label="${key.name}; ascendente ${key.up}; descendente ${key.down}">${label(key)}</button>`).join("");
+  return `<div class="tlm-piano chromatic-piano">${white}${black}</div>`;
 }
 
 /* ===================== AUDIO ===================== */
