@@ -435,12 +435,13 @@ function staffReferenceSVG(clef,selectedNote=""){
   return '<div class="staff-reference"><div class="staff-reference-title">Clave de '+(clef==="treble"?"sol":"fa")+'</div>'+CrescendoPractice.sequence(notes.map(note=>({note,beats:4,label:NOTE_SOLFEGE[note[0]],color:note===selected?"#c8942e":undefined})),{clef,labels:true})+'<div class="cp-note-buttons">'+notes.map(note=>'<button type="button" class="'+(note===selected?"active":"")+'" aria-pressed="'+String(note===selected)+'" data-reference-note="'+note+'">'+NOTE_SOLFEGE[note[0]]+' · '+note+'</button>').join('')+'</div><p class="reference-selection" aria-live="polite">'+selectedLabel+'</p></div>';
 }
 const HAND_STAFF_POSITIONS={
-  treble:[['line-1','Línea 1','Mi'],['space-1','Espacio 1','Fa'],['line-2','Línea 2','Sol'],['space-2','Espacio 2','La'],['line-3','Línea 3','Si'],['space-3','Espacio 3','Do'],['line-4','Línea 4','Re'],['space-4','Espacio 4','Mi'],['line-5','Línea 5','Fa']],
-  bass:[['line-1','Línea 1','Sol'],['space-1','Espacio 1','La'],['line-2','Línea 2','Si'],['space-2','Espacio 2','Do'],['line-3','Línea 3','Re'],['space-3','Espacio 3','Mi'],['line-4','Línea 4','Fa'],['space-4','Espacio 4','Sol'],['line-5','Línea 5','La']]
+  treble:[['line-5','Línea 5','Fa','5'],['space-4','Espacio 4','Mi'],['line-4','Línea 4','Re','4'],['space-3','Espacio 3','Do'],['line-3','Línea 3','Si','3'],['space-2','Espacio 2','La'],['line-2','Línea 2','Sol','2'],['space-1','Espacio 1','Fa'],['line-1','Línea 1','Mi','1']],
+  bass:[['line-5','Línea 5','La','1'],['space-4','Espacio 4','Sol'],['line-4','Línea 4','Fa','2'],['space-3','Espacio 3','Mi'],['line-3','Línea 3','Re','3'],['space-2','Espacio 2','Do'],['line-2','Línea 2','Si','4'],['space-1','Espacio 1','La'],['line-1','Línea 1','Sol','5']]
 };
 function handStaffHTML(clef){
   const items=HAND_STAFF_POSITIONS[clef];
-  return '<div class="hand-staff-board" role="group" aria-label="Mano pentagrama"><div class="hand-staff-side">Meñique<br><span>línea 1</span></div><div class="hand-staff-lanes">'+items.map(([id,label,note])=>'<button type="button" class="hand-staff-position '+(id.startsWith("line")?"finger":"space")+'" data-hand-position="'+id+'" aria-label="'+label+', '+note+'">'+(id.startsWith("line")?"Dedo":"Espacio")+'<b>'+label.replace(/[^0-9]/g,"")+'</b><small>'+note+'</small></button>').join('')+'</div><div class="hand-staff-side">Pulgar<br><span>línea 5</span></div></div>';
+  const side=clef==="treble"?['Meñique · 5','Pulgar · 1']:['Pulgar · 1','Meñique · 5'];
+  return '<div class="hand-staff-board" role="group" aria-label="Mano pentagrama"><div class="hand-staff-side">'+side[0]+'<br><span>línea 5</span></div><div class="hand-staff-lanes">'+items.map(([id,label,note,finger])=>'<button type="button" class="hand-staff-position '+(id.startsWith("line")?"finger":"space")+'" data-hand-position="'+id+'" aria-label="'+label+', '+note+'">'+(finger?"Dedo":"Espacio")+'<b>'+ (finger||label.replace(/[^0-9]/g,""))+'</b><small>'+note+'</small></button>').join('')+'</div><div class="hand-staff-side">'+side[1]+'<br><span>línea 1</span></div></div>';
 }
 function mountReadingLab(el){
   const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
@@ -450,7 +451,7 @@ function mountReadingLab(el){
       <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa una nota: se reproduce, queda resaltada y muestra su posición exacta.</p>
       <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
       <div class="staff-reference-stack" data-reading-reference></div>
-      <section class="hand-staff-section"><div><div class="diagram-label">Práctica cinestésica · mano-pentagrama</div><p class="staff-reference-copy">Extiende una mano: del meñique al pulgar, cada dedo es una línea; los huecos son espacios. Con el índice de la otra mano toca la posición pedida.</p></div><div class="hand-staff-visual"><img src="assets/mano-pentagrama-numerada.png" alt="Mano izquierda abierta: dedo 1, meñique; dedo 2, anular; dedo 3, medio; dedo 4, índice; dedo 5, pulgar. Las cinco líneas del pentagrama se relacionan con los cinco dedos."><p><b>1 · Meñique</b> · línea 1 &nbsp; <b>2 · Anular</b> · línea 2 &nbsp; <b>3 · Medio</b> · línea 3 &nbsp; <b>4 · Índice</b> · línea 4 &nbsp; <b>5 · Pulgar</b> · línea 5</p></div><div class="hand-staff-controls"><label>Clave <select data-hand-clef><option value="treble">Sol</option><option value="bass">Fa</option></select></label><button type="button" class="ghost-btn" data-hand-next>Nueva posición</button></div><p class="hand-staff-prompt" data-hand-prompt></p><div data-hand-staff></div><p class="reference-selection" data-hand-feedback aria-live="polite"></p></section>
+      <section class="hand-staff-section"><div><div class="diagram-label">Práctica cinestésica · mano-pentagrama</div><p class="staff-reference-copy">La mano derecha acompaña la clave de sol; la izquierda, la clave de fa. Los dedos son líneas y los cuatro huecos entre ellos son espacios. Usa el índice de la otra mano para señalar la posición pedida.</p></div><div class="hand-staff-visual"><img data-hand-image src="assets/mano-derecha-clave-sol.png" alt="Mano derecha para clave de sol: cinco dedos alineados con las líneas del pentagrama y numerados del uno al cinco."><p data-hand-legend></p></div><p class="hand-staff-space-copy"><b>Espacios:</b> los huecos entre línea 1–2, 2–3, 3–4 y 4–5 son, respectivamente, espacios 1, 2, 3 y 4.</p><div class="hand-staff-controls"><label>Clave <select data-hand-clef><option value="treble">Sol · mano derecha</option><option value="bass">Fa · mano izquierda</option></select></label><button type="button" class="ghost-btn" data-hand-next>Nueva posición</button></div><p class="hand-staff-prompt" data-hand-prompt></p><div data-hand-staff></div><p class="reference-selection" data-hand-feedback aria-live="polite"></p></section>
     </section>
     <section class="lab-card">
       <div class="diagram-label">Audición de duraciones</div>
@@ -474,6 +475,11 @@ function mountReadingLab(el){
   let handTarget="line-1";
   const renderHandStaff=()=>{
     const clef=el.querySelector("[data-hand-clef]").value;
+    const hand=clef==="treble"
+      ?{src:"assets/mano-derecha-clave-sol.png",alt:"Mano derecha para clave de sol: meñique cinco en línea cinco, pulgar uno en línea uno.",legend:"<b>Sol · mano derecha:</b> 5 meñique · línea 5; 4 anular · línea 4; 3 medio · línea 3; 2 índice · línea 2; 1 pulgar · línea 1."}
+      :{src:"assets/mano-izquierda-clave-fa.png",alt:"Mano izquierda para clave de fa: pulgar uno en línea cinco, meñique cinco en línea uno.",legend:"<b>Fa · mano izquierda:</b> 1 pulgar · línea 5; 2 índice · línea 4; 3 medio · línea 3; 4 anular · línea 2; 5 meñique · línea 1."};
+    const image=el.querySelector("[data-hand-image]");image.src=hand.src;image.alt=hand.alt;
+    el.querySelector("[data-hand-legend]").innerHTML=hand.legend;
     const position=HAND_STAFF_POSITIONS[clef].find(item=>item[0]===handTarget)||HAND_STAFF_POSITIONS[clef][0];
     handTarget=position[0];
     el.querySelector("[data-hand-prompt]").textContent=`Busca ${position[1].toLowerCase()} · ${position[2]}.`;
@@ -487,7 +493,7 @@ function mountReadingLab(el){
     }));
   };
   el.querySelector("[data-reference-clef]").addEventListener("change",renderReference);
-  el.querySelector("[data-hand-clef]").addEventListener("change",()=>{handTarget="line-1";renderHandStaff()});
+  el.querySelector("[data-hand-clef]").addEventListener("change",()=>{handTarget="line-5";renderHandStaff()});
   el.querySelector("[data-hand-next]").addEventListener("click",()=>{const list=HAND_STAFF_POSITIONS[el.querySelector("[data-hand-clef]").value];handTarget=list[Math.floor(Math.random()*list.length)][0];renderHandStaff()});
   el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
     const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
