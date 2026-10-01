@@ -90,9 +90,9 @@ window.TLM_DATA = {
     },
     {
       id: "intervalos",
-      title: "Altura e intervalos",
-      subtitle: "Medir relaciones entre sonidos.",
-      lead: "Un intervalo no es una lista para memorizar: es la forma básica de describir la distancia y relación entre alturas.",
+      title: "Alteraciones e intervalos",
+      subtitle: "Cromatismo y relaciones entre sonidos.",
+      lead: "Después de leer notas naturales y pulso básico, añade alteraciones y mide la distancia real entre alturas.",
       blocks: [
         { title:"Tono y semitono", html:"<p>En el sistema temperado occidental, el semitono es la unidad cromática habitual. Dos semitonos forman un tono.</p>" },
         { title:"Número y cualidad", html:"<p>El número describe cuántos nombres de nota abarca el intervalo; la cualidad distingue variantes como mayor, menor, justa, aumentada o disminuida.</p>" },
@@ -125,9 +125,9 @@ window.TLM_DATA = {
     },
     {
       id: "expresion-forma",
-      title: "Expresión, textura y forma",
-      subtitle: "Cómo cambia la música más allá de las notas.",
-      lead: "La misma melodía puede sentirse completamente distinta si cambian su dinámica, articulación, timbre, textura, tempo o forma.",
+      title: "Lectura aplicada, expresión y forma",
+      subtitle: "Integrar signos, ritmo avanzado e interpretación.",
+      lead: "Ahora las notas y el ritmo se convierten en una interpretación: añade signos, articulación, dinámica, textura y forma.",
       blocks: [
         {
           title: "Dinámica",

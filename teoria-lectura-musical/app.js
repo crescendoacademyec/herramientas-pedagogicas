@@ -52,7 +52,7 @@ function parseJSON(value,fallback={}){
   try{return JSON.parse(value)}catch(e){return fallback}
 }
 function loadState(){
-  const empty={completed:{},activeLevelId:DATA.levels[0].id,practice:{}};
+  const empty={completed:{},activeLevelId:DATA.levels[0].id,practice:{},readingEvaluation:null};
   for(const key of [LS_KEY,...LEGACY_LS_KEYS]){
     try{
       const raw=localStorage.getItem(key);
@@ -61,7 +61,8 @@ function loadState(){
       return {
         completed: parsed.completed&&typeof parsed.completed==="object"?parsed.completed:{},
         activeLevelId: DATA.levels.some(x=>x.id===parsed.activeLevelId)?parsed.activeLevelId:DATA.levels[0].id,
-        practice: parsed.practice&&typeof parsed.practice==="object"?parsed.practice:{}
+        practice: parsed.practice&&typeof parsed.practice==="object"?parsed.practice:{},
+        readingEvaluation: parsed.readingEvaluation&&typeof parsed.readingEvaluation==="object"?parsed.readingEvaluation:null
       };
     }catch(e){}
   }
@@ -101,6 +102,48 @@ function renderLevelCards(){
   }));
   updateHomeProgress();
 }
+function blocksWithTitles(level,titles){
+  return titles.map(title=>level.blocks.find(block=>block.title===title)).filter(Boolean);
+}
+function courseBlocks(level){
+  const reading=DATA.levels.find(item=>item.id==="lectura");
+  const rhythm=DATA.levels.find(item=>item.id==="ritmo");
+  if(level.id==="lectura") return blocksWithTitles(reading,[
+    "Las notas musicales y el cifrado americano","Vertical y horizontal","Pentagrama, claves y notas"
+  ]);
+  if(level.id==="ritmo") return [
+    ...blocksWithTitles(rhythm,["Pulso, tempo, metrónomo y BPM","Referencia aproximada de tempo","Cómo se lee un compás","Tipos de compás y acentuación","Silencios"]),
+    ...blocksWithTitles(reading,["Duración: figuras y silencios","Tabla completa de figuras y silencios"])
+  ];
+  if(level.id==="intervalos") return [
+    ...blocksWithTitles(reading,["Solfeo cromático: Do, Di, Re, Ri…","Alteraciones y escritura básica"]),
+    ...level.blocks
+  ];
+  if(level.id==="expresion-forma") return [
+    ...blocksWithTitles(reading,["Convenciones de escritura","Barras, repeticiones y navegación"]),
+    ...blocksWithTitles(rhythm,["Ritmo real","Puntillo","Ligadura de prolongación","Síncopa y contratiempo","Tresillo","Compases compuestos","Otros signos temporales esenciales"]),
+    ...level.blocks
+  ];
+  return level.blocks;
+}
+const LEARNING_GUIDE={
+  musica:{before:"Escucha un mismo sonido y describe qué cambió: altura, duración, intensidad o timbre.",goal:"Distinguir los elementos que luego se representarán por escrito."},
+  lectura:{before:"Domina los nombres naturales antes de añadir sostenidos, bemoles o figuras rítmicas.",goal:"Ubicar notas en clave de sol y fa usando líneas y espacios."},
+  ritmo:{before:"Relaciona una negra con un pulso y completa compases simples antes de subdividir.",goal:"Mantener un pulso estable y leer 2/4, 3/4 y 4/4."},
+  intervalos:{before:"Lee notas naturales y reconoce el semitono como distancia mínima.",goal:"Comparar dos alturas de forma melódica y armónica."},
+  escalas:{before:"Construye primero intervalos de forma consciente, no solo por memoria visual.",goal:"Reconocer el patrón de una escala y trasladarlo a otra tónica."},
+  tonalidad:{before:"Diferencia escala, tónica y grado antes de trabajar armaduras.",goal:"Leer una armadura y relacionarla con una tonalidad mayor."},
+  "expresion-forma":{before:"Mantén la lectura de notas y pulso mientras agregas indicaciones expresivas y ritmo avanzado.",goal:"Leer una frase con articulación, dinámica, signos y forma básica."},
+  "puente-armonia":{before:"Integra altura, ritmo y contorno antes de analizar la función de cada nota.",goal:"Leer frases breves y vincular melodía, intervalos y tríadas."}
+};
+function renderLearningGuide(level,index){
+  const guide=LEARNING_GUIDE[level.id];
+  if(!guide)return"";
+  return `<section class="learning-guide" aria-label="Ruta pedagógica del nivel">
+    <div><p class="kicker">RUTA DE APRENDIZAJE · ETAPA ${index+1} DE ${DATA.levels.length}</p><h3>Antes de avanzar</h3><p>${escapeHtml(guide.before)}</p></div>
+    <div class="learning-guide-goal"><span>Meta práctica</span><b>${escapeHtml(guide.goal)}</b></div>
+  </section>`;
+}
 function renderCourse(){
   stopAllAudio();
   const index=DATA.levels.findIndex(x=>x.id===activeLevelId);
@@ -113,7 +156,8 @@ function renderCourse(){
     <p class="kicker">Nivel ${index+1} de ${DATA.levels.length}</p>
     <h2 class="lesson-title">${escapeHtml(level.title)}</h2>
     <p class="lesson-lead">${escapeHtml(level.lead)}</p>
-    ${level.blocks.map(block=>`
+    ${renderLearningGuide(level,index)}
+    ${courseBlocks(level).map(block=>`
       <section class="lesson-block">
         <h3>${escapeHtml(block.title)}</h3>
         ${block.html}
@@ -152,6 +196,7 @@ function renderCourse(){
   mountTrainer(level);
   mountSolfege(level);
   mountQuickPractice(level);
+  mountAppliedReading(level);
   mountChromaticInstrumentReference();
   window.CrescendoLab?.attach($("lessonContent"),'theory');
 }
@@ -170,6 +215,10 @@ function mountChromaticInstrumentReference(){
     <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. En la guitarra, cada traste consecutivo avanza un semitono.</p>
     <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${pianoHTML("C",chromaticTones,{range:12})}</section><section class="visual-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="scroll-x">${guitarScaleSVG("C",chromaticTones)}</div></section></div>
     <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
+  const practiceNote=mount.nextElementSibling;
+  if(practiceNote?.tagName==="P"&&practiceNote.textContent.includes("Solfeo cromático")){
+    practiceNote.innerHTML="<b>Practica:</b> usa el laboratorio «Solfeo cromático guiado» de esta unidad: escucha, canta y elige la sílaba correspondiente.";
+  }
   mount.querySelector("[data-chromatic-play]").addEventListener("click",()=>playSequence(chromaticTones.map(t=>rootMidi("C",4)+t.semi),190));
 }
 
@@ -403,7 +452,7 @@ function mountInteractive(level){
     mountRhythmLab(el);
     mountAdvancedRhythmLab(el);
   }
-  else if(level.id==="intervalos") mountIntervalLab(el);
+  else if(level.id==="intervalos") { mountIntervalLab(el); mountChromaticPractice(el); }
   else if(level.id==="escalas") mountScaleLab(el);
   else if(level.id==="tonalidad") mountTonalityLab(el);
   else if(level.id==="expresion-forma") mountExpressionFormLab(el);
@@ -486,21 +535,13 @@ function handImageHotspots(clef){
   return HAND_STAFF_POSITIONS[clef].map(([id,label,note,finger],index)=>`<button type="button" class="hand-hotspot ${finger?"finger":"space"}" data-hand-hotspot="${id}" data-hand-clef="${clef}" style="--x:${coords[index][0]}%;--y:${coords[index][1]}%" aria-label="${label}: ${note}" title="${label}"></button>`).join("");
 }
 function mountReadingLab(el){
-  const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
-  el.innerHTML=`<div class="visual-two">
+  el.innerHTML=`<div>
     <section class="lab-card staff-map-card">
       <div class="diagram-label">Mapa de notas en el pentagrama</div>
       <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa una nota: se reproduce, queda resaltada y muestra su posición exacta.</p>
       <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
       <div class="staff-reference-stack" data-reading-reference></div>
       <section class="hand-staff-section"><div><div class="diagram-label">Explora el pentagrama con las manos</div><p class="staff-reference-copy">Toca un dedo para reconocer una línea o el hueco entre dos dedos para reconocer un espacio. En este ejercicio: meñique = 1 y pulgar = 5.</p></div><div class="hand-staff-practice-layout"><figure class="hand-figure" data-hand-figure="bass"><div class="hand-figure-media"><img src="assets/mano-derecha-clave-sol.png" alt="Mano izquierda con cinco dedos, orientada hacia el ejercicio."><div class="hand-hotspots" data-hand-hotspots="bass">${handImageHotspots("bass")}</div></div><figcaption>Mano izquierda<br><span>Clave de fa</span></figcaption></figure><div class="hand-staff-center"><label class="hand-clef-picker">Clave <select data-hand-clef><option value="treble">Sol · mano derecha</option><option value="bass">Fa · mano izquierda</option></select></label><p data-hand-legend></p><p class="hand-staff-space-copy"><b>Espacios:</b> toca el hueco entre dos dedos. Entre línea 1–2 está el espacio 1; entre línea 4–5, el espacio 4.</p><p class="hand-staff-prompt">Selecciona un dedo o un espacio directamente sobre una mano.</p><p class="reference-selection" data-hand-feedback aria-live="polite"></p></div><figure class="hand-figure" data-hand-figure="treble"><div class="hand-figure-media"><img src="assets/mano-izquierda-clave-fa.png" alt="Mano derecha con cinco dedos, orientada hacia el ejercicio."><div class="hand-hotspots" data-hand-hotspots="treble">${handImageHotspots("treble")}</div></div><figcaption>Mano derecha<br><span>Clave de sol</span></figcaption></figure></div></section>
-    </section>
-    <section class="lab-card">
-      <div class="diagram-label">Audición de duraciones</div>
-      <p class="staff-reference-copy">La referencia gráfica completa está en la tabla superior. Aquí puedes escuchar cuánto dura cada valor si la negra equivale a un pulso.</p>
-      <div class="controls-row"><label>Valor <select data-rhythm-audition>${rhythmValues.map(value=>`<option value="${value.beats}">${value.name} · ${value.beats} pulso${value.beats===1?"":"s"}</option>`).join("")}</select></label><button class="primary-btn" data-play-rhythm-value>▶ Escuchar duración</button></div>
-      <p class="feedback" data-figure-feedback>Selecciona un valor y escúchalo con el piano acústico.</p>
-    </section>
   </div>`;
   let selectedReferenceNote="";
   const renderReference=()=>{
@@ -537,17 +578,13 @@ function mountReadingLab(el){
     const finger=selected[3]?` · dedo ${selected[3]}`:"";
     el.querySelector("[data-hand-feedback]").textContent=`${selected[1]}${finger} de la clave de ${clef==="treble"?"sol":"fa"}: ${selected[2]}.`;
   }));
-  el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
-    const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
-    playTone(60,{duration:seconds,volume:.12});
-    el.querySelector("[data-figure-feedback]").textContent=`${select.options[select.selectedIndex].textContent}: duración relativa con negra = 1 pulso.`;
-  });
   renderReference();
   renderHandStaff();
 }
 
 /* RITMO */
 function mountRhythmLab(el){
+  const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
   el.innerHTML=`<div class="lab-card">
     <div class="controls-grid compact">
       <label>Tempo <input type="range" min="40" max="180" value="90" data-bpm><span data-bpm-label>90 BPM</span></label>
@@ -556,6 +593,7 @@ function mountRhythmLab(el){
     <div class="beat-row" data-beats></div>
     <div class="lab-actions"><button class="primary-btn" data-metro>▶ Iniciar pulso</button><button class="ghost-btn" data-stop-metro>■ Detener</button></div>
     <div class="rhythm-builder"><p><b>Patrón de 8 subdivisiones</b> · activa/desactiva golpes:</p><div class="step-row" data-rhythm-steps>${Array.from({length:8},(_,i)=>`<button class="rhythm-step ${i%2===0?"on":""}" data-step="${i}">${i+1}</button>`).join("")}</div><button class="ghost-btn" data-play-pattern>▶ Escuchar patrón</button></div>
+    <section class="rhythm-duration-audition"><div class="diagram-label">Audición de figuras</div><p>Escucha cuánto dura cada figura cuando la negra equivale a un pulso.</p><div class="controls-row"><label>Valor <select data-rhythm-audition>${rhythmValues.map(value=>`<option value="${value.beats}">${value.name} · ${value.beats} pulso${value.beats===1?"":"s"}</option>`).join("")}</select></label><button class="ghost-btn" data-play-rhythm-value>▶ Escuchar duración</button></div><p class="feedback" data-figure-feedback></p></section>
   </div>`;
   const bpm=el.querySelector("[data-bpm]"),meter=el.querySelector("[data-meter]");
   const renderBeats=()=>{const n=meterPulseCount(meter.value);el.querySelector("[data-beats]").innerHTML=Array.from({length:n},(_,i)=>`<span class="beat ${i===0?"accent":n===2&&i===1?"secondary-accent":""}" data-beat="${i}">${i+1}</span>`).join("")};
@@ -567,6 +605,11 @@ function mountRhythmLab(el){
   });
   el.querySelector("[data-stop-metro]").addEventListener("click",()=>{stopAllAudio();el.querySelectorAll(".beat").forEach(b=>b.classList.remove("active"))});
   el.querySelectorAll(".rhythm-step").forEach(btn=>btn.addEventListener("click",()=>btn.classList.toggle("on")));
+  el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
+    const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
+    playTone(60,{duration:seconds,volume:.12});
+    el.querySelector("[data-figure-feedback]").textContent=`${select.options[select.selectedIndex].textContent}: duración relativa con negra = 1 pulso.`;
+  });
   el.querySelector("[data-play-pattern]").addEventListener("click",async()=>{
     stopAllAudio();const playbackToken=AUDIO.seq;const steps=[...el.querySelectorAll(".rhythm-step")],gap=(60000/Number(bpm.value))/2;
     for(let i=0;i<steps.length;i++){if(playbackToken!==AUDIO.seq)return;steps.forEach((s,j)=>s.classList.toggle("active",i===j));if(steps[i].classList.contains("on"))playTone(i===0?84:79,{duration:.06,volume:.13});await new Promise(r=>setTimeout(r,gap));}
@@ -588,6 +631,29 @@ function mountIntervalLab(el){
   [root,sel].forEach(x=>x.addEventListener("change",update));update();
   el.querySelector("[data-int-melodic]").addEventListener("click",()=>{const {i}=current(),m=rootMidi(root.value,4);playSequence([m,m+i.semitones],500)});
   el.querySelector("[data-int-harmonic]").addEventListener("click",()=>{const {i}=current(),m=rootMidi(root.value,4);playChord([m,m+i.semitones])});
+}
+function mountChromaticPractice(parent){
+  const section=document.createElement("section");
+  section.className="chromatic-practice lab-card";
+  section.innerHTML=`<div class="diagram-label">Solfeo cromático guiado</div><p>Lee la nota, escucha su altura y elige la sílaba correcta. Esta práctica aparece aquí después de dominar las notas naturales.</p><div data-chromatic-staff></div><p class="trainer-prompt">¿Qué sílaba corresponde?</p><div class="trainer-answer-grid" data-chromatic-answers></div><p class="feedback" data-chromatic-feedback aria-live="polite"></p><div class="trainer-footer"><button class="ghost-btn" type="button" data-chromatic-hear>▶ Escuchar nota</button><button class="primary-btn" type="button" data-chromatic-next>Nueva nota</button></div>`;
+  parent.appendChild(section);
+  const pool=Object.keys(CHROMATIC_SOLFEGE).filter(note=>note.includes("#")||note.includes("b"));
+  let current="C#";
+  const render=()=>{
+    current=randomItem(pool);
+    section.querySelector("[data-chromatic-staff]").innerHTML=staffTrainerSVG(`${current}4`,"treble");
+    const choices=shuffle([current,...shuffle(pool.filter(note=>note!==current)).slice(0,3)]);
+    section.querySelector("[data-chromatic-answers]").innerHTML=choices.map(note=>`<button type="button" data-chromatic-answer="${note}">${CHROMATIC_SOLFEGE[note]}</button>`).join("");
+    section.querySelector("[data-chromatic-feedback]").textContent="";
+    section.querySelectorAll("[data-chromatic-answer]").forEach(button=>button.addEventListener("click",()=>{
+      const correct=button.dataset.chromaticAnswer===current;
+      section.querySelector("[data-chromatic-feedback]").textContent=correct?`Correcto: ${current.replace("#","♯").replace("b","♭")} se canta ${CHROMATIC_SOLFEGE[current]}.`:`La respuesta es ${CHROMATIC_SOLFEGE[current]}.`;
+      section.querySelectorAll("[data-chromatic-answer]").forEach(item=>{item.disabled=true;if(item.dataset.chromaticAnswer===current)item.classList.add("correct");else if(item===button)item.classList.add("wrong")});
+    }));
+  };
+  section.querySelector("[data-chromatic-next]").addEventListener("click",render);
+  section.querySelector("[data-chromatic-hear]").addEventListener("click",()=>playTone(rootMidi(current,4),{duration:.65}));
+  render();
 }
 
 /* SCALES */
@@ -996,10 +1062,9 @@ mountRhythmSolfege = function(root){
     root.querySelector("[data-solfege-bpm]").textContent=body.querySelector("[data-rs-bpm]")?.value||76;
   }
   async function playCompound(){
-    stopAllAudio();
-    const playbackToken=AUDIO.seq;
-    await ensurePianoSoundFont();
     const bpm=Number(body.querySelector("[data-rs-bpm]")?.value||76);
+    const playbackToken=await playCountIn(body,bpm,"6/8");
+    if(playbackToken===null)return;
     const pulseMs=60000/bpm;
     const pulses=[...score.querySelectorAll("[data-compound-pulse]")];
     for(let p=0;p<pulses.length;p++){
@@ -1019,6 +1084,7 @@ mountRhythmSolfege = function(root){
       }
     }
     pulses.forEach(node=>node.classList.remove("playing"));
+    finishCountIn(body);
   }
   meterSelect.addEventListener("change",()=>{
     if(meterSelect.value==="6/8") renderCompound();
@@ -1144,7 +1210,7 @@ function mountNoteTrainer(root,onResult){
   body.innerHTML=`<div class="trainer-controls">
     <label>Clave <select data-nt-clef><option value="treble">Sol</option><option value="bass">Fa</option><option value="mixed">Mixta</option></select></label>
     <label>Dificultad <select data-nt-level><option value="1">Nivel 1 · centro</option><option value="2">Nivel 2 · rango amplio</option><option value="3">Nivel 3 · líneas adicionales</option></select></label>
-    <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="chromatic">Solfeo cromático · Do, Di, Re…</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
+    <label>Modo <select data-nt-mode><option value="spanish">Nombres en español · Do, Re, Mi</option><option value="name">Cifrado americano · C, D, E</option><option value="keyboard">Tecla visual · C, D, E</option></select></label>
     <label>Notas a practicar <select data-nt-accidentals><option value="natural">Solo naturales</option><option value="sharps">Solo sostenidos</option><option value="flats">Solo bemoles</option><option value="both">Sostenidos y bemoles</option><option value="all">Naturales, sostenidos y bemoles</option></select></label>
   </div>
   <p data-nt-chromatic-guide hidden>Do = C en esta práctica, como en Piano Virtual. Ti = B; Si = G♯. Identifica la sílaba según la escritura de la nota, no solo su sonido. Este modo usa las alteraciones de la tabla introductoria (sin E♯, B♯, C♭ ni F♭).</p>
@@ -1353,6 +1419,40 @@ function mountKeyTrainer(root,onResult){
 }
 
 
+
+/* ===================== LECTURA APLICADA ===================== */
+const APPLIED_READING={
+  lectura:{title:"Lectura 1 · notas naturales",focus:"Nombra cada nota antes de escucharla. Mantén un pulso tranquilo de negras.",meter:"4/4",bpm:64,phrase:["C4","D4","E4","F4","G4","F4","E4","D4"]},
+  ritmo:{title:"Lectura 2 · pulso y silencio",focus:"Cuenta cuatro pulsos antes de entrar. Las figuras y silencios adquieren sentido dentro del compás.",meter:"4/4",bpm:68,phrase:["C4","C4","D4","E4","F4","E4","D4","C4"]},
+  intervalos:{title:"Lectura 3 · pasos y saltos",focus:"Anticipa si cada movimiento sube, baja o salta antes de cantar la frase.",meter:"4/4",bpm:72,phrase:["C4","E4","D4","F4","E4","G4","F4","C5"]},
+  escalas:{title:"Lectura 4 · recorrido de escala",focus:"Reconoce el patrón y conserva el nombre correcto de cada grado al subir y bajar.",meter:"4/4",bpm:72,phrase:["C4","D4","E4","F4","G4","A4","G4","F4"]},
+  tonalidad:{title:"Lectura 5 · centro tonal",focus:"Escucha el reposo de la tónica al inicio y al final de la frase.",meter:"3/4",bpm:66,phrase:["G4","A4","B4","D5","C5","B4","A4","G4","G4"]},
+  "expresion-forma":{title:"Lectura 6 · frase e interpretación",focus:"Haz la cuenta previa, conserva el pulso y piensa dónde respirarían las dos mitades de la frase.",meter:"4/4",bpm:76,phrase:["C4","D4","E4","G4","F4","E4","D4","C4"]},
+  "puente-armonia":{title:"Lectura final · línea con dirección",focus:"Lee el contorno, identifica los apoyos y escucha cómo la frase vuelve a la tónica.",meter:"4/4",bpm:80,phrase:["C4","E4","G4","A4","G4","E4","D4","C4"]}
+};
+function mountAppliedReading(level){
+  const config=APPLIED_READING[level.id];
+  if(!config)return;
+  const phrase=config.phrase.map((note,index)=>({note,dur:"q",beats:1,bar:Math.floor(index/(config.meter==="3/4"?3:4))}));
+  const mount=document.createElement("section");
+  mount.className="applied-reading panel";
+  mount.innerHTML=`<header class="applied-reading-head"><div><p class="kicker">LECTURA APLICADA</p><h3>${escapeHtml(config.title)}</h3><p>${escapeHtml(config.focus)}</p></div><span>${escapeHtml(config.meter)} · ${config.bpm} BPM</span></header>
+    <div class="solfege-score-wrap"><div class="scroll-x" data-applied-staff>${phraseStaffSVG(phrase,{clef:"treble",meter:config.meter})}</div></div>
+    <p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p>
+    <div class="solfege-actions"><button class="primary-btn" type="button" data-applied-play>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-applied-hear>▶ Escuchar sin cuenta</button></div>
+    <div class="applied-reading-check"><p>Antes de reproducir: ¿cuál es la primera nota?</p><div data-applied-answers></div><p class="feedback" data-applied-feedback aria-live="polite"></p></div>`;
+  $("lessonContent").appendChild(mount);
+  const first=config.phrase[0].replace(/\d/,"");
+  const choices=shuffle([first,...shuffle(["C","D","E","F","G","A","B"].filter(note=>note!==first)).slice(0,3)]);
+  mount.querySelector("[data-applied-answers]").innerHTML=choices.map(note=>`<button type="button" data-applied-answer="${note}">${note} · ${NOTE_SOLFEGE[note]}</button>`).join("");
+  mount.querySelectorAll("[data-applied-answer]").forEach(button=>button.addEventListener("click",()=>{
+    const correct=button.dataset.appliedAnswer===first;
+    mount.querySelector("[data-applied-feedback]").textContent=correct?`Correcto: la frase inicia en ${NOTE_SOLFEGE[first]}. Ahora léela con la cuenta previa.`:`Revisa el primer símbolo del pentagrama: inicia en ${NOTE_SOLFEGE[first]}.`;
+    mount.querySelectorAll("[data-applied-answer]").forEach(item=>{item.disabled=true;if(item.dataset.appliedAnswer===first)item.classList.add("correct");else if(item===button)item.classList.add("wrong")});
+  }));
+  mount.querySelector("[data-applied-play]").addEventListener("click",()=>playPhrase(mount,phrase,config.bpm,config.meter));
+  mount.querySelector("[data-applied-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/config.bpm)));
+}
 
 /* ===================== FASE 4 · SOLFEO INTERACTIVO ===================== */
 
@@ -2228,7 +2328,8 @@ function renderEvaluationSummary(){
   el.innerHTML=`
     <div class="summary-stat"><span>Progreso</span><b>${totalProgressPercent()}%</b><small>${completedCount()}/${DATA.levels.length} niveles</small></div>
     <div class="summary-stat"><span>Diagnóstico</span><b>${diag?diag.percent+"%":"—"}</b><small>${diag?"último resultado":"sin realizar"}</small></div>
-    <div class="summary-stat"><span>Evaluación final</span><b>${final?final.percent+"%":"—"}</b><small>${final?final.label:"sin realizar"}</small></div>`;
+    <div class="summary-stat"><span>Evaluación final</span><b>${final?final.percent+"%":"—"}</b><small>${final?final.label:"sin realizar"}</small></div>
+    <div class="summary-stat"><span>Lectura práctica</span><b>${state.readingEvaluation?"✓":"—"}</b><small>${state.readingEvaluation?"registrada":"sin realizar"}</small></div>`;
 }
 
 function renderBadges(){
@@ -2323,6 +2424,30 @@ function startEvaluation(kind){
   renderQuestion();
 }
 
+function startReadingEvaluation(){
+  const runner=$("evaluationRunner");
+  if(!runner)return;
+  const phrase=["C4","D4","E4","G4","F4","E4","D4","C4"].map((note,index)=>({note,dur:"q",beats:1,bar:Math.floor(index/4)}));
+  runner.classList.remove("hidden");
+  runner.innerHTML=`<section class="reading-evaluation"><div class="eval-runner-head"><div><span>Lectura práctica guiada</span><b>Frase de 2 compases · 4/4</b></div></div>
+    <p>Esta prueba no simula medir tu voz: úsala para comprobar una lectura real. Escucha la cuenta previa, entra con el pulso y marca honestamente lo que lograste.</p>
+    <div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:"treble",meter:"4/4"})}</div></div>
+    <p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p>
+    <div class="solfege-actions"><button type="button" class="primary-btn" data-reading-eval-play>▶ Cuenta y reproduce</button><button type="button" class="ghost-btn" data-reading-eval-hear>▶ Escuchar referencia</button></div>
+    <div class="reading-evaluation-list"><label><input type="checkbox" data-reading-check="pulse"> Entré después de la cuenta previa y mantuve el pulso.</label><label><input type="checkbox" data-reading-check="names"> Nombré las notas sin detenerme.</label><label><input type="checkbox" data-reading-check="shape"> Reconocí que la frase sube y vuelve a Do.</label></div>
+    <button type="button" class="primary-btn" data-reading-eval-save>Registrar práctica</button><p class="feedback" data-reading-eval-feedback aria-live="polite"></p></section>`;
+  runner.querySelector("[data-reading-eval-play]").addEventListener("click",()=>playPhrase(runner,phrase,72,"4/4"));
+  runner.querySelector("[data-reading-eval-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/72)));
+  runner.querySelector("[data-reading-eval-save]").addEventListener("click",()=>{
+    const checks=[...runner.querySelectorAll("[data-reading-check]")];
+    const achieved=checks.filter(check=>check.checked).length;
+    state.readingEvaluation={achieved,total:checks.length,at:new Date().toISOString()};
+    saveState();
+    runner.querySelector("[data-reading-eval-feedback]").textContent=achieved===checks.length?"Práctica registrada: lectura completa. Repite en otro tempo para consolidarla.":`Práctica registrada: ${achieved}/${checks.length}. Repite la frase y enfócate en el punto que falta.`;
+    renderEvaluationSummary();
+  });
+}
+
 /* Refuerza el progreso al marcar niveles */
 const _updateHomeProgressPhase1 = updateHomeProgress;
 updateHomeProgress = function(){
@@ -2343,6 +2468,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   $("openMapBtn").addEventListener("click",()=>showView("mapa"));
   $("startDiagnosticBtn")?.addEventListener("click",()=>startEvaluation("diagnostic"));
   $("startFinalEvalBtn")?.addEventListener("click",()=>startEvaluation("final"));
+  $("startReadingEvalBtn")?.addEventListener("click",startReadingEvaluation);
   renderEvaluationSummary();
   renderBadges();
   if(location.hash==="#curso") showView("curso");

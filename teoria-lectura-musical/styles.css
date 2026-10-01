@@ -262,12 +262,14 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
 .figure-card{display:grid;gap:4px;text-align:center}.figure-card span{font-family:"Bravura TLM","Noto Music","Segoe UI Symbol",serif;font-size:2.9rem;font-weight:400;line-height:.82;transform:scale(1.18);transform-origin:center}.figure-card small{color:var(--muted)}
 .beat-row{display:flex;gap:8px;margin-top:16px}.beat{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center}.beat.accent{border-color:var(--gold);border-width:2px}.beat.secondary-accent{border-color:rgba(212,168,79,.62)}.beat.active{background:var(--gold);color:#111}
 .rhythm-builder{margin-top:18px}.step-row{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}.rhythm-step.on{background:rgba(154,184,170,.25);border-color:var(--green)}.rhythm-step.active{outline:2px solid var(--gold)}
+.rhythm-duration-audition{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.rhythm-duration-audition p{color:var(--muted)}
 .fifths-wheel{width:340px;height:340px;position:relative;margin:0 auto 20px}.fifths-wheel button{--angle:calc(var(--i)*30deg - 90deg);position:absolute;left:50%;top:50%;width:48px;height:48px;border-radius:50%;transform:translate(-50%,-50%) rotate(var(--angle)) translate(126px) rotate(calc(-1*var(--angle)));border:1px solid var(--line);background:#1c1916;color:var(--ink)}.fifths-wheel button.active{background:var(--gold);color:#111}.wheel-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:110px;height:110px;border-radius:50%;display:grid;place-items:center;align-content:center;border:1px solid var(--line);background:#151310}.wheel-center b{font-size:1.8rem;color:var(--gold)}.wheel-center span{font-size:.7rem;color:var(--muted)}
 .key-info{text-align:center}.key-info h4{font-size:1.5rem;margin:0}.key-info p{color:var(--muted)}
 .degree-function-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.degree-function{padding:9px;border:1px solid var(--line);border-radius:10px;display:grid;gap:2px}.degree-function small{color:var(--muted);font-size:.67rem}.degree-function.dominante{border-color:rgba(212,168,79,.45)}.degree-function.tonica{border-color:rgba(154,184,170,.4)}
 .quick-practice{margin-top:22px;padding:18px}.quick-practice h3{margin:3px 0 8px}.quick-options{display:grid;gap:7px}.quick-options button{text-align:left}.quick-options button.correct{background:rgba(154,184,170,.22);border-color:var(--green)}.quick-options button.wrong{background:rgba(212,137,114,.15);border-color:#d48972}
 @media(max-width:1000px){.visual-three{grid-template-columns:1fr}.controls-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:760px){.visual-two{grid-template-columns:1fr}.controls-grid,.controls-grid.compact{grid-template-columns:1fr}.fifths-wheel{transform:scale(.85);margin-left:auto;margin-right:auto}.degree-function-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.visual-two{grid-template-columns:1fr}.controls-grid,.controls-grid.compact{grid-template-columns:1fr}.fifths-wheel{transform:scale(.85);margin-left:auto;margin-right:auto}.degree-function-grid{grid-template-columns:repeat(2,1fr)}.learning-guide{grid-template-columns:1fr}.applied-reading-head{display:grid}}
 @media(max-width:760px){.hand-staff-practice-layout{grid-template-columns:1fr}.hand-figure{grid-row:auto}.hand-figure img{max-width:290px;height:135px}.hand-staff-center{grid-row:1}.hand-figure[data-hand-figure="bass"]{grid-row:2}.hand-figure[data-hand-figure="treble"]{grid-row:3}}@media(max-width:520px){.note-answer-grid{grid-template-columns:repeat(4,1fr)}.step-row{grid-template-columns:repeat(4,1fr)}.figure-grid{grid-template-columns:1fr}.controls-row{display:grid}.controls-row label{min-width:0}.fifths-wheel{width:300px;height:300px;transform:scale(.82);transform-origin:center top}.lab-actions{display:grid}.lab-actions button{width:100%}.hand-staff-board{grid-template-columns:48px minmax(230px,1fr) 48px}.staff-reference .cp-note-buttons{grid-template-columns:repeat(13,42px)}}
 
 
@@ -463,6 +465,37 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
   margin-top:22px;
   padding:18px;
 }
+.learning-guide{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,.7fr);
+  gap:16px;
+  align-items:center;
+  margin:20px 0;
+  padding:16px 18px;
+  border:1px solid rgba(212,168,79,.38);
+  border-radius:13px;
+  background:linear-gradient(110deg,rgba(212,168,79,.10),rgba(255,255,255,.015));
+}
+.learning-guide h3{margin:4px 0 6px;font-size:1.1rem}
+.learning-guide p{margin:0;color:var(--muted)}
+.learning-guide-goal{display:grid;gap:5px;padding:12px;border-left:2px solid var(--gold);background:rgba(0,0,0,.14)}
+.learning-guide-goal span{color:var(--gold);font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.learning-guide-goal b{line-height:1.35}
+.applied-reading{margin-top:22px;padding:18px}
+.applied-reading-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.applied-reading-head h3{margin:3px 0 7px;font-size:1.3rem}
+.applied-reading-head p{margin:0;color:var(--muted)}
+.applied-reading-head>span{padding:6px 9px;border:1px solid var(--line);border-radius:999px;color:var(--gold);font-size:.75rem;white-space:nowrap}
+.applied-reading-check{margin-top:12px;padding:12px;border:1px solid rgba(154,184,170,.25);border-radius:10px;background:rgba(154,184,170,.04)}
+.applied-reading-check p{margin:0 0 8px}
+.applied-reading-check [data-applied-answers]{display:flex;flex-wrap:wrap;gap:7px}
+.applied-reading-check button{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#171513;color:var(--ink);cursor:pointer}
+.applied-reading-check button.correct{border-color:#78be92;background:rgba(120,190,146,.15)}
+.applied-reading-check button.wrong{border-color:#d87c72;background:rgba(216,124,114,.12)}
+.reading-evaluation{display:grid;gap:13px;padding:18px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.018)}
+.reading-evaluation>p{margin:0;color:var(--muted)}
+.reading-evaluation-list{display:grid;gap:8px;padding:12px;border:1px solid rgba(154,184,170,.24);border-radius:10px;background:rgba(154,184,170,.04)}
+.reading-evaluation-list label{display:flex;gap:8px;align-items:flex-start;color:var(--ink)}
 .solfege-head{
   display:flex;
   justify-content:space-between;
