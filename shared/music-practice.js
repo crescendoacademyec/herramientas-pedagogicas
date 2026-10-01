@@ -50,7 +50,11 @@
     let measures='';
     for(const [bar,notes] of orderedGroups){
       const body=notes.map((e,i)=>{
-        const n=e.note?named(e.note):e.midi!==undefined?{...midiNote(e.midi),...e}:rootNote('G',4),beats=e.beats??1;
+        const beats=e.beats??1;
+        // A forward advances the MusicXML cursor without drawing a symbol. It keeps
+        // isolated short values centered in a full-width reference staff.
+        if(e.kind==='spacer')return `<forward><duration>${Math.round(beats*48)}</duration></forward>`;
+        const n=e.note?named(e.note):e.midi!==undefined?{...midiNote(e.midi),...e}:rootNote('G',4);
         const actual=e.tupletActual||(e.kind==='triplet'||Math.abs(beats-1/3)<.00001?3:0);
         const triplet=actual>0;
         const base=triplet?(actual===6?.25:.5):beats;
@@ -73,8 +77,13 @@
     document.querySelectorAll('.music-glyph').forEach(host=>{
       const code=host.textContent.trim().codePointAt(0),index=figures.indexOf(code);
       let events=null,options={compact:true};
-      if(index>=0)events=[{beats:4/2**index}];
-      else if(code>=0xE4E3&&code<=0xE4E9)events=[{kind:'rest',beats:4/2**(code-0xE4E3)}];
+      const centeredValue=(event)=>{
+        // Fixed count of white notes reserves one consistent staff width for
+        // every value. The visible event remains the only printed example.
+        return [event,...Array.from({length:8},()=>({note:'G4',beats:4,color:'#fffdf8'}))];
+      };
+      if(index>=0)events=centeredValue({beats:4/2**index});
+      else if(code>=0xE4E3&&code<=0xE4E9)events=centeredValue({kind:'rest',beats:4/2**(code-0xE4E3)});
       else if([0xE050,0xE062,0xE05C].includes(code)){events=[{kind:'rest',beats:4}];options.clef=code===0xE062?'bass':code===0xE05C?'alto':'treble';}
       else if(code>=0xE260&&code<=0xE264){const alter={0xE260:-1,0xE261:0,0xE262:1,0xE263:2,0xE264:-2}[code];events=[{...rootNote('G'),alter,midi:67+alter,beats:1,accidental:alter===0?'natural':undefined}];}
       else if(code===0xE4C0)events=[{beats:1,fermata:true}];
