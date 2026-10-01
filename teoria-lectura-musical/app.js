@@ -215,8 +215,8 @@ function mountChromaticInstrumentReference(){
   const chromaticTokens=["1","b2","2","b3","3","4","b5","5","b6","6","b7","7","8"];
   const chromaticTones=tones("C",chromaticTokens);
   mount.innerHTML=`<div class="diagram-label">Cromatismo en el instrumento</div>
-    <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. Pulsa una tecla para escucharla. La segunda y tercera línea muestran el solfeo ascendente y descendente.</p>
-    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="scroll-x">${guitarScaleSVG("C",chromaticTones)}</div></section></div>
+    <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. Pulsa una tecla para escucharla. Elige cómo nombrarlas y sigue las doce posiciones del diapasón.</p>
+    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box chromatic-guitar-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="chromatic-label-picker" role="group" aria-label="Nombres para el diapasón"><button type="button" data-chromatic-guitar-label="note" class="active">Notas</button><button type="button" data-chromatic-guitar-label="up">Ascendente</button><button type="button" data-chromatic-guitar-label="down">Descendente</button></div><div class="scroll-x" data-chromatic-guitar></div></section></div>
     <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
   const practiceNote=mount.nextElementSibling;
   if(practiceNote?.tagName==="P"&&practiceNote.textContent.includes("Solfeo cromático")){
@@ -224,6 +224,16 @@ function mountChromaticInstrumentReference(){
   }
   mount.querySelectorAll("[data-chromatic-key]").forEach(key=>key.addEventListener("click",()=>playTone(Number(key.dataset.chromaticKey),{duration:.75,volume:.2})));
   mount.querySelector("[data-chromatic-play]").addEventListener("click",()=>playSequence(chromaticTones.map(t=>rootMidi("C",4)+t.semi),190));
+  const guitarMount=mount.querySelector("[data-chromatic-guitar]");
+  const renderGuitar=mode=>{
+    guitarMount.innerHTML=chromaticGuitarHTML(mode);
+    guitarMount.querySelectorAll("[data-chromatic-fret-midi]").forEach(cell=>cell.addEventListener("click",()=>playTone(Number(cell.dataset.chromaticFretMidi),{duration:.75,volume:.2})));
+  };
+  renderGuitar("note");
+  mount.querySelectorAll("[data-chromatic-guitar-label]").forEach(button=>button.addEventListener("click",()=>{
+    mount.querySelectorAll("[data-chromatic-guitar-label]").forEach(item=>item.classList.toggle("active",item===button));
+    renderGuitar(button.dataset.chromaticGuitarLabel);
+  }));
 }
 function chromaticPianoHTML(){
   const keys=[
@@ -427,6 +437,17 @@ function guitarScaleSVG(rootName,toneList){
   let dots="";
   strings.forEach((open,r)=>{for(let f=0;f<=frets;f++){const pc=(open+f)%12;if(!pcs.has(pc))continue;const x=ml+20+f*gapX,y=mt+r*gapY,isRoot=pc===rootPc;dots+=`<circle class="dot ${isRoot?"root":""}" cx="${x}" cy="${y}" r="8"/>${isRoot?`<text class="dotlabel" x="${x}" y="${y+3}" text-anchor="middle">R</text>`:""}`;}});
   return `<svg viewBox="0 0 ${w} ${h}" class="tlm-guitar" role="img" aria-label="Mapa de escala en guitarra">${grid}${dots}</svg>`;
+}
+function chromaticGuitarHTML(mode="note"){
+  const strings=[{name:"E",pc:4,midi:64},{name:"B",pc:11,midi:59},{name:"G",pc:7,midi:55},{name:"D",pc:2,midi:50},{name:"A",pc:9,midi:45},{name:"E",pc:4,midi:40}];
+  const sharpNames=["C","C♯","D","D♯","E","F","F♯","G","G♯","A","A♯","B"];
+  const flatNames=["C","D♭","D","E♭","E","F","G♭","G","A♭","A","B♭","B"];
+  const sharpSolfege=["Do","Di","Re","Ri","Mi","Fa","Fi","Sol","Si","La","Li","Ti"];
+  const flatSolfege=["Do","Ra","Re","Me","Mi","Fa","Se","Sol","Le","La","Te","Ti"];
+  const labelFor=pc=>mode==="up"?`${sharpNames[pc]} · ${sharpSolfege[pc]}`:mode==="down"?`${flatNames[pc]} · ${flatSolfege[pc]}`:`${sharpNames[pc]}${sharpNames[pc]===flatNames[pc]?"":` / ${flatNames[pc]}`}`;
+  const frets=Array.from({length:13},(_,f)=>`<div class="chromatic-fret-number">${f}</div>`).join("");
+  const rows=strings.map(string=>`<div class="chromatic-string-name">${string.name}</div>${Array.from({length:13},(_,f)=>`<button type="button" class="chromatic-fret-note" data-chromatic-fret-midi="${string.midi+f}" aria-label="Cuerda ${string.name}, traste ${f}: ${labelFor((string.pc+f)%12)}">${labelFor((string.pc+f)%12)}</button>`).join("")}`).join("");
+  return `<div class="chromatic-guitar" data-label-mode="${mode}"><div class="chromatic-guitar-grid"><div class="chromatic-string-name chromatic-string-head">Cuerda</div>${frets}${rows}</div><p>Trastes 0–12 · ${mode==="up"?"solfeo ascendente con sostenidos":mode==="down"?"solfeo descendente con bemoles":"nombre enarmónico de cada nota"}. Pulsa una posición para escucharla.</p></div>`;
 }
 function rootOptions(selected="C"){return ROOTS.map(r=>`<option value="${r.value}" ${r.value===selected?"selected":""}>${r.label}</option>`).join("")}
 

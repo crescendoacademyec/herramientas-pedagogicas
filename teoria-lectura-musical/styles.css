@@ -621,6 +621,12 @@ h2{font-size:clamp(2rem,4vw,3.5rem);line-height:1.05;margin:0}
 }
 .chromatic-instrument-reference .staff-reference-copy{margin:7px 0 12px}
 .chromatic-instrument-reference .ghost-btn{margin-top:10px}
+.chromatic-instrument-grid .chromatic-guitar-box{grid-column:1/-1}
+.chromatic-label-picker{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.chromatic-label-picker button{padding:6px 10px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.025);color:var(--muted);font:800 .72rem/1 inherit;cursor:pointer}
+.chromatic-label-picker button:hover,.chromatic-label-picker button:focus-visible{border-color:rgba(212,168,79,.7);color:var(--ink);outline:none}
+.chromatic-label-picker button.active{border-color:#e5bb58;background:var(--gold);color:#1c1711}
+.chromatic-guitar{min-width:720px}.chromatic-guitar-grid{display:grid;grid-template-columns:42px repeat(13,minmax(50px,1fr));border:1px solid #675f54;border-radius:8px;overflow:hidden;background:#211e1a}.chromatic-string-name,.chromatic-fret-number{display:grid;place-items:center;min-height:28px;border-right:1px solid rgba(205,194,175,.3);border-bottom:1px solid rgba(205,194,175,.3);color:#d4c8b8;font-size:.68rem;font-weight:900}.chromatic-string-head{color:var(--gold);background:#28231d}.chromatic-fret-number{min-height:24px;color:var(--gold);background:#28231d}.chromatic-fret-note{min-width:0;min-height:38px;padding:3px;border:0;border-right:1px solid rgba(205,194,175,.3);border-bottom:1px solid rgba(205,194,175,.3);background:linear-gradient(180deg,#383027,#29251f);color:#eee7dd;font:800 .64rem/1.1 inherit;cursor:pointer}.chromatic-fret-note:hover,.chromatic-fret-note:focus-visible{position:relative;z-index:1;background:#d4a84f;color:#18130e;outline:2px solid #f1cd75;outline-offset:-2px}.chromatic-guitar p{margin:8px 0 0;color:var(--muted);font-size:.74rem}
 .solfege-task{
   margin-top:12px;
   padding:12px;
