@@ -40,6 +40,9 @@ const INTERVALS = [
 const DEGREE_BASE = {1:0,2:2,3:4,4:5,5:7,6:9,7:11,8:12,9:14,11:17,13:21};
 
 const AUDIO = {ctx:null,masterBus:null,nodes:[],metroTimer:null,metroBeat:0,sfPlayer:null,sfPromise:null,sfFailed:false};
+// Refuerza por igual las muestras de piano y guitarra, sin alterar la relación
+// entre las dinámicas que usan los ejercicios.
+const PLAYBACK_GAIN = 1.4;
 
 function $(id){ return document.getElementById(id); }
 function escapeHtml(value){
@@ -245,7 +248,7 @@ function audioContext(){
     if(!AC) return null;
     AUDIO.ctx=new AC();
     AUDIO.masterBus=AUDIO.ctx.createGain();
-    AUDIO.masterBus.gain.value=2.6;
+    AUDIO.masterBus.gain.value=3.2;
     AUDIO.masterBus.connect(AUDIO.ctx.destination);
   }
   if(AUDIO.ctx.state==="suspended") AUDIO.ctx.resume();
@@ -273,7 +276,7 @@ function playPianoSample(player,midi,{duration,volume,delay}){
   const ctx=audioContext();if(!ctx||!player) return null;
   const start=ctx.currentTime+delay;
   try{
-    const note=player.play(midi,start,{gain:volume,duration});
+    const note=player.play(midi,start,{gain:volume*PLAYBACK_GAIN,duration});
     if(note){
       AUDIO.nodes.push(note);
       window.setTimeout(()=>{AUDIO.nodes=AUDIO.nodes.filter(node=>node!==note)},Math.max(0,(delay+duration+.5)*1000));
@@ -287,7 +290,7 @@ function playOscillatorFallback(midi,{duration,volume,delay}){
   const osc=ctx.createOscillator(),gain=ctx.createGain();
   osc.type="triangle";osc.frequency.setValueAtTime(midiFreq(midi),t);
   gain.gain.setValueAtTime(.0001,t);
-  gain.gain.exponentialRampToValueAtTime(volume,t+.015);
+  gain.gain.exponentialRampToValueAtTime(volume*PLAYBACK_GAIN,t+.015);
   gain.gain.exponentialRampToValueAtTime(.0001,t+duration);
   osc.connect(gain);gain.connect(AUDIO.masterBus||ctx.destination);osc.start(t);osc.stop(t+duration+.03);
   AUDIO.nodes.push(osc);
