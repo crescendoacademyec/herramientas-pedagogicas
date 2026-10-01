@@ -435,13 +435,13 @@ function staffReferenceSVG(clef,selectedNote=""){
   return '<div class="staff-reference"><div class="staff-reference-title">Clave de '+(clef==="treble"?"sol":"fa")+'</div>'+CrescendoPractice.sequence(notes.map(note=>({note,beats:4,label:NOTE_SOLFEGE[note[0]],color:note===selected?"#c8942e":undefined})),{clef,labels:true})+'<div class="cp-note-buttons">'+notes.map(note=>'<button type="button" class="'+(note===selected?"active":"")+'" aria-pressed="'+String(note===selected)+'" data-reference-note="'+note+'">'+NOTE_SOLFEGE[note[0]]+' · '+note+'</button>').join('')+'</div><p class="reference-selection" aria-live="polite">'+selectedLabel+'</p></div>';
 }
 const HAND_STAFF_POSITIONS={
-  treble:[['line-5','Línea 5','Fa','5'],['space-4','Espacio 4','Mi'],['line-4','Línea 4','Re','4'],['space-3','Espacio 3','Do'],['line-3','Línea 3','Si','3'],['space-2','Espacio 2','La'],['line-2','Línea 2','Sol','2'],['space-1','Espacio 1','Fa'],['line-1','Línea 1','Mi','1']],
-  bass:[['line-5','Línea 5','La','1'],['space-4','Espacio 4','Sol'],['line-4','Línea 4','Fa','2'],['space-3','Espacio 3','Mi'],['line-3','Línea 3','Re','3'],['space-2','Espacio 2','Do'],['line-2','Línea 2','Si','4'],['space-1','Espacio 1','La'],['line-1','Línea 1','Sol','5']]
+  treble:[['line-5','Línea 5','Fa','1'],['space-4','Espacio 4','Mi'],['line-4','Línea 4','Re','2'],['space-3','Espacio 3','Do'],['line-3','Línea 3','Si','3'],['space-2','Espacio 2','La'],['line-2','Línea 2','Sol','4'],['space-1','Espacio 1','Fa'],['line-1','Línea 1','Mi','5']],
+  bass:[['line-5','Línea 5','La','5'],['space-4','Espacio 4','Sol'],['line-4','Línea 4','Fa','4'],['space-3','Espacio 3','Mi'],['line-3','Línea 3','Re','3'],['space-2','Espacio 2','Do'],['line-2','Línea 2','Si','2'],['space-1','Espacio 1','La'],['line-1','Línea 1','Sol','1']]
 };
-function handStaffHTML(clef){
+function handStaffHTML(clef,focusedPosition=""){
   const items=HAND_STAFF_POSITIONS[clef];
-  const side=clef==="treble"?['Meñique · 5','Pulgar · 1']:['Pulgar · 1','Meñique · 5'];
-  return '<div class="hand-staff-board" role="group" aria-label="Mano pentagrama"><div class="hand-staff-side">'+side[0]+'<br><span>línea 5</span></div><div class="hand-staff-lanes">'+items.map(([id,label,note,finger])=>'<button type="button" class="hand-staff-position '+(id.startsWith("line")?"finger":"space")+'" data-hand-position="'+id+'" aria-label="'+label+', '+note+'">'+(finger?"Dedo":"Espacio")+'<b>'+ (finger||label.replace(/[^0-9]/g,""))+'</b><small>'+note+'</small></button>').join('')+'</div><div class="hand-staff-side">'+side[1]+'<br><span>línea 1</span></div></div>';
+  const side=clef==="treble"?['Meñique · 1','Pulgar · 5']:['Pulgar · 5','Meñique · 1'];
+  return '<div class="hand-staff-board" role="group" aria-label="Mano pentagrama"><div class="hand-staff-side">'+side[0]+'<br><span>línea 5</span></div><div class="hand-staff-lanes">'+items.map(([id,label,note,finger])=>'<button type="button" class="hand-staff-position '+(id.startsWith("line")?"finger":"space")+(id===focusedPosition?" exploring":"")+'" data-hand-position="'+id+'" aria-label="'+label+', '+note+'">'+(finger?"Dedo":"Espacio")+'<b>'+ (finger||label.replace(/[^0-9]/g,""))+'</b><small>'+note+'</small></button>').join('')+'</div><div class="hand-staff-side">'+side[1]+'<br><span>línea 1</span></div></div>';
 }
 function mountReadingLab(el){
   const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
@@ -451,7 +451,7 @@ function mountReadingLab(el){
       <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa una nota: se reproduce, queda resaltada y muestra su posición exacta.</p>
       <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
       <div class="staff-reference-stack" data-reading-reference></div>
-      <section class="hand-staff-section"><div><div class="diagram-label">Práctica cinestésica · mano-pentagrama</div><p class="staff-reference-copy">La mano derecha acompaña la clave de sol; la izquierda, la clave de fa. Los dedos son líneas y los cuatro huecos entre ellos son espacios. Usa el índice de la otra mano para señalar la posición pedida.</p></div><div class="hand-staff-practice-layout"><figure class="hand-figure" data-hand-figure="bass"><img src="assets/mano-derecha-clave-sol.png" alt="Mano izquierda con cinco dedos, orientada hacia el ejercicio."><figcaption>Mano izquierda<br><span>Clave de fa</span></figcaption></figure><div class="hand-staff-center"><p data-hand-legend></p><p class="hand-staff-space-copy"><b>Espacios:</b> los huecos entre línea 1–2, 2–3, 3–4 y 4–5 son, respectivamente, espacios 1, 2, 3 y 4.</p><div class="hand-staff-controls"><label>Clave <select data-hand-clef><option value="treble">Sol · mano derecha</option><option value="bass">Fa · mano izquierda</option></select></label><button type="button" class="ghost-btn" data-hand-next>Nueva posición</button></div><p class="hand-staff-prompt" data-hand-prompt></p><div data-hand-staff></div><p class="reference-selection" data-hand-feedback aria-live="polite"></p></div><figure class="hand-figure" data-hand-figure="treble"><img src="assets/mano-izquierda-clave-fa.png" alt="Mano derecha con cinco dedos, orientada hacia el ejercicio."><figcaption>Mano derecha<br><span>Clave de sol</span></figcaption></figure></div></section>
+      <section class="hand-staff-section"><div><div class="diagram-label">Práctica cinestésica · mano-pentagrama</div><p class="staff-reference-copy">La mano derecha acompaña la clave de sol; la izquierda, la clave de fa. Los dedos son líneas y los cuatro huecos entre ellos son espacios. En este ejercicio: meñique = 1 y pulgar = 5.</p></div><div class="hand-staff-practice-layout"><figure class="hand-figure" data-hand-figure="bass"><img src="assets/mano-derecha-clave-sol.png" alt="Mano izquierda con cinco dedos, orientada hacia el ejercicio."><figcaption>Mano izquierda<br><span>Clave de fa</span></figcaption></figure><div class="hand-staff-center"><p data-hand-legend></p><p class="hand-staff-space-copy"><b>Espacios:</b> los huecos entre línea 1–2, 2–3, 3–4 y 4–5 son, respectivamente, espacios 1, 2, 3 y 4.</p><div class="hand-staff-controls"><label>Clave <select data-hand-clef><option value="treble">Sol · mano derecha</option><option value="bass">Fa · mano izquierda</option></select></label><div class="hand-mode-switch" role="group" aria-label="Modo de ejercicio"><button type="button" data-hand-mode="explore" class="active">Explorar</button><button type="button" data-hand-mode="practice">Practicar</button></div><button type="button" class="ghost-btn" data-hand-next>Nueva posición</button></div><p class="hand-staff-prompt" data-hand-prompt></p><div data-hand-staff></div><p class="reference-selection" data-hand-feedback aria-live="polite"></p></div><figure class="hand-figure" data-hand-figure="treble"><img src="assets/mano-izquierda-clave-fa.png" alt="Mano derecha con cinco dedos, orientada hacia el ejercicio."><figcaption>Mano derecha<br><span>Clave de sol</span></figcaption></figure></div></section>
     </section>
     <section class="lab-card">
       <div class="diagram-label">Audición de duraciones</div>
@@ -472,29 +472,40 @@ function mountReadingLab(el){
       note.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();play()}});
     });
   };
-  let handTarget="line-1";
+  let handTarget="line-1",handFocus="line-1",handMode="explore";
   const renderHandStaff=()=>{
     const clef=el.querySelector("[data-hand-clef]").value;
     const hand=clef==="treble"
-      ?{legend:"<b>Sol · mano derecha:</b> 5 meñique · línea 5; 4 anular · línea 4; 3 medio · línea 3; 2 índice · línea 2; 1 pulgar · línea 1."}
-      :{legend:"<b>Fa · mano izquierda:</b> 1 pulgar · línea 5; 2 índice · línea 4; 3 medio · línea 3; 4 anular · línea 2; 5 meñique · línea 1."};
+      ?{legend:"<b>Sol · mano derecha:</b> 1 meñique · línea 5; 2 anular · línea 4; 3 medio · línea 3; 4 índice · línea 2; 5 pulgar · línea 1."}
+      :{legend:"<b>Fa · mano izquierda:</b> 5 pulgar · línea 5; 4 índice · línea 4; 3 medio · línea 3; 2 anular · línea 2; 1 meñique · línea 1."};
     el.querySelectorAll("[data-hand-figure]").forEach(figure=>figure.classList.toggle("active",figure.dataset.handFigure===clef));
+    el.querySelectorAll("[data-hand-mode]").forEach(button=>button.classList.toggle("active",button.dataset.handMode===handMode));
     el.querySelector("[data-hand-legend]").innerHTML=hand.legend;
     const position=HAND_STAFF_POSITIONS[clef].find(item=>item[0]===handTarget)||HAND_STAFF_POSITIONS[clef][0];
     handTarget=position[0];
-    el.querySelector("[data-hand-prompt]").textContent=`Busca ${position[1].toLowerCase()} · ${position[2]}.`;
-    el.querySelector("[data-hand-staff]").innerHTML=handStaffHTML(clef);
+    const focused=HAND_STAFF_POSITIONS[clef].find(item=>item[0]===handFocus)||position;
+    handFocus=focused[0];
+    el.querySelector("[data-hand-prompt]").textContent=handMode==="explore"?`Explora: pulsa una línea o espacio para conocer su nota.`:`Busca ${position[1].toLowerCase()} · ${position[2]}.`;
+    el.querySelector("[data-hand-staff]").innerHTML=handStaffHTML(clef,handFocus);
     el.querySelector("[data-hand-feedback]").textContent="";
     el.querySelectorAll("[data-hand-position]").forEach(button=>button.addEventListener("click",()=>{
-      const correct=button.dataset.handPosition===handTarget;
+      handFocus=button.dataset.handPosition;
+      const selected=HAND_STAFF_POSITIONS[clef].find(item=>item[0]===handFocus);
+      if(handMode==="explore"){
+        renderHandStaff();
+        el.querySelector("[data-hand-feedback]").textContent=`${selected[1]} de la clave de ${clef==="treble"?"sol":"fa"}: ${selected[2]}.`;
+        return;
+      }
+      const correct=handFocus===handTarget;
       el.querySelectorAll("[data-hand-position]").forEach(item=>item.classList.remove("correct","wrong"));
       button.classList.add(correct?"correct":"wrong");
       el.querySelector("[data-hand-feedback]").textContent=correct?`Correcto: ${position[2]} está en ${position[1].toLowerCase()} de la clave de ${clef==="treble"?"sol":"fa"}.`:`Observa de nuevo: ${position[2]} está en ${position[1].toLowerCase()}.`;
     }));
   };
   el.querySelector("[data-reference-clef]").addEventListener("change",renderReference);
-  el.querySelector("[data-hand-clef]").addEventListener("change",()=>{handTarget="line-5";renderHandStaff()});
-  el.querySelector("[data-hand-next]").addEventListener("click",()=>{const list=HAND_STAFF_POSITIONS[el.querySelector("[data-hand-clef]").value];handTarget=list[Math.floor(Math.random()*list.length)][0];renderHandStaff()});
+  el.querySelector("[data-hand-clef]").addEventListener("change",()=>{handTarget="line-5";handFocus="line-5";renderHandStaff()});
+  el.querySelectorAll("[data-hand-mode]").forEach(button=>button.addEventListener("click",()=>{handMode=button.dataset.handMode;renderHandStaff()}));
+  el.querySelector("[data-hand-next]").addEventListener("click",()=>{const list=HAND_STAFF_POSITIONS[el.querySelector("[data-hand-clef]").value];handTarget=list[Math.floor(Math.random()*list.length)][0];handFocus=handTarget;handMode="practice";renderHandStaff()});
   el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
     const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
     playTone(60,{duration:seconds,volume:.12});
