@@ -132,8 +132,9 @@
         if(!host.isConnected){mounted.delete(host);return;}
         const earPage=document.body.classList.contains('ear-training-page');
         const theoryPage=document.body.classList.contains('theory-reading-page');
-        // En Teoría se conservan las tarjetas y se amplía únicamente el grabado Bravura.
-        osmd.Zoom=theoryPage?(host.classList.contains('cp-compact')?1.2:1.08):earPage&&host.closest('[data-practice-workshop]')?1.65:earPage?(host.classList.contains('cp-compact')?.76:1.08):(host.classList.contains('cp-compact')?.6:.85);osmd.render();
+        // En Teoría los ejemplos amplios usan un grabado mayor. Las tarjetas compactas
+        // conservan su tamaño y se amplían mediante CSS dentro de su propio visor.
+        osmd.Zoom=theoryPage?(host.classList.contains('cp-compact')?.6:1.08):earPage&&host.closest('[data-practice-workshop]')?1.65:earPage?(host.classList.contains('cp-compact')?.76:1.08):(host.classList.contains('cp-compact')?.6:.85);osmd.render();
         // Remove engraving page margins, keeping the workshop viewport compact.
         function fitWorkshop(){
           if(!earPage||!host.closest('[data-practice-workshop]'))return;
