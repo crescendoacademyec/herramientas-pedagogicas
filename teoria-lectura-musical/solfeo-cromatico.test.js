@@ -17,6 +17,7 @@ assert.equal(vm.runInContext('CHROMATIC_SOLFEGE.Db',sandbox),'Ra');
 assert.match(source,/const fretCount=5/,'El diapasón cromático debe mantener cinco trastes legibles');
 assert.match(source,/data-chromatic-guitar-label="up"/,'El diapasón debe permitir seleccionar la lectura ascendente');
 assert.match(source,/data-chromatic-guitar-label="down"/,'El diapasón debe permitir seleccionar la lectura descendente');
+assert.match(source,/renderGuitar\("up"\)/,'El diapasón debe iniciar mostrando el solfeo cromático ascendente');
 const sharp=vm.runInContext('staffTrainerSVG("C#4","treble")',sandbox);
 const flat=vm.runInContext('staffTrainerSVG("Db4","treble")',sandbox);
 // Enarmónicos: igual sonido, distinta grafía delegada al motor.

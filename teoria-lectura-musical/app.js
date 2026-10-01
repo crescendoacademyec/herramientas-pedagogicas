@@ -216,7 +216,7 @@ function mountChromaticInstrumentReference(){
   const chromaticTones=tones("C",chromaticTokens);
   mount.innerHTML=`<div class="diagram-label">Cromatismo en el instrumento</div>
     <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. Pulsa una tecla para escucharla. Elige cómo nombrarlas y sigue las doce posiciones del diapasón.</p>
-    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box chromatic-guitar-box"><div class="diagram-label">Guitarra · 5 trastes</div><div class="chromatic-label-picker" role="group" aria-label="Nombres para el diapasón"><button type="button" data-chromatic-guitar-label="note" class="active">Notas</button><button type="button" data-chromatic-guitar-label="up">Ascendente</button><button type="button" data-chromatic-guitar-label="down">Descendente</button></div><div class="scroll-x" data-chromatic-guitar></div></section></div>
+    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box chromatic-guitar-box"><div class="diagram-label">Guitarra · 5 trastes</div><div class="chromatic-label-picker" role="group" aria-label="Nombres para el diapasón"><button type="button" data-chromatic-guitar-label="note">Notas</button><button type="button" data-chromatic-guitar-label="up" class="active">Ascendente</button><button type="button" data-chromatic-guitar-label="down">Descendente</button></div><div class="scroll-x" data-chromatic-guitar></div></section></div>
     <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
   const practiceNote=mount.nextElementSibling;
   if(practiceNote?.tagName==="P"&&practiceNote.textContent.includes("Solfeo cromático")){
@@ -229,7 +229,7 @@ function mountChromaticInstrumentReference(){
     guitarMount.innerHTML=chromaticGuitarHTML(mode);
     guitarMount.querySelectorAll("[data-chromatic-fret-midi]").forEach(cell=>cell.addEventListener("click",()=>playTone(Number(cell.dataset.chromaticFretMidi),{duration:.75,volume:.2})));
   };
-  renderGuitar("note");
+  renderGuitar("up");
   mount.querySelectorAll("[data-chromatic-guitar-label]").forEach(button=>button.addEventListener("click",()=>{
     mount.querySelectorAll("[data-chromatic-guitar-label]").forEach(item=>item.classList.toggle("active",item===button));
     renderGuitar(button.dataset.chromaticGuitarLabel);
