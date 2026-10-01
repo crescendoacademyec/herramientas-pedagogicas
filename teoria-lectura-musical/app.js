@@ -2241,7 +2241,10 @@ updateHomeProgress = function(){
 
 document.addEventListener("DOMContentLoaded",()=>{
   renderLevelCards();
-  document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>showView(btn.dataset.view)));
+  /* El selector de timbre comparte el estilo nav-btn, pero no navega: solo
+     cambia el instrumento. Escuchar el clic como navegación ocultaba todas
+     las vistas al intentar abrir una vista con nombre indefinido. */
+  document.querySelectorAll("[data-view]").forEach(btn=>btn.addEventListener("click",()=>showView(btn.dataset.view)));
   $("startCourseBtn").addEventListener("click",()=>showView("curso"));
   $("openMapBtn").addEventListener("click",()=>showView("mapa"));
   $("startDiagnosticBtn")?.addEventListener("click",()=>startEvaluation("diagnostic"));
