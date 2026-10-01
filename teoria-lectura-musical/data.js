@@ -1,33 +1,3 @@
-/* Las figuras de duración se dibujan como SVG para ocupar el espacio visual
-   disponible. Los antiguos glifos de metrónomo tenían un margen interno muy
-   grande y por eso la nota o silencio se percibía demasiado pequeño. */
-const TLM_STAFF_LINES = '<path d="M10 24H150M10 38H150M10 52H150M10 66H150M10 80H150" class="notation-staff-lines"/>';
-function tlmFigureGraphic(value, rest){
-  const flags={eighth:1,sixteenth:2,thirtysecond:3,sixtyfourth:4};
-  let mark="";
-  if(rest){
-    const rests={
-      whole:'<rect x="72" y="38" width="28" height="9" rx="1"/>',
-      half:'<rect x="72" y="29" width="28" height="9" rx="1"/>',
-      quarter:'<path d="M89 28c14 9-10 18 3 28 9 7-6 14 1 23M91 28l-9 15 14 8-14 14 13 14" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>',
-      eighth:'<path d="M82 30v35c0 7 14 7 14 0 0-6-8-6-14 0M82 30c22 2 24 16 15 20" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>',
-      sixteenth:'<path d="M82 27v40c0 7 14 7 14 0 0-6-8-6-14 0M82 27c24 2 25 14 16 18M82 42c22 2 23 13 14 17" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/>',
-      thirtysecond:'<path d="M80 24v44c0 7 14 7 14 0 0-6-8-6-14 0M80 24c25 2 27 12 17 16M80 38c24 2 26 12 16 16M80 52c22 2 24 12 14 16" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
-      sixtyfourth:'<path d="M78 20v50c0 7 14 7 14 0 0-6-8-6-14 0M78 20c27 2 29 11 18 15M78 32c26 2 28 11 17 15M78 44c25 2 27 11 16 15M78 56c23 2 25 11 14 15" fill="none" stroke="currentColor" stroke-width="3.7" stroke-linecap="round"/>'
-    };
-    mark=rests[value];
-  }else if(value==="whole") mark='<ellipse cx="76" cy="52" rx="15" ry="10" transform="rotate(-18 76 52)" fill="none" stroke="currentColor" stroke-width="4"/>';
-  else {
-    const count=flags[value]||0;
-    mark='<ellipse cx="74" cy="66" rx="13" ry="9" transform="rotate(-18 74 66)"/><path d="M86 64V22" fill="none" stroke="currentColor" stroke-width="4"/>';
-    for(let i=0;i<count;i++) mark+='<path d="M86 '+(23+i*10)+'c20 3 22 14 11 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>';
-    if(value==="half") mark='<ellipse cx="74" cy="66" rx="13" ry="9" transform="rotate(-18 74 66)" fill="none" stroke="currentColor" stroke-width="4"/><path d="M86 64V22" fill="none" stroke="currentColor" stroke-width="4"/>';
-  }
-  return '<svg class="notation-figure" viewBox="0 0 160 104" role="img" aria-label="'+(rest?'Silencio':'Figura')+' de '+value+'">'+TLM_STAFF_LINES+'<g class="notation-mark">'+mark+'</g></svg>';
-}
-const TLM_DURATION_ROWS=[['Redonda','whole','1 unidad'],['Blanca','half','1/2'],['Negra','quarter','1/4'],['Corchea','eighth','1/8'],['Semicorchea','sixteenth','1/16'],['Fusa','thirtysecond','1/32'],['Semifusa','sixtyfourth','1/64']];
-const TLM_DURATION_TABLE=TLM_DURATION_ROWS.map(row=>'<tr><td>'+row[0]+'</td><td class="notation-figure-cell">'+tlmFigureGraphic(row[1],false)+'</td><td class="notation-figure-cell rest-glyph-cell">'+tlmFigureGraphic(row[1],true)+'</td><td>'+row[2]+'</td></tr>').join('');
-
 window.TLM_DATA = {
   levels: [
     {
@@ -82,7 +52,7 @@ window.TLM_DATA = {
         },
         {
           title: "Tabla completa de figuras y silencios",
-          html: `<div class="reference-panel"><p>El valor exacto depende del compás. Esta tabla muestra la proporción tomando la redonda como unidad.</p><div class="table-scroll"><table class="music-reference-table"><thead><tr><th>Figura</th><th>Nota</th><th>Silencio</th><th>Relación</th></tr></thead><tbody>${TLM_DURATION_TABLE}</tbody></table></div><p class="reference-note-copy">Cada silencio dura lo mismo que la figura situada en su fila. Las barras agrupan corcheas y figuras menores para hacer visible la subdivisión del pulso.</p></div>`
+          html: `<div class="reference-panel"><p>El valor exacto depende del compás. Esta tabla muestra la proporción tomando la redonda como unidad.</p><div class="table-scroll"><table class="music-reference-table"><thead><tr><th>Figura</th><th>Nota</th><th>Silencio</th><th>Relación</th></tr></thead><tbody><tr><td>Redonda</td><td class="music-glyph">&#xECA2;</td><td class="music-glyph rest-glyph-cell">&#xE4E3;</td><td>1 unidad</td></tr><tr><td>Blanca</td><td class="music-glyph">&#xECA3;</td><td class="music-glyph rest-glyph-cell">&#xE4E4;</td><td>1/2</td></tr><tr><td>Negra</td><td class="music-glyph">&#xECA5;</td><td class="music-glyph rest-glyph-cell">&#xE4E5;</td><td>1/4</td></tr><tr><td>Corchea</td><td class="music-glyph">&#xECA7;</td><td class="music-glyph rest-glyph-cell">&#xE4E6;</td><td>1/8</td></tr><tr><td>Semicorchea</td><td class="music-glyph">&#xECA9;</td><td class="music-glyph rest-glyph-cell">&#xE4E7;</td><td>1/16</td></tr><tr><td>Fusa</td><td class="music-glyph">&#xECAB;</td><td class="music-glyph rest-glyph-cell">&#xE4E8;</td><td>1/32</td></tr><tr><td>Semifusa</td><td class="music-glyph">&#xECAD;</td><td class="music-glyph rest-glyph-cell">&#xE4E9;</td><td>1/64</td></tr></tbody></table></div><p class="reference-note-copy">Cada silencio dura lo mismo que la figura situada en su fila. Las barras agrupan corcheas y figuras menores para hacer visible la subdivisión del pulso.</p></div>`
         },
         {
           title: "Alteraciones y escritura básica",
