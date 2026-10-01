@@ -152,12 +152,25 @@ function renderCourse(){
   mountTrainer(level);
   mountSolfege(level);
   mountQuickPractice(level);
+  mountChromaticInstrumentReference();
   window.CrescendoLab?.attach($("lessonContent"),'theory');
 }
 function updateHomeProgress(){
   const done=DATA.levels.filter(x=>state.completed[x.id]).length;
   $("homeProgressBar").style.width=`${(done/DATA.levels.length)*100}%`;
   $("homeProgressText").textContent=`${done}/${DATA.levels.length} niveles explorados`;
+}
+
+function mountChromaticInstrumentReference(){
+  const mount=document.querySelector("[data-chromatic-instrument]");
+  if(!mount) return;
+  const chromaticTokens=["1","b2","2","b3","3","4","b5","5","b6","6","b7","7","8"];
+  const chromaticTones=tones("C",chromaticTokens);
+  mount.innerHTML=`<div class="diagram-label">Cromatismo en el instrumento</div>
+    <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. En la guitarra, cada traste consecutivo avanza un semitono.</p>
+    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${pianoHTML("C",chromaticTones,{range:12})}</section><section class="visual-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="scroll-x">${guitarScaleSVG("C",chromaticTones)}</div></section></div>
+    <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
+  mount.querySelector("[data-chromatic-play]").addEventListener("click",()=>playSequence(chromaticTones.map(t=>rootMidi("C",4)+t.semi),190));
 }
 
 /* ===================== AUDIO ===================== */
@@ -232,6 +245,34 @@ function stopAllAudio(){
   AUDIO.nodes.forEach(n=>{try{n.stop()}catch(e){}});
   AUDIO.nodes=[];
   if(AUDIO.metroTimer){clearInterval(AUDIO.metroTimer);AUDIO.metroTimer=null}
+}
+function meterPulseCount(meter="4/4"){
+  // 6/8 se practica aquí como dos pulsos principales con subdivisión ternaria.
+  return meter==="6/8"?2:Number(String(meter).split("/")[0])||4;
+}
+function setCountIn(root,text,active=false){
+  const display=root.querySelector("[data-count-in-display]");
+  if(!display) return;
+  display.textContent=text;
+  display.classList.toggle("active",active);
+}
+async function playCountIn(root,bpm,meter="4/4"){
+  stopAllAudio();
+  const token=AUDIO.seq;
+  await ensurePianoSoundFont();
+  const pulses=meterPulseCount(meter),ms=60000/bpm;
+  for(let i=0;i<pulses;i++){
+    if(token!==AUDIO.seq) return null;
+    setCountIn(root,`Cuenta previa · ${i+1} / ${pulses}`,true);
+    playTone(i===0?84:79,{duration:.07,volume:.17});
+    await new Promise(resolve=>setTimeout(resolve,ms));
+  }
+  if(token!==AUDIO.seq) return null;
+  setCountIn(root,"¡Ahora!",true);
+  return token;
+}
+function finishCountIn(root){
+  setCountIn(root,"Cuenta previa lista",false);
 }
 async function playSequence(midis,gap=360,onStep=()=>{},continuing=false){
   if(!continuing)stopAllAudio();
@@ -517,11 +558,11 @@ function mountRhythmLab(el){
     <div class="rhythm-builder"><p><b>Patrón de 8 subdivisiones</b> · activa/desactiva golpes:</p><div class="step-row" data-rhythm-steps>${Array.from({length:8},(_,i)=>`<button class="rhythm-step ${i%2===0?"on":""}" data-step="${i}">${i+1}</button>`).join("")}</div><button class="ghost-btn" data-play-pattern>▶ Escuchar patrón</button></div>
   </div>`;
   const bpm=el.querySelector("[data-bpm]"),meter=el.querySelector("[data-meter]");
-  const renderBeats=()=>{const n=Number(meter.value);el.querySelector("[data-beats]").innerHTML=Array.from({length:n},(_,i)=>`<span class="beat ${i===0?"accent":n===6&&i===3?"secondary-accent":""}" data-beat="${i}">${i+1}</span>`).join("")};
+  const renderBeats=()=>{const n=meterPulseCount(meter.value);el.querySelector("[data-beats]").innerHTML=Array.from({length:n},(_,i)=>`<span class="beat ${i===0?"accent":n===2&&i===1?"secondary-accent":""}" data-beat="${i}">${i+1}</span>`).join("")};
   bpm.addEventListener("input",()=>el.querySelector("[data-bpm-label]").textContent=`${bpm.value} BPM`);meter.addEventListener("change",renderBeats);renderBeats();
   el.querySelector("[data-metro]").addEventListener("click",()=>{
     stopAllAudio();AUDIO.metroBeat=0;
-    const tick=()=>{const beats=[...el.querySelectorAll(".beat")],position=AUDIO.metroBeat%beats.length;beats.forEach((b,i)=>b.classList.toggle("active",i===position));playTone(position===0?84:beats.length===6&&position===3?82:79,{duration:.07,volume:.13});AUDIO.metroBeat++};
+    const tick=()=>{const beats=[...el.querySelectorAll(".beat")],position=AUDIO.metroBeat%beats.length;beats.forEach((b,i)=>b.classList.toggle("active",i===position));playTone(position===0?84:position===1&&beats.length===2?82:79,{duration:.07,volume:.13});AUDIO.metroBeat++};
     tick();AUDIO.metroTimer=setInterval(tick,60000/Number(bpm.value));
   });
   el.querySelector("[data-stop-metro]").addEventListener("click",()=>{stopAllAudio();el.querySelectorAll(".beat").forEach(b=>b.classList.remove("active"))});
@@ -765,7 +806,8 @@ function mountAdvancedRhythmLab(parent){
   <div class="advanced-rhythm-grid" data-ar-grid></div>
   <div class="lab-actions">
     <button class="primary-btn" data-ar-play>▶ Escuchar ejemplo</button>
-    <button class="ghost-btn" data-ar-count>▶ Escuchar pulso base</button>
+    <button class="ghost-btn" data-ar-count>▶ Iniciar pulso base</button>
+    <button class="ghost-btn" data-ar-stop>■ Detener</button>
   </div>`;
   parent.appendChild(wrapper);
 
@@ -780,7 +822,7 @@ function mountAdvancedRhythmLab(parent){
     wrapper.querySelector("[data-ar-desc]").textContent=current.description;
     wrapper.querySelector("[data-ar-grid]").innerHTML=CrescendoPractice.sequence(current.events.map(ev=>({...ev,note:"G4",beats:ev.beats*(current.meter==="6/8"?1.5:1)})),{meter:current.meter})+current.events.map((ev,i)=>`
       <div class="advanced-rhythm-event ${ev.kind}" data-ar-event="${i}" style="--beats:${ev.beats}">
-        <b>Evento ${i+1}</b>
+        <b aria-label="Pulso ${i+1}">${i+1}</b>
         <small>${ev.kind==="rest"?"silencio":ev.kind==="triplet"?"1/3 pulso":`${ev.beats} pulso${ev.beats===1?"":"s"}`}</small>
         ${ev.tieStart?'<span>Prolongar</span>':""}
       </div>`).join("");
@@ -789,6 +831,7 @@ function mountAdvancedRhythmLab(parent){
   bpm.addEventListener("input",()=>wrapper.querySelector("[data-ar-bpm-label]").textContent=bpm.value);
   wrapper.querySelector("[data-ar-play]").addEventListener("click",()=>playAdvancedRhythmExample(wrapper,current,Number(bpm.value)));
   wrapper.querySelector("[data-ar-count]").addEventListener("click",()=>playAdvancedBasePulse(current,Number(bpm.value)));
+  wrapper.querySelector("[data-ar-stop]").addEventListener("click",()=>{stopAllAudio();wrapper.querySelectorAll("[data-ar-event]").forEach(node=>node.classList.remove("playing"));});
   render();
 }
 
@@ -797,12 +840,15 @@ async function playAdvancedBasePulse(example,bpm){
     const playbackToken=AUDIO.seq;
     await ensurePianoSoundFont();
   const beatMs=60000/bpm;
-  const beats=example.compound?2:4;
-  for(let i=0;i<beats;i++){
-      if(playbackToken!==AUDIO.seq)return;
-    playTone(i===0?84:79,{duration:.06,volume:.14});
-    await new Promise(r=>setTimeout(r,beatMs));
-  }
+  const beats=meterPulseCount(example.meter);
+  let position=0;
+  const tick=()=>{
+    if(playbackToken!==AUDIO.seq)return;
+    playTone(position===0?84:position===1&&beats===2?82:79,{duration:.06,volume:.14});
+    position=(position+1)%beats;
+  };
+  tick();
+  AUDIO.metroTimer=setInterval(tick,beatMs);
 }
 
 async function playAdvancedRhythmExample(root,example,bpm){
@@ -1413,10 +1459,9 @@ function phraseStaffSVG(phrase,{clef="treble",meter="4/4"}={}){
   return CrescendoPractice.sequence(phrase,{clef,meter,labels:true})+'<div class="cp-note-buttons">'+phrase.map((ev,index)=>'<span data-sol-note-index="'+index+'">'+escapeHtml(ev.note)+'</span>').join('')+'</div>';
 }
 
-async function playPhrase(root,phrase,bpm){
-  stopAllAudio();
-    const playbackToken=AUDIO.seq;
-    await ensurePianoSoundFont();
+async function playPhrase(root,phrase,bpm,meter="4/4"){
+  const playbackToken=await playCountIn(root,bpm,meter);
+  if(playbackToken===null) return;
   const msPerBeat=60000/bpm;
   for(let i=0;i<phrase.length;i++){
       if(playbackToken!==AUDIO.seq)return;
@@ -1427,6 +1472,7 @@ async function playPhrase(root,phrase,bpm){
     await new Promise(r=>setTimeout(r,ev.beats*msPerBeat));
   }
   root.querySelectorAll("[data-sol-note-index]").forEach(g=>g.classList.remove("playing"));
+  finishCountIn(root);
 }
 
 function mountMelodySolfege(root){
@@ -1437,6 +1483,7 @@ function mountMelodySolfege(root){
     <label>BPM <input type="range" min="50" max="120" value="80" data-ms-bpm><span data-ms-bpm-label>80</span></label>
   </div>
   <div class="solfege-score-wrap"><div class="scroll-x" data-ms-staff></div></div>
+  <p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · 1 2 3 4</p>
   <div class="solfege-actions">
     <button class="primary-btn" data-ms-play>▶ Reproducir</button>
     <button class="ghost-btn" data-ms-count>1 2 3 4 · Contar</button>
@@ -1458,7 +1505,7 @@ function mountMelodySolfege(root){
   bpm.addEventListener("input",()=>{body.querySelector("[data-ms-bpm-label]").textContent=bpm.value;root.querySelector("[data-solfege-bpm]").textContent=bpm.value});
   [bars,level].forEach(x=>x.addEventListener("change",render));
   body.querySelector("[data-ms-new]").addEventListener("click",render);
-  body.querySelector("[data-ms-play]").addEventListener("click",()=>playPhrase(body,phrase,Number(bpm.value)));
+  body.querySelector("[data-ms-play]").addEventListener("click",()=>playPhrase(body,phrase,Number(bpm.value),"4/4"));
   body.querySelector("[data-ms-count]").addEventListener("click",async()=>{
     stopAllAudio();const playbackToken=AUDIO.seq;
     const ms=60000/Number(bpm.value);
@@ -1488,10 +1535,9 @@ function rhythmNotationHTML(pattern){
   pattern.forEach(ev=>(grouped[ev.bar]??=[]).push(ev));
   return Object.entries(grouped).map(([bar,events])=>'<div class="rhythm-measure" data-rhythm-measure="'+bar+'">'+CrescendoPractice.sequence(events.map(ev=>({...ev,note:"G4",bar:0})),{meter:"4/4"})+'<div class="cp-note-buttons">'+events.map((ev,i)=>'<span class="rhythm-symbol" data-rhythm-event="'+bar+'-'+i+'">'+escapeHtml(ev.label)+'</span>').join('')+'</div><span class="measure-number">Compás '+(Number(bar)+1)+'</span></div>').join('');
 }
-async function playRhythmPattern(root,pattern,bpm){
-  stopAllAudio();
-    const playbackToken=AUDIO.seq;
-    await ensurePianoSoundFont();
+async function playRhythmPattern(root,pattern,bpm,meter="4/4"){
+  const playbackToken=await playCountIn(root,bpm,meter);
+  if(playbackToken===null) return;
   const ms=60000/bpm;
   for(const ev of pattern){
       if(playbackToken!==AUDIO.seq)return;
@@ -1504,6 +1550,7 @@ async function playRhythmPattern(root,pattern,bpm){
     await new Promise(r=>setTimeout(r,ev.beats*ms));
   }
   root.querySelectorAll(".rhythm-symbol").forEach(x=>x.classList.remove("playing"));
+  finishCountIn(root);
 }
 function mountRhythmSolfege(root){
   const body=root.querySelector("[data-solfege-body]");
@@ -1513,6 +1560,7 @@ function mountRhythmSolfege(root){
     <label>BPM <input type="range" min="50" max="120" value="76" data-rs-bpm><span data-rs-bpm-label>76</span></label>
   </div>
   <div class="rhythm-reading-score" data-rs-score></div>
+  <p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · 1 2 3 4</p>
   <div class="solfege-actions"><button class="primary-btn" data-rs-play>▶ Reproducir</button><button class="ghost-btn" data-rs-new>Nuevo patrón</button></div>
   <div class="solfege-task"><p><b>Reto:</b> marca el pulso con la mano antes de reproducir el patrón.</p></div>`;
   let pattern=[];
@@ -1526,7 +1574,7 @@ function mountRhythmSolfege(root){
   bpm.addEventListener("input",()=>{body.querySelector("[data-rs-bpm-label]").textContent=bpm.value;root.querySelector("[data-solfege-bpm]").textContent=bpm.value});
   [bars,level].forEach(x=>x.addEventListener("change",render));
   body.querySelector("[data-rs-new]").addEventListener("click",render);
-  body.querySelector("[data-rs-play]").addEventListener("click",()=>playRhythmPattern(body,pattern,Number(bpm.value)));
+  body.querySelector("[data-rs-play]").addEventListener("click",()=>playRhythmPattern(body,pattern,Number(bpm.value),"4/4"));
   render();
 }
 
@@ -1548,6 +1596,7 @@ function mountContourSolfege(root){
   </div>
   <div class="solfege-score-wrap"><div class="scroll-x" data-cs-staff></div></div>
   <div class="contour-cards" data-cs-contour></div>
+  <p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · 1 2 3 4</p>
   <div class="solfege-actions"><button class="primary-btn" data-cs-play>▶ Escuchar frase</button><button class="ghost-btn" data-cs-new>Nueva frase</button></div>`;
   let phrase=[];
   const level=body.querySelector("[data-cs-level]"),bpm=body.querySelector("[data-cs-bpm]");
@@ -1573,7 +1622,7 @@ function mountContourSolfege(root){
   bpm.addEventListener("input",()=>{body.querySelector("[data-cs-bpm-label]").textContent=bpm.value;root.querySelector("[data-solfege-bpm]").textContent=bpm.value});
   level.addEventListener("change",render);
   body.querySelector("[data-cs-new]").addEventListener("click",render);
-  body.querySelector("[data-cs-play]").addEventListener("click",()=>playPhrase(body,phrase,Number(bpm.value)));
+  body.querySelector("[data-cs-play]").addEventListener("click",()=>playPhrase(body,phrase,Number(bpm.value),"4/4"));
   render();
 }
 
