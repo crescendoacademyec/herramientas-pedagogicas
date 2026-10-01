@@ -167,7 +167,7 @@ function audioContext(){
     if(!AC) return null;
     AUDIO.ctx=new AC();
     AUDIO.masterBus=AUDIO.ctx.createGain();
-    AUDIO.masterBus.gain.value=2;
+    AUDIO.masterBus.gain.value=2.6;
     AUDIO.masterBus.connect(AUDIO.ctx.destination);
   }
   if(AUDIO.ctx.state==="suspended") AUDIO.ctx.resume();
@@ -420,18 +420,37 @@ function staffTrainerSVG(note,clef){
   return CrescendoPractice.staff([CrescendoPractice.named(note)],{clef});
 }
 const NOTE_SOLFEGE={C:"Do",D:"Re",E:"Mi",F:"Fa",G:"Sol",A:"La",B:"Si"};
-function staffReferenceSVG(clef){
+function referencePosition(note,clef){
   const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES;
-  return '<div class="staff-reference"><div class="staff-reference-title">Clave de '+(clef==="treble"?"sol":"fa")+'</div>'+CrescendoPractice.sequence(notes.map(note=>({note,beats:4,label:NOTE_SOLFEGE[note[0]]})),{clef,labels:true})+'<div class="cp-note-buttons">'+notes.map(note=>'<button type="button" data-reference-note="'+note+'">'+NOTE_SOLFEGE[note[0]]+' · '+note+'</button>').join('')+'</div></div>';
+  const index=notes.indexOf(note);
+  const positions=clef==="treble"
+    ?["línea adicional inferior","espacio inferior","línea 1","espacio 1","línea 2","espacio 2","línea 3","espacio 3","línea 4","espacio 4","línea 5","espacio superior","línea adicional superior"]
+    :["línea adicional inferior","espacio inferior","línea 1","espacio 1","línea 2","espacio 2","línea 3","espacio 3","línea 4","espacio 4","línea 5","espacio superior","línea adicional superior"];
+  return positions[index]||"pentagrama";
+}
+function staffReferenceSVG(clef,selectedNote=""){
+  const notes=clef==="treble"?TREBLE_STAFF_NOTES:BASS_STAFF_NOTES;
+  const selected=notes.includes(selectedNote)?selectedNote:"";
+  const selectedLabel=selected?`${NOTE_SOLFEGE[selected[0]]} · ${selected} · ${referencePosition(selected,clef)}`:"Elige una nota para verla destacada en dorado.";
+  return '<div class="staff-reference"><div class="staff-reference-title">Clave de '+(clef==="treble"?"sol":"fa")+'</div>'+CrescendoPractice.sequence(notes.map(note=>({note,beats:4,label:NOTE_SOLFEGE[note[0]],color:note===selected?"#c8942e":undefined})),{clef,labels:true})+'<div class="cp-note-buttons">'+notes.map(note=>'<button type="button" class="'+(note===selected?"active":"")+'" aria-pressed="'+String(note===selected)+'" data-reference-note="'+note+'">'+NOTE_SOLFEGE[note[0]]+' · '+note+'</button>').join('')+'</div><p class="reference-selection" aria-live="polite">'+selectedLabel+'</p></div>';
+}
+const HAND_STAFF_POSITIONS={
+  treble:[['line-1','Línea 1','Mi'],['space-1','Espacio 1','Fa'],['line-2','Línea 2','Sol'],['space-2','Espacio 2','La'],['line-3','Línea 3','Si'],['space-3','Espacio 3','Do'],['line-4','Línea 4','Re'],['space-4','Espacio 4','Mi'],['line-5','Línea 5','Fa']],
+  bass:[['line-1','Línea 1','Sol'],['space-1','Espacio 1','La'],['line-2','Línea 2','Si'],['space-2','Espacio 2','Do'],['line-3','Línea 3','Re'],['space-3','Espacio 3','Mi'],['line-4','Línea 4','Fa'],['space-4','Espacio 4','Sol'],['line-5','Línea 5','La']]
+};
+function handStaffHTML(clef){
+  const items=HAND_STAFF_POSITIONS[clef];
+  return '<div class="hand-staff-board" role="group" aria-label="Mano pentagrama"><div class="hand-staff-side">Meñique<br><span>línea 1</span></div><div class="hand-staff-lanes">'+items.map(([id,label,note])=>'<button type="button" class="hand-staff-position '+(id.startsWith("line")?"finger":"space")+'" data-hand-position="'+id+'" aria-label="'+label+', '+note+'">'+(id.startsWith("line")?"Dedo":"Espacio")+'<b>'+label.replace(/[^0-9]/g,"")+'</b><small>'+note+'</small></button>').join('')+'</div><div class="hand-staff-side">Pulgar<br><span>línea 5</span></div></div>';
 }
 function mountReadingLab(el){
   const rhythmValues=[{name:"Redonda",beats:4},{name:"Blanca",beats:2},{name:"Negra",beats:1},{name:"Corchea",beats:.5},{name:"Semicorchea",beats:.25},{name:"Fusa",beats:.125},{name:"Semifusa",beats:.0625}];
   el.innerHTML=`<div class="visual-two">
     <section class="lab-card staff-map-card">
       <div class="diagram-label">Mapa de notas en el pentagrama</div>
-      <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa su botón bajo el pentagrama para escucharla.</p>
+      <p class="staff-reference-copy">Observa dónde se escribe cada nota. Selecciona una clave y pulsa una nota: se reproduce, queda resaltada y muestra su posición exacta.</p>
       <div class="controls-row"><label>Mostrar <select data-reference-clef><option value="treble">Clave de sol</option><option value="bass">Clave de fa</option><option value="both" selected>Ambas claves</option></select></label></div>
       <div class="staff-reference-stack" data-reading-reference></div>
+      <section class="hand-staff-section"><div><div class="diagram-label">Práctica cinestésica · mano-pentagrama</div><p class="staff-reference-copy">Extiende una mano: del meñique al pulgar, cada dedo es una línea; los huecos son espacios. Con el índice de la otra mano toca la posición pedida.</p></div><div class="hand-staff-controls"><label>Clave <select data-hand-clef><option value="treble">Sol</option><option value="bass">Fa</option></select></label><button type="button" class="ghost-btn" data-hand-next>Nueva posición</button></div><p class="hand-staff-prompt" data-hand-prompt></p><div data-hand-staff></div><p class="reference-selection" data-hand-feedback aria-live="polite"></p></section>
     </section>
     <section class="lab-card">
       <div class="diagram-label">Audición de duraciones</div>
@@ -440,24 +459,43 @@ function mountReadingLab(el){
       <p class="feedback" data-figure-feedback>Selecciona un valor y escúchalo con el piano acústico.</p>
     </section>
   </div>`;
+  let selectedReferenceNote="";
   const renderReference=()=>{
     const choice=el.querySelector("[data-reference-clef]").value;
     const clefs=choice==="both"?["treble","bass"]:[choice];
     const mount=el.querySelector("[data-reading-reference]");
-    mount.innerHTML=clefs.map(staffReferenceSVG).join("");
+    mount.innerHTML=clefs.map(clef=>staffReferenceSVG(clef,selectedReferenceNote)).join("");
     mount.querySelectorAll("[data-reference-note]").forEach(note=>{
-      const play=()=>{const name=note.dataset.referenceNote;playTone(rootMidi(name.slice(0,-1),Number(name.slice(-1))),{duration:.7,volume:.18})};
+      const play=()=>{const name=note.dataset.referenceNote;selectedReferenceNote=name;playTone(rootMidi(name.slice(0,-1),Number(name.slice(-1))),{duration:.7,volume:.22});renderReference()};
       note.addEventListener("click",play);
       note.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();play()}});
     });
   };
+  let handTarget="line-1";
+  const renderHandStaff=()=>{
+    const clef=el.querySelector("[data-hand-clef]").value;
+    const position=HAND_STAFF_POSITIONS[clef].find(item=>item[0]===handTarget)||HAND_STAFF_POSITIONS[clef][0];
+    handTarget=position[0];
+    el.querySelector("[data-hand-prompt]").textContent=`Busca ${position[1].toLowerCase()} · ${position[2]}.`;
+    el.querySelector("[data-hand-staff]").innerHTML=handStaffHTML(clef);
+    el.querySelector("[data-hand-feedback]").textContent="";
+    el.querySelectorAll("[data-hand-position]").forEach(button=>button.addEventListener("click",()=>{
+      const correct=button.dataset.handPosition===handTarget;
+      el.querySelectorAll("[data-hand-position]").forEach(item=>item.classList.remove("correct","wrong"));
+      button.classList.add(correct?"correct":"wrong");
+      el.querySelector("[data-hand-feedback]").textContent=correct?`Correcto: ${position[2]} está en ${position[1].toLowerCase()} de la clave de ${clef==="treble"?"sol":"fa"}.`:`Observa de nuevo: ${position[2]} está en ${position[1].toLowerCase()}.`;
+    }));
+  };
   el.querySelector("[data-reference-clef]").addEventListener("change",renderReference);
+  el.querySelector("[data-hand-clef]").addEventListener("change",()=>{handTarget="line-1";renderHandStaff()});
+  el.querySelector("[data-hand-next]").addEventListener("click",()=>{const list=HAND_STAFF_POSITIONS[el.querySelector("[data-hand-clef]").value];handTarget=list[Math.floor(Math.random()*list.length)][0];renderHandStaff()});
   el.querySelector("[data-play-rhythm-value]").addEventListener("click",()=>{
     const select=el.querySelector("[data-rhythm-audition]"),beats=Number(select.value),seconds=Math.max(.08,beats*.5);
     playTone(60,{duration:seconds,volume:.12});
     el.querySelector("[data-figure-feedback]").textContent=`${select.options[select.selectedIndex].textContent}: duración relativa con negra = 1 pulso.`;
   });
   renderReference();
+  renderHandStaff();
 }
 
 /* RITMO */
