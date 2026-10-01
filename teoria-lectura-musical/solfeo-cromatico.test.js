@@ -14,7 +14,7 @@ assert.equal(vm.runInContext('CHROMATIC_SOLFEGE.B',sandbox),'Ti');
 assert.equal(vm.runInContext('CHROMATIC_SOLFEGE["G#"]',sandbox),'Si');
 assert.equal(vm.runInContext('CHROMATIC_SOLFEGE["C#"]',sandbox),'Di');
 assert.equal(vm.runInContext('CHROMATIC_SOLFEGE.Db',sandbox),'Ra');
-assert.match(source,/function chromaticGuitarHTML/,'El cromatismo debe poder verse en los doce trastes de guitarra');
+assert.match(source,/const fretCount=5/,'El diapasón cromático debe mantener cinco trastes legibles');
 assert.match(source,/data-chromatic-guitar-label="up"/,'El diapasón debe permitir seleccionar la lectura ascendente');
 assert.match(source,/data-chromatic-guitar-label="down"/,'El diapasón debe permitir seleccionar la lectura descendente');
 const sharp=vm.runInContext('staffTrainerSVG("C#4","treble")',sandbox);

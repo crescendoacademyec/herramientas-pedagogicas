@@ -216,7 +216,7 @@ function mountChromaticInstrumentReference(){
   const chromaticTones=tones("C",chromaticTokens);
   mount.innerHTML=`<div class="diagram-label">Cromatismo en el instrumento</div>
     <p class="staff-reference-copy">Las doce alturas están activas: las teclas negras corresponden a alteraciones. Pulsa una tecla para escucharla. Elige cómo nombrarlas y sigue las doce posiciones del diapasón.</p>
-    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box chromatic-guitar-box"><div class="diagram-label">Guitarra · 12 trastes</div><div class="chromatic-label-picker" role="group" aria-label="Nombres para el diapasón"><button type="button" data-chromatic-guitar-label="note" class="active">Notas</button><button type="button" data-chromatic-guitar-label="up">Ascendente</button><button type="button" data-chromatic-guitar-label="down">Descendente</button></div><div class="scroll-x" data-chromatic-guitar></div></section></div>
+    <div class="visual-two chromatic-instrument-grid"><section class="visual-box"><div class="diagram-label">Piano · C a C</div>${chromaticPianoHTML()}</section><section class="visual-box chromatic-guitar-box"><div class="diagram-label">Guitarra · 5 trastes</div><div class="chromatic-label-picker" role="group" aria-label="Nombres para el diapasón"><button type="button" data-chromatic-guitar-label="note" class="active">Notas</button><button type="button" data-chromatic-guitar-label="up">Ascendente</button><button type="button" data-chromatic-guitar-label="down">Descendente</button></div><div class="scroll-x" data-chromatic-guitar></div></section></div>
     <button type="button" class="ghost-btn" data-chromatic-play>▶ Escuchar cromatismo</button>`;
   const practiceNote=mount.nextElementSibling;
   if(practiceNote?.tagName==="P"&&practiceNote.textContent.includes("Solfeo cromático")){
@@ -445,9 +445,10 @@ function chromaticGuitarHTML(mode="note"){
   const sharpSolfege=["Do","Di","Re","Ri","Mi","Fa","Fi","Sol","Si","La","Li","Ti"];
   const flatSolfege=["Do","Ra","Re","Me","Mi","Fa","Se","Sol","Le","La","Te","Ti"];
   const labelFor=pc=>mode==="up"?`${sharpNames[pc]} · ${sharpSolfege[pc]}`:mode==="down"?`${flatNames[pc]} · ${flatSolfege[pc]}`:`${sharpNames[pc]}${sharpNames[pc]===flatNames[pc]?"":` / ${flatNames[pc]}`}`;
-  const frets=Array.from({length:13},(_,f)=>`<div class="chromatic-fret-number">${f}</div>`).join("");
-  const rows=strings.map(string=>`<div class="chromatic-string-name">${string.name}</div>${Array.from({length:13},(_,f)=>`<button type="button" class="chromatic-fret-note" data-chromatic-fret-midi="${string.midi+f}" aria-label="Cuerda ${string.name}, traste ${f}: ${labelFor((string.pc+f)%12)}">${labelFor((string.pc+f)%12)}</button>`).join("")}`).join("");
-  return `<div class="chromatic-guitar" data-label-mode="${mode}"><div class="chromatic-guitar-grid"><div class="chromatic-string-name chromatic-string-head">Cuerda</div>${frets}${rows}</div><p>Trastes 0–12 · ${mode==="up"?"solfeo ascendente con sostenidos":mode==="down"?"solfeo descendente con bemoles":"nombre enarmónico de cada nota"}. Pulsa una posición para escucharla.</p></div>`;
+  const fretCount=5;
+  const frets=Array.from({length:fretCount+1},(_,f)=>`<div class="chromatic-fret-number">${f}</div>`).join("");
+  const rows=strings.map(string=>`<div class="chromatic-string-name">${string.name}</div>${Array.from({length:fretCount+1},(_,f)=>`<button type="button" class="chromatic-fret-note" data-chromatic-fret-midi="${string.midi+f}" aria-label="Cuerda ${string.name}, traste ${f}: ${labelFor((string.pc+f)%12)}">${labelFor((string.pc+f)%12)}</button>`).join("")}`).join("");
+  return `<div class="chromatic-guitar" data-label-mode="${mode}"><div class="chromatic-guitar-grid"><div class="chromatic-string-name chromatic-string-head">Cuerda</div>${frets}${rows}</div><p>Trastes 0–5 · ${mode==="up"?"solfeo ascendente con sostenidos":mode==="down"?"solfeo descendente con bemoles":"nombre enarmónico de cada nota"}. Pulsa una posición para escucharla.</p></div>`;
 }
 function rootOptions(selected="C"){return ROOTS.map(r=>`<option value="${r.value}" ${r.value===selected?"selected":""}>${r.label}</option>`).join("")}
 
