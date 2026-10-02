@@ -21,6 +21,8 @@ assert.match(app,/allCourseLevels\(\)/,'El progreso debe incluir los tres nivele
 assert.match(app,/function generateTrackNotes/,'Los niveles aplicados deben crear frases nuevas');
 assert.match(app,/function generatedTrackQuestion/,'Las comprobaciones avanzadas deben rotar situaciones');
 assert.match(app,/data-track-new/,'Cada práctica aplicada debe permitir generar otro ejercicio');
+assert.match(app,/function renderTrackExtension/,'Los niveles 2 y 3 deben incluir estrategia de estudio explícita');
+assert.match(app,/LECTURA GUIADA · GENERADA/,'Armaduras y métrica deben incluir un pentagrama generado');
 
 const context={window:{}};context.window=context;vm.createContext(context);
 vm.runInContext(data,context);

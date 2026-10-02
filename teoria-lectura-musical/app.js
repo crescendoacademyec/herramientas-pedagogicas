@@ -199,6 +199,7 @@ function renderCourse(){
         <h3>${escapeHtml(block.title)}</h3>
         ${block.html}
       </section>`).join("")}
+    ${renderTrackExtension(level)}
     ${renderInteractive(level)}
     ${renderTrainer(level)}
     ${renderSolfege(level)}
@@ -247,6 +248,13 @@ function updateHomeProgress(){
   const levels=allCourseLevels(),done=levels.filter(x=>state.completed[x.id]).length;
   $("homeProgressBar").style.width=`${(done/levels.length)*100}%`;
   $("homeProgressText").textContent=`${done}/${levels.length} unidades exploradas`;
+}
+function renderTrackExtension(level){
+  if(activeTrackId==="foundation")return"";
+  const kind=level.practice?.type;
+  const focus=kind==="key"?"armadura, alteraciones recurrentes y centro tonal":kind==="meter"?"agrupación, pulso principal y subdivisión":kind==="grand"?"voz principal, coincidencias verticales y pulso compartido":kind==="dictation"?"pulso, contorno y memoria auditiva":"clave, contorno, ritmo y continuidad";
+  const common=kind==="key"||kind==="meter"?"Lee la situación, verbaliza la decisión y luego compruébala con el ejercicio generado.":"Observa primero en silencio; después escucha o lee con cuenta previa, y repite únicamente el punto que se interrumpió.";
+  return `<section class="track-extension"><div><p class="kicker">ESTRATEGIA DE ESTUDIO</p><h3>Preparar, leer y comprobar</h3><p>${escapeHtml(common)}</p></div><div class="track-extension-grid"><article><b>Antes</b><span>Localiza ${escapeHtml(focus)}.</span></article><article><b>Durante</b><span>Conserva el pulso aunque ocurra un error.</span></article><article><b>Después</b><span>Explica una decisión y genera otra práctica.</span></article></div><p class="track-error"><b>Error frecuente:</b> detenerse para corregir cada detalle. En lectura real, vuelve al siguiente punto seguro y revisa después.</p></section>`;
 }
 
 function mountChromaticInstrumentReference(){
@@ -1537,8 +1545,8 @@ function mountAppliedReading(level){
 
 /* ===================== NIVELES 2 Y 3 · PRÁCTICA APLICADA ===================== */
 function trackPhrase(notes,meter){
-  const beats=meter==="3/4"?3:meter==="5/4"?5:meter==="6/8"?6:4;
-  const compound=meter==="6/8";
+  const beats=meter==="3/4"?3:meter==="5/4"?5:meter==="6/8"?6:meter==="7/8"?7:4;
+  const compound=meter==="6/8"||meter==="7/8";
   return notes.map((note,index)=>({note,dur:compound?"e":"q",beats:compound ? .5 : 1,bar:Math.floor(index/beats)}));
 }
 function trackTones(notes){
@@ -1609,7 +1617,7 @@ function mountTrackPractice(level){
     const contour=delta>2?"Salto ascendente":delta>0?"Grado conjunto ascendente":delta<-2?"Salto descendente":"Grado conjunto descendente";
     const dictationQuestion=shuffledQuestion("Después de escuchar, ¿cómo comienza la frase nueva?",contour,["Repetición exacta","Dos notas simultáneas","Silencio inicial"]);
     const question=cfg.type==="dictation"?dictationQuestion:noteQuestion;
-    const instrumentMap=level.id==="l2-fluidez-sol"?"":`<div class="visual-two track-instrument-map"><section class="visual-box"><div class="diagram-label">Piano · notas de la frase</div>${pianoHTML("C",visualTones)}</section><section class="visual-box"><div class="diagram-label">Diapasón · posiciones</div><div class="scroll-x">${guitarScaleSVG("C",visualTones)}</div></section></div>`;
+    const instrumentMap=["l2-fluidez-sol","l2-dictado","l2-primera-vista"].includes(level.id)?"":`<div class="visual-two track-instrument-map"><section class="visual-box"><div class="diagram-label">Piano · notas de la frase</div>${pianoHTML("C",visualTones)}</section><section class="visual-box"><div class="diagram-label">Diapasón · posiciones</div><div class="scroll-x">${guitarScaleSVG("C",visualTones)}</div></section></div>`;
     mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">PRÁCTICA GUIADA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>${cfg.type==="dictation"?"Escucha primero; después responde sin mirar la solución.":"Observa el contorno, recibe la cuenta previa y mantén el pulso."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:cfg.clef||"treble",meter:cfg.meter})}</div></div>${instrumentMap}<p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div>${makeQuestion(question.question,question.answers)}</div>`;
     mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,cfg.bpm,cfg.meter));
     mount.querySelector("[data-track-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/cfg.bpm)));
@@ -1630,6 +1638,24 @@ function mountTrackPractice(level){
       window.setTimeout(()=>{if(token===AUDIO.seq)finishCountIn(mount)},upper.length*secondsPerEvent*1000);
     });
     mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
+    return;
+  }
+  if(cfg.type==="key"||cfg.type==="meter"){
+    const isKey=cfg.type==="key";
+    const meter=isKey?"4/4":level.id==="l2-ritmo-compuesto"?"6/8":"7/8";
+    const keyExample=randomItem([
+      {name:"Sol mayor",notes:["G4","A4","B4","C5","D5","E5","F#5","G5"]},
+      {name:"Re mayor",notes:["D4","E4","F#4","G4","A4","B4","C#5","D5"]},
+      {name:"Fa mayor",notes:["F4","G4","A4","Bb4","C5","D5","E5","F5"]}
+    ]);
+    const notes=isKey?generateTrackNotes(keyExample.notes):generateTrackNotes(["G4","A4","B4","D5","C5","B4","A4","G4"]);
+    const phrase=trackPhrase(notes,meter);
+    const question=isKey?shuffledQuestion(`La frase incluye las alteraciones de ${keyExample.name}. ¿Qué tonalidad estás leyendo?`,keyExample.name,["Do mayor","La menor","Mi♭ mayor"]):generatedTrackQuestion(level,cfg);
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA GUIADA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>${isKey?"Identifica las alteraciones que se repiten y decide la tonalidad antes de escuchar.":"Marca la agrupación antes de entrar: el pentagrama se lee desde el pulso, no desde figuras aisladas."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:"treble",meter})}</div></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div>${makeQuestion(question.question,question.answers)}</div>`;
+    mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,68,meter));
+    mount.querySelector("[data-track-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),440));
+    mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
+    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:question.correct,explain:isKey?`La escala escrita contiene las alteraciones propias de ${keyExample.name}.`:question.explain||cfg.explain,levelId:level.id})));
     return;
   }
   const question=generatedTrackQuestion(level,cfg);
