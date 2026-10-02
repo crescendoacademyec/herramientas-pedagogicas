@@ -11,6 +11,9 @@
     view: "home",
     topicIndex: 0,
     studiedTopics: {},   // { "n1-0": true, ... }
+    practiceChecks: {},
+    curriculumEvidence: {},
+    curriculumVersion: 2,
     quiz: null           // { levelSlug, student, course, date, answers: [], submitted:false, startedAt }
   };
 
@@ -31,8 +34,13 @@
       if (!raw) return;
       var saved = JSON.parse(raw);
       state.levelIndex = saved.levelIndex || 0;
-      state.topicIndex = saved.topicIndex || 0;
+      // La versión 2 añade una estación de preparación al inicio de cada nivel.
+      // Conserva al estudiante en el mismo tema que estaba viendo antes del cambio.
+      state.topicIndex = (saved.topicIndex || 0) + ((saved.curriculumVersion || 1) < 2 ? 1 : 0);
       state.studiedTopics = saved.studiedTopics || {};
+      state.practiceChecks = saved.practiceChecks || {};
+      state.curriculumEvidence = saved.curriculumEvidence || {};
+      state.curriculumVersion = 2;
       if (saved.quiz && saved.quiz.startedAt && !saved.quiz.submitted) {
         state.quiz = saved.quiz;
       }
@@ -204,6 +212,58 @@
     renderLevelsOverview();
   }
 
+  var CURRICULUM = {
+    1: { prerequisite: "Cifrado básico, escala mayor y lectura de símbolos de acorde.", diagnostic: ["Construyo Cmaj7, Dm7, G7 y Bm7♭5 sin ayuda.", "Canto la función ii–V–I y reconozco tensión y resolución.", "Toco shells de ii–V–I en C, F y Bb."], project: "Analiza y acompaña un ii–V–I de un standard sencillo con shells y notas guía.", repertoire: "Autumn Leaves o Blue Bossa" },
+    2: { prerequisite: "Nivel 1: campo mayor, ii–V–I y notas guía.", diagnostic: ["Distingo ii–V–I mayor de iiø–V7(♭9)–i.", "Localizo el dominante secundario de un grado.", "Escucho el tritono que resuelve en un dominante."], project: "Analiza ocho compases menores y prueba una sustitución que conserve la resolución.", repertoire: "Alone Together, Equinox o There Will Never Be Another You" },
+    3: { prerequisite: "Nivel 2: campo menor, cadencias, dominantes secundarios y sustitución tritonal.", diagnostic: ["Separo intercambio modal de una modulación.", "Conduzco terceras y séptimas en un ii–V–I.", "Relaciono una nota larga de melodía con una tensión disponible."], project: "Rearmoniza cuatro compases y explica función, bajo, melodía y conducción de voces.", repertoire: "Stella by Starlight, Footprints o Have You Met Miss Jones" },
+    4: { prerequisite: "Nivel 3: reharmonización funcional, formas y voicings rootless.", diagnostic: ["Puedo usar un voicing cuartal como color, sin confundirlo con función tonal.", "Diferencio una estructura superior de una inversión.", "Escribo una voz superior que se mantenga reconocible."], project: "Compón una sección de ocho compases con motivo, contraste y retorno; justifica un color contemporáneo.", repertoire: "So What, Maiden Voyage o Giant Steps" },
+    5: { prerequisite: "Nivel 1 como mínimo; los niveles 2–4 enriquecen el material armónico disponible.", diagnostic: ["Mantengo pulso con una nota antes de tocar muchas alturas.", "Resuelvo en tercera o séptima de cada acorde.", "Canto y reproduzco un motivo breve."], project: "Registra un chorus con motivo, desarrollo, aproximación resuelta y cierre claro.", repertoire: "Blues en F, Autumn Leaves o un standard ya analizado" }
+  };
+
+  function renderCurriculumMounts(scope) {
+    scope.querySelectorAll(".jazz-curriculum-mount").forEach(function (mount) {
+      var level = Number(mount.dataset.curriculumLevel);
+      var kind = mount.dataset.curriculumKind;
+      var guide = CURRICULUM[level];
+      if (!guide) return;
+      var key = "n" + level + "-" + kind;
+      var evidence = state.curriculumEvidence[key] || {};
+      if (kind === "entry") {
+        mount.innerHTML = '<section class="curriculum-card"><p class="kicker">Antes de avanzar</p><h4>Diagnóstico de entrada</h4><p><b>Base esperada:</b> ' + guide.prerequisite + '</p><div class="curriculum-checks">' + guide.diagnostic.map(function (item, index) {
+          return '<label><input type="checkbox" data-evidence="' + key + '" data-evidence-step="' + index + '"' + (evidence[index] ? ' checked' : '') + '> <span>' + item + '</span></label>';
+        }).join("") + '</div><p class="small-note">Si una afirmación aún no se cumple, úsala como meta breve antes de pasar al siguiente tema.</p></section>';
+      } else {
+        mount.innerHTML = '<section class="curriculum-card curriculum-project"><p class="kicker">Evidencia aplicada</p><h4>Proyecto de cierre</h4><p>' + guide.project + '</p><p><b>Repertorio sugerido:</b> ' + guide.repertoire + '</p><div class="curriculum-checks"><label><input type="checkbox" data-evidence="' + key + '" data-evidence-step="analysis"' + (evidence.analysis ? ' checked' : '') + '> <span>Anoté función, forma y decisiones armónicas.</span></label><label><input type="checkbox" data-evidence="' + key + '" data-evidence-step="sound"' + (evidence.sound ? ' checked' : '') + '> <span>Lo canté o lo toqué a un tempo controlable.</span></label><label><input type="checkbox" data-evidence="' + key + '" data-evidence-step="review"' + (evidence.review ? ' checked' : '') + '> <span>Escuché el resultado y escribí una mejora concreta.</span></label></div></section>';
+      }
+    });
+    scope.querySelectorAll("[data-evidence]").forEach(function (input) {
+      input.addEventListener("change", function () {
+        var key = input.dataset.evidence;
+        if (!state.curriculumEvidence[key]) state.curriculumEvidence[key] = {};
+        state.curriculumEvidence[key][input.dataset.evidenceStep] = input.checked;
+        saveState();
+      });
+    });
+  }
+
+  function renderTopicClosure(level, topic, index) {
+    if (topic.curriculumRole) return "";
+    var key = level.slug + "-" + index;
+    var checks = state.practiceChecks[key] || {};
+    return '<aside class="topic-transfer"><p class="kicker">Cierre activo</p><h4>Escucha, canta, toca y aplica</h4><p>Antes de marcar <b>' + topic.title + '</b> como estudiado, convierte la idea en una decisión musical.</p><div class="curriculum-checks"><label><input type="checkbox" data-practice="' + key + '" data-practice-step="hear"' + (checks.hear ? ' checked' : '') + '> <span>Escuché o identifiqué el recurso en contexto.</span></label><label><input type="checkbox" data-practice="' + key + '" data-practice-step="sing"' + (checks.sing ? ' checked' : '') + '> <span>Canté las fundamentales, notas guía o tensión principal.</span></label><label><input type="checkbox" data-practice="' + key + '" data-practice-step="apply"' + (checks.apply ? ' checked' : '') + '> <span>Lo toqué o escribí en una tonalidad distinta.</span></label></div></aside>';
+  }
+
+  function wireTopicPractice(scope) {
+    scope.querySelectorAll("[data-practice]").forEach(function (input) {
+      input.addEventListener("change", function () {
+        var key = input.dataset.practice;
+        if (!state.practiceChecks[key]) state.practiceChecks[key] = {};
+        state.practiceChecks[key][input.dataset.practiceStep] = input.checked;
+        saveState();
+      });
+    });
+  }
+
   // ---------- Render: teoría ----------
   function renderTheory() {
     var lvl = currentLevel();
@@ -240,8 +300,10 @@
       var body = document.createElement("div");
       body.className = "topic-body";
       if (isOpen) {
-        body.innerHTML = topic.html + (TOPIC_VISUALS[topic.title] ? '<div class="theory-visual-mount" data-viz="' + TOPIC_VISUALS[topic.title] + '"></div>' : '');
+        body.innerHTML = topic.html + (TOPIC_VISUALS[topic.title] ? '<div class="theory-visual-mount" data-viz="' + TOPIC_VISUALS[topic.title] + '"></div>' : '') + renderTopicClosure(lvl, topic, idx);
         populateGeneratedDiagrams(body);
+        renderCurriculumMounts(body);
+        wireTopicPractice(body);
         window.CrescendoJazzPiano?.attach(body, topic.title);
         window.CrescendoBagaLab?.mount(body);
       }
@@ -515,6 +577,7 @@
 
     document.getElementById("goTheoryBtn").addEventListener("click", function () { setView("theory"); });
     document.getElementById("startQuizBtn2").addEventListener("click", function () { setView("quiz"); });
+    document.getElementById("openImprovRoute").addEventListener("click", function () { setView("improv"); });
 
     document.getElementById("prevTopicBtn").addEventListener("click", function () { stepTopic(-1); });
     document.getElementById("nextTopicBtn").addEventListener("click", function () { stepTopic(1); });

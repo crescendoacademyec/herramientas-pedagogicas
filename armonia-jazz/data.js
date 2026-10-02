@@ -1,5 +1,5 @@
 /* Armonía Jazz — Crescendo Academy
-   Contenido teórico y cuestionarios para los 4 niveles.
+   Contenido teórico y cuestionarios para los 5 niveles.
    Todo el contenido de este archivo es original, redactado para Crescendo Academy. */
 
 const LEVELS = [
@@ -1284,3 +1284,53 @@ const LEVELS = [
 function q(prompt, options, correctIndex, explanation) {
   return { prompt, options, correctIndex, explanation };
 }
+
+// Puentes pedagógicos: se agregan sin sustituir ninguno de los temas existentes.
+// Cada nivel comienza con una meta observable y termina en una aplicación de repertorio.
+function enrichCurriculum() {
+  var guides = {
+    1: {
+      entry: "Reconocer y construir tétradas diatónicas, cantar la función ii–V–I y tocar shells sencillos en tres tonalidades.",
+      project: "Elige un ii–V–I de un standard sencillo. Nombra las funciones, canta sus terceras y séptimas y acompáñalo con shells en tres tonalidades.",
+      repertoire: "Autumn Leaves o Blue Bossa"
+    },
+    2: {
+      entry: "Distinguir una resolución mayor de una menor y localizar V7, iiø y sus tensiones antes de añadir sustituciones.",
+      project: "Analiza ocho compases con un ii–V–i, añade un dominante secundario o sustituto tritonal que respete la melodía y explica su resolución.",
+      repertoire: "Alone Together, Equinox o There Will Never Be Another You"
+    },
+    3: {
+      entry: "Dominar ii–V–I mayor y menor, las notas guía y la diferencia entre tonicización, intercambio modal y modulación.",
+      project: "Rearmoniza cuatro compases de una melodía conservando sus notas estructurales. Justifica cada cambio por función, bajo y conducción de voces.",
+      repertoire: "Stella by Starlight, Footprints o Have You Met Miss Jones"
+    },
+    4: {
+      entry: "Resolver funciones tradicionales con voicings rootless antes de usar recursos de color no funcional, cuartal o compuesto.",
+      project: "Escribe y toca una sección de ocho compases: motivo, contraste y retorno. Incluye un recurso contemporáneo con una explicación de su color y conducción.",
+      repertoire: "So What, Maiden Voyage o Giant Steps"
+    },
+    5: {
+      entry: "Mantener el pulso y resolver en notas objetivo sobre ii–V–I antes de sumar cromatismo, superposiciones o material outside.",
+      project: "Graba o registra un chorus: presenta un motivo, desarróllalo, usa una aproximación con resolución y deja un cierre claro sobre la forma.",
+      repertoire: "Blues en F, Autumn Leaves o un standard trabajado en los niveles anteriores"
+    }
+  };
+
+  LEVELS.forEach(function (level) {
+    if (level.topics.some(function (topic) { return topic.curriculumRole === "entry"; })) return;
+    var guide = guides[level.id];
+    level.topics.unshift({
+      curriculumRole: "entry",
+      title: "Ruta del nivel " + level.id + ": preparación y diagnóstico",
+      html: "<p>Esta estación prepara el trabajo del nivel. No reemplaza los temas que siguen: te indica qué escuchar, cantar y tocar antes de aplicarlos.</p><div class=\"jazz-curriculum-mount\" data-curriculum-kind=\"entry\" data-curriculum-level=\"" + level.id + "\"></div>"
+    });
+    level.topics.push({
+      curriculumRole: "project",
+      title: "Proyecto aplicado del nivel " + level.id,
+      html: "<p>Integra el contenido del nivel en un fragmento de repertorio. La evidencia puede ser una grabación, una partitura anotada o una interpretación en clase.</p><div class=\"jazz-curriculum-mount\" data-curriculum-kind=\"project\" data-curriculum-level=\"" + level.id + "\"></div>"
+    });
+    level.curriculumGuide = guide;
+  });
+}
+
+enrichCurriculum();
