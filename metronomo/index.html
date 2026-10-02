@@ -481,7 +481,7 @@
             font-variant-ligatures: none;
         }
         .basic-dropdown-item .fig-icon { font-size: 1.45rem; line-height: 1; width: 28px; text-align: center; }
-        .basic-box-value.figure-glyph { font-size: 1.7rem; line-height: .9; }
+        .basic-box-value.figure-glyph { display:block; margin-top:5px; font-size:1.7rem; line-height:.9; transform:translateY(2px); }
 
         /* ===== Rutinas (guardar / cargar presets) — visible en Pro y Básico ===== */
         .preset-bar { display: grid;grid-template-columns:repeat(5,minmax(120px,1fr));align-items:stretch;gap:10px;margin-bottom:18px }
@@ -796,6 +796,8 @@
                             <option value="3">Tresillos</option>
                             <option value="4">Semicorch.</option>
                             <option value="6">Seisillos</option>
+                            <option value="8">Fusas</option>
+                            <option value="16">Semifusas</option>
                         </select>
                     </div>
                     <input type="text" id="custom-amalgam" placeholder="Amalgama Custom (Ej: 3+2+2)">
@@ -1124,7 +1126,9 @@
         { value: '2s', label: 'Corchea c/swing', icon: '♪〜' },
         { value: '3', label: 'Tresillos', icon: '♪³' },
         { value: '4', label: 'Semicorcheas', icon: '♬' },
-        { value: '6', label: 'Seisillos', icon: '♬⁶' }
+        { value: '6', label: 'Seisillos', icon: '♬⁶' },
+        { value: '8', label: 'Fusas', icon: '𝅘𝅥𝅰' },
+        { value: '16', label: 'Semifusas', icon: '𝅘𝅥𝅱' }
     ];
 
     const basicCompasBtn = document.getElementById('basicCompasBtn');
