@@ -11,6 +11,11 @@
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
   <script>document.getElementById("suite-favicon").href = new URL("../favicon.svg", window.location.href).href;</script>
 <style>
+        @font-face {
+            font-family: "Bravura Metronome";
+            src: local("Bravura"), url("../editor-crescendo/assets/fonts/Bravura.otf") format("opentype");
+            font-display: block;
+        }
         /* ===== VARIABLES GLOBALES (unificadas) ===== */
         :root {
             --ink: #161514;
@@ -285,7 +290,7 @@
         .rhythm-lab-controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px;align-items:end}.rhythm-lab label{display:grid;min-width:0;gap:5px;color:var(--text-dim);font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase}.rhythm-lab select,.rhythm-lab input,.rhythm-lab-controls>button{width:100%;min-width:0;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:10px;background:rgba(0,0,0,.3);color:var(--text);padding:7px 9px}.rhythm-lab select:focus,.rhythm-lab input:focus{outline:1px solid var(--accent);border-color:var(--accent)}.rhythm-lab-controls>button{background:var(--accent);color:var(--ink);font-weight:900;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}.rhythm-lab-controls>button:hover{border-color:var(--accent);background:#edc461;box-shadow:0 5px 16px rgba(212,168,79,.28);transform:translateY(-1px)}
         .rhythm-stepper{display:grid;grid-template-columns:34px minmax(40px,1fr) 34px;gap:5px}.rhythm-stepper input{text-align:center;appearance:textfield;-moz-appearance:textfield}.rhythm-stepper input::-webkit-inner-spin-button,.rhythm-stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}.rhythm-stepper button{min-width:0;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:rgba(255,255,255,.08);color:var(--text);font-size:1.15rem;font-weight:900;cursor:pointer}.rhythm-stepper button:hover{border-color:var(--accent);background:rgba(212,168,79,.18);color:var(--accent)}
         .rhythm-score{margin-top:12px;min-height:132px;max-height:168px;overflow-x:auto;overflow-y:hidden;border-radius:8px;background:#fffdf8;color:#111;scrollbar-gutter:stable}.rhythm-score .cp-staff{height:132px;min-height:132px;padding:0;overflow:visible}.rhythm-score .cp-staff>div{transform:translateY(-31px) scale(1.45);transform-origin:top left;width:69%}
-        .rhythm-palette{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin:12px 0;overflow-x:auto;padding:4px 0 6px}.rhythm-tool{flex:1 1 0;width:auto;height:38px;min-width:34px;max-width:52px;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:2px 4px;background:rgba(255,255,255,.07);color:var(--text);font-family:Bravura,"Noto Music",serif;font-size:1.05rem;line-height:1;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s,color .2s}.rhythm-tool:hover{border-color:var(--accent);background:rgba(212,168,79,.14);box-shadow:0 4px 12px rgba(0,0,0,.2);color:var(--accent);transform:translateY(-1px)}.rhythm-tool.is-active,.rhythm-tool.is-active:hover{border-color:var(--accent);background:var(--accent);color:var(--ink);box-shadow:0 4px 12px rgba(212,168,79,.25)}.rhythm-score-wrap{position:relative}.rhythm-score-overlay{position:absolute;inset:0;z-index:4;cursor:crosshair}.rhythm-editor-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}.rhythm-editor-actions button{width:auto;min-width:0;min-height:36px;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 9px;background:rgba(255,255,255,.07);color:var(--text);font-weight:800;cursor:pointer}
+        .rhythm-palette{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;margin:12px 0;overflow-x:auto;padding:4px 0 6px}.rhythm-tool{flex:1 1 0;width:auto;height:38px;min-width:34px;max-width:52px;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:2px 4px;background:rgba(255,255,255,.07);color:var(--text);font-family:"Bravura Metronome","Noto Music",serif;font-size:1.05rem;line-height:1;cursor:pointer;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s,color .2s}.rhythm-tool:hover{border-color:var(--accent);background:rgba(212,168,79,.14);box-shadow:0 4px 12px rgba(0,0,0,.2);color:var(--accent);transform:translateY(-1px)}.rhythm-tool.is-active,.rhythm-tool.is-active:hover{border-color:var(--accent);background:var(--accent);color:var(--ink);box-shadow:0 4px 12px rgba(212,168,79,.25)}.rhythm-score-wrap{position:relative}.rhythm-score-overlay{position:absolute;inset:0;z-index:4;cursor:crosshair}.rhythm-editor-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}.rhythm-editor-actions button{width:auto;min-width:0;min-height:36px;border:1px solid rgba(255,255,255,.14);border-radius:8px;padding:6px 9px;background:rgba(255,255,255,.07);color:var(--text);font-weight:800;cursor:pointer}
         .rhythm-lab-status{margin-top:8px!important;color:#9bd1b5!important}
         .rhythm-lab-controls>#rhythmGenerate{background:rgba(0,0,0,.3);color:var(--text);box-shadow:none}.rhythm-lab-controls>#rhythmGenerate:hover{border-color:var(--accent);background:rgba(212,168,79,.14);color:var(--accent);box-shadow:0 5px 16px rgba(0,0,0,.2)}
         .rhythm-stepper button,.rhythm-stepper button:hover{border-color:rgba(255,255,255,.14)!important;background:rgba(255,255,255,.08)!important;color:var(--text)!important;box-shadow:none!important;transform:none!important}.rhythm-stepper button.is-hovered{border-color:var(--accent)!important;background:rgba(212,168,79,.18)!important;color:var(--accent)!important;box-shadow:0 3px 10px rgba(0,0,0,.18)!important}
@@ -470,7 +475,13 @@
         }
         .basic-dropdown-item:hover { background: rgba(212, 168, 79, 0.18); color: var(--accent); }
         .basic-dropdown-item.selected { color: var(--accent); font-weight: bold; }
-        .basic-dropdown-item .fig-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+        .figure-glyph, .basic-dropdown-item .fig-icon {
+            font-family: "Bravura Metronome", "Noto Music", "Segoe UI Symbol", serif;
+            font-weight: 400;
+            font-variant-ligatures: none;
+        }
+        .basic-dropdown-item .fig-icon { font-size: 1.45rem; line-height: 1; width: 28px; text-align: center; }
+        .basic-box-value.figure-glyph { font-size: 1.7rem; line-height: .9; }
 
         /* ===== Rutinas (guardar / cargar presets) — visible en Pro y Básico ===== */
         .preset-bar { display: grid;grid-template-columns:repeat(5,minmax(120px,1fr));align-items:stretch;gap:10px;margin-bottom:18px }
@@ -696,11 +707,7 @@
                 </button>
                 <div class="basic-dropdown" id="presetDropdown"></div>
             </div>
-            <button type="button" class="basic-box preset-box" id="scoreOpenBtn">
-                <span class="basic-box-label">Partitura</span>
-                <span class="basic-box-value" id="scoreBtnValue">📄 Cargar</span>
-            </button>
-            <input type="file" id="scoreFileInput" accept="image/*,application/pdf,.xml,.musicxml,.mxl" style="display:none">
+            <button type="button" class="basic-box preset-box" id="exerciseToggleBtn" aria-expanded="false"><span class="basic-box-label">Práctica</span><span class="basic-box-value">Ejercicios / editor</span></button>
             <div class="basic-controls" id="basicControls">
               <div class="basic-select-wrap">
                 <button type="button" class="basic-box" id="basicCompasBtn">
@@ -712,12 +719,16 @@
               <div class="basic-select-wrap">
                 <button type="button" class="basic-box" id="basicFiguraBtn">
                     <span class="basic-box-label">Figura</span>
-                    <span class="basic-box-value" id="basicFiguraValue">♩</span>
+                    <span class="basic-box-value figure-glyph" id="basicFiguraValue">♩</span>
                 </button>
                 <div class="basic-dropdown" id="basicFiguraDropdown"></div>
               </div>
             </div>
-            <button type="button" class="basic-box preset-box" id="exerciseToggleBtn" aria-expanded="false"><span class="basic-box-label">Práctica</span><span class="basic-box-value">Ejercicios / editor</span></button>
+            <button type="button" class="basic-box preset-box" id="scoreOpenBtn">
+                <span class="basic-box-label">Partitura</span>
+                <span class="basic-box-value" id="scoreBtnValue">📄 Cargar</span>
+            </button>
+            <input type="file" id="scoreFileInput" accept="image/*,application/pdf,.xml,.musicxml,.mxl" style="display:none">
         </div>
 
         <div class="stage hidden" id="stageArea">
@@ -949,7 +960,7 @@
             <div class="basic-dropdown score-mini-dropdown" id="scoreCompasDropdown"></div>
         </div>
         <div class="basic-select-wrap score-mini-wrap">
-            <button type="button" class="score-mini-btn" id="scoreFiguraBtn"><span id="scoreFiguraValue">♩</span></button>
+            <button type="button" class="score-mini-btn" id="scoreFiguraBtn"><span class="figure-glyph" id="scoreFiguraValue">♩</span></button>
             <div class="basic-dropdown score-mini-dropdown" id="scoreFiguraDropdown"></div>
         </div>
         <div class="score-bar-sep"></div>
