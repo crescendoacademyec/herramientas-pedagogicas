@@ -18,6 +18,9 @@ assert.ok(html.includes('id="evaluacionView"'));
 assert.ok(html.includes('data-view="evaluacion"'));
 assert.ok(html.includes('id="badgeGrid"'));
 assert.match(app,/allCourseLevels\(\)/,'El progreso debe incluir los tres niveles del curso');
+assert.match(app,/function generateTrackNotes/,'Los niveles aplicados deben crear frases nuevas');
+assert.match(app,/function generatedTrackQuestion/,'Las comprobaciones avanzadas deben rotar situaciones');
+assert.match(app,/data-track-new/,'Cada práctica aplicada debe permitir generar otro ejercicio');
 
 const context={window:{}};context.window=context;vm.createContext(context);
 vm.runInContext(data,context);

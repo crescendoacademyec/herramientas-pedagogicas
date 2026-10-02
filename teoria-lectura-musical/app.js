@@ -1544,29 +1544,81 @@ function trackPhrase(notes,meter){
 function trackTones(notes){
   return [...new Set(notes.map(note=>midiFromNamed(note)%12))].map((pc,index)=>({pc,semi:pc,name:NOTE_NAMES[pc],token:NOTE_NAMES[pc],degree:index+1,isRoot:pc===0}));
 }
+function generateTrackNotes(seedNotes){
+  const pool=[...new Set(seedNotes.map(midiFromNamed))].sort((a,b)=>a-b);
+  const length=seedNotes.length;
+  let current=randomItem(pool),previousDirection=0;
+  const notes=[current];
+  for(let index=1;index<length;index++){
+    const direction=Math.random()<.18&&previousDirection!==0?-previousDirection:(Math.random()<.5?1:-1);
+    const leap=Math.random()<.24?2:1;
+    const candidate=current+(direction*leap*2);
+    current=pool.reduce((best,pitch)=>Math.abs(pitch-candidate)<Math.abs(best-candidate)?pitch:best,pool[0]);
+    previousDirection=Math.sign(current-notes[notes.length-1])||previousDirection;
+    notes.push(current);
+  }
+  return notes.map(namedFromMidiNatural);
+}
+function shuffledQuestion(question,correctAnswer,distractors){
+  const answers=shuffle([correctAnswer,...distractors]);
+  return {question,answers,correct:answers.indexOf(correctAnswer)};
+}
+function generatedTrackQuestion(level,cfg){
+  if(cfg.type==="key"){
+    const scenarios=level.id==="l2-armaduras"?[
+      ["¿Qué tonalidad mayor corresponde a una armadura de un sostenido (Fa♯)?","Sol mayor",["Re mayor","Fa mayor","Do mayor"]],
+      ["¿Qué tonalidad mayor corresponde a dos sostenidos (Fa♯ y Do♯)?","Re mayor",["La mayor","Sol mayor","Si♭ mayor"]],
+      ["¿Qué tonalidad mayor corresponde a un bemol (Si♭)?","Fa mayor",["Si♭ mayor","Do mayor","Re menor"]]
+    ]:[
+      ["Si una nueva armadura aparece en medio de una sección, la primera acción al leer es:","Actualizar las notas afectadas y reconsiderar el centro tonal",["Ignorarla hasta el final","Cambiar solo la primera nota","Aumentar el tempo"]],
+      ["Una alteración que se repite durante varios compases junto con una nueva armadura sugiere revisar:","Un posible cambio de región tonal",["Solo el volumen","La digitación de una nota","El nombre del instrumento"]]
+    ];
+    const [question,correct,distractors]=randomItem(scenarios);return shuffledQuestion(question,correct,distractors);
+  }
+  if(cfg.type==="meter"){
+    const scenarios=level.id==="l2-ritmo-compuesto"?[
+      ["¿Cómo se siente normalmente un compás de 6/8?","Dos pulsos grandes subdivididos en tres",["Seis pulsos iguales y fuertes","Tres pulsos de dos corcheas"]],
+      ["¿Qué diferencia principal separa 3/4 de 6/8?","3/4 divide tres pulsos en dos; 6/8 divide dos pulsos en tres",["Usan exactamente la misma acentuación","6/8 no tiene pulso","3/4 solo usa silencios"]]
+    ]:[
+      ["Una agrupación frecuente para 7/8 es:","2+2+3",["3+4+4","7 pulsos fuertes iguales","6+1 sin subdivisión"]],
+      ["En 5/4, una agrupación clara puede ser:","3+2",["4+4","5 pulsos idénticos sin grupos","2+2+2"]]
+    ];
+    const [question,correct,distractors]=randomItem(scenarios);return shuffledQuestion(question,correct,distractors);
+  }
+  if(cfg.type==="quiz"){
+    const scenarios=level.id==="l3-polirritmia"?[
+      ["En una relación 3:2, tres ataques ocupan el mismo tiempo que:","Dos ataques de la otra capa",["Seis compases","Una corchea","Cuatro ataques"]],
+      ["Para preparar 3:2, una división común útil contiene:","Seis partes iguales",["Tres partes iguales","Dos compases sin pulso","Cinco partes desiguales"]]
+    ]:[
+      ["Después de una indicación D.S. al Coda, normalmente debes:","Volver al signo y saltar a la coda cuando se indique",["Volver siempre al compás uno","Ignorar las repeticiones","Tocar más rápido"]],
+      ["Antes de tocar una partitura con repeticiones, conviene primero:","Trazar el recorrido de secciones y señales",["Cambiar todas las notas","Evitar contar silencios","Omitir las marcas de ensayo"]]
+    ];
+    const [question,correct,distractors]=randomItem(scenarios);return shuffledQuestion(question,correct,distractors);
+  }
+  return {question:cfg.question,answers:cfg.answers,correct:cfg.correct,explain:cfg.explain};
+}
 function mountTrackPractice(level){
   const cfg=level.practice;
   if(!cfg||activeTrackId==="foundation")return;
   const mount=$("interactiveMount");if(!mount)return;
-  const makeQuestion=()=>`<div class="track-check"><p class="trainer-prompt">${escapeHtml(cfg.question||"¿Cuál es la primera nota de la frase?")}</p><div class="trainer-answer-grid" data-track-answers>${(cfg.answers||[]).map((answer,index)=>`<button type="button" data-track-answer="${index}">${escapeHtml(answer)}</button>`).join("")}</div><p class="feedback" data-track-feedback aria-live="polite"></p></div>`;
+  const makeQuestion=(question=cfg.question,answers=cfg.answers||[])=>`<div class="track-check"><p class="trainer-prompt">${escapeHtml(question||"¿Cuál es la primera nota de la frase?")}</p><div class="trainer-answer-grid" data-track-answers>${answers.map((answer,index)=>`<button type="button" data-track-answer="${index}">${escapeHtml(answer)}</button>`).join("")}</div><p class="feedback" data-track-feedback aria-live="polite"></p></div>`;
   if(cfg.type==="reading"||cfg.type==="dictation"){
-    const phrase=trackPhrase(cfg.phrase,cfg.meter);
-    const visualTones=trackTones(cfg.phrase);
-    const first=cfg.phrase[0].replace(/\d/,"");
-    const answers=cfg.answers||shuffle([first,...NATURAL.filter(note=>note!==first).slice(0,3)]).map(note=>note.includes("·")?note:`${note} · ${NOTE_SOLFEGE[note]||note}`);
-    const correct=cfg.correct??answers.findIndex(answer=>answer.startsWith(first+" "));
-    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">PRÁCTICA GUIADA</p><h3>${escapeHtml(level.title)}</h3><p>${cfg.type==="dictation"?"Escucha primero; después responde sin mirar la solución.":"Observa el contorno, recibe la cuenta previa y mantén el pulso."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:cfg.clef||"treble",meter:cfg.meter})}</div></div><div class="visual-two track-instrument-map"><section class="visual-box"><div class="diagram-label">Piano · notas de la frase</div>${pianoHTML("C",visualTones)}</section><section class="visual-box"><div class="diagram-label">Diapasón · posiciones</div><div class="scroll-x">${guitarScaleSVG("C",visualTones)}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button></div>${makeQuestion()}</div>`;
+    const notes=generateTrackNotes(cfg.phrase),phrase=trackPhrase(notes,cfg.meter),visualTones=trackTones(notes),first=notes[0].replace(/\d/,"");
+    const noteQuestion=shuffledQuestion("¿Cuál es la primera nota de esta nueva frase?",`${first} · ${NOTE_SOLFEGE[first]||first}`,NATURAL.filter(note=>note!==first).slice(0,3).map(note=>`${note} · ${NOTE_SOLFEGE[note]}`));
+    const delta=midiFromNamed(notes[1])-midiFromNamed(notes[0]);
+    const contour=delta>2?"Salto ascendente":delta>0?"Grado conjunto ascendente":delta<-2?"Salto descendente":"Grado conjunto descendente";
+    const dictationQuestion=shuffledQuestion("Después de escuchar, ¿cómo comienza la frase nueva?",contour,["Repetición exacta","Dos notas simultáneas","Silencio inicial"]);
+    const question=cfg.type==="dictation"?dictationQuestion:noteQuestion;
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">PRÁCTICA GUIADA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>${cfg.type==="dictation"?"Escucha primero; después responde sin mirar la solución.":"Observa el contorno, recibe la cuenta previa y mantén el pulso."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:cfg.clef||"treble",meter:cfg.meter})}</div></div><div class="visual-two track-instrument-map"><section class="visual-box"><div class="diagram-label">Piano · notas de la frase</div>${pianoHTML("C",visualTones)}</section><section class="visual-box"><div class="diagram-label">Diapasón · posiciones</div><div class="scroll-x">${guitarScaleSVG("C",visualTones)}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div>${makeQuestion(question.question,question.answers)}</div>`;
     mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,cfg.bpm,cfg.meter));
     mount.querySelector("[data-track-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/cfg.bpm)));
-    if(!cfg.answers){
-      mount.querySelector("[data-track-answers]").innerHTML=answers.map((answer,index)=>`<button type="button" data-track-answer="${index}">${escapeHtml(answer)}</button>`).join("");
-    }
-    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:correct,explain:cfg.explain||`La frase comienza en ${NOTE_SOLFEGE[first]||first}.`,levelId:level.id})));
+    mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
+    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:question.correct,explain:cfg.type==="dictation"?"El contorno se determina por la distancia y dirección entre las dos primeras notas.":`La frase comienza en ${NOTE_SOLFEGE[first]||first}.`,levelId:level.id})));
     return;
   }
   if(cfg.type==="grand"){
-    const upper=trackPhrase(cfg.upper,cfg.meter),lower=trackPhrase(cfg.lower,cfg.meter);
-    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA POLIFÓNICA</p><h3>${escapeHtml(level.title)}</h3><p>Lee cada voz por separado y después observa los puntos de coincidencia vertical.</p></header><div class="grand-staff-practice"><section><b>Clave de sol</b><div class="scroll-x">${phraseStaffSVG(upper,{clef:"treble",meter:cfg.meter})}</div></section><section><b>Clave de fa</b><div class="scroll-x">${phraseStaffSVG(lower,{clef:"bass",meter:cfg.meter})}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-upper>▶ Leer voz superior</button><button class="ghost-btn" type="button" data-track-lower>▶ Leer voz inferior</button><button class="ghost-btn" type="button" data-track-both>▶ Escuchar ambas</button></div><p class="feedback">Empieza a un tempo donde puedas mantener ambas voces sin detener el pulso.</p></div>`;
+    const upper=trackPhrase(generateTrackNotes(cfg.upper),cfg.meter),lower=trackPhrase(generateTrackNotes(cfg.lower),cfg.meter);
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA POLIFÓNICA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>Lee cada voz por separado y después observa los puntos de coincidencia vertical.</p></header><div class="grand-staff-practice"><section><b>Clave de sol</b><div class="scroll-x">${phraseStaffSVG(upper,{clef:"treble",meter:cfg.meter})}</div></section><section><b>Clave de fa</b><div class="scroll-x">${phraseStaffSVG(lower,{clef:"bass",meter:cfg.meter})}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-upper>▶ Leer voz superior</button><button class="ghost-btn" type="button" data-track-lower>▶ Leer voz inferior</button><button class="ghost-btn" type="button" data-track-both>▶ Escuchar ambas</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div><p class="feedback">Empieza a un tempo donde puedas mantener ambas voces sin detener el pulso.</p></div>`;
     mount.querySelector("[data-track-upper]").addEventListener("click",()=>playPhrase(mount,upper,cfg.bpm,cfg.meter));
     mount.querySelector("[data-track-lower]").addEventListener("click",()=>playPhrase(mount,lower,cfg.bpm,cfg.meter));
     mount.querySelector("[data-track-both]").addEventListener("click",async()=>{
@@ -1576,10 +1628,13 @@ function mountTrackPractice(level){
       lower.forEach((event,index)=>playTone(midiFromNamed(event.note),{delay:index*secondsPerEvent,duration:.55,volume:.13}));
       window.setTimeout(()=>{if(token===AUDIO.seq)finishCountIn(mount)},upper.length*secondsPerEvent*1000);
     });
+    mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
     return;
   }
-  mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">COMPROBACIÓN ACTIVA</p><h3>${escapeHtml(level.title)}</h3><p>Responde y lee la explicación antes de continuar.</p></header>${makeQuestion()}</div>`;
-  mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:cfg.correct,explain:cfg.explain,levelId:level.id})));
+  const question=generatedTrackQuestion(level,cfg);
+  mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">COMPROBACIÓN ACTIVA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>Responde y lee la explicación antes de continuar.</p></header>${makeQuestion(question.question,question.answers)}<div class="solfege-actions"><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div></div>`;
+  mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
+  mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:question.correct,explain:question.explain||cfg.explain,levelId:level.id})));
 }
 function resolveTrackCheck(mount,{selected,correctIndex,explain,levelId}){
   const correct=selected===correctIndex;
