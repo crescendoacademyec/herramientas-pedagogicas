@@ -302,6 +302,27 @@ function normalizeData() {
   normalizeMultipleChoiceOrder();
   normalizeVoicingQuiz();
   normalizePianoSelectQuestions();
+  ensurePedagogicalExpansion();
+}
+function ensurePedagogicalExpansion() {
+  if (DATA.modules.some(module => module.id === "nivel-5-conexiones-funcionales")) return;
+  DATA.modules.push({
+    id:"nivel-5-conexiones-funcionales",level:"Nivel 5",title:"Conexiones funcionales y preparación para jazz",subtitle:"Del campo diatónico a la tonicización, el préstamo modal y la resolución extendida.",
+    theory:[
+      {id:"n5-campo-repaso",title:"1. Campo armónico y función: recapitulación constructiva",subtitle:"Construir antes de sustituir.",items:[{term:"Procedimiento",body:"Construye primero la escala, apila terceras sobre cada grado, nombra la cualidad del acorde y recién entonces identifica su función. Esta recapitulación conecta el campo armónico con las sustituciones que ya conoces."},{term:"Cadencia",body:"Una cadencia organiza preparación, tensión y resolución. Antes de rearmonizar una progresión, identifica dónde está su tónica y qué dominante la prepara."}]},
+      {id:"n5-enlace-progresiones",title:"2. Conducción de voces en progresiones",subtitle:"Aplicar el voicing entre acordes reales.",items:[{term:"Ruta de trabajo",body:"En II–V–I, enlaza primero tercera y séptima, conserva notas comunes, mueve las demás voces por semitono o tono cuando sea posible y deja el bajo como referencia funcional."},{term:"Diagnóstico auditivo",body:"Compara una conducción cercana con una dispersa o con tensiones ubicadas en el grave. La segunda puede ser válida por intención estilística, pero debe elegirse conscientemente."}]},
+      {id:"n5-dominantes-secundarios",title:"3. Dominantes secundarios y tonicización",subtitle:"Resolver temporalmente hacia otro grado.",items:[{term:"Dominante aplicado",body:"Un dominante secundario prepara temporalmente un grado diatónico: V/V resuelve a V, V/ii resuelve a ii. No exige necesariamente una modulación completa; escucha si el nuevo centro se confirma y se prolonga."},{term:"Lectura funcional",body:"Localiza la sensible del acorde objetivo y verifica su resolución. Este gesto es más fiable que memorizar símbolos aislados."}]},
+      {id:"n5-intercambio-modal",title:"4. Intercambio modal y sustitución por tritono",subtitle:"Color paralelo y dirección cromática.",items:[{term:"Intercambio modal",body:"Un acorde prestado procede de una escala paralela y conserva la misma tónica global. Explica qué nota característica aporta y cómo regresa a la tonalidad."},{term:"Sustitución por tritono",body:"Un dominante puede sustituirse por otro cuya fundamental está a tritono, porque comparte el núcleo de tercera y séptima invertidas. Úsala cuando la conducción cromática y el estilo la justifiquen."}]},
+      {id:"n5-modulacion-aplicada",title:"5. Modulación breve e integración hacia jazz",subtitle:"Distinguir color local, tonicización y cambio de centro.",items:[{term:"Tres niveles",body:"Una alteración local cambia una nota; una tonicización prepara momentáneamente un grado; una modulación establece un nuevo centro con duración, cadencia y confirmación auditiva."},{term:"Aplicación",body:"Analiza una progresión corta en este orden: tonalidad de partida, funciones diatónicas, dominantes aplicados, préstamos, destino de cada resolución y voicings posibles. Este proceso prepara el trabajo de standards en Armonía Jazz."}]}
+    ],
+    quiz:[
+      {id:1,type:"multipleChoice",section:"Campo armónico",prompt:"Antes de sustituir funcionalmente un acorde, ¿qué conviene identificar?",choices:["La tonalidad, el grado y la función del acorde","Solo el registro del bajo","El tempo de la canción","La digitación de guitarra"],answer:0,sampleAnswer:"La tonalidad, el grado y la función del acorde."},
+      {id:2,type:"multipleChoice",section:"Conducción",prompt:"En un II–V–I, ¿qué se enlaza primero para reconocer la dirección funcional?",choices:["Las notas guía: tercera y séptima","Solo las quintas","Las notas más agudas al azar","Únicamente la fundamental"],answer:0,sampleAnswer:"Las notas guía: tercera y séptima."},
+      {id:3,type:"multipleChoice",section:"Dominantes aplicados",prompt:"¿A qué grado resuelve V/V?",choices:["Al V de la tonalidad","Siempre al I","Al iii únicamente","A cualquier acorde sin relación"],answer:0,sampleAnswer:"Al V de la tonalidad."},
+      {id:4,type:"multipleChoice",section:"Color cromático",prompt:"¿Qué distingue el intercambio modal de una modulación?",choices:["Mantiene el centro tonal general y toma color de una escala paralela","Siempre cambia de armadura","No usa acordes","Elimina la resolución"],answer:0,sampleAnswer:"Mantiene el centro tonal general y toma color de una escala paralela."},
+      {id:5,type:"multipleChoice",section:"Síntesis",prompt:"¿Cuál es la evidencia más clara de una modulación?",choices:["Nuevo centro confirmado mediante duración y cadencia","Una sola alteración accidental","Un cambio de dinámica","Una nota repetida"],answer:0,sampleAnswer:"Nuevo centro confirmado mediante duración y cadencia."}
+    ]
+  });
 }
 function normalizeMultipleChoiceOrder() {
   DATA.modules.forEach(module => {
@@ -1900,6 +1921,13 @@ const THEORY_VISUAL_LABS = {
     { type: "functionalBridgeLab", title: "Puente ii - V - I", description: "Escucha las notas guía del ii - V - I mayor y del iiø - V - i menor.", options: { family: "jazz-bridge" } }
   ]
 };
+Object.assign(THEORY_VISUAL_LABS, {
+  "n5-campo-repaso":[{type:"functionalBridgeLab",title:"Campo y cadencias",description:"Reconstruye las tétradas y escucha su función antes de sustituir.",options:{family:"major-field"}}],
+  "n5-enlace-progresiones":[{type:"shellLab",title:"Enlace de notas guía",description:"Compara shells antes de mover extensiones y bajo."}],
+  "n5-dominantes-secundarios":[{type:"functionalBridgeLab",title:"Preparación dominante",description:"Escucha la dirección de una dominante hacia su acorde objetivo.",options:{family:"cadences"}}],
+  "n5-intercambio-modal":[{type:"chordExplorer",title:"Color modal y dominante",description:"Contrasta acordes prestados y dominantes alterados en piano, guitarra y pentagrama.",options:{categories:["Séptimas y sextas","Onceavas y treceavas","Con #11"],defaultSymbol:"7"}}],
+  "n5-modulacion-aplicada":[{type:"reharmLab",title:"Laboratorio de análisis funcional",description:"Explora sustituciones y explica el destino funcional de cada acorde."}]
+});
 const THEORY_VISUAL_CHORD_FORMULAS = {
   "": "1 3 5",
   "-": "1 b3 5",
