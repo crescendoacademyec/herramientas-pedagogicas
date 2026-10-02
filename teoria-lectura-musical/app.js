@@ -1567,6 +1567,14 @@ function generateTrackNotes(seedNotes){
   }
   return notes.map(namedFromMidiNatural);
 }
+function keySignaturePracticeHTML(key){
+  const signatures={G:{kind:"sharp",count:1},D:{kind:"sharp",count:2},A:{kind:"sharp",count:3},F:{kind:"flat",count:1},Bb:{kind:"flat",count:2},Eb:{kind:"flat",count:3}};
+  const signature=signatures[key.root]||{kind:"sharp",count:0};
+  const sharpPositions=[54,40,66,30,58,44,70],flatPositions=[42,56,28,50,36,62,34];
+  const positions=(signature.kind==="sharp"?sharpPositions:flatPositions).slice(0,signature.count);
+  const glyph=signature.kind==="sharp"?String.fromCodePoint(0xE262):String.fromCodePoint(0xE260);
+  return `<div class="key-signature-practice" role="img" aria-label="Armadura para identificar tonalidad"><div class="key-signature-staff"><span class="key-signature-clef">${SMUFL_GLYPHS.gClef}</span>${[0,1,2,3,4].map(line=>`<i style="top:${22+line*14}%"></i>`).join("")}${positions.map((position,index)=>`<span class="key-signature-glyph" style="left:${34+index*9}%;top:${position}%">${glyph}</span>`).join("")}</div><p>Identifica la armadura antes de escuchar o responder.</p></div>`;
+}
 function shuffledQuestion(question,correctAnswer,distractors){
   const answers=shuffle([correctAnswer,...distractors]);
   return {question,answers,correct:answers.indexOf(correctAnswer)};
@@ -1644,18 +1652,20 @@ function mountTrackPractice(level){
     const isKey=cfg.type==="key";
     const meter=isKey?"4/4":level.id==="l2-ritmo-compuesto"?"6/8":"7/8";
     const keyExample=randomItem([
-      {name:"Sol mayor",notes:["G4","A4","B4","C5","D5","E5","F#5","G5"]},
-      {name:"Re mayor",notes:["D4","E4","F#4","G4","A4","B4","C#5","D5"]},
-      {name:"Fa mayor",notes:["F4","G4","A4","Bb4","C5","D5","E5","F5"]}
+      {root:"G",name:"Sol mayor",relative:"Mi menor",notes:["G4","A4","B4","C5","D5","E5","F#5","G5"]},
+      {root:"D",name:"Re mayor",relative:"Si menor",notes:["D4","E4","F#4","G4","A4","B4","C#5","D5"]},
+      {root:"F",name:"Fa mayor",relative:"Re menor",notes:["F4","G4","A4","Bb4","C5","D5","E5","F5"]}
     ]);
-    const notes=isKey?generateTrackNotes(keyExample.notes):generateTrackNotes(["G4","A4","B4","D5","C5","B4","A4","G4"]);
+    const notes=isKey?[]:generateTrackNotes(["G4","A4","B4","D5","C5","B4","A4","G4"]);
     const phrase=trackPhrase(notes,meter);
-    const question=isKey?shuffledQuestion(`La frase incluye las alteraciones de ${keyExample.name}. ¿Qué tonalidad estás leyendo?`,keyExample.name,["Do mayor","La menor","Mi♭ mayor"]):generatedTrackQuestion(level,cfg);
-    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA GUIADA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>${isKey?"Identifica las alteraciones que se repiten y decide la tonalidad antes de escuchar.":"Marca la agrupación antes de entrar: el pentagrama se lee desde el pulso, no desde figuras aisladas."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:"treble",meter})}</div></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div>${makeQuestion(question.question,question.answers)}</div>`;
-    mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,68,meter));
-    mount.querySelector("[data-track-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),440));
+    const question=isKey?shuffledQuestion("¿Qué tonalidad mayor corresponde a la armadura mostrada?",keyExample.name,["Do mayor","La menor","Mi♭ mayor"]):generatedTrackQuestion(level,cfg);
+    const notation=isKey?keySignaturePracticeHTML(keyExample):`<div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:"treble",meter})}</div></div>`;
+    const actions=isKey?`<div class="solfege-actions"><button class="primary-btn" type="button" data-track-hear>▶ Escuchar escala</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva armadura</button></div>`:`<p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button><button class="ghost-btn" type="button" data-track-new>↻ Nueva práctica</button></div>`;
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA GUIADA · GENERADA</p><h3>${escapeHtml(level.title)}</h3><p>${isKey?"Identifica la armadura, nombra la tonalidad mayor y después relaciona su relativa menor.":"Marca la agrupación antes de entrar: el pentagrama se lee desde el pulso, no desde figuras aisladas."}</p></header>${notation}${actions}${makeQuestion(question.question,question.answers)}</div>`;
+    if(!isKey)mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,68,meter));
+    mount.querySelector("[data-track-hear]").addEventListener("click",()=>isKey?playSequence(tones(keyExample.root,SCALES[0].tokens).map(t=>rootMidi(keyExample.root,4)+t.semi),330):playSequence(phrase.map(event=>midiFromNamed(event.note)),440));
     mount.querySelector("[data-track-new]").addEventListener("click",()=>mountTrackPractice(level));
-    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:question.correct,explain:isKey?`La escala escrita contiene las alteraciones propias de ${keyExample.name}.`:question.explain||cfg.explain,levelId:level.id})));
+    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:question.correct,explain:isKey?`${keyExample.name} comparte esa armadura con ${keyExample.relative}.`:question.explain||cfg.explain,levelId:level.id})));
     return;
   }
   const question=generatedTrackQuestion(level,cfg);

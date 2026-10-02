@@ -23,6 +23,8 @@ assert.match(app,/function generatedTrackQuestion/,'Las comprobaciones avanzadas
 assert.match(app,/data-track-new/,'Cada práctica aplicada debe permitir generar otro ejercicio');
 assert.match(app,/function renderTrackExtension/,'Los niveles 2 y 3 deben incluir estrategia de estudio explícita');
 assert.match(app,/LECTURA GUIADA · GENERADA/,'Armaduras y métrica deben incluir un pentagrama generado');
+assert.match(app,/function keySignaturePracticeHTML/,'Armaduras debe mostrar la firma tonal, no una frase genérica');
+assert.match(app,/Nueva armadura/,'La práctica de armaduras debe generar nuevas firmas tonales');
 
 const context={window:{}};context.window=context;vm.createContext(context);
 vm.runInContext(data,context);
