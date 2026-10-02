@@ -323,6 +323,39 @@
         .control-group.expanded .group-advanced { max-height: 800px; opacity: 1; padding: 15px; margin-bottom: 5px; }
         .control-group.expanded .group-header .arr { transform: rotate(180deg); color: var(--accent); }
 
+        .rhythm-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:5px; padding:4px; border:1px solid rgba(255,255,255,.13); border-radius:999px; background:rgba(0,0,0,.24); }
+        .rhythm-tab { border:0; border-radius:999px; padding:8px 5px; background:transparent; color:var(--text-dim); font:700 .68rem/1 inherit; cursor:pointer; }
+        .rhythm-tab.active { color:#18120a; background:var(--accent); }
+        .rhythm-tab-panel { display:none; gap:9px; padding-top:6px; }
+        .rhythm-tab-panel.active { display:flex; flex-direction:column; }
+        .field-label { color:var(--text-dim); font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+        .rhythm-help { margin:0; color:var(--text-dim); font-size:.7rem; line-height:1.45; }
+        .clave-timeline { display:grid; grid-template-columns:repeat(16,minmax(0,1fr)); gap:3px; min-height:30px; }
+        .clave-step { min-height:30px; display:grid; place-items:center; border:1px solid rgba(255,255,255,.12); border-radius:5px; color:rgba(255,255,255,.3); font-size:.59rem; }
+        .clave-step.hit { border-color:rgba(245,158,11,.8); background:rgba(245,158,11,.22); color:#fbbf24; box-shadow:inset 0 0 0 1px rgba(245,158,11,.16); }
+        .clave-step.bar-start { border-left-color:rgba(255,255,255,.5); }
+        .poly-topline { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+        .poly-topline strong { color:var(--accent); font-size:.82rem; }
+        .poly-presets { display:flex; flex-wrap:wrap; gap:5px; }
+        .poly-presets button,.poly-listen button,.poly-swap { border:1px solid rgba(255,255,255,.16); border-radius:7px; padding:6px 8px; color:var(--text-dim); background:rgba(255,255,255,.05); font:700 .7rem/1 inherit; cursor:pointer; }
+        .poly-presets button:hover,.poly-presets button.active,.poly-listen button:hover,.poly-swap:hover { border-color:var(--accent); color:var(--accent); background:rgba(212,168,79,.14); }
+        .poly-inputs { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto; align-items:end; gap:7px; }
+        .poly-inputs label { display:grid; gap:4px; color:var(--text-dim); font-size:.65rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; }
+        .poly-inputs input { min-width:0; text-align:center; }
+        .poly-against { padding-bottom:10px; color:var(--text-dim); font-size:.68rem; }
+        .poly-swap { min-height:40px; padding-inline:10px; font-size:1rem; }
+        .poly-cycle { display:grid; gap:7px; padding:11px; border:1px solid rgba(255,255,255,.11); border-radius:8px; background:rgba(0,0,0,.2); overflow-x:auto; }
+        .poly-lane { display:grid; grid-template-columns:54px minmax(180px,1fr); align-items:center; gap:8px; min-width:300px; }
+        .poly-lane-label { color:var(--text-dim); font-size:.63rem; font-weight:800; text-transform:uppercase; }
+        .poly-steps { display:grid; gap:2px; }
+        .poly-step { height:18px; border-radius:3px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.05); }
+        .poly-step.hit-a { background:rgba(212,168,79,.78); border-color:#f4cd76; }
+        .poly-step.hit-b { background:rgba(192,132,252,.78); border-color:#d6b2ff; }
+        .poly-step.coincidence { box-shadow:inset 0 -3px 0 #8bc59e; }
+        .poly-step.is-playing { outline:2px solid #fff; outline-offset:1px; }
+        .poly-listen { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+        @media(max-width:560px){.poly-inputs{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.poly-swap{grid-column:1/-1}.poly-listen{align-items:flex-start;flex-direction:column}.clave-step{font-size:.5rem}}
+
         select, input[type=number], input[type=text] {
             background: rgba(22, 21, 20, 0.72) !important;
             border: 1px solid rgba(255, 255, 255, 0.18);
@@ -770,23 +803,43 @@
             <div class="control-group" id="drawer-poly">
                 <div class="group-header" onclick="toggleDrawer('drawer-poly')">Clave & Polirritmia <span class="arr">▼</span></div>
                 <div class="group-advanced">
-                    <select id="clave-select">
-                        <option value="off" selected>Clave: Apagada</option>
-                        <option value="son32">Son 3-2</option><option value="son23">Son 2-3</option>
-                        <option value="rumba32">Rumba 3-2</option><option value="rumba23">Rumba 2-3</option>
-                    </select>
-                    <div class="flex-row">
-                        <label class="toggle-switch"><input type="checkbox" id="poly-toggle"> Polirr. X:Y</label>
-                        <input type="number" id="poly-x" value="3" min="1" style="width: 50px; background: rgba(0,0,0,0.5);"> : <input type="number" id="poly-y" value="2" min="1" style="width: 50px; background: rgba(0,0,0,0.5);">
+                    <div class="rhythm-tabs" role="tablist" aria-label="Herramientas rítmicas">
+                        <button type="button" class="rhythm-tab active" role="tab" data-rhythm-tab="clave">Clave</button>
+                        <button type="button" class="rhythm-tab" role="tab" data-rhythm-tab="poly">Polirritmia</button>
+                        <button type="button" class="rhythm-tab" role="tab" data-rhythm-tab="pm">Polimetría</button>
                     </div>
-                    <div class="flex-row">
-                        <label class="toggle-switch"><input type="checkbox" id="pm-toggle"> Polimetría</label>
-                        <input type="number" id="pm-val" value="5" min="1" style="width: 50px; background: rgba(0,0,0,0.5);"> <label>pulsos</label>
-                    </div>
-                    <div class="adv-label">ASIGNACIÓN Y PITCH (↕)</div>
-                    <div class="flex-row"><label style="width: 45px;">Clave</label><select id="snd-clave" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-clave" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
-                    <div class="flex-row"><label style="width: 45px;">Polirr.</label><select id="snd-poly" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-poly" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
-                    <div class="flex-row"><label style="width: 45px;">Polimet.</label><select id="snd-pm" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-pm" min="0.5" max="2.0" step="0.05" value="1" style="width: 45px;" title="Pitch"></div>
+                    <section class="rhythm-tab-panel active" data-rhythm-panel="clave">
+                        <label class="field-label" for="clave-select">Patrón de clave</label>
+                        <select id="clave-select">
+                            <option value="off" selected>Apagada</option>
+                            <option value="son32">Son 3-2</option><option value="son23">Son 2-3</option>
+                            <option value="rumba32">Rumba 3-2</option><option value="rumba23">Rumba 2-3</option>
+                        </select>
+                        <div id="clave-timeline" class="clave-timeline" aria-live="polite"></div>
+                        <p class="rhythm-help">La clave se organiza en dos compases. Los golpes dorados marcan el patrón seleccionado.</p>
+                        <div class="flex-row"><label style="width:45px;">Sonido</label><select id="snd-clave" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-clave" min="0.5" max="2.0" step="0.05" value="1" style="width:45px;" title="Pitch"></div>
+                    </section>
+                    <section class="rhythm-tab-panel" data-rhythm-panel="poly">
+                        <div class="poly-topline"><label class="toggle-switch"><input type="checkbox" id="poly-toggle"> Activar polirritmia</label><strong id="poly-ratio-label">3 contra 2</strong></div>
+                        <div class="poly-presets" aria-label="Combinaciones frecuentes">
+                            <button type="button" data-poly-preset="2:3">2:3</button><button type="button" data-poly-preset="3:2" class="active">3:2</button><button type="button" data-poly-preset="3:4">3:4</button><button type="button" data-poly-preset="4:3">4:3</button><button type="button" data-poly-preset="4:5">4:5</button><button type="button" data-poly-preset="5:4">5:4</button><button type="button" data-poly-preset="5:6">5:6</button><button type="button" data-poly-preset="6:4">6:4</button><button type="button" data-poly-preset="7:4">7:4</button>
+                        </div>
+                        <div class="poly-inputs">
+                            <label>Capa A · pulso base<input type="number" id="poly-y" value="2" min="1" max="12" inputmode="numeric"></label>
+                            <span class="poly-against">contra</span>
+                            <label>Capa B · contra-pulso<input type="number" id="poly-x" value="3" min="1" max="12" inputmode="numeric"></label>
+                            <button type="button" id="poly-swap" class="poly-swap" title="Intercambiar capas">⇄</button>
+                        </div>
+                        <div id="poly-cycle" class="poly-cycle" aria-label="Ciclo visual de polirritmia"></div>
+                        <p id="poly-help" class="rhythm-help">Ambas capas empiezan juntas y vuelven a coincidir al terminar el ciclo.</p>
+                        <div class="poly-listen"><label class="toggle-switch"><input type="checkbox" id="poly-base-audible" checked> Escuchar capa A</label><label class="toggle-switch"><input type="checkbox" id="poly-counter-audible" checked> Escuchar capa B</label><button type="button" id="poly-one-cycle">▶ Una vuelta</button></div>
+                        <div class="flex-row"><label style="width:45px;">Capa B</label><select id="snd-poly" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-poly" min="0.5" max="2.0" step="0.05" value="1" style="width:45px;" title="Pitch"></div>
+                    </section>
+                    <section class="rhythm-tab-panel" data-rhythm-panel="pm">
+                        <p class="rhythm-help">La polimetría mantiene pulsos regulares, pero cada capa reinicia su compás después de una cantidad distinta de pulsos.</p>
+                        <div class="flex-row"><label class="toggle-switch"><input type="checkbox" id="pm-toggle"> Activar polimetría</label><input type="number" id="pm-val" value="5" min="1" max="16" style="width:58px; background:rgba(0,0,0,0.5);"> <label>pulsos por ciclo</label></div>
+                        <div class="flex-row"><label style="width:45px;">Sonido</label><select id="snd-pm" class="sound-selector"></select><span class="pitch-label">Pitch</span><input type="range" id="pitch-pm" min="0.5" max="2.0" step="0.05" value="1" style="width:45px;" title="Pitch"></div>
+                    </section>
                 </div>
             </div>
 
@@ -954,7 +1007,7 @@
     let totalBeats = 4; let accentPulses = [0]; 
     let nextClaveTime = 0.0; let claveStep = 0;
     const clavePatterns = { 'son32': [1,0,0,1,0,0,1,0, 0,0,1,0,1,0,0,0], 'son23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,1,0], 'rumba32': [1,0,0,1,0,0,0,1, 0,0,1,0,1,0,0,0], 'rumba23': [0,0,1,0,1,0,0,0, 1,0,0,1,0,0,0,1] };
-    let nextPolyTime = 0.0; let nextPmTime = 0.0; let pmCount = 0;
+    let nextPolyTime = 0.0; let nextPmTime = 0.0; let pmCount = 0; let polyCount = 0;
 
     let barCount = 0; let practiceIntervalId = null; let secondsLeft = 0;
     const pyramidArray = [1, 2, 3, 4, 6, 4, 3, 2]; let pyramidIndex = 0; let pyramidBarCount = 0;
@@ -975,7 +1028,7 @@
         timeMin: document.getElementById('timer-minutes'), timeDisp: document.getElementById('timer-display'), timeLeft: document.getElementById('time-left'),
         pyrTgl: document.getElementById('pyramid-toggle'), pyrSet: document.getElementById('pyramid-settings'), pyrBars: document.getElementById('pyr-bars'),
         dropTgl: document.getElementById('dropout-toggle'), dropSet: document.getElementById('dropout-settings'), dropOn: document.getElementById('drop-on'), dropOff: document.getElementById('drop-off'),
-        claveSel: document.getElementById('clave-select'), polyTgl: document.getElementById('poly-toggle'), polyX: document.getElementById('poly-x'), polyY: document.getElementById('poly-y'), pmTgl: document.getElementById('pm-toggle'), pmVal: document.getElementById('pm-val'),
+        claveSel: document.getElementById('clave-select'), claveTimeline: document.getElementById('clave-timeline'), polyTgl: document.getElementById('poly-toggle'), polyX: document.getElementById('poly-x'), polyY: document.getElementById('poly-y'), polyCycle: document.getElementById('poly-cycle'), polyRatio: document.getElementById('poly-ratio-label'), polyHelp: document.getElementById('poly-help'), polyBaseAudible: document.getElementById('poly-base-audible'), polyCounterAudible: document.getElementById('poly-counter-audible'), polySwap: document.getElementById('poly-swap'), polyOneCycle: document.getElementById('poly-one-cycle'), pmTgl: document.getElementById('pm-toggle'), pmVal: document.getElementById('pm-val'),
         indPoly: document.getElementById('ind-poly'), indClave: document.getElementById('ind-clave'), indPm: document.getElementById('ind-pm'),
         tempoName: document.getElementById('tempo-name'),
 
@@ -1452,7 +1505,7 @@
     const STATE_RANGE_FIELDS = ['swing-slider', 'pitch-accent', 'pitch-beat', 'pitch-sub', 'pitch-swing', 'pitch-clave', 'pitch-poly', 'pitch-pm', 'vol-master', 'vol-accent', 'vol-normal', 'vol-sub', 'vol-extra'];
     const STATE_NUMBER_FIELDS = ['poly-x', 'poly-y', 'pm-val', 'train-start', 'train-end', 'train-step', 'train-bars', 'train-inc', 'pyr-bars', 'drop-on', 'drop-off', 'timer-minutes'];
     const STATE_TEXT_FIELDS = ['custom-amalgam'];
-    const STATE_CHECK_FIELDS = ['pendulumToggle', 'accent-toggle', 'poly-toggle', 'pm-toggle', 'trainer-toggle', 'pyramid-toggle', 'dropout-toggle'];
+    const STATE_CHECK_FIELDS = ['pendulumToggle', 'accent-toggle', 'poly-toggle', 'poly-base-audible', 'poly-counter-audible', 'pm-toggle', 'trainer-toggle', 'pyramid-toggle', 'dropout-toggle'];
 
     function collectState() {
         const s = { tempo: Math.round(tempo) };
@@ -1479,7 +1532,7 @@
         UI.dropSet.classList.toggle('visually-disabled', !UI.dropTgl.checked);
         UI.pyrSet.classList.toggle('visually-disabled', !UI.pyrTgl.checked);
 
-        parsePattern(); updateBpmUI(); renderVisualizer(); syncBasicLabels();
+        parsePattern(); updateBpmUI(); renderVisualizer(); renderClaveTimeline(); renderPolyBuilder(); syncBasicLabels();
     }
 
     // --- Rutinas guardadas (localStorage) ---
@@ -1674,6 +1727,78 @@
         }
         renderVisualizer();
     }
+
+    function gcd(a, b) { while (b) { const t = b; b = a % b; a = t; } return a || 1; }
+    function polyValues() {
+        const counter = Math.max(1, Math.min(12, parseInt(UI.polyX.value, 10) || 1));
+        const base = Math.max(1, Math.min(12, parseInt(UI.polyY.value, 10) || 1));
+        UI.polyX.value = counter; UI.polyY.value = base;
+        return { counter, base };
+    }
+    function renderClaveTimeline() {
+        if (!UI.claveTimeline) return;
+        const pattern = clavePatterns[UI.claveSel.value];
+        UI.claveTimeline.innerHTML = '';
+        if (!pattern) { UI.claveTimeline.innerHTML = '<span class="rhythm-help" style="grid-column:1/-1">Activa un patrón para ver sus dos compases.</span>'; return; }
+        pattern.forEach((hit, index) => {
+            const step = document.createElement('span');
+            step.className = 'clave-step' + (hit ? ' hit' : '') + (index === 8 ? ' bar-start' : '');
+            step.textContent = hit ? '●' : '·';
+            step.title = 'Semicorchea ' + (index + 1) + (hit ? ': golpe' : ': silencio');
+            UI.claveTimeline.appendChild(step);
+        });
+    }
+    function renderPolyBuilder() {
+        if (!UI.polyCycle) return;
+        const { counter, base } = polyValues();
+        const divisor = gcd(counter, base);
+        const simpleCounter = counter / divisor, simpleBase = base / divisor;
+        const steps = Math.min(144, (counter * base) / divisor);
+        UI.polyRatio.textContent = simpleCounter + ' contra ' + simpleBase;
+        UI.polyHelp.textContent = counter === simpleCounter && base === simpleBase
+            ? 'Ambas capas empiezan juntas y vuelven a coincidir al terminar el ciclo.'
+            : counter + ':' + base + ' comparte el mismo pulso que ' + simpleCounter + ':' + simpleBase + '.';
+        UI.polyCycle.innerHTML = '';
+        [[base, 'A · base', 'hit-a'], [counter, 'B · contra', 'hit-b']].forEach(([hits, label, hitClass]) => {
+            const lane = document.createElement('div'); lane.className = 'poly-lane';
+            const laneLabel = document.createElement('span'); laneLabel.className = 'poly-lane-label'; laneLabel.textContent = label;
+            const row = document.createElement('div'); row.className = 'poly-steps'; row.style.gridTemplateColumns = 'repeat(' + steps + ', minmax(7px, 1fr))';
+            for (let step = 0; step < steps; step++) {
+                const dot = document.createElement('span');
+                const hit = step % (steps / hits) === 0;
+                dot.className = 'poly-step' + (hit ? ' ' + hitClass : '') + (step === 0 ? ' coincidence' : '');
+                dot.dataset.polyLane = hitClass === 'hit-a' ? 'a' : 'b';
+                dot.dataset.polyStep = hit ? String(step / (steps / hits)) : '';
+                row.appendChild(dot);
+            }
+            lane.append(laneLabel, row); UI.polyCycle.appendChild(lane);
+        });
+        document.querySelectorAll('[data-poly-preset]').forEach(button => button.classList.toggle('active', button.dataset.polyPreset === counter + ':' + base));
+    }
+    function paintPolyCycle(lane, step) {
+        if (!UI.polyCycle || !UI.polyTgl.checked) return;
+        UI.polyCycle.querySelectorAll('.poly-step[data-poly-lane="' + lane + '"]').forEach(dot => dot.classList.toggle('is-playing', dot.dataset.polyStep === String(step)));
+    }
+    function setRhythmTab(name) {
+        document.querySelectorAll('[data-rhythm-tab]').forEach(button => button.classList.toggle('active', button.dataset.rhythmTab === name));
+        document.querySelectorAll('[data-rhythm-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.rhythmPanel === name));
+    }
+    document.querySelectorAll('[data-rhythm-tab]').forEach(button => button.addEventListener('click', () => setRhythmTab(button.dataset.rhythmTab)));
+    document.querySelectorAll('[data-poly-preset]').forEach(button => button.addEventListener('click', () => {
+        const [counter, base] = button.dataset.polyPreset.split(':').map(Number);
+        UI.polyX.value = counter; UI.polyY.value = base; renderPolyBuilder();
+    }));
+    [UI.polyX, UI.polyY].forEach(input => input.addEventListener('input', renderPolyBuilder));
+    UI.polySwap.addEventListener('click', () => { const value = UI.polyX.value; UI.polyX.value = UI.polyY.value; UI.polyY.value = value; renderPolyBuilder(); });
+    UI.claveSel.addEventListener('change', renderClaveTimeline);
+    UI.polyOneCycle.addEventListener('click', () => {
+        const { base } = polyValues();
+        const wasPlaying = isPlaying;
+        if (!wasPlaying) toggleMetronome();
+        const duration = Math.max(100, base * 60000 / Math.max(20, tempo));
+        window.setTimeout(() => { if (!wasPlaying && isPlaying) toggleMetronome(); }, duration + 80);
+    });
+    renderClaveTimeline(); renderPolyBuilder();
     UI.beatsSel.addEventListener('change', parsePattern);
     UI.amalgamInp.addEventListener('input', () => { parsePattern(); if(isPlaying) { mainBeatPos = 0; barCount = 0; }});
 
@@ -1806,6 +1931,9 @@
                     let cBars = parseInt(UI.dropOn.value) + parseInt(UI.dropOff.value);
                     if ((mainMeasureCount % cBars) >= parseInt(UI.dropOn.value)) isMuted = true;
                 }
+                // En polirritmia, el clic principal representa la capa A. Puede silenciarse
+                // para practicar solamente el contra-pulso sin detener el reloj interno.
+                if (UI.polyTgl.checked && !UI.polyBaseAudible.checked) isMuted = true;
                 const placement=UI.rhythmPlacement?.value||'all';
                 if(placement!=='all'&&window.CrescendoRhythm){
                     const division=window.CrescendoRhythm.PLACEMENTS[placement]?.division||1,rawStep=mainBeatPos*division,step=Math.round(rawStep);
@@ -1813,7 +1941,7 @@
                     if(Math.abs(rawStep-step)>1e-5||!frame.audible)isMuted=true;
                 }
 
-                notesInQueue.push({ engine: 'main', time: nextMainTime, noteIdx: Math.round(mainBeatPos * sub), isAcc: isAcc, isBeat: isBeat, isMuted: isMuted, sub: sub });
+                notesInQueue.push({ engine: 'main', time: nextMainTime, noteIdx: Math.round(mainBeatPos * sub), isAcc: isAcc, isBeat: isBeat, isMuted: isMuted, sub: sub, polyBaseStep: isBeat ? Math.round(mainBeatPos) % (parseInt(UI.polyY.value, 10) || 1) : null });
 
                 let sMode, mainVol, pMult;
                 if (isAcc) { sMode = document.getElementById('snd-accent').value; mainVol = parseFloat(UI.volAccent.value); pMult = parseFloat(document.getElementById('pitch-accent').value); }
@@ -1879,8 +2007,10 @@
             } 
             else if (nEv.engine === 'poly') {
                 if (UI.polyTgl.checked) {
-                    playSynthSound(nextPolyTime, document.getElementById('snd-poly').value, vExt, false, parseFloat(document.getElementById('pitch-poly').value));
-                    notesInQueue.push({ engine: 'poly', time: nextPolyTime });
+                    const polyMuted = !UI.polyCounterAudible.checked;
+                    playSynthSound(nextPolyTime, document.getElementById('snd-poly').value, vExt, polyMuted, parseFloat(document.getElementById('pitch-poly').value));
+                    notesInQueue.push({ engine: 'poly', time: nextPolyTime, isMuted: polyMuted, polyCounterStep: polyCount % (parseInt(UI.polyX.value, 10) || 1) });
+                    polyCount++;
                 }
                 let px = parseInt(UI.polyX.value) || 1; let py = parseInt(UI.polyY.value) || 1;
                 nextPolyTime += ((60.0 / tempo) * py) / px;
@@ -1925,6 +2055,7 @@
                     }
                 });
                 lastMainIdx = ev.noteIdx;
+                if (ev.polyBaseStep !== null && ev.polyBaseStep !== undefined && !ev.isMuted) paintPolyCycle('a', ev.polyBaseStep);
             }
             if ((ev.engine === 'poly' || ev.engine === 'clave' || ev.engine === 'pm') && !ev.isMuted) {
                 if (UI.pendTgl.checked) {
@@ -1935,6 +2066,7 @@
                 if (ev.engine === 'clave') { UI.indClave.classList.add('flash'); setTimeout(()=>UI.indClave.classList.remove('flash'), 100); }
                 if (ev.engine === 'pm') { UI.indPm.classList.add('flash'); setTimeout(()=>UI.indPm.classList.remove('flash'), 100); }
             }
+            if (ev.engine === 'poly' && ev.polyCounterStep !== undefined && !ev.isMuted) paintPolyCycle('b', ev.polyCounterStep);
         });
         if (isPlaying) requestAnimationFrame(draw);
     }
@@ -1951,7 +2083,7 @@
             
             let startTime = audioContext.currentTime + 0.05;
             nextMainTime = startTime; mainBeatPos = 0; mainMeasureCount = 0;
-            nextClaveTime = startTime; claveStep = 0; nextPolyTime = startTime; nextPmTime = startTime; pmCount = 0;
+            nextClaveTime = startTime; claveStep = 0; nextPolyTime = startTime; nextPmTime = startTime; pmCount = 0; polyCount = 0;
             
             if (UI.trainTgl.checked) { tempo = parseInt(UI.trainStart.value); trainDir = 1; currentTrainBars = parseInt(UI.trainBars.value); updateBpmUI(); }
             if(UI.pyrTgl.checked) { pyramidIndex = 0; pyramidBarCount = 0; UI.subSel.value = pyramidArray[0]; renderVisualizer(); }
