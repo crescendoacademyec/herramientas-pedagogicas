@@ -923,6 +923,10 @@
             let processToken = 0;
             let processTimer = null;
             let processingPromise = null;
+            // Respaldo nativo: garantiza que un archivo ya aceptado por el navegador
+            // pueda reproducirse aunque el decodificador o el procesamiento falle.
+            let fallbackMedia = null;
+            let fallbackUrl = null;
             const PREF_KEY = 'crescendo-speed-v2';
 
             // --- UI helpers ---
@@ -953,6 +957,10 @@
 
             function refreshCurrentTime() {
                 if (!isPlaying || !audioCtx) return;
+                if (fallbackMedia) {
+                    currentTime = fallbackMedia.currentTime;
+                    return;
+                }
                 const tempo = processedTempo || currentTempoRate();
                 currentTime = startedOffset + (audioCtx.currentTime - startedAt) * tempo;
 
@@ -993,6 +1001,40 @@
                 try { currentSource.stop(); } catch (_) {}
                 try { currentSource.disconnect(); } catch (_) {}
                 currentSource = null;
+            }
+
+            function disposeFallbackMedia() {
+                if (!fallbackMedia) return;
+                fallbackMedia.onended = null;
+                fallbackMedia.pause();
+                fallbackMedia.removeAttribute('src');
+                fallbackMedia.load();
+                fallbackMedia = null;
+                if (fallbackUrl) URL.revokeObjectURL(fallbackUrl);
+                fallbackUrl = null;
+            }
+
+            async function startFallbackPlayback(offset = currentTime) {
+                if (!audioFile) throw new Error('No hay archivo de audio para reproducir.');
+                if (!fallbackMedia) {
+                    fallbackUrl = URL.createObjectURL(audioFile);
+                    fallbackMedia = new Audio(fallbackUrl);
+                    fallbackMedia.preload = 'auto';
+                    fallbackMedia.preservesPitch = true;
+                    fallbackMedia.mozPreservesPitch = true;
+                    fallbackMedia.webkitPreservesPitch = true;
+                    fallbackMedia.onended = () => { isPlaying=false; currentTime=duration; stopTimeUpdates(); playIcon.innerHTML='<path d="M8 5v14l12-7Z"/>'; updateTimeDisplay(); drawWaveform(); };
+                }
+                fallbackMedia.pause();
+                fallbackMedia.playbackRate = currentTempoRate();
+                fallbackMedia.currentTime = Math.max(0, Math.min(offset, Math.max(0, duration-.001)));
+                await fallbackMedia.play();
+                startedOffset = fallbackMedia.currentTime;
+                startedAt = performance.now()/1000;
+                isPlaying = true;
+                setStatus('Reproducción directa del navegador.');
+                playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
+                startTimeUpdates();
             }
 
             function linearSample(data, pos) {
@@ -1144,12 +1186,15 @@
 
             async function startPlayback(offset = currentTime) {
                 if (!audioBuffer) return;
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                await audioCtx.resume();
-                const buffer = await ensureProcessed();
-                if (!buffer) return;
-                disposeSource();
-                currentSource = createSource(buffer);
+                try {
+                  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                  await audioCtx.resume();
+                  const buffer = await ensureProcessed();
+                  if (!buffer) throw new Error('El procesamiento fue cancelado.');
+                  disposeFallbackMedia();
+                  disposeSource();
+                  currentSource = createSource(buffer);
+                  if (!currentSource) throw new Error('No se pudo crear la fuente de audio.');
                 const safeSourceOffset = Math.max(0, Math.min(offset, Math.max(0, duration - 0.001)));
                 const processedOffset = safeSourceOffset / processedTempo;
                 startedOffset = safeSourceOffset;
@@ -1169,12 +1214,18 @@
                 currentSource.start(0, Math.max(0, Math.min(processedOffset, buffer.duration - 0.001)));
                 playIcon.innerHTML = '<rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/>';
                 startTimeUpdates();
+                } catch (err) {
+                    console.error('No se pudo iniciar el motor procesado:', err);
+                    try { await startFallbackPlayback(offset); }
+                    catch (fallbackError) { setStatus('No se pudo reproducir el archivo: '+fallbackError.message, true); }
+                }
             }
 
             function pausePlayback() {
                 refreshCurrentTime();
                 isPlaying = false;
                 stopTimeUpdates();
+                if (fallbackMedia) { currentTime=fallbackMedia.currentTime; fallbackMedia.pause(); }
                 disposeSource();
                 playIcon.innerHTML = '<path d="M8 5v14l12-7Z"/>';
                 updateTimeDisplay();
@@ -1284,6 +1335,7 @@
             // --- Cargar archivo ---
             async function loadFile(file) {
                 if (!file) return;
+                disposeFallbackMedia();
                 audioFile = file;
                 fileNameLabel.innerHTML = `${file.name} <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>`;
 
