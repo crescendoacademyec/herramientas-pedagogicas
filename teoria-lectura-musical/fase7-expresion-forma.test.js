@@ -12,10 +12,13 @@ assert.ok(app.includes("function mountExpressionTrainer"));
 ["Dinámica","Articulación","Tempo y carácter","Timbre","Textura","Forma"]
   .forEach(term=>assert.ok(data.includes(term),`Falta ${term}`));
 assert.match(css,/FASE 7 · EXPRESIÓN, TEXTURA Y FORMA/);
-assert.ok(html.includes("Ocho niveles conectados"));
+assert.ok(html.includes("Tres niveles conectados"));
+assert.match(app,/const COURSE_TRACKS/);
+assert.match(app,/Lectura musical aplicada/);
+assert.match(app,/Lectura avanzada e interpretación/);
 
 const context={window:{}};context.window=context;vm.createContext(context);
 vm.runInContext(data,context);
 assert.equal(context.TLM_DATA.levels.length,8);
 assert.ok(context.TLM_DATA.levels.some(x=>x.id==="expresion-forma"));
-console.log("Fase 7: expresión, textura, forma y 8 niveles OK.");
+console.log("Fase 7: expresión, textura, forma y tres rutas OK.");

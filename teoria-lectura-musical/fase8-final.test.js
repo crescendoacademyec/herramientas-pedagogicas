@@ -17,6 +17,7 @@ assert.match(css,/FASE 8 FINAL · EVALUACIÓN, PROGRESO Y ACCESIBILIDAD/);
 assert.ok(html.includes('id="evaluacionView"'));
 assert.ok(html.includes('data-view="evaluacion"'));
 assert.ok(html.includes('id="badgeGrid"'));
+assert.match(app,/allCourseLevels\(\)/,'El progreso debe incluir los tres niveles del curso');
 
 const context={window:{}};context.window=context;vm.createContext(context);
 vm.runInContext(data,context);

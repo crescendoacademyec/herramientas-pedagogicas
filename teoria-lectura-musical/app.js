@@ -1,8 +1,29 @@
 const DATA = window.TLM_DATA;
-const LS_KEY = "crescendo-teoria-lectura-v2";
+const COURSE_TRACKS = {
+  foundation:{id:"foundation",number:1,title:"Fundamentos de teoría y lectura",short:"Nivel 1",summary:"Comprende el lenguaje escrito: altura, ritmo, claves, tonalidad y expresión.",levels:DATA.levels},
+  applied:{id:"applied",number:2,title:"Lectura musical aplicada",short:"Nivel 2",summary:"Convierte los fundamentos en fluidez: claves, armaduras, dictado y lectura a primera vista.",levels:[
+    {id:"l2-fluidez-sol",title:"Fluidez en clave de sol",subtitle:"Lectura por grados conjuntos y saltos controlados.",lead:"La lectura fluida no consiste en nombrar cada línea desde cero: reconoce direcciones, puntos de apoyo y patrones cortos.",before:"Domina las notas naturales en clave de sol y mantén un pulso cómodo.",goal:"Leer frases de cuatro compases sin detener el pulso.",practice:{type:"reading",clef:"treble",meter:"4/4",bpm:72,phrase:["C4","D4","E4","G4","F4","E4","D4","C4","E4","F4","G4","E4","D4","C4","D4","C4"]},blocks:[{title:"Reconocer antes de contar",html:"<p>Observa primero la dirección: repetición, grado conjunto o salto. Después ubica las notas de apoyo y lee el resto como movimiento, no como una lista aislada de nombres.</p>"},{title:"Rutina de fluidez",html:"<ol><li>Lee en silencio el contorno.</li><li>Marca cuatro pulsos de entrada.</li><li>Nombra o canta a tempo lento.</li><li>Repite solo cuando el pulso no se interrumpa.</li></ol>"}]},
+    {id:"l2-clave-fa",title:"Fluidez en clave de fa",subtitle:"Registro grave, líneas adicionales y lectura funcional.",lead:"La clave de fa requiere una referencia estable: Fa está en la cuarta línea; desde allí se cuentan líneas y espacios con dirección.",before:"Relaciona la clave de fa con la mano izquierda y con Do4 como puente entre claves.",goal:"Reconocer notas graves y medias sin traducirlas desde la clave de sol.",practice:{type:"reading",clef:"bass",meter:"3/4",bpm:66,phrase:["C3","D3","E3","F3","G3","F3","E3","D3","C3","G2","C3","E3"]},blocks:[{title:"Anclas visuales",html:"<p>Usa Fa3 en la cuarta línea y Do3 en el segundo espacio como referencias. Las líneas adicionales se leen por continuidad; no forman un sistema separado.</p>"},{title:"Alternar sin confundir",html:"<p>Practica una frase en sol y una en fa, pero nombra la clave antes de leer. El error común es conservar mentalmente la referencia de la clave anterior.</p>"}]},
+    {id:"l2-armaduras",title:"Armaduras y tonalidades relativas",subtitle:"Leer la tonalidad antes de la primera nota.",lead:"Una armadura es información global: modifica la lectura durante toda la sección, salvo que un becuadro o accidental indique otra cosa.",before:"Reconoce sostenidos, bemoles, escala mayor y menor natural.",goal:"Relacionar una armadura con una tonalidad mayor, su relativa menor y las alteraciones que afecta.",practice:{type:"key",question:"¿Qué tonalidad mayor corresponde a una armadura de un sostenido (Fa♯)?",answers:["Sol mayor","Re mayor","Fa mayor","Do mayor"],correct:0,explain:"Un sostenido corresponde a Sol mayor; su relativa menor es Mi menor."},blocks:[{title:"Orden y lectura",html:"<p>Los sostenidos siguen Fa–Do–Sol–Re–La–Mi–Si; los bemoles, el orden inverso. Para leer, identifica primero la última alteración escrita y luego confirma la tonalidad.</p>"},{title:"Relativas",html:"<p>Mayor y menor relativa comparten armadura. La menor relativa se encuentra una tercera menor debajo de la mayor: Sol mayor y Mi menor, por ejemplo.</p>"}]},
+    {id:"l2-ritmo-compuesto",title:"Ritmo aplicado y compases compuestos",subtitle:"Sentir pulsos grandes antes de subdividir.",lead:"En 6/8 no conviene contar seis acentos iguales: se sienten normalmente dos pulsos grandes, cada uno dividido en tres corcheas.",before:"Mantén 2/4, 3/4 y 4/4 con pulso estable.",goal:"Leer 6/8 y contrastarlo con 3/4 sin perder la jerarquía métrica.",practice:{type:"meter",question:"¿Cómo se siente normalmente un compás de 6/8?",answers:["Dos pulsos grandes subdivididos en tres","Seis pulsos iguales y fuertes","Tres pulsos de dos corcheas"],correct:0,explain:"6/8 es compuesto binario: dos pulsos principales de negra con puntillo."},blocks:[{title:"Dos agrupaciones distintas",html:"<p>3/4 suele organizarse como tres pulsos que se dividen en dos; 6/8 como dos pulsos que se dividen en tres. Ambas cifras suman seis corcheas, pero se sienten y frasean de manera diferente.</p>"},{title:"Lee con el cuerpo",html:"<p>Marca los pulsos principales con el pie y las subdivisiones con la voz: <b>UNO-la-li DOS-la-li</b>. Después añade la partitura.</p>"}]},
+    {id:"l2-dictado",title:"Dictado rítmico y melódico",subtitle:"Del oído a la partitura.",lead:"El dictado separa tareas: primero pulso y métrica, luego contorno, después notas o duraciones concretas. No intentes resolver todo en una sola escucha.",before:"Reconoce intervalos básicos, figuras y silencios en compases simples.",goal:"Identificar un patrón escuchado y justificarlo con altura o ritmo.",practice:{type:"dictation",clef:"treble",meter:"4/4",bpm:68,phrase:["C4","E4","D4","F4","E4","G4","F4","C5"],question:"Después de escuchar, ¿qué describe mejor el inicio?",answers:["Salto ascendente y descenso por grado conjunto","Repetición de una sola nota","Descenso cromático continuo","Dos notas simultáneas"],correct:0,explain:"La frase comienza C–E y luego E–D: un salto ascendente seguido de un grado conjunto descendente."},blocks:[{title:"Procedimiento en tres pasadas",html:"<ol><li>Escucha el pulso y la cantidad de compases.</li><li>Dibuja el contorno: sube, baja o se repite.</li><li>Comprueba notas y figuras una por una.</li></ol>"},{title:"La corrección enseña",html:"<p>Compara tu respuesta con el modelo y localiza la primera diferencia. Corregir desde ese punto es más útil que repetir todo sin diagnóstico.</p>"}]},
+    {id:"l2-gran-pentagrama",title:"Gran pentagrama y lectura coordinada",subtitle:"Dos claves, una sola organización temporal.",lead:"La clave de sol y la de fa comparten compases, pulsos y barras. Primero lee cada voz por separado; luego alinea sus apoyos verticales.",before:"Lee frases sencillas en ambas claves por separado.",goal:"Identificar qué ocurre simultáneamente en dos pentagramas y mantener un pulso común.",practice:{type:"grand",meter:"4/4",bpm:60,upper:["E4","F4","G4","E4","D4","E4","F4","D4"],lower:["C3","C3","G2","G2","C3","C3","G2","C3"]},blocks:[{title:"Vertical y horizontal a la vez",html:"<p>La lectura horizontal sigue cada voz en el tiempo. La lectura vertical compara los sonidos que coinciden. Empieza por los ataques simultáneos de cada pulso.</p>"},{title:"Práctica por capas",html:"<p>Lee la voz superior, luego la inferior. Marca los pulsos comunes. Solo después une ambas voces, primero despacio y sin sacrificar continuidad.</p>"}]},
+    {id:"l2-primera-vista",title:"Primera vista y repertorio breve",subtitle:"Preparar, leer, continuar y evaluar.",lead:"La primera vista busca continuidad musical, no perfección instantánea. Preparar compás, tonalidad, dificultades y puntos de respiración es parte de leer.",before:"Integra clave, armadura, ritmo y contorno en frases cortas.",goal:"Completar una pieza breve con cuenta previa y una autoevaluación concreta.",practice:{type:"reading",clef:"treble",meter:"6/8",bpm:62,phrase:["G4","A4","B4","D5","B4","A4","G4","D4","G4","A4","B4","G4"]},blocks:[{title:"Vista previa de 20 segundos",html:"<p>Antes de sonar: identifica clave, compás, armadura, nota inicial, ritmo difícil y punto final. Elige un tempo que permita no detenerte.</p>"},{title:"Rúbrica breve",html:"<p>Al terminar, valora pulso, alturas, ritmo y continuidad. Escoge un punto para mejorar y repite una vez con una intención clara.</p>"}]}
+  ]},
+  advanced:{id:"advanced",number:3,title:"Lectura avanzada e interpretación",short:"Nivel 3",summary:"Lee texturas, métricas y repertorio con autonomía interpretativa.",levels:[
+    {id:"l3-metricas",title:"Métricas irregulares y agrupación",subtitle:"5/4, 7/8 y acentos internos.",lead:"Un compás irregular no es una suma caótica: se organiza en grupos perceptibles, como 3+2 en 5/4 o 2+2+3 en 7/8.",before:"Diferencia compases simples y compuestos y conserva subdivisiones estables.",goal:"Decidir y mantener una agrupación antes de leer un patrón irregular.",practice:{type:"meter",question:"Una agrupación frecuente para 7/8 es:",answers:["2+2+3","3+4+4","7 pulsos fuertes iguales","6+1 sin subdivisión"],correct:0,explain:"7/8 suele agruparse en combinaciones de dos y tres: 2+2+3, 3+2+2 o 2+3+2 según el estilo."},blocks:[{title:"Agrupar para anticipar",html:"<p>Escribe o marca los grupos antes de tocar. El numerador informa la cantidad de corcheas; la agrupación indica cómo se siente y frasea el compás.</p>"},{title:"Acento no es volumen",html:"<p>Un acento métrico puede sentirse como dirección o apoyo, sin convertir cada inicio de grupo en un golpe fuerte.</p>"}]},
+    {id:"l3-polirritmia",title:"Polirritmia y subdivisión",subtitle:"Dos capas temporales sobre un mismo pulso.",lead:"La polirritmia se aprende encontrando un pulso común. Antes de tocar dos capas, puedes cantar una mientras marcas la otra.",before:"Mantén subdivisiones binarias y ternarias de forma estable.",goal:"Reconocer la relación 3:2 y preparar su pulso común.",practice:{type:"quiz",question:"En una relación 3:2, tres ataques ocupan el mismo tiempo que:",answers:["Dos ataques de la otra capa","Seis compases","Una corchea","Cuatro ataques"],correct:0,explain:"Ambas capas completan el mismo espacio temporal: tres contra dos."},blocks:[{title:"Pulso común",html:"<p>Para 3:2, divide primero el espacio en seis partes iguales: una capa cae cada dos partes y la otra cada tres. Luego vuelve a sentir el pulso amplio.</p>"},{title:"De lo escrito a lo audible",html:"<p>No memorices solo el dibujo. Alterna contar, palmear, escuchar y leer para unir representación y sensación.</p>"}]},
+    {id:"l3-cambios-tonales",title:"Cambios de tonalidad y cromatismo",subtitle:"Leer función y grafía en contexto.",lead:"Cuando cambia la armadura o aparecen accidentales persistentes, la lectura debe preguntarse si hay una nueva región tonal, una modulación o un color pasajero.",before:"Reconoce armaduras mayores, menores relativas y alteraciones accidentales.",goal:"Separar una alteración local de un cambio tonal indicado por la partitura.",practice:{type:"key",question:"Si una nueva armadura aparece en medio de una sección, la primera acción al leer es:",answers:["Actualizar las notas afectadas y reconsiderar el centro tonal","Ignorarla hasta el final","Cambiar solo la primera nota","Aumentar el tempo"],correct:0,explain:"Una nueva armadura modifica las alturas que se leen desde ese punto y puede señalar una nueva tonalidad."},blocks:[{title:"Mira antes de reaccionar",html:"<p>En una nueva sección revisa armadura, alteraciones recurrentes, notas de llegada y cadencias. La grafía correcta aporta información funcional, incluso cuando dos notas suenan igual en temperamento.</p>"},{title:"Lectura responsable",html:"<p>Respeta sostenidos, bemoles y becuadros escritos. Simplificar enarmónicamente por costumbre puede ocultar la dirección de la línea.</p>"}]},
+    {id:"l3-textura",title:"Textura y lectura polifónica",subtitle:"Voces, acordes y prioridades.",lead:"En una textura polifónica cada voz tiene dirección propia. La lectura eficaz distingue qué voz lleva la melodía, qué voz sostiene el ritmo y qué notas forman apoyo armónico.",before:"Coordina dos claves en patrones simples y reconoce tríadas.",goal:"Seguir una voz principal sin perder la alineación vertical del conjunto.",practice:{type:"grand",meter:"3/4",bpm:58,upper:["G4","B4","A4","C5","B4","D5","C5","B4","A4"],lower:["C3","G2","C3","F2","C3","G2","C3","G2","C3"]},blocks:[{title:"Jerarquía de voces",html:"<p>Identifica primero la voz que debe escucharse como melodía. Después observa las notas que coinciden con sus apoyos y, por último, los detalles de acompañamiento.</p>"},{title:"Acordes no sustituyen voces",html:"<p>Un acorde explica la verticalidad, pero no elimina el valor melódico de cada línea. Lee ambas dimensiones: sucesión y simultaneidad.</p>"}]},
+    {id:"l3-navegacion",title:"Partitura, ensamble y navegación",subtitle:"Repeticiones, señales y entradas.",lead:"En una partitura extensa, leer también es orientarse: números de compás, marcas de ensayo, repeticiones, codas y cambios de tempo permiten conservar la forma.",before:"Reconoce barras, casillas, D.C., D.S., Fine y Coda.",goal:"Trazar el recorrido de una sección antes de tocarla con otras personas.",practice:{type:"quiz",question:"Después de una indicación D.S. al Coda, normalmente debes:",answers:["Volver al signo y saltar a la coda cuando se indique","Volver siempre al compás uno","Ignorar las repeticiones","Tocar más rápido"],correct:0,explain:"D.S. manda volver al signo; la indicación posterior determina cuándo se toma la coda."},blocks:[{title:"Mapa antes de ensayo",html:"<p>Marca secciones, repeticiones y cambios de tempo. En ensamble, saber dónde se está es tan importante como leer las notas correctas.</p>"},{title:"Entradas y silencios",html:"<p>Cuenta los silencios activos. Antes de una entrada, identifica qué instrumento o voz funciona como referencia audible.</p>"}]},
+    {id:"l3-capstone",title:"Primera vista avanzada e interpretación",subtitle:"Integrar lectura, continuidad y decisión musical.",lead:"La meta final no es eliminar todo error: es leer con dirección, pulso, sonido y capacidad de recuperarse sin abandonar la forma.",before:"Integra métrica, tonalidad, textura, signos expresivos y navegación.",goal:"Realizar una lectura breve, registrar evidencia y definir un plan de mejora concreto.",practice:{type:"reading",clef:"treble",meter:"5/4",bpm:56,phrase:["D4","F4","A4","G4","E4","F4","A4","C5","B4","A4","G4","F4","E4","D4","C4"]},blocks:[{title:"Protocolo profesional",html:"<ol><li>Observa clave, compás, tonalidad, tempo y forma.</li><li>Localiza los ritmos, saltos y alteraciones de riesgo.</li><li>Cuenta antes de entrar y conserva el pulso.</li><li>Si ocurre un error, vuelve al pulso en el siguiente punto seguro.</li></ol>"},{title:"Cierre del curso",html:"<p>Graba una lectura, escucha una vez y evalúa continuidad, precisión rítmica, alturas, articulación y fraseo. Esa evidencia orienta tu práctica posterior en repertorio real.</p>"}]}
+  ]}
+};
+const LS_KEY = "crescendo-teoria-lectura-v3";
 const LEGACY_LS_KEYS = ["crescendo-teoria-lectura-v1"];
 let state = loadState();
-let activeLevelId = state.activeLevelId || DATA.levels[0].id;
+let activeTrackId = state.activeTrackId||"foundation";
+let activeLevelId = state.activeLevelId || currentLevels()[0].id;
 
 const NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NATURAL = ["C","D","E","F","G","A","B"];
@@ -54,8 +75,11 @@ function escAttr(v){ return escapeHtml(v); }
 function parseJSON(value,fallback={}){
   try{return JSON.parse(value)}catch(e){return fallback}
 }
+function currentTrack(){return COURSE_TRACKS[activeTrackId]||COURSE_TRACKS.foundation}
+function currentLevels(){return currentTrack().levels}
+function allCourseLevels(){return Object.values(COURSE_TRACKS).flatMap(track=>track.levels)}
 function loadState(){
-  const empty={completed:{},activeLevelId:DATA.levels[0].id,practice:{},readingEvaluation:null};
+  const empty={completed:{},activeTrackId:"foundation",activeLevelId:DATA.levels[0].id,practice:{},readingEvaluation:null};
   for(const key of [LS_KEY,...LEGACY_LS_KEYS]){
     try{
       const raw=localStorage.getItem(key);
@@ -63,7 +87,8 @@ function loadState(){
       const parsed=JSON.parse(raw);
       return {
         completed: parsed.completed&&typeof parsed.completed==="object"?parsed.completed:{},
-        activeLevelId: DATA.levels.some(x=>x.id===parsed.activeLevelId)?parsed.activeLevelId:DATA.levels[0].id,
+        activeTrackId: COURSE_TRACKS[parsed.activeTrackId]?parsed.activeTrackId:"foundation",
+        activeLevelId: allCourseLevels().some(x=>x.id===parsed.activeLevelId)?parsed.activeLevelId:DATA.levels[0].id,
         practice: parsed.practice&&typeof parsed.practice==="object"?parsed.practice:{},
         readingEvaluation: parsed.readingEvaluation&&typeof parsed.readingEvaluation==="object"?parsed.readingEvaluation:null
       };
@@ -73,6 +98,7 @@ function loadState(){
 }
 function saveState(){
   try{
+    state.activeTrackId=activeTrackId;
     state.activeLevelId=activeLevelId;
     localStorage.setItem(LS_KEY,JSON.stringify(state));
   }catch(e){console.warn("No se pudo guardar el progreso:",e);}
@@ -93,15 +119,20 @@ function showView(view){
 }
 
 function renderLevelCards(){
-  $("levelCards").innerHTML=DATA.levels.map((level,i)=>`
-    <article class="level-card ${state.completed[level.id]?"completed":""}">
-      <span class="level-number">Nivel ${i+1}</span>
-      <h3>${escapeHtml(level.title)}</h3>
-      <p>${escapeHtml(level.subtitle)}</p>
-      <button type="button" data-open-level="${level.id}">Estudiar →</button>
-    </article>`).join("");
-  document.querySelectorAll("[data-open-level]").forEach(btn=>btn.addEventListener("click",()=>{
-    activeLevelId=btn.dataset.openLevel; saveState(); showView("curso");
+  $("levelCards").innerHTML=Object.values(COURSE_TRACKS).map(track=>{
+    const done=track.levels.filter(level=>state.completed[level.id]).length;
+    return `<article class="level-card course-track-card ${done===track.levels.length?"completed":""}">
+      <span class="level-number">${escapeHtml(track.short)} · ${track.levels.length} unidades</span>
+      <h3>${escapeHtml(track.title)}</h3>
+      <p>${escapeHtml(track.summary)}</p>
+      <small>${done}/${track.levels.length} unidades exploradas</small>
+      <button type="button" data-open-track="${track.id}">Abrir ${escapeHtml(track.short)} →</button>
+    </article>`;
+  }).join("");
+  document.querySelectorAll("[data-open-track]").forEach(btn=>btn.addEventListener("click",()=>{
+    activeTrackId=btn.dataset.openTrack;
+    activeLevelId=currentLevels().some(level=>level.id===state.activeLevelId)?state.activeLevelId:currentLevels()[0].id;
+    saveState(); showView("curso");
   }));
   updateHomeProgress();
 }
@@ -109,6 +140,7 @@ function blocksWithTitles(level,titles){
   return titles.map(title=>level.blocks.find(block=>block.title===title)).filter(Boolean);
 }
 function courseBlocks(level){
+  if(activeTrackId!=="foundation") return level.blocks;
   const reading=DATA.levels.find(item=>item.id==="lectura");
   const rhythm=DATA.levels.find(item=>item.id==="ritmo");
   if(level.id==="lectura") return blocksWithTitles(reading,[
@@ -140,23 +172,25 @@ const LEARNING_GUIDE={
   "puente-armonia":{before:"Integra altura, ritmo y contorno antes de analizar la función de cada nota.",goal:"Leer frases breves y vincular melodía, intervalos y tríadas."}
 };
 function renderLearningGuide(level,index){
-  const guide=LEARNING_GUIDE[level.id];
+  const guide=LEARNING_GUIDE[level.id]||{before:level.before,goal:level.goal};
   if(!guide)return"";
   return `<section class="learning-guide" aria-label="Ruta pedagógica del nivel">
-    <div><p class="kicker">RUTA DE APRENDIZAJE · ETAPA ${index+1} DE ${DATA.levels.length}</p><h3>Antes de avanzar</h3><p>${escapeHtml(guide.before)}</p></div>
+    <div><p class="kicker">${escapeHtml(currentTrack().short)} · ETAPA ${index+1} DE ${currentLevels().length}</p><h3>Antes de avanzar</h3><p>${escapeHtml(guide.before)}</p></div>
     <div class="learning-guide-goal"><span>Meta práctica</span><b>${escapeHtml(guide.goal)}</b></div>
   </section>`;
 }
 function renderCourse(){
   stopAllAudio();
-  const index=DATA.levels.findIndex(x=>x.id===activeLevelId);
-  const level=DATA.levels[index]||DATA.levels[0];
-  $("courseNav").innerHTML=DATA.levels.map((item,i)=>`
+  const levels=currentLevels();
+  const index=levels.findIndex(x=>x.id===activeLevelId);
+  const level=levels[index]||levels[0];
+  if(level.id!==activeLevelId){activeLevelId=level.id;saveState();}
+  $("courseNav").innerHTML=`<div class="track-switcher" role="tablist" aria-label="Nivel del curso">${Object.values(COURSE_TRACKS).map(track=>`<button type="button" role="tab" aria-selected="${track.id===activeTrackId}" class="${track.id===activeTrackId?"active":""}" data-course-track="${track.id}">${escapeHtml(track.short)}</button>`).join("")}</div>`+levels.map((item,i)=>`
     <button class="course-nav-btn ${item.id===level.id?"active":""}" data-course-level="${item.id}" type="button" ${item.id===level.id?'aria-current="page"':""}>
       <span>${i+1}</span><span><b>${escapeHtml(item.title)}</b><small>${state.completed[item.id]?"Completado":"Pendiente"}</small></span>
     </button>`).join("");
   $("lessonContent").innerHTML=`
-    <p class="kicker">Nivel ${index+1} de ${DATA.levels.length}</p>
+    <p class="kicker">${escapeHtml(currentTrack().short)} · Unidad ${index+1} de ${levels.length}</p>
     <h2 class="lesson-title">${escapeHtml(level.title)}</h2>
     <p class="lesson-lead">${escapeHtml(level.lead)}</p>
     ${renderLearningGuide(level,index)}
@@ -174,7 +208,7 @@ function renderCourse(){
       <button class="primary-btn complete-btn ${state.completed[level.id]?"done":""}" id="completeLevelBtn" type="button">
         ${state.completed[level.id]?"Nivel completado ✓":"Marcar como completado"}
       </button>
-      <button class="ghost-btn" id="nextLevelBtn" type="button" ${index===DATA.levels.length-1?"disabled":""}>Siguiente →</button>
+      <button class="ghost-btn" id="nextLevelBtn" type="button" ${index===levels.length-1?"disabled":""}>Siguiente →</button>
       <button class="ghost-btn" id="resetCourseBtn" type="button">Reiniciar progreso</button>
     </div>`;
   $("lessonContent").prepend($("lessonContent").querySelector(".lesson-actions"));
@@ -185,11 +219,16 @@ function renderCourse(){
   document.querySelectorAll("[data-course-level]").forEach(btn=>btn.addEventListener("click",()=>{
     activeLevelId=btn.dataset.courseLevel; saveState(); renderCourse(); scrollTopSafe();
   }));
+  document.querySelectorAll("[data-course-track]").forEach(btn=>btn.addEventListener("click",()=>{
+    activeTrackId=btn.dataset.courseTrack;
+    activeLevelId=currentLevels()[0].id;
+    saveState();renderCourse();scrollTopSafe();
+  }));
   $("prevLevelBtn").addEventListener("click",()=>{
-    if(index>0){activeLevelId=DATA.levels[index-1].id;saveState();renderCourse();scrollTopSafe();}
+    if(index>0){activeLevelId=levels[index-1].id;saveState();renderCourse();scrollTopSafe();}
   });
   $("nextLevelBtn").addEventListener("click",()=>{
-    if(index<DATA.levels.length-1){activeLevelId=DATA.levels[index+1].id;saveState();renderCourse();scrollTopSafe();}
+    if(index<levels.length-1){activeLevelId=levels[index+1].id;saveState();renderCourse();scrollTopSafe();}
   });
   $("completeLevelBtn").addEventListener("click",()=>{
     state.completed[level.id]=!state.completed[level.id];
@@ -200,13 +239,14 @@ function renderCourse(){
   mountSolfege(level);
   mountQuickPractice(level);
   mountAppliedReading(level);
+  mountTrackPractice(level);
   mountChromaticInstrumentReference();
   window.CrescendoLab?.attach($("lessonContent"),'theory');
 }
 function updateHomeProgress(){
-  const done=DATA.levels.filter(x=>state.completed[x.id]).length;
-  $("homeProgressBar").style.width=`${(done/DATA.levels.length)*100}%`;
-  $("homeProgressText").textContent=`${done}/${DATA.levels.length} niveles explorados`;
+  const levels=allCourseLevels(),done=levels.filter(x=>state.completed[x.id]).length;
+  $("homeProgressBar").style.width=`${(done/levels.length)*100}%`;
+  $("homeProgressText").textContent=`${done}/${levels.length} unidades exploradas`;
 }
 
 function mountChromaticInstrumentReference(){
@@ -472,7 +512,7 @@ function interactiveTitle(id){
     escalas:"Explorador de escalas",
     tonalidad:"Círculo de quintas y centro tonal",
     "puente-armonia":"Laboratorio de melodía y puente hacia la armonía"
-  })[id]||"Laboratorio";
+  })[id]||(COURSE_TRACKS[activeTrackId]?.levels.some(level=>level.id===id)?"Laboratorio de lectura aplicada":"Laboratorio");
 }
 function interactiveDescription(id){
   return ({
@@ -483,7 +523,7 @@ function interactiveDescription(id){
     escalas:"Escoge tónica y tipo de escala y compárala en piano, guitarra y pentagrama.",
     tonalidad:"Selecciona una tonalidad desde el círculo de quintas y observa sus notas, armadura y jerarquía básica.",
     "puente-armonia":"Analiza motivos, contorno, grados conjuntos, saltos y secuencias; después conecta la melodía con tríadas y armonía."
-  })[id]||"";
+  })[id]||(COURSE_TRACKS[activeTrackId]?.levels.find(level=>level.id===id)?.goal||"");
 }
 function mountInteractive(level){
   const el=$("interactiveMount"); if(!el)return;
@@ -1495,6 +1535,60 @@ function mountAppliedReading(level){
   mount.querySelector("[data-applied-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/config.bpm)));
 }
 
+/* ===================== NIVELES 2 Y 3 · PRÁCTICA APLICADA ===================== */
+function trackPhrase(notes,meter){
+  const beats=meter==="3/4"?3:meter==="5/4"?5:meter==="6/8"?6:4;
+  const compound=meter==="6/8";
+  return notes.map((note,index)=>({note,dur:compound?"e":"q",beats:compound ? .5 : 1,bar:Math.floor(index/beats)}));
+}
+function trackTones(notes){
+  return [...new Set(notes.map(note=>midiFromNamed(note)%12))].map((pc,index)=>({pc,semi:pc,name:NOTE_NAMES[pc],token:NOTE_NAMES[pc],degree:index+1,isRoot:pc===0}));
+}
+function mountTrackPractice(level){
+  const cfg=level.practice;
+  if(!cfg||activeTrackId==="foundation")return;
+  const mount=$("interactiveMount");if(!mount)return;
+  const makeQuestion=()=>`<div class="track-check"><p class="trainer-prompt">${escapeHtml(cfg.question||"¿Cuál es la primera nota de la frase?")}</p><div class="trainer-answer-grid" data-track-answers>${(cfg.answers||[]).map((answer,index)=>`<button type="button" data-track-answer="${index}">${escapeHtml(answer)}</button>`).join("")}</div><p class="feedback" data-track-feedback aria-live="polite"></p></div>`;
+  if(cfg.type==="reading"||cfg.type==="dictation"){
+    const phrase=trackPhrase(cfg.phrase,cfg.meter);
+    const visualTones=trackTones(cfg.phrase);
+    const first=cfg.phrase[0].replace(/\d/,"");
+    const answers=cfg.answers||shuffle([first,...NATURAL.filter(note=>note!==first).slice(0,3)]).map(note=>note.includes("·")?note:`${note} · ${NOTE_SOLFEGE[note]||note}`);
+    const correct=cfg.correct??answers.findIndex(answer=>answer.startsWith(first+" "));
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">PRÁCTICA GUIADA</p><h3>${escapeHtml(level.title)}</h3><p>${cfg.type==="dictation"?"Escucha primero; después responde sin mirar la solución.":"Observa el contorno, recibe la cuenta previa y mantén el pulso."}</p></header><div class="solfege-score-wrap"><div class="scroll-x">${phraseStaffSVG(phrase,{clef:cfg.clef||"treble",meter:cfg.meter})}</div></div><div class="visual-two track-instrument-map"><section class="visual-box"><div class="diagram-label">Piano · notas de la frase</div>${pianoHTML("C",visualTones)}</section><section class="visual-box"><div class="diagram-label">Diapasón · posiciones</div><div class="scroll-x">${guitarScaleSVG("C",visualTones)}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-read>▶ Cuenta y lee</button><button class="ghost-btn" type="button" data-track-hear>▶ Escuchar modelo</button></div>${makeQuestion()}</div>`;
+    mount.querySelector("[data-track-read]").addEventListener("click",()=>playPhrase(mount,phrase,cfg.bpm,cfg.meter));
+    mount.querySelector("[data-track-hear]").addEventListener("click",()=>playSequence(phrase.map(event=>midiFromNamed(event.note)),Math.round(60000/cfg.bpm)));
+    if(!cfg.answers){
+      mount.querySelector("[data-track-answers]").innerHTML=answers.map((answer,index)=>`<button type="button" data-track-answer="${index}">${escapeHtml(answer)}</button>`).join("");
+    }
+    mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:correct,explain:cfg.explain||`La frase comienza en ${NOTE_SOLFEGE[first]||first}.`,levelId:level.id})));
+    return;
+  }
+  if(cfg.type==="grand"){
+    const upper=trackPhrase(cfg.upper,cfg.meter),lower=trackPhrase(cfg.lower,cfg.meter);
+    mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">LECTURA POLIFÓNICA</p><h3>${escapeHtml(level.title)}</h3><p>Lee cada voz por separado y después observa los puntos de coincidencia vertical.</p></header><div class="grand-staff-practice"><section><b>Clave de sol</b><div class="scroll-x">${phraseStaffSVG(upper,{clef:"treble",meter:cfg.meter})}</div></section><section><b>Clave de fa</b><div class="scroll-x">${phraseStaffSVG(lower,{clef:"bass",meter:cfg.meter})}</div></section></div><p class="count-in-display" data-count-in-display aria-live="polite">Cuenta previa · preparada</p><div class="solfege-actions"><button class="primary-btn" type="button" data-track-upper>▶ Leer voz superior</button><button class="ghost-btn" type="button" data-track-lower>▶ Leer voz inferior</button><button class="ghost-btn" type="button" data-track-both>▶ Escuchar ambas</button></div><p class="feedback">Empieza a un tempo donde puedas mantener ambas voces sin detener el pulso.</p></div>`;
+    mount.querySelector("[data-track-upper]").addEventListener("click",()=>playPhrase(mount,upper,cfg.bpm,cfg.meter));
+    mount.querySelector("[data-track-lower]").addEventListener("click",()=>playPhrase(mount,lower,cfg.bpm,cfg.meter));
+    mount.querySelector("[data-track-both]").addEventListener("click",async()=>{
+      const token=await playCountIn(mount,cfg.bpm,cfg.meter);if(token===null)return;
+      const secondsPerEvent=60/cfg.bpm;
+      upper.forEach((event,index)=>playTone(midiFromNamed(event.note),{delay:index*secondsPerEvent,duration:.55,volume:.13}));
+      lower.forEach((event,index)=>playTone(midiFromNamed(event.note),{delay:index*secondsPerEvent,duration:.55,volume:.13}));
+      window.setTimeout(()=>{if(token===AUDIO.seq)finishCountIn(mount)},upper.length*secondsPerEvent*1000);
+    });
+    return;
+  }
+  mount.innerHTML=`<div class="lab-card track-practice"><header><p class="kicker">COMPROBACIÓN ACTIVA</p><h3>${escapeHtml(level.title)}</h3><p>Responde y lee la explicación antes de continuar.</p></header>${makeQuestion()}</div>`;
+  mount.querySelectorAll("[data-track-answer]").forEach(button=>button.addEventListener("click",()=>resolveTrackCheck(mount,{selected:Number(button.dataset.trackAnswer),correctIndex:cfg.correct,explain:cfg.explain,levelId:level.id})));
+}
+function resolveTrackCheck(mount,{selected,correctIndex,explain,levelId}){
+  const correct=selected===correctIndex;
+  mount.querySelectorAll("[data-track-answer]").forEach(button=>{button.disabled=true;const answer=Number(button.dataset.trackAnswer);if(answer===correctIndex)button.classList.add("correct");else if(answer===selected)button.classList.add("wrong")});
+  const feedback=mount.querySelector("[data-track-feedback]");
+  if(feedback)feedback.textContent=(correct?"Correcto. ":"Revisa. ")+explain;
+  state.practice[levelId]=correct;saveState();
+}
+
 /* ===================== FASE 4 · SOLFEO INTERACTIVO ===================== */
 
 const SOLFEGE_LEVELS = {
@@ -2335,26 +2429,27 @@ const BADGE_DEFINITIONS = [
   {id:"tonal",icon:"V",title:"Centro tonal",desc:"Completa tonalidad.",test:()=>!!state.completed.tonalidad},
   {id:"expression",icon:"ƒ",title:"Intérprete consciente",desc:"Completa expresión, textura y forma.",test:()=>!!state.completed["expresion-forma"]},
   {id:"bridge",icon:"→",title:"Puente armónico",desc:"Completa el nivel final.",test:()=>!!state.completed["puente-armonia"]},
-  {id:"all-levels",icon:"8",title:"Ruta completa",desc:"Completa los 8 niveles.",test:()=>completedCount()===DATA.levels.length},
+  {id:"all-levels",icon:"3",title:"Ruta completa",desc:"Completa las tres rutas de lectura.",test:()=>completedCount()===allCourseLevels().length},
   {id:"final-pass",icon:"✓",title:"Evaluación superada",desc:"Obtén al menos 80% en la evaluación final.",test:()=>Number(state.finalEvaluation?.percent||0)>=80}
 ];
 
 function completedCount(){
-  return DATA.levels.filter(level=>state.completed[level.id]).length;
+  return allCourseLevels().filter(level=>state.completed[level.id]).length;
 }
 function practiceCount(){
-  return DATA.levels.filter(level=>state.practice?.[level.id]).length;
+  return allCourseLevels().filter(level=>state.practice?.[level.id]).length;
 }
 function totalProgressPercent(){
-  const completionPart = completedCount()/DATA.levels.length;
-  const practicePart = practiceCount()/DATA.levels.length;
+  const total=allCourseLevels().length;
+  const completionPart = completedCount()/total;
+  const practicePart = practiceCount()/total;
   return Math.round((completionPart*.75 + practicePart*.25)*100);
 }
 
 function renderDetailedProgress(){
   const el=$("homeProgressDetail");
   if(!el) return;
-  const completed=completedCount(), practice=practiceCount(), total=DATA.levels.length;
+  const completed=completedCount(), practice=practiceCount(), total=allCourseLevels().length;
   el.innerHTML=`
     <div class="mini-stat"><b>${completed}</b><span>niveles completos</span></div>
     <div class="mini-stat"><b>${practice}</b><span>prácticas rápidas correctas</span></div>
@@ -2367,7 +2462,7 @@ function renderEvaluationSummary(){
   const diag=state.diagnostic;
   const final=state.finalEvaluation;
   el.innerHTML=`
-    <div class="summary-stat"><span>Progreso</span><b>${totalProgressPercent()}%</b><small>${completedCount()}/${DATA.levels.length} niveles</small></div>
+    <div class="summary-stat"><span>Progreso</span><b>${totalProgressPercent()}%</b><small>${completedCount()}/${allCourseLevels().length} unidades</small></div>
     <div class="summary-stat"><span>Diagnóstico</span><b>${diag?diag.percent+"%":"—"}</b><small>${diag?"último resultado":"sin realizar"}</small></div>
     <div class="summary-stat"><span>Evaluación final</span><b>${final?final.percent+"%":"—"}</b><small>${final?final.label:"sin realizar"}</small></div>
     <div class="summary-stat"><span>Lectura práctica</span><b>${state.readingEvaluation?"✓":"—"}</b><small>${state.readingEvaluation?"registrada":"sin realizar"}</small></div>`;
@@ -2409,7 +2504,7 @@ function startEvaluation(kind){
         <div class="eval-progress"><div style="width:${((index)/questions.length)*100}%"></div></div>
       </div>
       <div class="eval-question-card">
-        <p class="eval-level">${escapeHtml(DATA.levels.find(l=>l.id===q.level)?.title||q.level)}</p>
+        <p class="eval-level">${escapeHtml(allCourseLevels().find(l=>l.id===q.level)?.title||q.level)}</p>
         <h3>${escapeHtml(q.q)}</h3>
         <div class="eval-options">${q.choices.map((choice,i)=>`<button type="button" data-eval-choice="${i}">${escapeHtml(choice)}</button>`).join("")}</div>
         <p class="feedback" data-eval-feedback aria-live="polite"></p>
@@ -2437,7 +2532,7 @@ function startEvaluation(kind){
     const result={score,total:questions.length,percent,label:evaluationLabel(percent),at:new Date().toISOString(),answers};
     if(kind==="diagnostic")state.diagnostic=result;else state.finalEvaluation=result;
     saveState();
-    const byLevel=DATA.levels.map(level=>{
+    const byLevel=allCourseLevels().map(level=>{
       const items=answers.filter(a=>a.level===level.id);
       const correct=items.filter(a=>a.correct).length;
       return {level,correct,total:items.length};
