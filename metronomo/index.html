@@ -293,14 +293,14 @@
         @media(max-width:860px){.rhythm-lab-controls{grid-template-columns:repeat(2,minmax(0,1fr))}.rhythm-lab-controls>button{grid-column:1/-1}.rhythm-score{overflow:auto}}
         @media(max-width:520px){.rhythm-lab-controls{grid-template-columns:1fr}.rhythm-tool{flex:0 0 36px}.rhythm-editor-actions button{font-size:.68rem;padding-inline:4px}}
         .beat-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-        .beat-num { font-size: 0.92rem; font-weight: 900; color: var(--text-dim); min-height: 18px; line-height: 1; transition: color 0.08s, transform 0.08s; font-variant-numeric: tabular-nums; }
+        .beat-num { font-size: 1.12rem; font-weight: 900; color: var(--text-dim); min-height: 22px; line-height: 1; transition: color 0.05s, transform 0.05s; font-variant-numeric: tabular-nums; }
         .beat-num.empty { visibility: hidden; }
         .beat-num.active { color: var(--accent); transform: scale(1.25); }
-        .dot { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.05s ease-out; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
+        .dot { width: 21px; height: 21px; border-radius: 50%; background: rgba(255,255,255,0.1); transition: all 0.05s ease-out; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
         .dot.active-downbeat { background: var(--beat-1); box-shadow: 0 0 15px var(--beat-1); transform: scale(1.3); }
         .dot.active-beat { background: var(--text); box-shadow: 0 0 10px var(--text); transform: scale(1.15); }
-        .dot.active-sub { background: rgba(255,255,255,0.3); width: 10px; height: 10px; margin-top: 3px; }
-        .dot.sub-dot { width: 10px; height: 10px; margin-top: 3px; }
+        .dot.active-sub { background: rgba(255,255,255,0.3); width: 14px; height: 14px; margin-top: 3px; }
+        .dot.sub-dot { width: 14px; height: 14px; margin-top: 3px; }
 
         .controls-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-bottom: 25px; align-items: start; }
         .control-group { background: rgba(0,0,0,0.3); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
@@ -355,14 +355,18 @@
         .poly-step.is-playing { outline:2px solid #fff; outline-offset:1px; }
         .poly-listen { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
         @media(max-width:560px){.poly-inputs{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}.poly-swap{grid-column:1/-1}.poly-listen{align-items:flex-start;flex-direction:column}.clave-step{font-size:.5rem}}
-        .rhythm-workspace-nav { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin:18px 0 10px; padding:5px; border:1px solid rgba(255,255,255,.13); border-radius:12px; background:rgba(0,0,0,.2); }
+        .rhythm-workspace-nav { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin:18px 0 10px; padding:5px; border:1px solid rgba(255,255,255,.13); border-radius:12px; background:rgba(0,0,0,.2); }
         .rhythm-workspace-nav button { border:0; border-radius:8px; padding:10px 7px; color:var(--text-dim); background:transparent; font:800 .7rem/1 inherit; letter-spacing:.04em; text-transform:uppercase; cursor:pointer; }
         .rhythm-workspace-nav button.active { color:#18120a; background:var(--accent); box-shadow:0 3px 10px rgba(0,0,0,.22); }
         .rhythm-workspace { margin:0 0 18px; }
         .rhythm-workspace:empty { display:none; }
-        .rhythm-workspace #drawer-poly { border:1px solid rgba(212,168,79,.38); border-radius:12px; background:rgba(0,0,0,.22); overflow:hidden; }
-        .rhythm-workspace #drawer-poly .group-advanced { display:block; max-height:none; opacity:1; overflow:visible; padding:16px; margin:0; background:transparent; }
+        .controls-grid:empty { display:none; }
+        .rhythm-workspace .control-group { border:1px solid rgba(212,168,79,.38); border-radius:12px; background:rgba(0,0,0,.22); overflow:hidden; }
+        .rhythm-workspace .control-group .group-header { display:none; }
+        .rhythm-workspace .control-group .group-basic,.rhythm-workspace .control-group .group-advanced { display:flex; max-height:none; opacity:1; overflow:visible; padding:16px; margin:0; background:transparent; }
         .rhythm-workspace #drawer-poly .rhythm-tab-panel { padding-top:0; }
+        .metronome-container.mode-basic .rhythm-workspace-nav,.metronome-container.mode-basic .rhythm-workspace { display:none!important; }
+        @media(max-width:780px){.rhythm-workspace-nav{grid-template-columns:repeat(4,minmax(0,1fr))}}
         @media(max-width:560px){.rhythm-workspace-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
         select, input[type=number], input[type=text] {
@@ -437,10 +441,9 @@
 
         /* Nombre de tempo (Andantino, Allegro...) solo visible en modo básico */
         .tempo-name {
-            display: none; color: var(--text-dim); font-size: 0.85rem; font-weight: 600;
+            display: block; color: var(--text-dim); font-size: 0.85rem; font-weight: 600;
             text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2px;
         }
-        .metronome-container.mode-basic .tempo-name { display: block; }
 
         /* Cuadros de selección rápida (Compás / Figura) del modo básico */
         .basic-controls { display: contents; gap: 12px; margin-bottom: 22px; }
@@ -732,13 +735,16 @@
             </div>
         </div>
 
+        <div class="visualizer" id="visualizer"></div>
         <nav class="rhythm-workspace-nav" aria-label="Área de trabajo rítmico">
             <button type="button" class="active" data-workspace-tab="pulse">Pulso</button>
             <button type="button" data-workspace-tab="clave">Clave</button>
             <button type="button" data-workspace-tab="poly">Polirritmia</button>
             <button type="button" data-workspace-tab="pm">Polimetría</button>
+            <button type="button" data-workspace-tab="rhythm">Ritmo y sonidos</button>
+            <button type="button" data-workspace-tab="mixer">Mixer</button>
+            <button type="button" data-workspace-tab="training">Entrenamiento</button>
         </nav>
-        <div class="visualizer" id="visualizer"></div>
         <div class="rhythm-workspace" id="rhythmWorkspace"></div>
 
         <section class="rhythm-lab" id="rhythmLab" aria-labelledby="rhythmLabTitle" hidden>
@@ -1784,15 +1790,20 @@
         UI.polyCycle.querySelectorAll('.poly-step[data-poly-lane="' + lane + '"]').forEach(dot => dot.classList.toggle('is-playing', dot.dataset.polyStep === String(step)));
     }
     const rhythmWorkspace = document.getElementById('rhythmWorkspace');
-    const polyDrawer = document.getElementById('drawer-poly');
-    // La herramienta especializada se mueve al centro; no crea otro metrónomo,
-    // sino que sustituye temporalmente la vista de pulso.
-    rhythmWorkspace.appendChild(polyDrawer);
+    const workspaceDrawers = {
+        clave: document.getElementById('drawer-poly'), poly: document.getElementById('drawer-poly'), pm: document.getElementById('drawer-poly'),
+        rhythm: document.getElementById('drawer-ritmo'), mixer: document.getElementById('drawer-mixer'), training: document.getElementById('drawer-train')
+    };
+    // Todos los controles avanzados pasan al área central: una sola superficie
+    // de trabajo en vez de un metrónomo dentro de otro acordeón.
+    [...new Set(Object.values(workspaceDrawers))].forEach(drawer => rhythmWorkspace.appendChild(drawer));
     function setRhythmWorkspace(name) {
         const isPulse = name === 'pulse';
         document.querySelectorAll('[data-workspace-tab]').forEach(button => button.classList.toggle('active', button.dataset.workspaceTab === name));
         UI.vis.hidden = !isPulse;
         rhythmWorkspace.hidden = isPulse;
+        const activeDrawer = workspaceDrawers[name];
+        [...new Set(Object.values(workspaceDrawers))].forEach(drawer => drawer.hidden = !isPulse && drawer !== activeDrawer);
         document.querySelectorAll('[data-rhythm-panel]').forEach(panel => panel.classList.toggle('active', panel.dataset.rhythmPanel === name));
         if (name === 'clave') renderClaveTimeline();
         if (name === 'poly') renderPolyBuilder();
@@ -2043,7 +2054,10 @@
 
     let lastMainIdx = -1;
     function draw() {
-        let evs = []; while (notesInQueue.length && notesInQueue[0].time < audioContext.currentTime) evs.push(notesInQueue.shift());
+        // El audio se agenda con anticipación; adelantamos el dibujo 32 ms para
+        // compensar un frame de renderizado y que luz y golpe se perciban juntos.
+        const visualLead = 0.032;
+        let evs = []; while (notesInQueue.length && notesInQueue[0].time < audioContext.currentTime + visualLead) evs.push(notesInQueue.shift());
 
         evs.forEach(ev => {
             if (ev.engine === 'main' && ev.noteIdx !== lastMainIdx) {
