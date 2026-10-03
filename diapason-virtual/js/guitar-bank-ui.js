@@ -65,4 +65,15 @@
     render();sync();
   }
   configs.forEach(mount);
+  // Garantiza que al cambiar de instrumento nunca quede visible el banco anterior.
+  function syncBankVisibility(){
+    configs.forEach(config=>{
+      const host=document.getElementById(config.hostId);
+      if(!host)return;
+      host.hidden=instrumentSel.value!==config.instrument;
+      if(host.hidden)host.open=false;
+    });
+  }
+  instrumentSel.addEventListener('change',()=>setTimeout(syncBankVisibility,0));
+  syncBankVisibility();
 })();

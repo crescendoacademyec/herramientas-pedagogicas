@@ -21,5 +21,6 @@ assert.match(ui,/rootOffset:5/);
 assert.match(ui,/Ver en el diapasón/);
 assert.match(ui,/applySelection\(e,\[i\]\)/);
 assert.match(ui,/const step=380/);
+assert.match(ui,/function syncBankVisibility\(\)/);
 assert.equal(['C','C#','D','D#','E','F'][(bank.roots.C+5)%12],'F','C de guitarra debe nombrarse F en requinto');
 console.log(bank.entries.length+' posturas verificadas · guitarra/requinto · afinación estándar');
