@@ -30,15 +30,12 @@
     <div class="bank-steps" id="bankSteps"></div>
     <div class="bank-course-progress" id="bankCourseProgress" data-major-course aria-label="Progreso en las doce tonalidades"></div>
     <div class="bank-display"><div class="bank-score" id="bankScore" role="img" aria-label="Voicing en gran pentagrama"><div data-live-score></div><div data-live-labels></div></div>
-      <div><h2 id="bankTitle"></h2><p class="bank-help" id="bankHelp"></p><ul class="bank-note-list" id="bankNotes"></ul>
-      <p class="bank-note">Azul: mano izquierda · Dorado: mano derecha · Verde: sonando. Reparto sugerido, ajustable a tu mano. El cifrado objetivo se mantiene aunque el detector encuentre un nombre equivalente.</p></div></div>
-    <div class="bank-actions"><button class="bank-primary" data-action="play">Escuchar acorde</button><button data-action="arpeggio" data-for="build jazz drop2 progression">Escuchar arpegio</button><button data-action="stop">Detener</button>
-    <button data-action="add" data-for="build">Añadir siguiente nota</button><button data-action="clear" data-for="build">Empezar desde cero</button><button data-action="all" data-for="build">Mostrar completo</button>
-    <button data-action="sequence" data-for="progression drop2 lines">Escuchar secuencia</button><button data-action="check">Comprobar lo que toco</button></div>
-    <button data-action="complete-key" data-for="lines" data-major-course>Marcar tonalidad practicada</button>
-    <p class="bank-status" id="bankStatus" role="status" aria-live="polite"></p>
-    <p class="bank-note">La comprobación usa las teclas pulsadas (ratón, teclado o MIDI), con octavas exactas; no evalúa el pedal. Para tensiones y omisiones, distingue siempre fórmula teórica de voicing. En progresiones, «Acercar registros» transpone octavas: no calcula una digitación óptima.</p>
-    <a href="../armonia-jazz/index.html">Estudiar la explicación en Armonía Jazz →</a>`;
+      <div class="bank-details"><h2 id="bankTitle"></h2><p class="bank-help" id="bankHelp"></p><ul class="bank-note-list" id="bankNotes"></ul>
+      <p class="bank-note">Azul: mano izquierda · Dorado: mano derecha · Verde: sonando. Reparto sugerido, ajustable a tu mano. El cifrado objetivo se mantiene aunque el detector encuentre un nombre equivalente.</p>
+      <div class="bank-actions"><button class="bank-primary" data-action="play">Escuchar acorde</button><button data-action="arpeggio" data-for="build jazz drop2 progression">Escuchar arpegio</button><button data-action="stop">Detener</button>
+      <button data-action="add" data-for="build">Añadir siguiente nota</button><button data-action="clear" data-for="build">Empezar desde cero</button><button data-action="all" data-for="build">Mostrar completo</button>
+      <button data-action="sequence" data-for="progression drop2 lines">Escuchar secuencia</button><button data-action="check">Comprobar lo que toco</button><button data-action="complete-key" data-for="lines" data-major-course>Marcar tonalidad practicada</button></div>
+      <p class="bank-status" id="bankStatus" role="status" aria-live="polite"></p><a href="../armonia-jazz/index.html">Estudiar la explicación en Armonía Jazz →</a></div></div>`;
   const $=id=>document.getElementById('bank'+id);
   $('Pattern').value='1';$('Register').value='0';
   const state={tab:'build',step:0,count:Infinity};

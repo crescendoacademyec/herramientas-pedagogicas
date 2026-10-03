@@ -11,9 +11,10 @@
 .bank-course-progress{display:grid;grid-template-columns:repeat(12,minmax(48px,1fr));gap:6px;margin:12px 0}.bank-course-progress button{padding:7px 4px}.bank-course-progress button[aria-pressed="true"]{background:#416f58;color:#fff}
 .bank-controls{flex-wrap:nowrap}.bank-controls label{display:grid;gap:5px;font-size:12px;max-width:100%;min-width:0;flex:1 1 125px}.bank-controls select,.bank-controls input{width:100%;min-width:0;max-width:100%;padding:8px 9px;text-overflow:clip}.bank-controls input{box-sizing:border-box}
 #bankRoot{min-width:90px}#bankMinor{min-width:105px}#bankStyle{min-width:185px}#bankSmooth{min-width:155px}#bankPattern,#bankVoicing{min-width:170px}#bankFormula{min-width:165px}#bankInversion{min-width:120px}#bankRegister,#bankOpen,#bankHands{min-width:140px}#bankTempo{min-width:92px}
-.bank-actions{flex-wrap:nowrap}.bank-actions button{padding:7px 9px;font-size:12px;line-height:1.15;white-space:nowrap;flex:1 1 auto}
+.bank-actions{flex-wrap:wrap;gap:7px;margin:12px 0}.bank-actions button{padding:7px 9px;font-size:12px;line-height:1.15;white-space:nowrap;flex:0 1 auto}
 .chord-bank button[aria-pressed="true"],.chord-bank .bank-primary{background:#d5aa4c;color:#17130d}
-.bank-display{display:grid;grid-template-columns:minmax(210px,320px) minmax(0,1fr);gap:20px;align-items:center}
+.bank-display{display:grid;grid-template-columns:minmax(210px,320px) minmax(0,1fr);gap:20px;align-items:start}
+.bank-details{min-width:0}.bank-details h2{margin:0 0 8px}.bank-details .bank-help{margin-top:0}
 .bank-score{background:#fbf7f0;border-radius:10px;min-height:220px;padding:14px;display:flex;align-items:center}
 .bank-score [data-live-score]{width:100%;overflow:auto}.bank-score svg{display:block;width:100%;height:auto;max-height:280px}
 .bank-score .live-note-label{font:600 11px Arial;fill:#29251f;stroke:#fbf7f0;stroke-width:3px;paint-order:stroke fill}
