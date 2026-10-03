@@ -13,4 +13,7 @@ assert.ok(bank.entries.some(e=>e.quality==='maj9'));
 assert.equal(bank.entries[0].name,'C');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.ok(html.includes('<details id="guitarChordBank" hidden>'));
+const ui=fs.readFileSync(path.join(__dirname,'../js/guitar-bank-ui.js'),'utf8');
+assert.match(ui,/1 índice · 2 medio · 3 anular · 4 meñique/);
+assert.match(ui,/finger=Math\.min\(4,Math\.max\(1,f-start\+1\)\)/);
 console.log(bank.entries.length+' posturas verificadas · guitarra/requinto · afinación estándar');
