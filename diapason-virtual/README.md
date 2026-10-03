@@ -21,7 +21,7 @@ Esta versión parte de la Fase 5 y aplica una revisión musical, responsive y es
 - `js/metronome.js`: metrónomo y pulso.
 - `js/score.js`: PDF, imágenes, web, MusicXML, reproducción, tutor y digitación de frase.
 - `js/ukulele-chords.js` y `js/ukulele-bank-ui.js`: banco específico de ukelele.
-- `js/guitar-chords.js` y `js/guitar-bank-ui.js`: banco compartido por guitarra estándar y requinto estándar. Incluye 561 posturas verificadas en tres registros; las formas se transfieren porque ambas afinaciones conservan el mismo patrón interválico entre cuerdas.
+- `js/guitar-chords.js` y `js/guitar-bank-ui.js`: bancos separados de guitarra estándar y requinto estándar. Incluye 561 posturas verificadas en tres registros; el requinto conserva las formas y presenta los nombres una cuarta justa arriba.
 - `tests/validate.js`: comprobación básica de IDs y dependencias.
 - `tests/guitar-bank.test.js`: verificación de notas, posiciones e igualdad interválica entre guitarra y requinto.
 
