@@ -1042,13 +1042,17 @@
     return `<div class="cs-visualizer cs-fretboard-visualizer" role="img" aria-label="Diapasón de ${name} con las notas de la escala resaltadas"><div class="cs-fretboard-caption"><span>${name} · afinación real</span><span>0–12 trastes · notas de la escala en dorado</span></div><canvas id="csScaleFretboard" class="cs-scale-canvas"></canvas></div>`;
   }
   function renderScaleExplorer(){
-    if(!analysisResult||!$('scaleInstrumentSelect'))return;
-    const instrument=$('scaleInstrumentSelect').value;
+    const activeButton=document.querySelector('#scaleInstrumentButtons .is-active');
+    if(!analysisResult||!activeButton)return;
+    const instrument=activeButton.dataset.instrument;
     const pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(scaleRootPc(analysisResult.key)+n)%12);
     $('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');
     $('scaleInstrumentView').innerHTML=instrument==='piano'?renderScalePiano(pcs):renderScaleFretboard(instrument,pcs);
   }
-  $('scaleInstrumentSelect')?.addEventListener('change',renderScaleExplorer);
+  document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(item=>{const selected=item===button;item.classList.toggle('is-active',selected);item.setAttribute('aria-pressed',String(selected));});
+    renderScaleExplorer();
+  }));
 
   // ---------- resultados / timeline / beat grid ----------
   function displayResults() {
