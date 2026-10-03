@@ -1008,7 +1008,8 @@
   function scaleRootPc(key){return {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11}[String(key||'C')]??0;}
   const isBlackPc=pc=>[1,3,6,8,10].includes(pc);
   function renderScalePiano(pcs){
-    const midis=Array.from({length:37},(_,i)=>48+i), whites=midis.filter(m=>!isBlackPc(m%12));
+    // Mismo registro del modo Principiante de Piano Virtual: C3–B5.
+    const midis=Array.from({length:36},(_,i)=>48+i), whites=midis.filter(m=>!isBlackPc(m%12));
     let whiteIndex=0;
     const keys=midis.map(m=>{
       const black=isBlackPc(m%12), active=pcs.includes(m%12);
@@ -1017,7 +1018,7 @@
       const width=100/whites.length;
       return `<div class="${black?'black-key':'white-key'} ${active?'active':''}" style="left:${black?position*width-(width*.58/2):position*width}%;width:${black?width*.58:width}%" aria-label="${SCALE_NAMES[m%12]}${active?' pertenece a la escala':''}"><div class="label">${active?SCALE_NAMES[m%12]:''}</div></div>`;
     }).join('');
-    return `<div class="cs-visualizer cs-piano-visualizer" role="img" aria-label="Teclado de piano con las notas de la escala resaltadas"><div class="cs-piano-caption">Registro C3–C6 · notas de la escala en dorado</div><div id="csScaleKeyboard">${keys}</div></div>`;
+    return `<div class="cs-visualizer cs-piano-visualizer" role="img" aria-label="Teclado de piano con las notas de la escala resaltadas"><div class="cs-piano-caption">Modo Principiante · C3–B5 · notas de la escala en dorado</div><div id="csScaleKeyboard">${keys}</div></div>`;
   }
   function roundedScaleRect(ctx,x,y,w,h,r){const q=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+q,y);ctx.arcTo(x+w,y,x+w,y+h,q);ctx.arcTo(x+w,y+h,x,y+h,q);ctx.arcTo(x,y+h,x,y,q);ctx.arcTo(x,y,x+w,y,q);ctx.closePath();}
   // Adaptación directa del lienzo de diapasones de la suite: misma geometría, vetas y metal.
@@ -1035,11 +1036,25 @@
     ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 11px Inter, sans-serif';ctx.fillStyle='rgba(255,250,240,.55)';for(let f=0;f<=12;f++)ctx.fillText(String(f),boardX+f*fw+(f?0:0),11);
     tuning.slice().reverse().forEach((open,s)=>{const y=padY+s*gap;ctx.fillStyle='rgba(255,250,240,.75)';ctx.font='900 11px Inter, sans-serif';ctx.fillText(String(tuning.length-s),10,y);for(let f=0;f<=12;f++){const pc=(open+f)%12;if(!pcs.includes(pc))continue;const x=boardX+(f?f-.5:0)*fw;ctx.save();ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;ctx.fillStyle='#d4a84f';ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='#161514';ctx.font='900 10px Inter, sans-serif';ctx.fillText(SCALE_NAMES[pc],x,y+.5);}});
   }
+  // Copia del planteamiento de Cuerdas Frotadas: tablero cónico y líneas guía,
+  // nunca trastes. Las líneas indican referencias de entonación cromática.
+  function drawScaleViolinBoard(canvas,tuning,pcs){
+    const ratio=window.devicePixelRatio||1,width=Math.max(760,canvas.clientWidth||760),h=184,ctx=canvas.getContext('2d');canvas.width=width*ratio;canvas.height=h*ratio;canvas.style.height=`${h}px`;ctx.setTransform(ratio,0,0,ratio,0,0);
+    const boardX=66,padY=38,boardW=width-boardX-22,centerY=92,nutGap=30,bodyGap=48,strings=tuning.slice().reverse(),columns=14;
+    const stringY=(s,t)=>centerY+(s-(strings.length-1)/2)*(nutGap+(bodyGap-nutGap)*t);
+    ctx.clearRect(0,0,width,h);ctx.beginPath();ctx.moveTo(boardX,stringY(0,0));ctx.lineTo(boardX+boardW,stringY(0,1));ctx.lineTo(boardX+boardW,stringY(strings.length-1,1));ctx.lineTo(boardX,stringY(strings.length-1,0));ctx.closePath();
+    const bg=ctx.createLinearGradient(0,padY,0,h-padY);bg.addColorStop(0,'#5a3a24');bg.addColorStop(.5,'#2c1810');bg.addColorStop(1,'#150b06');ctx.fillStyle=bg;ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='rgba(243,224,187,.5)';ctx.stroke();
+    const guideColors={2:'#4ea1e0',4:'#6fcf5b',5:'#f2b544',7:'#f2e34f',9:'#4ea1e0',11:'#6fcf5b',12:'#f2b544',14:'#f2e34f'};
+    for(let c=1;c<=columns;c++){const t=(c-.5)/columns,x=boardX+t*boardW;ctx.beginPath();ctx.moveTo(x,stringY(0,t)-6);ctx.lineTo(x,stringY(strings.length-1,t)+6);if(guideColors[c]){ctx.strokeStyle=guideColors[c];ctx.lineWidth=4;ctx.globalAlpha=.92;}else{ctx.strokeStyle='rgba(255,250,240,.35)';ctx.lineWidth=1.4;ctx.globalAlpha=.6;ctx.setLineDash([3,3]);}ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
+    for(let s=0;s<strings.length;s++){ctx.beginPath();ctx.moveTo(boardX,stringY(s,0));ctx.lineTo(boardX+boardW,stringY(s,1));ctx.strokeStyle='rgba(255,250,240,.92)';ctx.lineWidth=1.3+s*.55;ctx.stroke();ctx.font='900 11px Inter, sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='rgba(255,250,240,.75)';ctx.fillText(String(strings.length-s),boardX-28,stringY(s,0));}
+    ctx.font='900 10px Inter, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';for(let s=0;s<strings.length;s++){for(let c=0;c<=columns;c++){const semi=Math.round(c*12/columns),pc=(strings[s]+semi)%12;if(!pcs.includes(pc))continue;const t=c/columns,x=boardX+t*boardW,y=stringY(s,t);ctx.save();ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;ctx.fillStyle='#d4a84f';ctx.beginPath();ctx.arc(x,y,13,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='#161514';ctx.fillText(SCALE_NAMES[pc],x,y+.5);}}
+  }
   function renderScaleFretboard(instrument,pcs){
     const tuning=SCALE_TUNINGS[instrument]||SCALE_TUNINGS.guitar, frets=Array.from({length:13},(_,f)=>f);
     const name=SCALE_INSTRUMENT_NAMES[instrument]||'Guitarra';
-    requestAnimationFrame(()=>{const canvas=$('csScaleFretboard');if(canvas)drawScaleFretboard(canvas,tuning,pcs);});
-    return `<div class="cs-visualizer cs-fretboard-visualizer" role="img" aria-label="Diapasón de ${name} con las notas de la escala resaltadas"><div class="cs-fretboard-caption"><span>${name} · afinación real</span><span>0–12 trastes · notas de la escala en dorado</span></div><canvas id="csScaleFretboard" class="cs-scale-canvas"></canvas></div>`;
+    const isViolin=instrument==='violin';
+    requestAnimationFrame(()=>{const canvas=$('csScaleFretboard');if(canvas)(isViolin?drawScaleViolinBoard:drawScaleFretboard)(canvas,tuning,pcs);});
+    return `<div class="cs-visualizer cs-fretboard-visualizer" role="img" aria-label="Diapasón de ${name} con las notas de la escala resaltadas"><div class="cs-fretboard-caption"><span>${name} · afinación real</span><span>${isViolin?'líneas guía de entonación · sin trastes':'0–12 trastes · notas de la escala en dorado'}</span></div><canvas id="csScaleFretboard" class="cs-scale-canvas"></canvas></div>`;
   }
   function renderScaleExplorer(){
     const activeButton=document.querySelector('#scaleInstrumentButtons .is-active');
