@@ -1000,9 +1000,41 @@
     updateBeatGrid(currentTime);
   }
 
-  const SCALE_PCS={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]}; const SCALE_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B']; const SCALE_TUNINGS={guitar:[40,45,50,55,59,64],violin:[55,62,69,76],ukulele:[67,60,64,69],requinto:[45,50,55,60,64,69]};
+  const SCALE_PCS={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]};
+  const SCALE_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+  // Afinaciones reales, de grave a aguda. Se comparten con los instrumentos de la suite.
+  const SCALE_TUNINGS={guitar:[40,45,50,55,59,64],bass:[28,33,38,43],violin:[55,62,69,76],ukulele:[67,60,64,69],requinto:[45,50,55,60,64,69]};
+  const SCALE_INSTRUMENT_NAMES={guitar:'Guitarra',bass:'Bajo',violin:'Violín',ukulele:'Ukelele',requinto:'Requinto'};
   function scaleRootPc(key){return {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11}[String(key||'C')]??0;}
-  function renderScaleExplorer(){if(!analysisResult||!$('scaleInstrumentSelect'))return;const instrument=$('scaleInstrumentSelect').value,pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(scaleRootPc(analysisResult.key)+n)%12);$('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');if(instrument==='piano'){$('scaleInstrumentView').innerHTML=`<div class="scale-piano">${Array.from({length:25},(_,i)=>48+i).map(m=>`<button class="${[1,3,6,8,10].includes(m%12)?'black ':''}${pcs.includes(m%12)?'in-scale':''}">${pcs.includes(m%12)?SCALE_NAMES[m%12]:''}</button>`).join('')}</div>`;return;}const tuning=SCALE_TUNINGS[instrument]||SCALE_TUNINGS.guitar;$('scaleInstrumentView').innerHTML=`<div class="scale-strings">${tuning.slice().reverse().map((open,i)=>`<div class="scale-string"><b>${SCALE_NAMES[open%12]}</b>${Array.from({length:13},(_,f)=>{const pc=(open+f)%12;return `<span class="scale-fret ${pcs.includes(pc)?'in-scale':''}">${pcs.includes(pc)?SCALE_NAMES[pc]:f}</span>`}).join('')}</div>`).join('')}</div>`;}
+  const isBlackPc=pc=>[1,3,6,8,10].includes(pc);
+  function renderScalePiano(pcs){
+    const midis=Array.from({length:37},(_,i)=>48+i), whites=midis.filter(m=>!isBlackPc(m%12));
+    let whiteIndex=0;
+    const keys=midis.map(m=>{
+      const black=isBlackPc(m%12), active=pcs.includes(m%12);
+      const position=whiteIndex;
+      if(!black) whiteIndex++;
+      return `<div class="cs-key ${black?'cs-key--black':'cs-key--white'} ${active?'is-scale':''}" style="--white-index:${position}" aria-label="${SCALE_NAMES[m%12]}${active?' pertenece a la escala':''}"><span>${active?SCALE_NAMES[m%12]:''}</span></div>`;
+    }).join('');
+    return `<div class="cs-visualizer cs-piano-visualizer" role="img" aria-label="Teclado de piano con las notas de la escala resaltadas"><div class="cs-piano-caption">Registro C3–C6 · notas de la escala en dorado</div><div class="cs-piano-keyboard" style="--white-count:${whites.length}">${keys}</div></div>`;
+  }
+  function renderScaleFretboard(instrument,pcs){
+    const tuning=SCALE_TUNINGS[instrument]||SCALE_TUNINGS.guitar, frets=Array.from({length:13},(_,f)=>f);
+    const labels=frets.map(f=>`<span>${f}</span>`).join('');
+    const strings=tuning.slice().reverse().map((open,row)=>{
+      const cells=frets.map(f=>{const pc=(open+f)%12,active=pcs.includes(pc),marker=[3,5,7,9].includes(f)?'has-marker':f===12?'has-double-marker':'';return `<div class="cs-fret ${marker} ${active?'is-scale':''}" aria-label="cuerda ${tuning.length-row}, traste ${f}: ${SCALE_NAMES[pc]}">${active?`<span class="cs-note-dot">${SCALE_NAMES[pc]}</span>`:''}</div>`;}).join('');
+      return `<div class="cs-string-row" style="--string:${row}"><span class="cs-open-note">${SCALE_NAMES[open%12]}</span><div class="cs-fret-row">${cells}</div></div>`;
+    }).join('');
+    const name=SCALE_INSTRUMENT_NAMES[instrument]||'Guitarra';
+    return `<div class="cs-visualizer cs-fretboard-visualizer" role="img" aria-label="Diapasón de ${name} con las notas de la escala resaltadas"><div class="cs-fretboard-caption"><span>${name} · afinación real</span><span>0–12 trastes · notas de la escala en dorado</span></div><div class="cs-fret-numbers"><span>cuerda</span>${labels}</div><div class="cs-fretboard">${strings}</div></div>`;
+  }
+  function renderScaleExplorer(){
+    if(!analysisResult||!$('scaleInstrumentSelect'))return;
+    const instrument=$('scaleInstrumentSelect').value;
+    const pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(scaleRootPc(analysisResult.key)+n)%12);
+    $('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');
+    $('scaleInstrumentView').innerHTML=instrument==='piano'?renderScalePiano(pcs):renderScaleFretboard(instrument,pcs);
+  }
   $('scaleInstrumentSelect')?.addEventListener('change',renderScaleExplorer);
 
   // ---------- resultados / timeline / beat grid ----------
