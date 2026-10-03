@@ -20,13 +20,12 @@
     e.frets.forEach((f,i)=>{const x=28+i*21;if(f===null||f===0)s+='<text x="'+x+'" y="29" text-anchor="middle" font-size="13" fill="#222">'+(f===null?'×':'○')+'</text>';else{const y=35+(f-start+.5)*gap;s+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="#9c6919"/><text x="'+x+'" y="'+(y+3)+'" text-anchor="middle" font-size="9" fill="white">'+f+'</text>';}});
     return s+'</svg>';
   }
-  function choose(e){
-    if(instrumentSel.value!=='ukulele')return false;
-    stop();selected=e;
+  function applySelection(e,activeIndexes){
+    selected=e;
     // Use existing manual-position mode, not guitar/requinto voicing templates.
     rootSel.value='';chordTypeSel.value='';scaleSel.value='';
     manualSelections.clear();hoverCell=null;
-    e.frets.forEach((f,i)=>{if(f!==null)manualSelections.add(selectedKey(3-i,f));});
+    e.frets.forEach((f,i)=>{if(f!==null&&(!activeIndexes||activeIndexes.includes(i)))manualSelections.add(selectedKey(3-i,f));});
     visibleFrets=Math.max(visibleFrets,Math.max(...e.frets.filter(f=>f!==null)),4);
     posSel.value='1';refresh();
     const midis=bank.midis(e,tuningSel.value==='low_g',capoSemitones());
@@ -34,15 +33,18 @@
     const missing=bank.qualities[e.quality][1].filter(iv=>!pcs.has(iv));
     status.textContent=e.name+' · '+(tuningSel.value==='low_g'?'Low G':'High G')+' · Notas reales: '+midis.map(m=>names[m%12]+(Math.floor(m/12)-1)).join(' · ')+(capoSemitones()?' · Capo '+capoSemitones()+': el sonido está transpuesto.':'')+(missing.length?' · Postura con notas omitidas respecto de la fórmula completa.':'')+(e.correction?' · '+e.correction:'');
     grid.querySelectorAll('.uke-card').forEach(card=>{const on=card.dataset.id===e.id;card.classList.toggle('is-selected',on);card.querySelector('.uke-select').setAttribute('aria-pressed',String(on));});
-    return true;
+  }
+  function choose(e){
+    if(instrumentSel.value!=='ukulele')return false;
+    stop();applySelection(e);return true;
   }
   function play(e,arpeggio){
-    if(!choose(e))return;
-    const ctx=ensureCtx();ctx?.resume?.();
-    bank.midis(e,tuningSel.value==='low_g',capoSemitones()).forEach((m,i)=>{
-      if(arpeggio)timers.push(setTimeout(()=>{if(instrumentSel.value==='ukulele')voices.push(playNote(m,1.5));},i*230));
-      else voices.push(playNote(m,1.8));
-    });
+    if(!arpeggio){if(!choose(e))return;const ctx=ensureCtx();ctx?.resume?.();bank.midis(e,tuningSel.value==='low_g',capoSemitones()).forEach(m=>voices.push(playNote(m,1.8)));return;}
+    if(instrumentSel.value!=='ukulele')return;
+    stop();applySelection(e,[]);const ctx=ensureCtx();ctx?.resume?.();const step=360,midis=bank.midis(e,tuningSel.value==='low_g',capoSemitones());let midiIndex=0;
+    const notes=e.frets.flatMap((f,i)=>f===null?[]:[{index:i,midi:midis[midiIndex++]}]);
+    notes.forEach((note,i)=>timers.push(setTimeout(()=>{if(instrumentSel.value==='ukulele'){applySelection(e,[note.index]);voices.push(playNote(note.midi,1.65));}},i*step)));
+    timers.push(setTimeout(()=>{if(instrumentSel.value==='ukulele')applySelection(e);},notes.length*step));
   }
   function render(){
     grid.replaceChildren();
@@ -50,7 +52,7 @@
     host.querySelector('[data-uke-count]').textContent=filtered.length+' posturas · '+bank.entries.length+' en el banco';
     for(const e of filtered){
       const card=document.createElement('article');card.className='uke-card';card.dataset.id=e.id;
-      card.innerHTML='<strong>'+e.name+'</strong>'+diagram(e)+'<small>'+bank.qualities[e.quality][0]+' · pág. '+e.page+(e.correction?' · Revisado':'')+'</small><button type="button" class="uke-select" aria-pressed="false">Ver '+e.name+'</button><div><button type="button" data-play>Escuchar</button> <button type="button" data-arp>Arpegio</button></div>';
+      card.innerHTML='<strong>'+e.name+'</strong>'+diagram(e)+'<small>'+bank.qualities[e.quality][0]+' · pág. '+e.page+(e.correction?' · Revisado':'')+'</small><button type="button" class="uke-select" aria-pressed="false">Ver en el diapasón</button><div><button type="button" data-play>Escuchar</button> <button type="button" data-arp>Arpegio</button></div>';
       card.querySelector('.uke-select').onclick=()=>choose(e);
       card.querySelector('[data-play]').onclick=()=>play(e,false);
       card.querySelector('[data-arp]').onclick=()=>play(e,true);

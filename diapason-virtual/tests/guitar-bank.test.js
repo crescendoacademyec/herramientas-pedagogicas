@@ -18,5 +18,8 @@ const ui=fs.readFileSync(path.join(__dirname,'../js/guitar-bank-ui.js'),'utf8');
 assert.match(ui,/1 índice · 2 medio · 3 anular · 4 meñique/);
 assert.match(ui,/finger=Math\.min\(4,Math\.max\(1,f-start\+1\)\)/);
 assert.match(ui,/rootOffset:5/);
+assert.match(ui,/Ver en el diapasón/);
+assert.match(ui,/applySelection\(e,\[i\]\)/);
+assert.match(ui,/const step=380/);
 assert.equal(['C','C#','D','D#','E','F'][(bank.roots.C+5)%12],'F','C de guitarra debe nombrarse F en requinto');
 console.log(bank.entries.length+' posturas verificadas · guitarra/requinto · afinación estándar');

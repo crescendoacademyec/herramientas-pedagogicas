@@ -14,4 +14,8 @@ assert.equal(bank.midis(bank.entries.find(e=>e.name==='G#')).length,3);
 const fs=require('node:fs'),path=require('node:path');
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.ok(html.includes('<details id="ukuleleBank" hidden>'));
+const ui=fs.readFileSync(path.join(__dirname,'../js/ukulele-bank-ui.js'),'utf8');
+assert.match(ui,/Ver en el diapasón/);
+assert.match(ui,/applySelection\(e,\[note\.index\]\)/);
+assert.match(ui,/const step=360/);
 console.log('151 posturas verificadas · High G/Low G · capo · cuerda silenciada · IDs únicos');

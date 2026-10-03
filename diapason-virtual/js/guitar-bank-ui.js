@@ -34,21 +34,29 @@
       e.frets.forEach((f,i)=>{const x=20+i*23;if(f===0)s+='<text x="'+x+'" y="31" text-anchor="middle" font-size="13" fill="#222">○</text>';else{const y=37+(f-start+.5)*gap,finger=Math.min(4,Math.max(1,f-start+1));s+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="#9c6919"/><text x="'+x+'" y="'+(y+3)+'" text-anchor="middle" font-size="9" fill="white">'+finger+'</text>';}});
       return s+'</svg>';
     }
-    function choose(e){
-      if(!isSupported()){status.textContent='Este banco requiere '+(config.instrument==='guitar'?'guitarra en afinación estándar.':'requinto estándar.')+' Cambia el instrumento para aplicar la postura.';return false;}
-      stop();selected=e;rootSel.value='';chordTypeSel.value='';scaleSel.value='';manualSelections.clear();hoverCell=null;
-      e.frets.forEach((f,i)=>manualSelections.add(selectedKey(5-i,f)));
+    function applySelection(e,activeIndexes){
+      selected=e;rootSel.value='';chordTypeSel.value='';scaleSel.value='';manualSelections.clear();hoverCell=null;
+      e.frets.forEach((f,i)=>{if(!activeIndexes||activeIndexes.includes(i))manualSelections.add(selectedKey(5-i,f));});
       visibleFrets=Math.max(visibleFrets,Math.max(...e.frets),4);posSel.value='1';refresh();
       const midis=bank.midis(e,config.instrument,capoSemitones());
       status.textContent=e.displayName+' · '+config.instrumentLabel+' · Posición '+e.position+' · Notas reales: '+midis.map(m=>displayNames[m%12]+(Math.floor(m/12)-1)).join(' · ')+(capoSemitones()?' · Capo '+capoSemitones()+': el sonido está transpuesto.':'');
       grid.querySelectorAll('.guitar-card').forEach(card=>{const on=card.dataset.id===e.id;card.classList.toggle('is-selected',on);card.querySelector('.guitar-select').setAttribute('aria-pressed',String(on));});
-      return true;
     }
-    function play(e,arpeggio){if(!choose(e))return;const ctx=ensureCtx();ctx?.resume?.();bank.midis(e,config.instrument,capoSemitones()).forEach((m,i)=>{if(arpeggio)timers.push(setTimeout(()=>{if(isSupported())voices.push(playNote(m,1.5));},i*175));else voices.push(playNote(m,1.8));});}
+    function choose(e){
+      if(!isSupported()){status.textContent='Este banco requiere '+(config.instrument==='guitar'?'guitarra en afinación estándar.':'requinto estándar.')+' Cambia el instrumento para aplicar la postura.';return false;}
+      stop();applySelection(e);return true;
+    }
+    function play(e,arpeggio){
+      if(!arpeggio){if(!choose(e))return;const ctx=ensureCtx();ctx?.resume?.();bank.midis(e,config.instrument,capoSemitones()).forEach(m=>voices.push(playNote(m,1.8)));return;}
+      if(!isSupported()){status.textContent='Cambia el instrumento o la afinación antes de escuchar este arpegio.';return;}
+      stop();applySelection(e,[]);const ctx=ensureCtx();ctx?.resume?.();const step=380;
+      bank.midis(e,config.instrument,capoSemitones()).forEach((m,i)=>timers.push(setTimeout(()=>{if(isSupported()){applySelection(e,[i]);voices.push(playNote(m,1.65));}},i*step)));
+      timers.push(setTimeout(()=>{if(isSupported())applySelection(e);},bank.midis(e,config.instrument,capoSemitones()).length*step));
+    }
     function render(){
       grid.replaceChildren();const filtered=bank.entries.map(rendered).filter(e=>(root.value==='all'||e.displayRoot===root.value)&&(quality.value==='all'||e.quality===quality.value)&&(position.value==='all'||String(e.position)===position.value));
       host.querySelector('[data-guitar-count]').textContent=filtered.length+' posturas · '+bank.entries.length+' en el banco';
-      for(const e of filtered){const card=document.createElement('article');card.className='guitar-card';card.dataset.id=e.id;card.innerHTML='<strong>'+e.displayName+'</strong>'+diagram(e)+'<small>'+bank.qualities[e.quality][0]+' · posición '+e.position+'</small><button type="button" class="guitar-select" aria-pressed="false">Ver '+e.displayName+'</button><div><button type="button" data-play>Escuchar</button> <button type="button" data-arp>Arpegio</button></div>';card.querySelector('.guitar-select').onclick=()=>choose(e);card.querySelector('[data-play]').onclick=()=>play(e,false);card.querySelector('[data-arp]').onclick=()=>play(e,true);grid.appendChild(card);}
+      for(const e of filtered){const card=document.createElement('article');card.className='guitar-card';card.dataset.id=e.id;card.innerHTML='<strong>'+e.displayName+'</strong>'+diagram(e)+'<small>'+bank.qualities[e.quality][0]+' · posición '+e.position+'</small><button type="button" class="guitar-select" aria-pressed="false">Ver en el diapasón</button><div><button type="button" data-play>Escuchar</button> <button type="button" data-arp>Arpegio</button></div>';card.querySelector('.guitar-select').onclick=()=>choose(e);card.querySelector('[data-play]').onclick=()=>play(e,false);card.querySelector('[data-arp]').onclick=()=>play(e,true);grid.appendChild(card);}
     }
     function sync(){stop();host.hidden=instrumentSel.value!==config.instrument;if(host.hidden){host.open=false;selected=null;}else if(!isSupported())status.textContent='Cambia a afinación estándar para aplicar estas posiciones.';}
     root.onchange=quality.onchange=position.onchange=()=>{stop();render();};host.querySelector('[data-guitar-stop]').onclick=stop;
