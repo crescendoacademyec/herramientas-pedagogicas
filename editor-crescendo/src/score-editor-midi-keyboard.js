@@ -74,6 +74,19 @@
       });
     };
 
+    let inlinePalette = null;
+    let inlinePaletteId = "";
+    const clearInlinePalette = () => {
+      if (!inlinePalette) return;
+      inlinePalette.replaceChildren();
+      inlinePalette.hidden = true;
+      inlinePaletteId = "";
+      root.querySelectorAll(".midi-dropdown-summary.is-inline-active").forEach((summary) => {
+        summary.classList.remove("is-inline-active");
+        summary.setAttribute("aria-expanded", "false");
+      });
+    };
+
     const addMenu = (id, label) => {
       const menu = document.createElement("details");
       menu.className = "midi-dropdown-menu";
@@ -92,6 +105,7 @@
       menu.addEventListener("toggle", () => {
         summary.setAttribute("aria-expanded", menu.open ? "true" : "false");
         if (!menu.open) return;
+        clearInlinePalette();
         root.querySelectorAll(".midi-dropdown-menu[open]").forEach((other) => {
           if (other !== menu) other.open = false;
         });
@@ -124,6 +138,7 @@
       button.dataset.defaultTooltip = buttonOptions.label || item.label;
       button.dataset.iconLabelPrefix = "Teclado MIDI";
       button.dataset.iconLabel = `Teclado MIDI · ${options.effectiveIconTooltip?.(button.dataset.iconId, button.dataset.defaultTooltip) || button.dataset.defaultTooltip || ""}`;
+      if (parent === inlinePalette) button.classList.add("midi-visual-palette-button");
       button.innerHTML = options.iconLayerHtml?.(options.iconLayersForItem?.(item, symbolClass) || []) || "";
       options.applyIconTooltipToElement?.(button);
       button.addEventListener("click", async (event) => {
@@ -139,6 +154,22 @@
         }
       });
       parent.appendChild(button);
+    };
+
+    const showInlinePalette = (id, items, buttonOptions) => {
+      if (!inlinePalette) return;
+      if (inlinePaletteId === id) {
+        clearInlinePalette();
+        return;
+      }
+      closeMenus();
+      clearInlinePalette();
+      inlinePaletteId = id;
+      inlinePalette.hidden = false;
+      items.forEach((item) => addButton(inlinePalette, item, buttonOptions(item)));
+      const summary = root.querySelector(`.midi-dropdown-menu[data-midi-menu="${id}"] .midi-dropdown-summary`);
+      summary?.classList.add("is-inline-active");
+      summary?.setAttribute("aria-expanded", "true");
     };
 
     const figuresMenu = addMenu("figures", "Figuras");
@@ -174,15 +205,47 @@
       });
     });
 
+    // Paletas visuales para escritura directa: se muestran en la franja libre
+    // entre los menús MIDI y el botón Acorde, usando glifos Bravura reales.
+    inlinePalette = document.createElement("div");
+    inlinePalette.className = "midi-inline-palette";
+    inlinePalette.hidden = true;
+    inlinePalette.setAttribute("role", "toolbar");
+    inlinePalette.setAttribute("aria-label", "Figuras y silencios disponibles");
+    root.appendChild(inlinePalette);
+
+    const figuresSummary = root.querySelector('.midi-dropdown-menu[data-midi-menu="figures"] .midi-dropdown-summary');
+    figuresSummary?.addEventListener("click", (event) => {
+      event.preventDefault();
+      showInlinePalette("figures", options.durations || [], (duration) => ({
+        durationId: duration.id,
+        entryKind: "note",
+        label: duration.label,
+        shortcut: duration.key,
+        action: options.actions?.noteDuration
+      }));
+    });
+
+    const restsSummary = root.querySelector('.midi-dropdown-menu[data-midi-menu="rests"] .midi-dropdown-summary');
+    restsSummary?.addEventListener("click", (event) => {
+      event.preventDefault();
+      showInlinePalette("rests", options.restPalette || [], (rest) => ({
+        durationId: rest.restDurationId,
+        entryKind: "rest",
+        action: options.actions?.rest
+      }));
+    });
+
     if (!root.dataset.dropdownBehaviorReady) {
       root.dataset.dropdownBehaviorReady = "true";
       root.addEventListener("keydown", (event) => {
         if (event.key !== "Escape") return;
         closeMenus();
+        clearInlinePalette();
         root.querySelector(".midi-dropdown-summary")?.focus();
       });
       document.addEventListener("pointerdown", (event) => {
-        if (!root.contains(event.target)) closeMenus();
+        if (!root.contains(event.target)) { closeMenus(); clearInlinePalette(); }
       });
     }
   }

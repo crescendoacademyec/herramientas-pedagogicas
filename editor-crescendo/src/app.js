@@ -15335,7 +15335,7 @@
       ...document.querySelectorAll(".editor-workbench .grid-control"),
       ...document.querySelectorAll(".editor-workbench .playback-bpm-control"),
       ...document.querySelectorAll(".editor-workbench .edit-controls button"),
-      ...document.querySelectorAll(".midi-figure-strip button"),
+      ...[...document.querySelectorAll(".midi-figure-strip button")].filter((button) => !button.classList.contains("midi-visual-palette-button")),
       ...document.querySelectorAll(".midi-chord-toggle")
     ];
     MenuRenderer.renderControls(buttons);

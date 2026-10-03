@@ -5549,6 +5549,51 @@ body.editor-page .editor-workbench .score-shell {
   position: relative;
 }
 
+/* Paleta Bravura visible: Figuras y Silencios usan el espacio libre del panel MIDI. */
+.editor-workbench .midi-keyboard-panel .midi-inline-palette {
+  align-items: center;
+  display: flex;
+  flex: 1 1 auto;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0 4px;
+}
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette[hidden] { display: none; }
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button {
+  align-items: center;
+  background: #302d29;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 5px;
+  color: #f5efe5;
+  display: inline-flex;
+  flex: 0 0 48px;
+  height: var(--app-menu-midi-height);
+  justify-content: center;
+  min-width: 48px;
+  overflow: visible;
+  padding: 0 5px;
+}
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button:hover,
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button:focus-visible,
+.editor-workbench .midi-keyboard-panel .midi-dropdown-summary.is-inline-active {
+  background: var(--app-menu-active);
+  border-color: rgba(255, 237, 184, 0.38);
+  color: #18140f;
+  outline: none;
+}
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .music-glyph {
+  font-family: "Bravura", "Bravura Metronome", serif;
+  font-size: 1.52rem;
+  line-height: 1;
+  transform: translateY(1px);
+}
+
 .midi-dropdown-menu {
   flex: 0 0 auto;
   position: relative;
@@ -5714,3 +5759,23 @@ body.editor-page .editor-workbench .score-shell {
 
 .editor-metronome-beat{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;flex:0 0 40px;box-sizing:border-box;border:1px solid #736447;border-radius:7px;background:#26231d;color:#edc763;font:700 18px/1 system-ui;font-variant-numeric:tabular-nums}
 .editor-metronome-beat.is-downbeat{background:#d5aa4c;color:#17130d;border-color:#edc763}
+
+/* La paleta visual no pasa por el renderizador textual de los menús MIDI. */
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button {
+  background: #302d29 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f5efe5 !important;
+}
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button:hover,
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .midi-visual-palette-button:focus-visible {
+  background: var(--app-menu-active) !important;
+  color: #18140f !important;
+}
+
+.editor-workbench .midi-keyboard-panel .midi-inline-palette .music-glyph {
+  font-family: "Bravura", "Bravura Metronome", serif !important;
+  font-size: 1.52rem !important;
+  font-style: normal !important;
+  font-weight: 400 !important;
+}
