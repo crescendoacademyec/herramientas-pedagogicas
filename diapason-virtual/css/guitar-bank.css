@@ -1,0 +1,17 @@
+#guitarChordBank[hidden] { display:none !important; }
+#guitarChordBank { margin:12px 0; padding:14px; border:1px solid #65502a; border-radius:12px; background:#211e18; color:#fff5df; }
+#guitarChordBank summary { cursor:pointer; font-weight:700; color:#e4ba61; padding:6px; }
+#guitarChordBank p { line-height:1.5; }
+#guitarChordBank .guitar-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:14px 0; }
+#guitarChordBank label { display:grid; gap:5px; }
+#guitarChordBank .guitar-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(174px,1fr)); gap:12px; max-height:560px; overflow:auto; padding:3px; }
+#guitarChordBank .guitar-card { background:#151411; border:1px solid #484236; border-radius:9px; padding:10px; display:flex; flex-direction:column; align-items:center; gap:6px; }
+#guitarChordBank .guitar-card.is-selected { border:2px solid #e4ba61; }
+#guitarChordBank .guitar-card svg { width:156px; height:172px; background:#fbf7f0; border-radius:6px; }
+#guitarChordBank button { color:#19160e; background:#d4a84f; border:0; border-radius:6px; padding:8px 10px; cursor:pointer; font-weight:bold; }
+#guitarChordBank .guitar-select { width:100%; }
+#guitarChordBank .guitar-card > div { display:flex; flex-wrap:wrap; gap:5px; justify-content:center; }
+#guitarChordBank .guitar-card small { text-align:center; color:#cec4b1; }
+#guitarChordBank .guitar-status { line-height:1.5; padding:10px 0; min-height:1.5em; }
+#guitarChordBank select { max-width:100%; }
+@media(max-width:600px){#guitarChordBank .guitar-grid { grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); }#guitarChordBank .guitar-card svg { width:146px; }}
