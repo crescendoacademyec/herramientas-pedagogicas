@@ -366,6 +366,10 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
 .secondary-options summary:focus-visible { outline:2px solid var(--gold); outline-offset:3px; }
 .secondary-options p { line-height:1.6; }
 .secondary-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+
+/* Resultado esencial: tonalidad, BPM y mapa útil de la escala. */
+#resultsCard .stat-box:not(:nth-child(1)):not(:nth-child(3)),#resultsCard .secondary-options,#resultsCard .toolbar-row,#resultsCard .beat-grid,#resultsCard .timeline-wrap,#resultsCard .player-row,#resultsCard #loopIndicator,#resultsCard .now-playing,#resultsCard .export-row,#resultsCard > .info-note{display:none!important}
+.scale-explorer{margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}.scale-explorer-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.scale-explorer h2{font-family:Georgia,serif;font-size:1.15rem;margin:0}.scale-explorer select{background:rgba(0,0,0,.3);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px}.scale-note-list{display:flex;flex-wrap:wrap;gap:7px;margin:14px 0}.scale-note-list span{border:1px solid var(--gold-dim);border-radius:999px;padding:5px 10px;color:var(--gold);font-weight:800;font-size:.8rem}.scale-instrument{border:1px solid var(--line);border-radius:10px;background:rgba(0,0,0,.2);padding:12px;overflow:auto}.scale-piano{display:flex;min-width:600px;height:78px}.scale-piano button{flex:1;min-width:26px;border:1px solid #4a443b;background:#fbf7f0;color:#17140f;font-size:10px;padding:0 2px 6px}.scale-piano button.black{background:#191714;color:#fffaf0;height:50px;margin-left:-9px;margin-right:-9px;z-index:2}.scale-piano button.in-scale{background:var(--gold);font-weight:900}.scale-strings{display:grid;gap:8px;min-width:650px}.scale-string{display:grid;grid-template-columns:46px repeat(13,minmax(36px,1fr));align-items:center;gap:2px}.scale-string b{color:var(--text-dim);font-size:.72rem}.scale-fret{min-height:27px;border:1px solid rgba(255,255,255,.18);border-radius:4px;display:grid;place-items:center;font-size:.66rem;color:var(--text-dim)}.scale-fret.in-scale{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:900}
 </style>
 </head>
 <body>
@@ -463,13 +467,17 @@ body.resizing-segment, body.resizing-segment * { cursor: ew-resize !important; u
             <div class="stat-grid">
                 <div class="stat-box"><div class="label">Tonalidad</div><div class="value" id="keyValue">—</div></div>
                 <div class="stat-box"><div class="label">Escala</div><div class="value" id="scaleValue">—</div></div>
-                <div class="stat-box"><div class="label">Tempo</div><div class="value" id="bpmValue">—</div></div>
+                <div class="stat-box"><div class="label">BPM</div><div class="value" id="bpmValue">—</div></div>
                 <div class="stat-box"><div class="label">Compás estimado</div><div class="value" id="meterValue">—<span class="value small-note">experimental</span></div></div>
                 <div class="stat-box"><div class="label">Fuerza tonal</div><div class="value" id="strengthValue">—</div></div>
                 <div class="stat-box"><div class="label">Duración</div><div class="value" id="durationValue">—</div></div>
                 <div class="stat-box"><div class="label">Acordes distintos</div><div class="value" id="chordCountValue">—</div></div>
             </div>
 
+            <section class="scale-explorer" aria-labelledby="scaleExplorerTitle">
+              <div class="scale-explorer-head"><h2 id="scaleExplorerTitle">Notas de la escala</h2><label>Instrumento <select id="scaleInstrumentSelect"><option value="piano">Piano</option><option value="guitar">Guitarra</option><option value="violin">Violín</option><option value="ukulele">Ukelele</option><option value="requinto">Requinto</option></select></label></div>
+              <div class="scale-note-list" id="scaleNoteList"></div><div class="scale-instrument" id="scaleInstrumentView" aria-live="polite"></div>
+            </section>
 
             <details class="secondary-options"><summary>Corregir tonalidad y tempo</summary>
             <div class="analysis-corrections" id="analysisCorrections">

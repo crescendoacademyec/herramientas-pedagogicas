@@ -1000,6 +1000,11 @@
     updateBeatGrid(currentTime);
   }
 
+  const SCALE_PCS={major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10]}; const SCALE_NAMES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B']; const SCALE_TUNINGS={guitar:[40,45,50,55,59,64],violin:[55,62,69,76],ukulele:[67,60,64,69],requinto:[45,50,55,60,64,69]};
+  function scaleRootPc(key){return {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11}[String(key||'C')]??0;}
+  function renderScaleExplorer(){if(!analysisResult||!$('scaleInstrumentSelect'))return;const instrument=$('scaleInstrumentSelect').value,pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(scaleRootPc(analysisResult.key)+n)%12);$('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');if(instrument==='piano'){$('scaleInstrumentView').innerHTML=`<div class="scale-piano">${Array.from({length:25},(_,i)=>48+i).map(m=>`<button class="${[1,3,6,8,10].includes(m%12)?'black ':''}${pcs.includes(m%12)?'in-scale':''}">${pcs.includes(m%12)?SCALE_NAMES[m%12]:''}</button>`).join('')}</div>`;return;}const tuning=SCALE_TUNINGS[instrument]||SCALE_TUNINGS.guitar;$('scaleInstrumentView').innerHTML=`<div class="scale-strings">${tuning.slice().reverse().map((open,i)=>`<div class="scale-string"><b>${SCALE_NAMES[open%12]}</b>${Array.from({length:13},(_,f)=>{const pc=(open+f)%12;return `<span class="scale-fret ${pcs.includes(pc)?'in-scale':''}">${pcs.includes(pc)?SCALE_NAMES[pc]:f}</span>`}).join('')}</div>`).join('')}</div>`;}
+  $('scaleInstrumentSelect')?.addEventListener('change',renderScaleExplorer);
+
   // ---------- resultados / timeline / beat grid ----------
   function displayResults() {
     $('fileTitleEl').innerHTML = (analysisResult.song || 'Sin nombre') +
@@ -1010,9 +1015,9 @@
       : '';
     const modCount = Array.isArray(analysisResult.modulations) ? analysisResult.modulations.length : 0;
     const modText = modCount ? `<span class="value small-note">${modCount} modulación${modCount===1?'':'es'} detectada${modCount===1?'':'s'}</span>` : '';
-    $('keyValue').innerHTML = (analysisResult.key || '—') + relText + modText;
+    $('keyValue').textContent=analysisResult.key?`${analysisResult.key} ${analysisResult.scale==='minor'?'menor':'mayor'}`:'—';
     $('scaleValue').textContent = analysisResult.scale === 'major' ? 'Mayor' : (analysisResult.scale === 'minor' ? 'Menor' : '—');
-    $('bpmValue').textContent = analysisResult.bpm !== null && analysisResult.bpm !== undefined ? analysisResult.bpm : '—';
+    $('bpmValue').textContent=analysisResult.bpm==null?'—':Math.round(analysisResult.bpm);
     const meterVal = analysisResult.meter;
     const db = analysisResult.decoderDiagnostics?.downbeatMeter;
     const meterNote = db ? `downbeat ${Math.round((db.confidence || 0) * 100)}%${db.fallback ? ' · conservador' : ''}` : 'estimado';
@@ -1024,6 +1029,7 @@
     const semanticCount = Array.isArray(analysisResult.sections) ? analysisResult.sections.filter(s=>s.semanticLabel && s.semanticLabel !== 'Unclassified').length : 0;
     $('chordCountValue').innerHTML = String(analysisResult.totalChords ?? '—') + (sectionCount ? `<span class="value small-note">${sectionCount} secciones · ${semanticCount} semánticas · ${repeatGroups} grupos repetidos</span>` : '');
     syncAnalysisCorrectionControls();
+    renderScaleExplorer();
 
     buildBeatGrid();
     buildTimeline();
@@ -1381,7 +1387,7 @@
       showToast('El BPM debe estar entre 20 y 360.');
       return;
     }
-    analysisResult.bpm = Math.round(value * 10) / 10;
+    analysisResult.bpm = Math.round(value);
     analysisResult.bpmCorrected = true;
     $('bpmValue').textContent = analysisResult.bpm;
     if ($('bpmCorrectionInput')) $('bpmCorrectionInput').value = analysisResult.bpm;
@@ -1417,7 +1423,7 @@
         showToast('El BPM debe estar entre 20 y 360.');
         return;
       }
-      analysisResult.bpm = Math.round(bpm * 10) / 10;
+      analysisResult.bpm = Math.round(bpm);
       analysisResult.bpmCorrected = true;
     }
 

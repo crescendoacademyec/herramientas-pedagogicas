@@ -3660,6 +3660,32 @@ function timeWeightedAgreement(a, b, duration, step=0.10) {
   return total ? round(same/total,3) : null;
 }
 
+// El estimador de tempo no debe interpretar el silencio inicial/final como
+// parte del pulso. Conservamos el audio completo para la línea temporal, pero
+// aislamos el tramo sonoro para calcular BPM.
+function trimTempoSilence(audioData, sampleRate) {
+  if (!audioData?.length || !sampleRate) return audioData;
+  let peak = 0;
+  for (let i = 0; i < audioData.length; i++) peak = Math.max(peak, Math.abs(Number(audioData[i]) || 0));
+  if (peak < 1e-6) return audioData;
+  const frame = Math.max(256, Math.round(sampleRate * 0.04));
+  const threshold = Math.max(0.0025, peak * 0.025);
+  let first = 0, last = audioData.length - 1, found = false;
+  for (let start = 0; start < audioData.length; start += frame) {
+    const end = Math.min(audioData.length, start + frame); let framePeak = 0;
+    for (let i = start; i < end; i++) framePeak = Math.max(framePeak, Math.abs(Number(audioData[i]) || 0));
+    if (framePeak >= threshold) { first = start; found = true; break; }
+  }
+  if (!found) return audioData;
+  for (let start = audioData.length - frame; start >= 0; start -= frame) {
+    const end = Math.min(audioData.length, start + frame); let framePeak = 0;
+    for (let i = start; i < end; i++) framePeak = Math.max(framePeak, Math.abs(Number(audioData[i]) || 0));
+    if (framePeak >= threshold) { last = end; break; }
+  }
+  const pad = Math.round(sampleRate * 0.08);
+  return audioData.subarray(Math.max(0, first - pad), Math.min(audioData.length, last + pad));
+}
+
 function summarizeEngine(name, chords, confidences, segments, finalSegments, duration) {
   const transitions=countChordTransitions(chords || []);
   const valid=(confidences||[]).filter(Number.isFinite);
@@ -3682,6 +3708,7 @@ function sameKey(a,b) {
 async function extractAnalysisFeatures(audioData, sampleRate, duration, progress = true, loadAllNeural = false, rhythmAnalysis = null, chordAnalysis = null, noteAnalysis = null) {
   if (progress) postMessage({ type: 'progress', message: 'Extrayendo features del audio una sola vez…' });
   const audioVector = essentia.arrayToVector(audioData);
+  const tempoVector = essentia.arrayToVector(trimTempoSilence(audioData, sampleRate));
   let rhythm = null;
   try {
     if (progress) postMessage({ type: 'progress', message: 'Detectando armonía base…' });
@@ -3691,13 +3718,13 @@ async function extractAnalysisFeatures(audioData, sampleRate, duration, progress
     if (progress) postMessage({ type: 'progress', message: 'Detectando tempo y beat map…' });
     let bpm = null, beats = [], meter = 4;
     try {
-      const bpmResult = essentia.PercivalBpmEstimator(audioVector, 1024, 2048, 128, 128, 210, 50, sampleRate);
-      bpm = parseFloat(bpmResult.bpm.toFixed(1));
+      const bpmResult = essentia.PercivalBpmEstimator(tempoVector, 1024, 2048, 128, 128, 210, 50, sampleRate);
+      bpm = Math.round(Number(bpmResult.bpm));
     } catch (e) {}
     try {
       rhythm = essentia.RhythmExtractor2013(audioVector, 1024, 1024, 256, 0.1, 208, 40, 1024, sampleRate, [], 0.24, true, true);
       beats = normalizeBeats(vectorToArray(rhythm.ticks), duration);
-      if ((!bpm || bpm <= 0) && rhythm.bpm) bpm = round(Number(rhythm.bpm), 1);
+      if ((!bpm || bpm <= 0) && rhythm.bpm) bpm = Math.round(Number(rhythm.bpm));
       meter = estimateMeterFromBeats(beats);
     } catch (e) { beats = []; meter = 4; }
     const beatMap = buildBeatMap(beats, meter, duration);
