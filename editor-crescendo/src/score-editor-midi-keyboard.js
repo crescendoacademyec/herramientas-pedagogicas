@@ -236,6 +236,15 @@
       }));
     });
 
+    const tupletsSummary = root.querySelector('.midi-dropdown-menu[data-midi-menu="tuplets"] .midi-dropdown-summary');
+    tupletsSummary?.addEventListener("click", (event) => {
+      event.preventDefault();
+      showInlinePalette("tuplets", options.tuplets || [], (item) => ({
+        label: item.label,
+        action: options.actions?.tuplet
+      }));
+    });
+
     if (!root.dataset.dropdownBehaviorReady) {
       root.dataset.dropdownBehaviorReady = "true";
       root.addEventListener("keydown", (event) => {

@@ -8977,7 +8977,13 @@
             state.pendingTupletRatio = null;
             render();
           } else if (item.customTuplet) requestCustomTuplet();
-          else activateTuplet(item.tuplet);
+          else if (item.tuplet) {
+            // La duración activa determina la figura del grupo irregular.
+            activateTuplet({
+              ...item.tuplet,
+              unitDurationId: state.activeDuration?.id || item.tuplet.unitDurationId
+            });
+          }
         },
         tool: (item) => {
           const action = {
