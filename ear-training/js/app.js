@@ -177,7 +177,7 @@
   function renderRound(){
     const opts=document.getElementById('options'); if(!opts||!state.round)return;
     const count=state.round.options.length; opts.style.gridTemplateColumns=count<=2?'1fr':count===3?'repeat(3,1fr)':'repeat(2,1fr)';
-    opts.innerHTML=state.round.options.map((o,i)=>`<button class="opt-btn" data-action="answer" data-index="${i}" ${state.round.disabled?'disabled':''}><span class="key-hint">${i<9?`${i+1}. `:''}</span>${esc(o.label)}</button>`).join('');
+    opts.innerHTML=state.round.options.map((o,i)=>`<button class="opt-btn" data-action="answer" data-index="${i}" ${state.round.disabled?'disabled':''}><span class="option-number">Opción ${i+1}</span><span class="option-label">${esc(o.label)}</span></button>`).join('');
     const fb=document.getElementById('feedback'); if(fb){
       fb.innerHTML=state.round.disabled?state.round.feedback():'Escucha y selecciona una respuesta.';
       if(!state.round.disabled&&!state.challenge){
