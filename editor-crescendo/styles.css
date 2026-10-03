@@ -5778,4 +5778,11 @@ body.editor-page .editor-workbench .score-shell {
   font-size: 1.52rem !important;
   font-style: normal !important;
   font-weight: 400 !important;
+  align-items: center !important;
+  display: inline-flex !important;
+  height: 100% !important;
+  justify-content: center !important;
+  position: relative;
+  top: 2px;
+  transform: none !important;
 }
