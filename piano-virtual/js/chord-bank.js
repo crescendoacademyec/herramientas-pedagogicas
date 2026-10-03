@@ -32,10 +32,9 @@
     <div class="bank-display"><div class="bank-score" id="bankScore" role="img" aria-label="Voicing en gran pentagrama"><div data-live-score></div><div data-live-labels></div></div>
       <div><h2 id="bankTitle"></h2><p class="bank-help" id="bankHelp"></p><ul class="bank-note-list" id="bankNotes"></ul>
       <p class="bank-note">Azul: mano izquierda · Dorado: mano derecha · Verde: sonando. Reparto sugerido, ajustable a tu mano. El cifrado objetivo se mantiene aunque el detector encuentre un nombre equivalente.</p></div></div>
-    <div class="bank-preview-scroll"><div class="bank-preview" id="bankKeyboard" role="img" aria-label="88 teclas: posiciones del acorde, de La0 a Do8"></div></div>
     <div class="bank-actions"><button class="bank-primary" data-action="play">Escuchar acorde</button><button data-action="arpeggio" data-for="build jazz drop2 progression">Escuchar arpegio</button><button data-action="stop">Detener</button>
     <button data-action="add" data-for="build">Añadir siguiente nota</button><button data-action="clear" data-for="build">Empezar desde cero</button><button data-action="all" data-for="build">Mostrar completo</button>
-    <button data-action="sequence" data-for="progression drop2 lines">Escuchar secuencia</button><button data-action="pro">Mostrar 88 teclas del piano</button><button data-action="check">Comprobar lo que toco</button></div>
+    <button data-action="sequence" data-for="progression drop2 lines">Escuchar secuencia</button><button data-action="check">Comprobar lo que toco</button></div>
     <button data-action="complete-key" data-for="lines" data-major-course>Marcar tonalidad practicada</button>
     <p class="bank-status" id="bankStatus" role="status" aria-live="polite"></p>
     <p class="bank-note">La comprobación usa las teclas pulsadas (ratón, teclado o MIDI), con octavas exactas; no evalúa el pedal. Para tensiones y omisiones, distingue siempre fórmula teórica de voicing. En progresiones, «Acercar registros» transpone octavas: no calcula una digitación óptima.</p>
@@ -53,19 +52,9 @@
       const midi=Number(k.dataset.midi),n=notes.find(n=>n.midi===midi);
       k.classList.toggle('bank-left',n?.hand==='left');k.classList.toggle('bank-right',n?.hand==='right');k.classList.toggle('bank-sounding',open&&sounding.has(midi));
     });
-    $('Keyboard').querySelectorAll('[data-midi]').forEach(k=>k.classList.toggle('sounding',sounding.has(Number(k.dataset.midi))));
   }
   function stop(){generation++;timers.forEach(clearTimeout);timers=[];voices.forEach(v=>{try{v.stop();}catch(_){}});voices=[];sounding.clear();highlight();}
   function later(fn,ms){timers.push(setTimeout(fn,ms));}
-  function preview(notes){
-    const white=m=>![1,3,6,8,10].includes(m%12);let wi=0,keys=[];
-    for(let m=21;m<=108;m++) {
-      const w=white(m),n=notes.find(n=>n.midi===m),x=w?wi:wi-.3;
-      keys.push(`<span class="bank-key ${w?'':'black'} ${n?.hand||''}" data-midi="${m}" style="left:${x*100/52}%;width:${(w?1:.6)*100/52}%" title="${esc(n?.label||midiToInfo(m).name+midiToInfo(m).octave)}"></span>`);
-      if(w)wi++;
-    }
-    $('Keyboard').innerHTML=keys.join('');
-  }
   const pc=n=>((n%12)+12)%12;
   function closeBelow(top,pcs){
     const out=[];for(let midi=top;midi>=top-24&&out.length<4;midi--)if(pcs.includes(pc(midi)))out.push(midi);
@@ -166,7 +155,7 @@
     $('Notes').innerHTML=v.notes.map(n=>`<li data-hand="${n.hand}">${esc(n.label)} · ${esc(n.degree)} · ${n.hand==='left'?'MI':'MD'}</li>`).join('');
     if(!staff)staff=new CrescendoLiveStaff($('Score'));
     staff.update(v.notes.map(n=>({...n,staff:n.hand==='left'?2:1})),'grand',0);
-    preview(v.notes);highlight();
+    highlight();
   }
   function render(){
     stop();const root=Number($('Root').value),preset=api.presets.find(p=>p.id===$('Voicing').value);
@@ -243,7 +232,6 @@
       case 'stop':stop();status('Reproducción detenida.');break;
       case 'add':state.count=Number.isFinite(state.count)?state.count+1:1;render();break;
       case 'clear':state.count=0;render();break;case 'all':state.count=Infinity;render();break;
-      case 'pro':modeProBtn.click();highlight();status('Piano completo: 88 teclas.');break;
       case 'check':{const expected=current.notes.map(n=>n.midi),missing=expected.filter(n=>!pressed.has(n)),extra=[...pressed].filter(n=>!expected.includes(n));status(!expected.length?'Añade primero alguna nota.':!missing.length&&!extra.length?'¡Correcto! Coinciden las notas y sus octavas.':`Faltan ${missing.length} notas; sobran ${extra.length}. Mantén las teclas pulsadas al comprobar.`);break;}
       case 'complete-key':{const key=Number($('Root').value);courseDone.has(key)?courseDone.delete(key):courseDone.add(key);localStorage.setItem('crescendo-major-course-keys',JSON.stringify([...courseDone]));render();status(`${courseDone.size}/12 tonalidades practicadas.`);break;}
     }
@@ -253,7 +241,14 @@
   document.addEventListener('piano-panic',()=>{pressed.clear();stop();});
   new MutationObserver(highlight).observe(keyboardEl,{childList:true});
   const launcher=document.getElementById('openChordBank');
-  function setPanelOpen(open){panel.hidden=!open;launcher.setAttribute('aria-expanded',String(open));launcher.setAttribute('aria-pressed',String(open));if(open)render();else{stop();highlight();}}
+  function setPanelOpen(open){
+    panel.hidden=!open;launcher.setAttribute('aria-expanded',String(open));launcher.setAttribute('aria-pressed',String(open));
+    if(open){
+      // El teclado principal es el único mapa visual: amplía el registro si venía del modo principiante.
+      if(currentMode==='beginner')modeProBtn.click();
+      render();
+    }else{stop();highlight();}
+  }
   launcher.onclick=()=>{const open=panel.hidden;setPanelOpen(open);if(open)panel.scrollIntoView({behavior:'smooth',block:'start'});};
   window.addEventListener('pagehide',stop);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();});
