@@ -1007,6 +1007,19 @@
   const SCALE_INSTRUMENT_NAMES={guitar:'Guitarra',bass:'Bajo',violin:'Violín',ukulele:'Ukelele',requinto:'Requinto'};
   function scaleRootPc(key){return {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11}[String(key||'C')]??0;}
   const isBlackPc=pc=>[1,3,6,8,10].includes(pc);
+  let scaleAudioContext=null;
+  function playScaleMidi(midi){
+    const AudioCtor=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtor||!Number.isFinite(midi))return;
+    scaleAudioContext ||= new AudioCtor();
+    const ctx=scaleAudioContext;
+    if(ctx.state==='suspended')ctx.resume();
+    const now=ctx.currentTime, frequency=440*Math.pow(2,(midi-69)/12);
+    const output=ctx.createGain(); output.gain.setValueAtTime(.0001,now); output.gain.exponentialRampToValueAtTime(.18,now+.018); output.gain.exponentialRampToValueAtTime(.0001,now+.88); output.connect(ctx.destination);
+    const fundamental=ctx.createOscillator(); fundamental.type='triangle'; fundamental.frequency.setValueAtTime(frequency,now); fundamental.connect(output);
+    const overtone=ctx.createOscillator(), overtoneGain=ctx.createGain(); overtone.type='sine'; overtone.frequency.setValueAtTime(frequency*2,now); overtoneGain.gain.setValueAtTime(.07,now); overtoneGain.gain.exponentialRampToValueAtTime(.0001,now+.5); overtone.connect(overtoneGain).connect(output);
+    fundamental.start(now); overtone.start(now); fundamental.stop(now+.9); overtone.stop(now+.55);
+  }
   function renderScalePiano(pcs,rootPc){
     // La primera tecla visible es la tónica: así una escala de Re comienza en Re, no en Do♯.
     const startMidi=48+((rootPc-(48%12)+12)%12);
@@ -1017,7 +1030,7 @@
       const position=whiteIndex;
       if(!black) whiteIndex++;
       const width=100/whites.length;
-      return `<div class="${black?'black-key':'white-key'} ${active?'active':''}" style="left:${black?position*width-(width*.58/2):position*width}%;width:${black?width*.58:width}%" aria-label="${SCALE_NAMES[m%12]}${active?' pertenece a la escala':''}"><div class="label">${active?SCALE_NAMES[m%12]:''}</div></div>`;
+      return `<div class="${black?'black-key':'white-key'} ${active?'active':''}" data-scale-midi="${m}" role="button" tabindex="0" style="left:${black?position*width-(width*.58/2):position*width}%;width:${black?width*.58:width}%" aria-label="Reproducir ${SCALE_NAMES[m%12]}${active?' de la escala':''}"><div class="label">${active?SCALE_NAMES[m%12]:''}</div></div>`;
     }).join('');
     const startLabel=SCALE_NAMES[startMidi%12], endLabel=SCALE_NAMES[(startMidi+35)%12];
     const startOctave=Math.floor(startMidi/12)-1, endOctave=Math.floor((startMidi+35)/12)-1;
@@ -1052,11 +1065,32 @@
     for(let s=0;s<strings.length;s++){ctx.beginPath();ctx.moveTo(boardX,stringY(s,0));ctx.lineTo(boardX+boardW,stringY(s,1));ctx.strokeStyle='rgba(255,250,240,.92)';ctx.lineWidth=1.3+s*.55;ctx.stroke();ctx.font='900 11px Inter, sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillStyle='rgba(255,250,240,.75)';ctx.fillText(String(strings.length-s),boardX-28,stringY(s,0));}
     ctx.font='900 10px Inter, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';for(let s=0;s<strings.length;s++){for(let c=0;c<=columns;c++){const semi=Math.round(c*12/columns),pc=(strings[s]+semi)%12;if(!pcs.includes(pc))continue;const t=c/columns,x=boardX+t*boardW,y=stringY(s,t);ctx.save();ctx.shadowColor='rgba(0,0,0,.42)';ctx.shadowBlur=8;ctx.shadowOffsetY=3;ctx.fillStyle='#d4a84f';ctx.beginPath();ctx.arc(x,y,13,0,Math.PI*2);ctx.fill();ctx.restore();ctx.fillStyle='#161514';ctx.fillText(SCALE_NAMES[pc],x,y+.5);}}
   }
+  function bindScaleFretboardPlayback(canvas,instrument,tuning,pcs){
+    canvas.title='Haz clic en una nota dorada para escucharla';
+    canvas.addEventListener('click',event=>{
+      const rect=canvas.getBoundingClientRect(), width=Math.max(760,canvas.clientWidth||760);
+      const x=(event.clientX-rect.left)*width/rect.width;
+      let y;
+      const candidates=[];
+      if(instrument==='violin'){
+        y=(event.clientY-rect.top)*184/rect.height;
+        const boardX=66,boardW=width-boardX-22,centerY=92,nutGap=30,bodyGap=48,columns=14,strings=tuning.slice().reverse();
+        const stringY=(s,t)=>centerY+(s-(strings.length-1)/2)*(nutGap+(bodyGap-nutGap)*t);
+        strings.forEach((open,s)=>{for(let c=0;c<=columns;c++){const semi=Math.round(c*12/columns),pc=(open+semi)%12;if(pcs.includes(pc))candidates.push({x:boardX+(c/columns)*boardW,y:stringY(s,c/columns),midi:open+semi});}});
+      }else{
+        const h=Math.max(190,86+(tuning.length-1)*34); y=(event.clientY-rect.top)*h/rect.height;
+        const boardX=58,boardW=width-boardX-18,fw=boardW/13,padY=22,gap=(h-padY*2)/(tuning.length-1||1);
+        tuning.slice().reverse().forEach((open,s)=>{for(let fret=0;fret<=12;fret++){const pc=(open+fret)%12;if(pcs.includes(pc))candidates.push({x:boardX+(fret?fret-.5:0)*fw,y:padY+s*gap,midi:open+fret});}});
+      }
+      const nearest=candidates.reduce((best,item)=>{const distance=Math.hypot(item.x-x,item.y-y);return !best||distance<best.distance?{...item,distance}:best;},null);
+      if(nearest&&nearest.distance<34)playScaleMidi(nearest.midi);
+    });
+  }
   function renderScaleFretboard(instrument,pcs){
     const tuning=SCALE_TUNINGS[instrument]||SCALE_TUNINGS.guitar, frets=Array.from({length:13},(_,f)=>f);
     const name=SCALE_INSTRUMENT_NAMES[instrument]||'Guitarra';
     const isViolin=instrument==='violin';
-    requestAnimationFrame(()=>{const canvas=$('csScaleFretboard');if(canvas)(isViolin?drawScaleViolinBoard:drawScaleFretboard)(canvas,tuning,pcs);});
+    requestAnimationFrame(()=>{const canvas=$('csScaleFretboard');if(canvas){(isViolin?drawScaleViolinBoard:drawScaleFretboard)(canvas,tuning,pcs);bindScaleFretboardPlayback(canvas,instrument,tuning,pcs);}});
     return `<div class="cs-visualizer cs-fretboard-visualizer" role="img" aria-label="Diapasón de ${name} con las notas de la escala resaltadas"><div class="cs-fretboard-caption"><span>${name} · afinación real</span><span>${isViolin?'líneas guía de entonación · sin trastes':'0–12 trastes · notas de la escala en dorado'}</span></div><canvas id="csScaleFretboard" class="cs-scale-canvas"></canvas></div>`;
   }
   function renderScaleExplorer(){
@@ -1068,6 +1102,16 @@
     $('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');
     $('scaleInstrumentView').innerHTML=instrument==='piano'?renderScalePiano(pcs,rootPc):renderScaleFretboard(instrument,pcs);
   }
+  $('scaleInstrumentView').addEventListener('click',event=>{
+    const key=event.target.closest('[data-scale-midi]');
+    if(key)playScaleMidi(Number(key.dataset.scaleMidi));
+  });
+  $('scaleInstrumentView').addEventListener('keydown',event=>{
+    if(event.key!=='Enter'&&event.key!==' ')return;
+    const key=event.target.closest('[data-scale-midi]');
+    if(!key)return;
+    event.preventDefault(); playScaleMidi(Number(key.dataset.scaleMidi));
+  });
   document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(button=>button.addEventListener('click',()=>{
     document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(item=>{const selected=item===button;item.classList.toggle('is-active',selected);item.setAttribute('aria-pressed',String(selected));});
     renderScaleExplorer();
@@ -1087,9 +1131,7 @@
     $('scaleValue').textContent = analysisResult.scale === 'major' ? 'Mayor' : (analysisResult.scale === 'minor' ? 'Menor' : '—');
     $('bpmValue').textContent=analysisResult.bpm==null?'—':Math.round(analysisResult.bpm);
     const meterVal = analysisResult.meter;
-    const db = analysisResult.decoderDiagnostics?.downbeatMeter;
-    const meterNote = db ? `downbeat ${Math.round((db.confidence || 0) * 100)}%${db.fallback ? ' · conservador' : ''}` : 'estimado';
-    document.getElementById('meterValue').innerHTML = (meterVal !== null && meterVal !== undefined ? meterVal + '/4' : '—') + `<span class="value small-note">${meterNote}</span>`;
+    $('meterValue').textContent = meterVal !== null && meterVal !== undefined ? `${meterVal}/4` : '—';
     $('strengthValue').textContent = analysisResult.strength !== null && analysisResult.strength !== undefined ? analysisResult.strength : '—';
     $('durationValue').textContent = formatTime(analysisResult.duration);
     const sectionCount = Array.isArray(analysisResult.sections) ? analysisResult.sections.length : 0;
