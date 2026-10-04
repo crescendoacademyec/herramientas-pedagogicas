@@ -195,7 +195,7 @@
         .hero-inner {
             position: relative;
             max-width: none;
-            margin-left: clamp(172px, 20vw, 265px);
+            margin-left: 0;
             z-index: 1;
         }
 
@@ -240,14 +240,14 @@
         .hero .staff .clef-treble {
             position: absolute;
             /* La espiral de la clave de sol abraza la segunda línea desde abajo. */
-            top: 41px;
+            top: 34px;
             left: 66px;
             font-size: 5rem;
         }
         .hero .staff .clef-bass {
             position: absolute;
             /* Los dos puntos de la clave de fa enmarcan la segunda línea desde arriba. */
-            top: -2px;
+            top: -12px;
             left: 0;
             font-size: 3.6rem;
         }
@@ -303,14 +303,19 @@
             color: var(--muted);
             font-size: 1.05rem;
             line-height: 1.7;
-            max-width: 62ch;
-            margin: 0;
+            max-width: min(62ch, 58%);
+            text-align: right;
+            margin: 0 0 0 auto;
             position: relative;
             z-index: 1;
         }
         @media (max-width: 768px) {
             .hero h1 {
                 white-space: normal;
+            }
+            .hero p {
+                max-width: none;
+                text-align: left;
             }
         }
 
