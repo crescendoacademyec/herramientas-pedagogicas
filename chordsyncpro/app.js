@@ -1139,7 +1139,12 @@
   }));
 
   // ---------- resultados / timeline / beat grid ----------
+  function placeResultsBeforeUpload(){
+    const panel=$('panelFile'), results=$('resultsCard'), upload=$('uploadCard');
+    if(panel&&results&&upload&&results.nextElementSibling!==upload)panel.insertBefore(results,upload);
+  }
   function displayResults() {
+    placeResultsBeforeUpload();
     $('fileTitleEl').innerHTML = (analysisResult.song || 'Sin nombre') +
       (analysisResult.isVideo ? '<span>Audio extraído de video</span>' : '<span></span>');
     const rel = analysisResult.relativeKey;
@@ -2585,6 +2590,7 @@
     currentFile = null;
     isVideoFile = false;
 
+    placeResultsBeforeUpload();
     $('uploadCard').style.display = 'none';
     $('resultsCard').style.display = '';
     $('fileTitleEl').firstChild.textContent = session.song || 'Sesión guardada';
