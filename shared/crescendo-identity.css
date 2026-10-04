@@ -67,5 +67,24 @@ button:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="tru
 
 input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: var(--crescendo-gold); }
 
+/* Leyendas de función tonal: son filtros de referencia, no cápsulas activas. */
+body .legend .legend-item,
+body .legend .legend-item[aria-pressed="true"] {
+  background: rgba(0,0,0,.32) !important;
+  border-color: rgba(255,255,255,.18) !important;
+  color: var(--crescendo-white) !important;
+  box-shadow: none !important;
+}
+body .legend .legend-item:hover:not(:disabled) {
+  background: rgba(212,168,79,.14) !important;
+  border-color: var(--crescendo-gold-light) !important;
+  color: var(--crescendo-gold-light) !important;
+  box-shadow: 0 4px 14px rgba(212,168,79,.16) !important;
+}
+body .legend .legend-item[aria-pressed="false"] {
+  background: rgba(0,0,0,.2) !important;
+  color: rgba(255,250,240,.5) !important;
+}
+
 /* Partituras, teclas, diagramas y canvases conservan su papel didáctico propio. */
 .cp-staff, .staff, .score, canvas, svg { color: inherit; }

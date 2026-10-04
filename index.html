@@ -178,7 +178,13 @@
             }
         }
 
-        /* ---------- Hero (fondo blanco, pentagrama abajo y ancho completo) ---------- */
+        @font-face {
+            font-family: "Bravura Home";
+            src: local("Bravura"), url("editor-crescendo/assets/fonts/Bravura.otf") format("opentype");
+            font-display: block;
+        }
+
+        /* ---------- Hero (fondo blanco, pentagrama Bravura estable) ---------- */
         .hero {
             position: relative;
             padding: clamp(32px, 5vw, 64px) clamp(20px, 6vw, 64px) clamp(48px, 7vw, 72px);
@@ -207,15 +213,19 @@
             opacity: 0.55;
             z-index: 0;
         }
-        .hero .staff svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-        .hero .staff line {
-            stroke: var(--brass);
-            stroke-width: 2.5;
+        .hero .staff-lines {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            color: var(--brass);
+            font-family: "Bravura Home", "Bravura", serif;
+            font-size: 8.8rem;
+            line-height: 1;
+            letter-spacing: -0.16em;
             opacity: 0.5;
+            white-space: nowrap;
         }
         /* Claves de sol y de fa, alineadas con el pentagrama, lado derecho */
         .hero .staff .clefs {
@@ -228,18 +238,18 @@
             gap: clamp(20px, 3vw, 40px);
         }
         .hero .staff .clef {
-            font-family: "Times New Roman", Georgia, serif;
+            font-family: "Bravura Home", "Bravura", serif;
             color: var(--brass);
             opacity: 0.55;
             line-height: 1;
             user-select: none;
         }
         .hero .staff .clef-treble {
-            font-size: 250px;
+            font-size: 13.8rem;
             transform: translateY(-5px);
         }
         .hero .staff .clef-bass {
-            font-size: 130px;
+            font-size: 7.2rem;
             transform: translateY(-15px);
         }
         @media (max-width: 768px) {
@@ -657,18 +667,12 @@
 
     <section class="hero">
         <div class="hero-inner">
-            <!-- Pentagrama con líneas que ocupan el 100% del ancho -->
+            <!-- Pentagrama y claves SMuFL: Bravura mantiene la métrica en todos los sistemas. -->
             <div class="staff" aria-hidden="true">
-                <svg width="100%" height="100%" viewBox="0 0 100 150" preserveAspectRatio="none">
-                    <line x1="0%" y1="10%" x2="100%" y2="10%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
-                    <line x1="0%" y1="30%" x2="100%" y2="30%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
-                    <line x1="0%" y1="50%" x2="100%" y2="50%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
-                    <line x1="0%" y1="70%" x2="100%" y2="70%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
-                    <line x1="0%" y1="90%" x2="100%" y2="90%" stroke="var(--brass)" stroke-width="2.5" opacity="0.5" />
-                </svg>
+                <div class="staff-lines">&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;</div>
                 <div class="clefs" aria-hidden="true">
-                    <span class="clef clef-treble">&#119070;</span>
-                    <span class="clef clef-bass">&#119074;</span>
+                    <span class="clef clef-treble">&#xE050;</span>
+                    <span class="clef clef-bass">&#xE062;</span>
                 </div>
             </div>
 
