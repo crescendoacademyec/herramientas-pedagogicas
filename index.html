@@ -198,16 +198,13 @@
             z-index: 1;
         }
 
-        /* Pentagrama ocupando todo el ancho de la página (rompe el contenedor de 760px) */
+        /* Pentagrama de borde a borde: es hijo directo del hero, no del bloque de texto. */
         .hero .staff {
             position: absolute;
-            left: 50%;
-            right: 50%;
-            margin-left: -50vw;
-            margin-right: -50vw;
-            width: 100vw;
-            top: calc(78% + 22px);
-            height: 144px;
+            left: 0;
+            width: 100%;
+            top: 67%;
+            height: 120px;
             transform: translateY(-50%);
             pointer-events: none;
             opacity: 0.55;
@@ -218,21 +215,19 @@
             inset: 0;
             opacity: 0.5;
             background:
-                linear-gradient(var(--brass), var(--brass)) 0 10% / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 30% / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 50% / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 70% / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 90% / 100% 2px no-repeat;
+                linear-gradient(var(--brass), var(--brass)) 0 10px / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 30px / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 50px / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 70px / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 90px / 100% 2px no-repeat;
         }
-        /* Claves de sol y de fa, alineadas con el pentagrama, lado derecho */
+        /* Cada clave se ancla independientemente a las líneas del pentagrama. */
         .hero .staff .clefs {
             position: absolute;
-            top: 50%;
-            right: clamp(24px, 6vw, 90px);
-            display: flex;
-            align-items: center;
-            gap: clamp(20px, 3vw, 40px);
-            transform: translateY(-50%);
+            top: 0;
+            left: clamp(58%, 64vw, 68%);
+            width: 180px;
+            height: 100%;
         }
         .hero .staff .clef {
             font-family: "Bravura Home", "Bravura", serif;
@@ -242,12 +237,18 @@
             user-select: none;
         }
         .hero .staff .clef-treble {
-            font-size: 8.9rem;
-            transform: translateY(-2px);
+            position: absolute;
+            /* La espiral de la clave de sol abraza la segunda línea desde abajo. */
+            top: 21px;
+            left: 0;
+            font-size: 5rem;
         }
         .hero .staff .clef-bass {
-            font-size: 4.9rem;
-            transform: translateY(-1px);
+            position: absolute;
+            /* Los dos puntos de la clave de fa enmarcan la segunda línea desde arriba. */
+            top: -2px;
+            left: 94px;
+            font-size: 3.6rem;
         }
         @media (max-width: 768px) {
             .hero .staff .clefs {
@@ -663,15 +664,15 @@
 </header>
 
     <section class="hero">
-        <div class="hero-inner">
-            <!-- Cinco líneas estables y claves SMuFL Bravura. -->
-            <div class="staff" aria-hidden="true">
-                <div class="staff-lines"></div>
-                <div class="clefs" aria-hidden="true">
-                    <span class="clef clef-treble">&#xE050;</span>
-                    <span class="clef clef-bass">&#xE062;</span>
-                </div>
+        <!-- Cinco líneas de borde a borde y claves SMuFL Bravura. -->
+        <div class="staff" aria-hidden="true">
+            <div class="staff-lines"></div>
+            <div class="clefs" aria-hidden="true">
+                <span class="clef clef-treble">&#xE050;</span>
+                <span class="clef clef-bass">&#xE062;</span>
             </div>
+        </div>
+        <div class="hero-inner">
 
             <div class="eyebrow">Recursos interactivos</div>
             <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
