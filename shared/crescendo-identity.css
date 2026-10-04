@@ -1,0 +1,62 @@
+/* Identidad visual compartida de Crescendo Academy.
+   Esta capa se carga al final de cada app para unificar fondo, jerarquía y estados. */
+:root {
+  --crescendo-black: #1e1e1e;
+  --crescendo-black-soft: #252525;
+  --crescendo-panel: #2a2a2a;
+  --crescendo-panel-deep: #181818;
+  --crescendo-gold: #d4a84f;
+  --crescendo-gold-light: #f0c96e;
+  --crescendo-white: #fffaf0;
+  --crescendo-muted: rgba(255,250,240,.7);
+  --bg: var(--crescendo-black);
+  --panel: var(--crescendo-panel-deep);
+  --panel2: var(--crescendo-panel);
+  --panel3: #353535;
+  --gold2: var(--crescendo-gold-light);
+  --cream: var(--crescendo-white);
+  --ink: var(--crescendo-black);
+  --gold: var(--crescendo-gold);
+  --text: var(--crescendo-white);
+  --muted: var(--crescendo-muted);
+  --active-color: var(--crescendo-gold);
+}
+
+html, body {
+  background: var(--crescendo-black) !important;
+  color: var(--crescendo-white);
+}
+
+body :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker) {
+  color: var(--crescendo-gold);
+}
+
+body :is(p,li,td,th,label,legend,.subtitle,.description,.muted) { color: inherit; }
+
+button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"] {
+  border-color: rgba(212,168,79,.48);
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+
+button:hover:not(:disabled), [role="button"]:hover, input[type="button"]:hover:not(:disabled), input[type="submit"]:hover:not(:disabled), input[type="reset"]:hover:not(:disabled) {
+  border-color: var(--crescendo-gold-light);
+  box-shadow: 0 4px 16px rgba(212,168,79,.22);
+}
+
+button:focus-visible, [role="button"]:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--crescendo-gold-light);
+  outline-offset: 3px;
+}
+
+button:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="true"]),
+[role="button"]:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="true"]),
+.active > button, .selected > button {
+  background: var(--crescendo-gold) !important;
+  border-color: var(--crescendo-gold-light) !important;
+  color: #17130a !important;
+}
+
+input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: var(--crescendo-gold); }
+
+/* Partituras, teclas, diagramas y canvases conservan su papel didáctico propio. */
+.cp-staff, .staff, .score, canvas, svg { color: inherit; }
