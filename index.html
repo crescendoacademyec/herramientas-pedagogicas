@@ -194,7 +194,8 @@
 
         .hero-inner {
             position: relative;
-            max-width: 760px;
+            max-width: none;
+            margin-left: clamp(172px, 20vw, 265px);
             z-index: 1;
         }
 
@@ -225,7 +226,7 @@
         .hero .staff .clefs {
             position: absolute;
             top: 0;
-            left: clamp(58%, 64vw, 68%);
+            left: clamp(28px, 5vw, 72px);
             width: 180px;
             height: 100%;
         }
@@ -239,20 +240,23 @@
         .hero .staff .clef-treble {
             position: absolute;
             /* La espiral de la clave de sol abraza la segunda línea desde abajo. */
-            top: 21px;
-            left: 0;
+            top: 41px;
+            left: 66px;
             font-size: 5rem;
         }
         .hero .staff .clef-bass {
             position: absolute;
             /* Los dos puntos de la clave de fa enmarcan la segunda línea desde arriba. */
             top: -2px;
-            left: 94px;
+            left: 0;
             font-size: 3.6rem;
         }
         @media (max-width: 768px) {
             .hero .staff .clefs {
                 display: none;
+            }
+            .hero-inner {
+                margin-left: 0;
             }
         }
 
@@ -280,11 +284,12 @@
             font-family: "Fraunces", "Times New Roman", serif;
             font-optical-sizing: auto;
             font-weight: 480;
-            font-size: clamp(2.4rem, 6vw, 4rem);
+            font-size: clamp(2rem, 4vw, 3.45rem);
             line-height: 1.06;
             margin: 0 0 18px;
             color: var(--text);
-            max-width: 13ch;
+            max-width: none;
+            white-space: nowrap;
             position: relative;
             z-index: 1;
         }
@@ -298,10 +303,15 @@
             color: var(--muted);
             font-size: 1.05rem;
             line-height: 1.7;
-            max-width: 50ch;
+            max-width: 62ch;
             margin: 0;
             position: relative;
             z-index: 1;
+        }
+        @media (max-width: 768px) {
+            .hero h1 {
+                white-space: normal;
+            }
         }
 
         /* ---------- Tools grid (fondo blanco, tarjetas blancas) ---------- */
@@ -668,8 +678,8 @@
         <div class="staff" aria-hidden="true">
             <div class="staff-lines"></div>
             <div class="clefs" aria-hidden="true">
-                <span class="clef clef-treble">&#xE050;</span>
                 <span class="clef clef-bass">&#xE062;</span>
+                <span class="clef clef-treble">&#xE050;</span>
             </div>
         </div>
         <div class="hero-inner">
