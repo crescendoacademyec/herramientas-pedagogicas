@@ -1007,9 +1007,10 @@
   const SCALE_INSTRUMENT_NAMES={guitar:'Guitarra',bass:'Bajo',violin:'Violín',ukulele:'Ukelele',requinto:'Requinto'};
   function scaleRootPc(key){return {C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11}[String(key||'C')]??0;}
   const isBlackPc=pc=>[1,3,6,8,10].includes(pc);
-  function renderScalePiano(pcs){
-    // Mismo registro del modo Principiante de Piano Virtual: C3–B5.
-    const midis=Array.from({length:36},(_,i)=>48+i), whites=midis.filter(m=>!isBlackPc(m%12));
+  function renderScalePiano(pcs,rootPc){
+    // La primera tecla visible es la tónica: así una escala de Re comienza en Re, no en Do♯.
+    const startMidi=48+((rootPc-(48%12)+12)%12);
+    const midis=Array.from({length:36},(_,i)=>startMidi+i), whites=midis.filter(m=>!isBlackPc(m%12));
     let whiteIndex=0;
     const keys=midis.map(m=>{
       const black=isBlackPc(m%12), active=pcs.includes(m%12);
@@ -1018,7 +1019,9 @@
       const width=100/whites.length;
       return `<div class="${black?'black-key':'white-key'} ${active?'active':''}" style="left:${black?position*width-(width*.58/2):position*width}%;width:${black?width*.58:width}%" aria-label="${SCALE_NAMES[m%12]}${active?' pertenece a la escala':''}"><div class="label">${active?SCALE_NAMES[m%12]:''}</div></div>`;
     }).join('');
-    return `<div class="cs-visualizer cs-piano-visualizer" role="img" aria-label="Teclado de piano con las notas de la escala resaltadas"><div class="cs-piano-caption">Modo Principiante · C3–B5 · notas de la escala en dorado</div><div id="csScaleKeyboard">${keys}</div></div>`;
+    const startLabel=SCALE_NAMES[startMidi%12], endLabel=SCALE_NAMES[(startMidi+35)%12];
+    const startOctave=Math.floor(startMidi/12)-1, endOctave=Math.floor((startMidi+35)/12)-1;
+    return `<div class="cs-visualizer cs-piano-visualizer" role="img" aria-label="Teclado de piano que inicia en ${startLabel} con las notas de la escala resaltadas"><div class="cs-piano-caption">Modo Principiante · ${startLabel}${startOctave}–${endLabel}${endOctave} · empieza en la tónica · notas de la escala en dorado</div><div id="csScaleKeyboard">${keys}</div></div>`;
   }
   function roundedScaleRect(ctx,x,y,w,h,r){const q=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+q,y);ctx.arcTo(x+w,y,x+w,y+h,q);ctx.arcTo(x+w,y+h,x,y+h,q);ctx.arcTo(x,y+h,x,y,q);ctx.arcTo(x,y,x+w,y,q);ctx.closePath();}
   // Adaptación directa del lienzo de diapasones de la suite: misma geometría, vetas y metal.
@@ -1060,9 +1063,10 @@
     const activeButton=document.querySelector('#scaleInstrumentButtons .is-active');
     if(!analysisResult||!activeButton)return;
     const instrument=activeButton.dataset.instrument;
-    const pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(scaleRootPc(analysisResult.key)+n)%12);
+    const rootPc=scaleRootPc(analysisResult.key);
+    const pcs=(SCALE_PCS[analysisResult.scale]||SCALE_PCS.major).map(n=>(rootPc+n)%12);
     $('scaleNoteList').innerHTML=pcs.map(pc=>`<span>${SCALE_NAMES[pc]}</span>`).join('');
-    $('scaleInstrumentView').innerHTML=instrument==='piano'?renderScalePiano(pcs):renderScaleFretboard(instrument,pcs);
+    $('scaleInstrumentView').innerHTML=instrument==='piano'?renderScalePiano(pcs,rootPc):renderScaleFretboard(instrument,pcs);
   }
   document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(button=>button.addEventListener('click',()=>{
     document.querySelectorAll('#scaleInstrumentButtons [data-instrument]').forEach(item=>{const selected=item===button;item.classList.toggle('is-active',selected);item.setAttribute('aria-pressed',String(selected));});
