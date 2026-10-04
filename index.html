@@ -184,7 +184,7 @@
             font-display: block;
         }
 
-        /* ---------- Hero (fondo blanco, pentagrama Bravura estable) ---------- */
+        /* ---------- Hero (fondo blanco, pentagrama estable y claves Bravura) ---------- */
         .hero {
             position: relative;
             padding: clamp(32px, 5vw, 64px) clamp(20px, 6vw, 64px) clamp(48px, 7vw, 72px);
@@ -216,26 +216,23 @@
         .hero .staff-lines {
             position: absolute;
             inset: 0;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-            color: var(--brass);
-            font-family: "Bravura Home", "Bravura", serif;
-            font-size: 8.8rem;
-            line-height: 1;
-            letter-spacing: -0.16em;
             opacity: 0.5;
-            white-space: nowrap;
+            background:
+                linear-gradient(var(--brass), var(--brass)) 0 10% / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 30% / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 50% / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 70% / 100% 2px no-repeat,
+                linear-gradient(var(--brass), var(--brass)) 0 90% / 100% 2px no-repeat;
         }
         /* Claves de sol y de fa, alineadas con el pentagrama, lado derecho */
         .hero .staff .clefs {
             position: absolute;
-            top: 0;
+            top: 50%;
             right: clamp(24px, 6vw, 90px);
-            height: 100%;
             display: flex;
             align-items: center;
             gap: clamp(20px, 3vw, 40px);
+            transform: translateY(-50%);
         }
         .hero .staff .clef {
             font-family: "Bravura Home", "Bravura", serif;
@@ -245,12 +242,12 @@
             user-select: none;
         }
         .hero .staff .clef-treble {
-            font-size: 13.8rem;
-            transform: translateY(-5px);
+            font-size: 8.9rem;
+            transform: translateY(-2px);
         }
         .hero .staff .clef-bass {
-            font-size: 7.2rem;
-            transform: translateY(-15px);
+            font-size: 4.9rem;
+            transform: translateY(-1px);
         }
         @media (max-width: 768px) {
             .hero .staff .clefs {
@@ -667,9 +664,9 @@
 
     <section class="hero">
         <div class="hero-inner">
-            <!-- Pentagrama y claves SMuFL: Bravura mantiene la métrica en todos los sistemas. -->
+            <!-- Cinco líneas estables y claves SMuFL Bravura. -->
             <div class="staff" aria-hidden="true">
-                <div class="staff-lines">&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;&#xE014;</div>
+                <div class="staff-lines"></div>
                 <div class="clefs" aria-hidden="true">
                     <span class="clef clef-treble">&#xE050;</span>
                     <span class="clef clef-bass">&#xE062;</span>
