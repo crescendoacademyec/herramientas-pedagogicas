@@ -23,7 +23,7 @@
 }
 
 html, body {
-  background: var(--crescendo-black) !important;
+  background: radial-gradient(circle at 74% 18%, rgba(212,168,79,.18), transparent 34%), var(--crescendo-black) !important;
   color: var(--crescendo-white);
 }
 
@@ -40,6 +40,8 @@ button, [role="button"], input[type="button"], input[type="submit"], input[type=
 
 button:hover:not(:disabled), [role="button"]:hover, input[type="button"]:hover:not(:disabled), input[type="submit"]:hover:not(:disabled), input[type="reset"]:hover:not(:disabled) {
   border-color: var(--crescendo-gold-light);
+  background-color: rgba(212,168,79,.14);
+  color: var(--crescendo-gold-light);
   box-shadow: 0 4px 16px rgba(212,168,79,.22);
 }
 
@@ -53,6 +55,13 @@ button:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="tru
 .active > button, .selected > button {
   background: var(--crescendo-gold) !important;
   border-color: var(--crescendo-gold-light) !important;
+  color: #17130a !important;
+}
+
+button:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="true"]) :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker,b,strong,span),
+[role="button"]:is(.active,.selected,.is-active,[aria-pressed="true"],[aria-selected="true"]) :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker,b,strong,span),
+.active > button :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker,b,strong,span),
+.selected > button :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker,b,strong,span) {
   color: #17130a !important;
 }
 
