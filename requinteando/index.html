@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Folk Virtual Crescendo: instrumentos folklóricos de cuerda con escalas, acordes, metrónomo, digitación y lector avanzado de partituras." />
-  <title>Folk Virtual</title>
+  <meta name="description" content="Requinteando: requinto, guitarra y ukelele con escalas, acordes, metrónomo y lector avanzado de partituras." />
+  <title>Requinteando</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
+  <link rel="stylesheet" href="css/ukulele-bank.css">
+  <link rel="stylesheet" href="css/guitar-bank.css">
   <style>
     /* ===== Variables y estilos base ===== */
     :root {
@@ -156,7 +158,7 @@
     }
 
 
-    /* ===== METRÓNOMO ===== */
+    /* ===== METRÓNOMO · fase 1 ===== */
     .header-metronome{display:flex;align-items:center;gap:4px;padding:4px 6px;border:1px solid rgba(212,168,79,.28);border-radius:10px;background:rgba(0,0,0,.22);box-shadow:0 4px 16px rgba(0,0,0,.16);white-space:nowrap}
     .header-metronome button,.header-metronome select{width:auto;min-width:0;min-height:28px;height:28px;padding:0 7px;border-radius:6px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.12);color:var(--text);font-size:.66rem;font-weight:800}
     .header-metronome .metro-play{width:30px;padding:0;color:var(--gold)}
@@ -911,11 +913,12 @@
 </style>
 <link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
 <link rel="stylesheet" href="../shared/string-sound-menu.css?v=1">
+<link rel="stylesheet" href="requinteando.css?v=1">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261004">
 </head>
-<body>
+<body class="requinteando-app">
   <header class="topbar">
-    <h1 class="brand"><span>Folk Virtual</span></h1>
+    <h1 class="brand"><span>Requinteando</span></h1>
     <div class="header-metronome" aria-label="Metrónomo">
       <button class="metro-play" id="metroToggle" aria-label="Iniciar metrónomo" type="button" title="Iniciar / detener metrónomo">▶</button>
       <div class="metro-bpm"><span class="metro-label">BPM</span><div class="metro-stepper"><button id="metroDown" type="button" aria-label="Bajar BPM">−</button><span id="metroBpmValue">80</span><button id="metroUp" type="button" aria-label="Subir BPM">+</button></div></div>
@@ -970,11 +973,11 @@
   <main class="app-shell">
     <section class="hero">
       <p class="eyebrow">Aplicación musical</p>
-      <p>Explora escalas, acordes, modos, posiciones y partituras en instrumentos folklóricos de cuerda con una lectura visual clara.</p>
+      <p>Explora escalas, acordes y posiciones para requinto, guitarra y ukelele con una lectura visual clara de función y disponibilidad.</p>
     </section>
 
     <!-- Panel de controles -->
-    <section class="panel" aria-label="Controles de Folk Virtual">
+    <section class="panel" aria-label="Controles de Requinteando">
       <div class="field">
         <label for="instrument">Instrumento</label>
         <select id="instrument"></select>
@@ -983,15 +986,15 @@
         <label id="soundTypeLabel" for="soundType">Timbre</label>
         <select id="soundType"></select>
       </div>
-      <div class="field">
+      <div class="field requinteando-hidden-control">
         <label for="tuning">Afinación</label>
         <select id="tuning"></select>
       </div>
       <div class="field">
-        <label for="capo">Capo / cejilla</label>
+        <label for="capo">Capo</label>
         <select id="capo"></select>
       </div>
-      <div class="field">
+      <div class="field requinteando-hidden-control">
         <label for="orientation">Orientación</label>
         <select id="orientation">
           <option value="right">Diestro</option>
@@ -1018,7 +1021,7 @@
         <label for="scale">Escala / Modo</label>
         <select id="scale"></select>
       </div>
-      <div class="field">
+      <div class="field requinteando-hidden-control">
         <label for="pos">Posición / Traste</label>
         <select id="pos"></select>
       </div>
@@ -1026,12 +1029,25 @@
         <label for="pattern">Patrón</label>
         <select id="pattern">
           <option value="free">Libre</option>
-          <optgroup label="Patrones instrumentales">
-            <option value="folk:position" disabled>Próximamente · patrones por instrumento</option>
+          <optgroup label="CAGED">
+            <option value="caged:C">Zona CAGED · C</option>
+            <option value="caged:A">Zona CAGED · A</option>
+            <option value="caged:G">Zona CAGED · G</option>
+            <option value="caged:E">Zona CAGED · E</option>
+            <option value="caged:D">Zona CAGED · D</option>
+          </optgroup>
+          <optgroup label="3 notas por cuerda">
+            <option value="3nps:1">3NPS guiado · posición 1</option>
+            <option value="3nps:2">3NPS guiado · posición 2</option>
+            <option value="3nps:3">3NPS guiado · posición 3</option>
+            <option value="3nps:4">3NPS guiado · posición 4</option>
+            <option value="3nps:5">3NPS guiado · posición 5</option>
+            <option value="3nps:6">3NPS guiado · posición 6</option>
+            <option value="3nps:7">3NPS guiado · posición 7</option>
           </optgroup>
         </select>
       </div>
-      <div class="field">
+      <div class="field requinteando-hidden-control">
         <label for="voicingRange">Voicing / cuerdas</label>
         <select id="voicingRange">
           <option value="all">Todas</option>
@@ -1085,6 +1101,9 @@
       </div>
     </section>
 
+    <details id="ukuleleBank" hidden></details>
+    <details id="guitarChordBank" hidden></details>
+    <details id="requintoChordBank" hidden></details>
     <!-- ===== FILA SUPERIOR: pentagrama + diapasón ===== -->
     <div class="top-row">
       <div class="staff-left">
@@ -1256,94 +1275,64 @@
   <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
   <script src="../cuerdas-frotadas/js/live-staff.js"></script>
   <script>
+/* fretboard.js */
     // ======================================================================
-    // 1. NÚCLEO DE FOLK VIRTUAL (diapasón, escalas, acordes)
+    // 1. CÓDIGO COMPLETO DEL REQUINTO VIRTUAL (diapasón, escalas, acordes)
     // ======================================================================
     const NOTE = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 
-    // Instrumentos modelados por órdenes/cursos, no por cuerdas simples.
-    // `pitches` usa una altura representativa por orden para el mapa del diapasón.
-    // `voices` conserva las octavas/unísonos reales de cada orden para la audición al hacer clic.
     const INSTRUMENTS = {
-      tiple: {
-        label: "Tiple colombiano",
-        description: "4 órdenes · 12 cuerdas (3 por orden)",
-        pitches: [64, 59, 55, 50],
-        nutFret: 0,
-        writtenTranspose: 12
+      requinto: {
+        label: "Requinto",
+        description: "6 cuerdas (A-D-G-C-E-A)",
+        pitches: [69, 64, 60, 55, 50, 45],
+        nutFret: 0
       },
-      tresCubano: {
-        label: "Tres cubano",
-        description: "3 órdenes · 6 cuerdas (2 por orden)",
-        pitches: [64, 60, 55],
-        nutFret: 0,
-        writtenTranspose: 12
+      guitar: {
+        label: "Guitarra",
+        description: "6 cuerdas (E-A-D-G-B-E)",
+        pitches: [64, 59, 55, 50, 45, 40],
+        nutFret: 0
       },
-      cuatroVenezolano: {
-        label: "Cuatro venezolano",
-        description: "4 cuerdas · afinación reentrante",
-        pitches: [59, 66, 62, 57],
-        nutFret: 0,
-        writtenTranspose: 0
+      ukulele: {
+        label: "Ukelele",
+        description: "4 cuerdas (G C E A)",
+        pitches: [69, 64, 60, 67],
+        nutFret: 0
       }
     };
 
     const TUNINGS = {
-      tiple: [
-        {
-          value:'modern-dgbe',
-          label:'Moderna · D G B E',
-          pitches:[64,59,55,50],
-          voices:[[64,64,64],[71,59,71],[67,55,67],[62,50,62]]
-        },
-        {
-          value:'lower-cfad',
-          label:'Grave · C F A D',
-          pitches:[62,57,53,48],
-          voices:[[62,62,62],[69,57,69],[65,53,65],[60,48,60]]
-        }
+      guitar: [
+        {value:'standard', label:'Estándar · E A D G B E', pitches:[64,59,55,50,45,40]},
+        {value:'drop_d', label:'Drop D · D A D G B E', pitches:[64,59,55,50,45,38]},
+        {value:'dadgad', label:'DADGAD · D A D G A D', pitches:[62,57,55,50,45,38]},
+        {value:'open_g', label:'Open G · D G D G B D', pitches:[62,59,55,50,43,38]},
+        {value:'open_d', label:'Open D · D A D F# A D', pitches:[62,57,54,50,45,38]}
       ],
-      tresCubano: [
-        {
-          value:'c-modern',
-          label:'Do mayor · G C E · Mi al unísono',
-          pitches:[64,60,55],
-          voices:[[64,64],[60,60],[67,55]]
-        },
-        {
-          value:'c-octaves',
-          label:'Do mayor · G C E · órdenes exteriores en octavas',
-          pitches:[52,60,55],
-          voices:[[64,52],[60,60],[67,55]]
-        },
-        {
-          value:'d-modern',
-          label:'Re mayor · A D F♯ · Fa♯ al unísono',
-          pitches:[66,62,57],
-          voices:[[66,66],[62,62],[69,57]]
-        }
+      ukulele: [
+        {value:'high_g', label:'High G · G C E A', pitches:[69,64,60,67]},
+        {value:'low_g', label:'Low G · G C E A', pitches:[69,64,60,55]}
       ],
-      cuatroVenezolano: [
-        {
-          value:'standard-adfsb',
-          label:'Estándar · A D F♯ B (reentrante)',
-          pitches:[59,66,62,57],
-          voices:[[59],[66],[62],[57]]
-        }
+      requinto: [
+        {value:'standard', label:'Estándar · A D G C E A', pitches:[69,64,60,55,50,45]}
       ]
     };
 
     const SOUND_OPTIONS = {
-      tiple: [
-        { value: 'acoustic_guitar_nylon', label: 'Tiple · cuerdas pulsadas' },
-        { value: 'acoustic_guitar_steel', label: 'Tiple · brillante' }
+      requinto: [
+        { value: 'acoustic_guitar_nylon', label: 'Requinto (nylon)' },
+        { value: 'acoustic_guitar_steel', label: 'Requinto (metal)' }
       ],
-      tresCubano: [
-        { value: 'acoustic_guitar_nylon', label: 'Tres cubano · nylon' },
-        { value: 'acoustic_guitar_steel', label: 'Tres cubano · metálico' }
+      guitar: [
+        { value: 'acoustic_guitar_nylon', label: 'Acústica (nylon)' },
+        { value: 'acoustic_guitar_steel', label: 'Acústica (metal)' },
+        { value: 'electric_guitar_clean', label: 'Eléctrica (limpia)' },
+        { value: 'electric_guitar_jazz', label: 'Eléctrica (jazz)' },
+        { value: 'electric_guitar_muted', label: 'Eléctrica (muted)' }
       ],
-      cuatroVenezolano: [
-        { value: 'acoustic_guitar_nylon', label: 'Cuatro · nylon' }
+      ukulele: [
+        { value: 'acoustic_guitar_nylon', label: 'Ukelele (nylon)' }
       ]
     };
 
@@ -1382,25 +1371,46 @@
     const GUIDE_DOTS = [3,5,7,9,12,15,17,19,22];
     const INVERSION_LABELS = ["Fundamental","1ª inversión","2ª inversión","3ª inversión"];
 
-    // Voicings genéricos por órdenes. Evitamos etiquetas CAGED/Drop-2 de guitarra:
-    // en instrumentos reentrantes el orden físico de las cuerdas no garantiza el orden de las voces.
     const CHORD_VOICINGS = {
-      triad_low:{label:"· órdenes graves",group:"Tríadas",family:"triad",templates:[
-        {strings:[3,2,1],slots:["root","third","fifth"],frets:[3,3,3]},
-        {strings:[3,2,1],slots:["third","fifth","root"],frets:[5,5,5]},
-        {strings:[3,2,1],slots:["fifth","root","third"],frets:[7,7,7]}
+      triad_s6:{label:"6",group:"Tríadas",family:"triad",templates:[
+        {strings:[5,4,3],slots:["root","third","fifth"],frets:[8,7,5]},
+        {strings:[5,4,3],slots:["third","fifth","root"],frets:[12,10,10]},
+        {strings:[5,4,3],slots:["fifth","root","third"],frets:[3,3,2]}
       ]},
-      triad_high:{label:"· órdenes agudos",group:"Tríadas",family:"triad",templates:[
-        {strings:[2,1,0],slots:["root","third","fifth"],frets:[3,3,3]},
-        {strings:[2,1,0],slots:["third","fifth","root"],frets:[5,5,5]},
-        {strings:[2,1,0],slots:["fifth","root","third"],frets:[7,7,7]}
+      triad_s5:{label:"5",group:"Tríadas",family:"triad",templates:[
+        {strings:[4,3,2],slots:["root","third","fifth"],frets:[3,2,0]},
+        {strings:[4,3,2],slots:["third","fifth","root"],frets:[7,5,5]},
+        {strings:[4,3,2],slots:["fifth","root","third"],frets:[10,10,9]}
       ]},
-      triad_all:{label:"· todas las zonas",group:"Tríadas",family:"triad",include:["triad_low","triad_high"]},
-      tetrad_all:{label:"· 4 órdenes",group:"Cuatríadas",family:"tetrad",templates:[
-        {strings:[3,2,1,0],slots:["root","third","fifth","seventh"],frets:[4,4,4,4]},
-        {strings:[3,2,1,0],slots:["third","fifth","seventh","root"],frets:[6,6,6,6]},
-        {strings:[3,2,1,0],slots:["fifth","seventh","root","third"],frets:[8,8,8,8]},
-        {strings:[3,2,1,0],slots:["seventh","root","third","fifth"],frets:[10,10,10,10]}
+      triad_s4:{label:"4",group:"Tríadas",family:"triad",templates:[
+        {strings:[3,2,1],slots:["root","third","fifth"],frets:[10,9,8]},
+        {strings:[3,2,1],slots:["third","fifth","root"],frets:[2,0,1]},
+        {strings:[3,2,1],slots:["fifth","root","third"],frets:[5,5,3]}
+      ]},
+      triad_s3:{label:"3",group:"Tríadas",family:"triad",templates:[
+        {strings:[2,1,0],slots:["root","third","fifth"],frets:[5,5,3]},
+        {strings:[2,1,0],slots:["third","fifth","root"],frets:[9,8,8]},
+        {strings:[2,1,0],slots:["fifth","root","third"],frets:[0,1,0]}
+      ]},
+      triad_all:{label:"todas",group:"Tríadas",family:"triad",include:["triad_s6","triad_s5","triad_s4","triad_s3"]},
+      drop2_s5:{label:"5",group:"Drop 2",family:"tetrad",templates:[
+        {strings:[4,3,2,1],slots:["root","fifth","seventh","third"],frets:[3,5,4,5]},
+        {strings:[4,3,2,1],slots:["third","seventh","root","fifth"],frets:[7,9,5,8]},
+        {strings:[4,3,2,1],slots:["fifth","root","third","seventh"],frets:[10,10,9,12]},
+        {strings:[4,3,2,1],slots:["seventh","third","fifth","root"],frets:[14,14,12,13]}
+      ]},
+      drop2_s4:{label:"4",group:"Drop 2",family:"tetrad",templates:[
+        {strings:[3,2,1,0],slots:["root","fifth","seventh","third"],frets:[10,12,12,12]},
+        {strings:[3,2,1,0],slots:["third","seventh","root","fifth"],frets:[2,4,1,3]},
+        {strings:[3,2,1,0],slots:["fifth","root","third","seventh"],frets:[5,5,5,7]},
+        {strings:[3,2,1,0],slots:["seventh","third","fifth","root"],frets:[9,9,8,8]}
+      ]},
+      drop2_all:{label:"todas",group:"Drop 2",family:"tetrad",include:["drop2_s5","drop2_s4"]},
+      drop3_s6:{label:"6",group:"Drop 3",family:"tetrad",templates:[
+        {strings:[5,3,2,1],slots:["root","seventh","third","fifth"],frets:[8,9,9,8]},
+        {strings:[5,3,2,1],slots:["third","root","fifth","seventh"],frets:[12,10,12,12]},
+        {strings:[5,3,2,1],slots:["fifth","third","seventh","root"],frets:[3,2,4,1]},
+        {strings:[5,3,2,1],slots:["seventh","fifth","root","third"],frets:[7,5,5,5]}
       ]}
     };
 
@@ -1408,21 +1418,13 @@
 
     // Utilidades
     const roman = n => ({1:"I",2:"II",3:"III",4:"IV",5:"V",6:"VI",7:"VII",8:"VIII",9:"IX",10:"X",11:"XI",12:"XII",13:"XIII",14:"XIV",15:"XV",16:"XVI",17:"XVII",18:"XVIII",19:"XIX",20:"XX",21:"XXI",22:"XXII"}[n] || n);
-    const activeInstrument = () => INSTRUMENTS[instrumentSel.value] || INSTRUMENTS.tiple;
+    const activeInstrument = () => INSTRUMENTS[instrumentSel.value] || INSTRUMENTS.requinto;
     const activeTuning = () => {
       const list=TUNINGS[instrumentSel.value]||[];
       return list.find(t=>t.value===tuningSel?.value)||list[0]||{pitches:activeInstrument().pitches};
     };
     const capoSemitones = () => Math.max(0,Math.min(12,+(capoSel?.value||0)));
     const activePitches = () => activeTuning().pitches.map(n=>n+capoSemitones());
-    const activeCourseVoices = () => {
-      const tuning=activeTuning();
-      const voices=tuning.voices || tuning.pitches.map(p=>[p]);
-      const capo=capoSemitones();
-      return voices.map(course=>course.map(p=>p+capo));
-    };
-    const courseMidisAt = (stringIdx, displayFret) =>
-      (activeCourseVoices()[stringIdx]||[]).map(m=>m+physicalFret(displayFret));
     const physicalFret = displayFret => displayFret + activeInstrument().nutFret;
     const isLeftHanded = () => orientationSel?.value==='left';
     const maxVisibleFrets = () => Math.max(4, TOTAL_FRETS - activeInstrument().nutFret);
@@ -1500,10 +1502,10 @@
     const phrasePlanDetail = $("phrasePlanDetail");
     const techniqueDetail = $("techniqueDetail");
 
-    const SETTINGS_KEY = 'folkVirtual_settings_v1';
+    const SETTINGS_KEY = 'requinteando_settings_v1';
     function readSettings(){
       try{
-        return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
+        return JSON.parse(localStorage.getItem(SETTINGS_KEY)||localStorage.getItem('diapasonVirtual_settings_v4')||localStorage.getItem('diapasonVirtual_settings_v3')||'{}');
       }catch(e){return{}}
     }
     function saveSettings(){
@@ -1604,7 +1606,7 @@
         soundTypeSel.value = options[0].value;
         loadSoundFont(options[0].value);
       }
-      const instrumentLabels = { tiple:'Tiple colombiano', tresCubano:'Tres cubano', cuatroVenezolano:'Cuatro venezolano' };
+      const instrumentLabels = { requinto: 'Requinto', guitar: 'Guitarra', ukulele: 'Ukelele' };
       soundTypeLabel.textContent = 'Timbre ' + (instrumentLabels[instrumentKey] || '');
     }
 
@@ -1614,21 +1616,13 @@
     }
 
     // Listeners de instrumento
-    function playCourse(stringIdx, displayFret, duration = 1.5) {
-      const course=courseMidisAt(stringIdx,displayFret);
-      if(!course.length) return null;
-      const gainScale=course.length>=3?0.42:(course.length===2?0.58:1);
-      const handles=course.map(m=>playNote(m,duration,gainScale)).filter(Boolean);
-      return {stop:()=>handles.forEach(h=>{try{h.stop?.()}catch(e){}})};
-    }
-
     instrumentSel.addEventListener('change', function() {
       manualSelections.clear();
       hoverCell = null;
       const instrumentKey = this.value;
       updateSoundTypeOptions(instrumentKey);
       updateTuningOptions();
-      if(patternSel.value!=='free') patternSel.value='free';
+      if(patternSel.value.startsWith('caged:') && instrumentKey!=='guitar') patternSel.value='free';
       refresh();
     });
 
@@ -1737,8 +1731,7 @@
     function populateChordOptions(keepValue = chordTypeSel.value) {
       chordTypeSel.length = 0;
       chordTypeSel.add(new Option("— Ninguna —",""));
-      const groupOrder = ["Tríadas","Cuatríadas"];
-      const courseCount=activePitches().length;
+      const groupOrder = ["Tríadas","Drop 2","Drop 3"];
       groupOrder.forEach(groupName => {
         const optgroup = document.createElement("optgroup");
         optgroup.label = groupName;
@@ -1746,7 +1739,6 @@
         Object.entries(CHORD_TYPES).forEach(([typeKey, def]) => {
           Object.entries(CHORD_VOICINGS).forEach(([voicingKey, voicing]) => {
             if (voicing.group !== groupName || def.family !== voicing.family) return;
-            if(def.family==='tetrad' && courseCount<4) return;
             optgroup.appendChild(new Option(chordMenuLabel(typeKey, voicingKey), `${typeKey}|${voicingKey}`));
             hasOptions = true;
           });
@@ -1802,11 +1794,7 @@
           const slot = template.slots[i];
           return { string: stringIdx, fret: frets[i], role: slot === "root" ? "root" : "structural", slot };
         });
-        const lowest=cells.reduce((best,c)=>{
-          const midi=activePitches()[c.string]+physicalFret(c.fret);
-          return (!best||midi<best.midi)?{midi,slot:c.slot}:best;
-        },null);
-        const inversion={root:0,third:1,fifth:2,seventh:3}[lowest?.slot] ?? 0;
+        const inversion = template.slots.indexOf("root");
         shapes.push({ inversion, cells });
       });
       return shapes;
@@ -1820,12 +1808,10 @@
     function shapeInVoicingRange(shape){
       const mode=voicingRangeSel?.value||'all';
       if(mode==='all') return true;
-      const count=Math.max(1,activePitches().length-1);
       const avg=shape.cells.reduce((a,c)=>a+c.string,0)/shape.cells.length;
-      const norm=avg/count; // 0 = agudo, 1 = grave
-      if(mode==='low') return norm>=0.55;
-      if(mode==='high') return norm<=0.45;
-      return norm>0.25 && norm<0.75;
+      if(mode==='low') return avg>=3.1;
+      if(mode==='high') return avg<=2.0;
+      return avg>1.5 && avg<3.8;
     }
     function selectedChordShapes(rootPc, def, voicing) {
       let shapes = buildChordShapes(rootPc, def, voicing).filter(shapeInVoicingRange);
@@ -1838,11 +1824,11 @@
     }
 
     // Sonido (playNote)
-    function playNote(midi, duration = 1.5, gainScale = 1) {
+    function playNote(midi, duration = 1.5) {
       if (!soundEnabled) return null;
       const ctx = ensureCtx();
       if (!ctx) return null;
-      const vol = (parseFloat(volumeSlider.value) / 10) * gainScale;
+      const vol = parseFloat(volumeSlider.value) / 10;
       if (isNaN(vol) || vol <= 0) return null;
 
       if (sfPlayer) {
@@ -1955,7 +1941,7 @@
       const midiNow=activePitches()[cell.s]+physicalFret(cell.displayFret);
       if(tutorMode&&tutorExpectedKeys.size){
         const tutorKey=scoreCellKey({string:cell.s,fret:cell.displayFret,midi:midiNow});
-        playCourse(cell.s,cell.displayFret,1.1);
+        playNote(midiNow,1.1);
         if(tutorExpectedKeys.has(tutorKey)){
           tutorCompletedKeys.add(tutorKey);
           practiceStatus.textContent=`Correcto ${tutorCompletedKeys.size}/${tutorExpectedKeys.size}`;
@@ -1982,7 +1968,7 @@
         manualSelections.add(key);
         const pitches = activePitches();
         const midi = pitches[cell.s] + physicalFret(cell.displayFret);
-        playCourse(cell.s,cell.displayFret,1.8);
+        playNote(midi, 1.8);
       }
       draw();
     });
@@ -2022,7 +2008,7 @@
       const p=patternSel?.value||'free';
       if(p==='free') return true;
       if(p.startsWith('caged:')){
-        return true;
+        if(instrumentSel.value!=='guitar') return true;
         const shape=p.split(':')[1];
         const lowEpc=((activePitches()[5]%12)+12)%12;
         const rootF=((rootPc-lowEpc)%12+12)%12;
@@ -2254,10 +2240,8 @@
         const selectedNotes = [];
         manualSelections.forEach(key => {
           const [s, displayFret] = key.split('-').map(Number);
-          const voices=courseMidisAt(s,displayFret);
-          voices.forEach(midi=>{
-            if(!selectedNotes.some(n=>n.midi===midi)) selectedNotes.push({pc:((midi%12)+12)%12,midi});
-          });
+          const midi = pitches[s] + physicalFret(displayFret);
+          selectedNotes.push({ pc: midi % 12, midi });
         });
         currentNotes = selectedNotes;
         if(hoverCell){
@@ -2431,6 +2415,7 @@
 
 </script>
   <script>
+/* staff.js */
     // ======================================================================
     // 2. CÓDIGO DEL PENTAGRAMA (CORREGIDO)
     // ======================================================================
@@ -2460,21 +2445,23 @@
     }
 
 
-    const folkLiveStaff=new CrescendoLiveStaff(document.getElementById('staffSvg'));
-    let folkStaffNotes=[];
-    function drawBaseStaff(){renderStaffNotes(folkStaffNotes);}
+    const fretboardLiveStaff=new CrescendoLiveStaff(document.getElementById('staffSvg'));
+    let fretboardStaffNotes=[];
+    function drawBaseStaff(){renderStaffNotes(fretboardStaffNotes);}
     function renderStaffNotes(notes){
-      folkStaffNotes=notes||[];
-      const transpose=Number(activeInstrument().writtenTranspose||0);
-      const pitches=[...new Set(folkStaffNotes.map(n=>n.midi))].sort((a,b)=>a-b).map(midi=>{
+      fretboardStaffNotes=notes||[];
+      // Preserve the app's existing written-pitch convention without changing audio.
+      const transpose=['guitar','ukulele','requinto'].includes(instrumentSel.value)?12:0;
+      const pitches=[...new Set(fretboardStaffNotes.map(n=>n.midi))].sort((a,b)=>a-b).map(midi=>{
         const written=midi+transpose,spelling=staffSpelling(written);
         return {letter:spelling.letter,acc:spelling.acc==='#'?'sharp':spelling.acc==='b'?'flat':null,octave:Math.floor(written/12)-1};
       });
-      folkLiveStaff.update(pitches,'treble',currentKeySignatureCount());
+      fretboardLiveStaff.update(pitches,'treble',currentKeySignatureCount());
     }
 
 </script>
   <script>
+/* metronome.js */
     // ======================================================================
     // METRÓNOMO / PRÁCTICA SINCRONIZADA
     // ======================================================================
@@ -2498,6 +2485,7 @@
 
 </script>
   <script>
+/* score.js */
     // ======================================================================
     // 3. CÓDIGO DE CARGA DE PARTITURAS (PDF, MusicXML, Imagen, Web)
     // ======================================================================
@@ -2745,25 +2733,20 @@
     let tutorExpectedKeys = new Set();
     let tutorCompletedKeys = new Set();
 
-    function scoreCellKey(cell){ return `${cell.string}:${cell.fret}`; }
+    function scoreCellKey(cell){ return `${cell.string}:${cell.fret}:${cell.midi}`; }
     function stringDisplayNumber(stringIdx){ return stringIdx + 1; }
     function noteLabelFromMidi(midi){
       const n=spellPc(((midi%12)+12)%12,rootSel.value||'');
       return `${n}${Math.floor(midi/12)-1}`;
     }
     function allPositionsForMidi(midi){
-      const courses=activeCourseVoices();
+      const pitches=activePitches();
       const maxDisplay=Math.max(0,TOTAL_FRETS-capoSemitones());
       const out=[];
-      const seen=new Set();
-      for(let s=0;s<courses.length;s++){
-        for(const openMidi of courses[s]){
-          const fret=midi-openMidi-activeInstrument().nutFret;
-          const key=`${s}:${fret}`;
-          if(Number.isInteger(fret)&&fret>=0&&fret<=maxDisplay&&!seen.has(key)){
-            seen.add(key);
-            out.push({string:s,fret,midi,pc:((midi%12)+12)%12});
-          }
+      for(let s=0;s<pitches.length;s++){
+        const fret=midi-pitches[s]-activeInstrument().nutFret;
+        if(Number.isInteger(fret)&&fret>=0&&fret<=maxDisplay){
+          out.push({string:s,fret,midi,pc:((midi%12)+12)%12});
         }
       }
       return out;
@@ -2840,7 +2823,7 @@
     }
     function attachMusicXmlHintsToSteps(){
       if(!scoreSteps.length)return;
-      const octaveOffset=-(Number(activeInstrument?.().writtenTranspose||0));
+      const octaveOffset=SCORE_OCTAVE_OFFSET[instrumentSel.value]||0;
       let hi=0;
       for(const step of scoreSteps){
         step.technique={notes:[],labels:[]};
@@ -3243,17 +3226,16 @@
       clearScoreHighlight();
     }
 
-    // La transposición escrita se obtiene del instrumento activo
+    // Guitarra, ukelele y requinto se escriben habitualmente una octava por encima
     // de su altura sonora. MusicXML usa la altura escrita; el diapasón/audio usan la sonora.
     const SCORE_OCTAVE_OFFSET = { requinto: -12, guitar: -12, ukulele: -12 };
 
     function getCurrentStepData(tempo){
-      const stepSeconds=ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,tempo); const notes=[]; const midis=[]; const octaveOffset=-(Number(activeInstrument?.().writtenTranspose||0));
+      const stepSeconds=ScorePlaybackTiming.stepSeconds(osmd.cursor.Iterator,tempo); const notes=[]; const midis=[]; const octaveOffset=SCORE_OCTAVE_OFFSET[instrumentSel.value]||0;
       try{
         const entries=osmd.cursor.Iterator.CurrentVoiceEntries||[];
         entries.forEach(ve=>(ve.Notes||[]).forEach(note=>{
           if(!note||(note.isRest&&note.isRest())||note.Pitch==null)return;
-          const octaveOffset=-(Number(activeInstrument?.().writtenTranspose||0));
           const midi=note.Pitch.halfTone+12+octaveOffset;
           const lengthFraction=(note.Length&&typeof note.Length.RealValue==='number')?note.Length.RealValue:.25;
           const durSeconds=lengthFraction*4*(60/tempo);
@@ -3656,7 +3638,7 @@
     // Inicialización
     window.addEventListener('load', function() {
       const s=readSettings();
-      instrumentSel.value = (s.instrument&&INSTRUMENTS[s.instrument])?s.instrument:'tiple';
+      instrumentSel.value = (s.instrument&&INSTRUMENTS[s.instrument])?s.instrument:'requinto';
       updateTuningOptions(s.tuning||'');
       if(Number.isFinite(+s.capo))capoSel.value=String(Math.max(0,Math.min(12,+s.capo)));
       if(['right','left'].includes(s.orientation))orientationSel.value=s.orientation;
@@ -3700,6 +3682,10 @@
 }));
 
 </script>
+<script src="js/ukulele-chords.js"></script>
+<script src="js/ukulele-bank-ui.js"></script>
+<script src="js/guitar-chords.js"></script>
+<script src="js/guitar-bank-ui.js"></script>
 <script src="../shared/string-sound-menu.js?v=1"></script>
 </body>
 </html>
