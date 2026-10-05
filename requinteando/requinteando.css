@@ -3,8 +3,8 @@
 
 @media (min-width: 901px) {
   .requinteando-app .panel {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-columns: repeat(9, minmax(0, 1fr));
   }
-  .requinteando-app .panel > .field-key-signature { grid-column: 1; grid-row: 2; }
-  .requinteando-app .panel > .field-frets { grid-column: 2 / -1; grid-row: 2; }
+  .requinteando-app .panel > .field-key-signature { grid-column: 9; grid-row: 1; }
+  .requinteando-app .panel > .field-frets { grid-column: 1 / -1; grid-row: 2; }
 }

@@ -1159,7 +1159,7 @@
   .panel .sound-source-indicator{max-width:110px;overflow:hidden;text-overflow:ellipsis;}
 }
 
-@media (min-width:901px) and (max-width:1180px){
+@media (min-width:901px) and (max-width:1320px){
   .panel{
     grid-template-columns:1.03fr 1.04fr .96fr 1.13fr .86fr .72fr 1.20fr 1.00fr 1.06fr;
     gap:8px 6px;

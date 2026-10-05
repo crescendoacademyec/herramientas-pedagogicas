@@ -926,6 +926,7 @@
       <select id="metroPulse" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩</option><option value="eighth">♪</option><option value="dottedQuarter">♩.</option></select>
       <span class="metro-beat" id="metroBeat" aria-label="Metrónomo detenido">—</span>
     </div>
+    <button class="guitar-bank-menu" id="guitarBankMenu" type="button" aria-controls="guitarChordBank">Banco de acordes</button>
     <div class="social-bar">
       <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -3685,6 +3686,14 @@
 <script src="js/ukulele-bank-ui.js"></script>
 <script src="js/guitar-chords.js"></script>
 <script src="js/guitar-bank-ui.js"></script>
+<script>
+  document.getElementById('guitarBankMenu')?.addEventListener('click', () => {
+    const bank = document.getElementById('guitarChordBank');
+    if (!bank || bank.hidden) return;
+    bank.open = true;
+    bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+</script>
 <script src="../shared/string-sound-menu.js?v=20261005c"></script>
 </body>
 </html>
