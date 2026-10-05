@@ -77,6 +77,66 @@ body .course-template-levels :is(p,span,small) { color: var(--crescendo-muted); 
 body .course-template-levels :is(h2,h3,h4,b,strong,em) { color: var(--crescendo-gold); }
 body .course-template-levels button:not(.active) { background: rgba(0,0,0,.28); color: var(--crescendo-white); }
 body .course-template-levels button.active { color: #17130a; }
+body .course-template-levels .module-tab.active {
+  background: var(--crescendo-gold);
+  border-color: var(--crescendo-gold-light);
+  box-shadow: 0 6px 18px rgba(212,168,79,.22);
+}
+body .course-template-levels .module-tab.active :is(em,span,small) { color: #17130a; }
+
+body .topbar .main-nav {
+  width: 100%;
+  justify-content: center;
+}
+body .topbar .nav-btn { border-radius: 999px; }
+
+body .level-card.active {
+  background: var(--crescendo-gold);
+  border-color: var(--crescendo-gold-light);
+  color: #17130a;
+  box-shadow: 0 6px 18px rgba(212,168,79,.22);
+}
+body .level-card.active :is(.level-card-num,h4,p,.level-card-meta) { color: #17130a; }
+
+body .course-template-roadmap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 24px;
+  padding: 18px 22px;
+  border: 1px solid rgba(212,168,79,.4);
+  border-radius: 14px;
+  background: linear-gradient(100deg, rgba(212,168,79,.12), rgba(255,255,255,.025));
+}
+body .course-template-roadmap :is(h3,p) { margin: 0; }
+body .course-template-roadmap h3 { font-size: 1.12rem; }
+body .course-template-roadmap > p { max-width: 390px; color: var(--crescendo-muted); line-height: 1.5; }
+
+body.functional-course .hero {
+  grid-template-columns: 1.4fr 1fr;
+  gap: 24px;
+}
+body.functional-course .hero-copy,
+body.functional-course .overview-panel {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+body.functional-course .hero .hero-summary {
+  max-width: 760px;
+  color: var(--crescendo-white);
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+body.functional-course .stats-grid { padding: 20px; background: rgba(0,0,0,.28); }
+body.functional-course .stat { background: transparent; border: 0; }
+@media (max-width: 820px) {
+  body .course-template-roadmap { align-items: flex-start; flex-direction: column; }
+  body.functional-course .hero { grid-template-columns: 1fr; }
+}
 
 body > .suite-footer {
   margin-top: 0;

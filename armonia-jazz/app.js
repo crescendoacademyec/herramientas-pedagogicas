@@ -54,7 +54,7 @@
     LEVELS.forEach(function (lvl, idx) {
       var card = document.createElement("button");
       card.type = "button";
-      card.className = "level-card";
+      card.className = "level-card" + (idx === state.levelIndex ? " active" : "");
       card.innerHTML =
         '<span class="level-card-num">Nivel ' + lvl.id + '</span>' +
         '<h4>' + lvl.name + '</h4>' +
