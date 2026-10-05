@@ -297,3 +297,22 @@ body .legend .legend-item[aria-pressed="false"] {
 
 /* Partituras, teclas, diagramas y canvases conservan su papel didáctico propio. */
 .cp-staff, .staff, .score, canvas, svg { color: inherit; }
+
+/* Consistent affordance for the score-file action in every instrument viewer. */
+.pdf-controls > label[for="pdfUpload"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 8px;
+  background: rgba(255,255,255,.10);
+  transition: background-color .16s ease, color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.pdf-controls > label[for="pdfUpload"]:hover,
+.pdf-controls > label[for="pdfUpload"]:focus-within {
+  background: var(--gold, #dfb652) !important;
+  color: #17130c !important;
+  border-color: var(--gold, #dfb652) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .24);
+}

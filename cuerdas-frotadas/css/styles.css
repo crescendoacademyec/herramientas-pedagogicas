@@ -1243,7 +1243,7 @@
   }
 }
 
-@media (min-width:901px) and (max-width:1180px){
+@media (min-width:901px) and (max-width:1600px){
   .panel{
     grid-template-columns:repeat(5,minmax(0,1fr));
     column-gap:7px;
