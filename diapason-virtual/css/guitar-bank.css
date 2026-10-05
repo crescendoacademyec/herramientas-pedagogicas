@@ -5,8 +5,8 @@
 :is(#guitarChordBank,#requintoChordBank) summary { cursor:pointer; font-weight:700; color:#e4ba61; padding:6px; }
 :is(#guitarChordBank,#requintoChordBank):not([open]) { padding:0; border:0; background:transparent; }
 :is(#guitarChordBank,#requintoChordBank):not([open]) summary { display:none; }
-:is(#guitarChordBank,#requintoChordBank):not([open]) summary { display:inline-flex; align-items:center; min-height:38px; padding:0 14px; border:1px solid rgba(228,186,97,.46); border-radius:9px; background:#24211b; color:#f1c76e; }
 :is(#guitarChordBank,#requintoChordBank):not([open]) summary:hover { background:#302a1d; border-color:#e4ba61; }
+.guitar-bank-menu.is-open { background:#d4a84f; border-color:#e7c36d; color:#1b160b; }
 :is(#guitarChordBank,#requintoChordBank) p { line-height:1.5; }
 :is(#guitarChordBank,#requintoChordBank) .guitar-filters { display:flex; flex-wrap:wrap; align-items:end; gap:12px; margin:14px 0; }
 :is(#guitarChordBank,#requintoChordBank) label { display:grid; gap:5px; }

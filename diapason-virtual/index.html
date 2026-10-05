@@ -3687,11 +3687,18 @@
 <script src="js/guitar-chords.js"></script>
 <script src="js/guitar-bank-ui.js"></script>
 <script>
-  document.getElementById('guitarBankMenu')?.addEventListener('click', () => {
+  const guitarBankMenu = document.getElementById('guitarBankMenu');
+  guitarBankMenu?.addEventListener('click', () => {
     const bank = document.getElementById('guitarChordBank');
     if (!bank || bank.hidden) return;
-    bank.open = true;
-    bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    bank.open = !bank.open;
+    guitarBankMenu.classList.toggle('is-open', bank.open);
+    guitarBankMenu.setAttribute('aria-expanded', String(bank.open));
+    if (bank.open) bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('guitarChordBank')?.addEventListener('toggle', event => {
+    guitarBankMenu?.classList.toggle('is-open', event.currentTarget.open);
+    guitarBankMenu?.setAttribute('aria-expanded', String(event.currentTarget.open));
   });
 </script>
 <script src="../shared/string-sound-menu.js?v=20261005c"></script>

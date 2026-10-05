@@ -1119,10 +1119,10 @@
 
   /* Referencia visual de mano izquierda / mano derecha (split en Do central) — independientes */
   #keyboard.show-hand-left .white-key.hand-left{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
   #keyboard.show-hand-right .white-key.hand-right{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
   #keyboard.show-hand-left .black-key.hand-left{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-left-color) 55%, var(--black-key)) 60%, #000 100%);
