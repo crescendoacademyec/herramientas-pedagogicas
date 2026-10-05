@@ -1436,3 +1436,7 @@
   color: #17120a;
   text-shadow: none;
 }
+
+/* El color elegido gobierna toda tecla presionada, incluso con guías o partituras activas. */
+#keyboard .white-key.active { background: color-mix(in srgb, var(--active-color) 58%, white) !important; box-shadow: 0 0 12px var(--active-color) !important; }
+#keyboard .black-key.active { background: color-mix(in srgb, var(--active-color) 72%, black) !important; box-shadow: 0 0 12px var(--active-color) !important; }

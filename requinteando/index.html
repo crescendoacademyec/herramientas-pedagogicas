@@ -1087,6 +1087,7 @@
         <div class="fret-control-row">
           <button id="clearAllBtn" type="button">Limpiar ajustes</button>
           <button id="clearSelectionBtn" type="button">Limpiar trastes</button>
+          <button class="guitar-bank-menu" id="requintoBankMenu" type="button" aria-controls="requintoChordBank" aria-expanded="false">Banco de acordes</button>
           <div id="chordNameBox">
             <span id="chordSymbol"></span>
             <span id="chordQualityLabel"></span>
@@ -3686,6 +3687,21 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
 <script src="js/ukulele-bank-ui.js"></script>
 <script src="js/guitar-chords.js"></script>
 <script src="js/guitar-bank-ui.js"></script>
+<script>
+  const requintoBankMenu = document.getElementById('requintoBankMenu');
+  requintoBankMenu?.addEventListener('click', () => {
+    const bank = document.getElementById('requintoChordBank');
+    if (!bank || bank.hidden) return;
+    bank.open = !bank.open;
+    requintoBankMenu.classList.toggle('is-open', bank.open);
+    requintoBankMenu.setAttribute('aria-expanded', String(bank.open));
+    if (bank.open) bank.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.getElementById('requintoChordBank')?.addEventListener('toggle', event => {
+    requintoBankMenu?.classList.toggle('is-open', event.currentTarget.open);
+    requintoBankMenu?.setAttribute('aria-expanded', String(event.currentTarget.open));
+  });
+</script>
 <script src="../shared/string-sound-menu.js?v=20261005c"></script>
 </body>
 </html>
