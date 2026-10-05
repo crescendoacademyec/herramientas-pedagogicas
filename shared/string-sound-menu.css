@@ -1,5 +1,6 @@
 .field[hidden] { display: none !important; }
 .sound-source-indicator[hidden] { display: none !important; }
+.sound-controls .sound-source-indicator { display: none !important; }
 .string-sound-menu { position: relative; display: inline-flex; z-index: 12; }
 .string-sound-trigger {
   display: inline-flex;
@@ -23,6 +24,12 @@
   color: #fff;
   box-shadow: 0 4px 16px rgba(28, 77, 53, .35);
 }
+.string-sound-menu[data-state="loading"] .string-sound-trigger { background: rgba(181, 137, 39, .88); border-color: #f3ce67; color: #17130a; }
+.string-sound-menu[data-state="loading"] .string-sound-label,
+.string-sound-menu[data-state="loading"] .string-sound-chevron { color: #4e3908; }
+.string-sound-menu[data-state="error"] .string-sound-trigger { background: rgba(137, 56, 49, .92); border-color: #ef9489; color: #fff5f2; }
+.string-sound-menu[data-state="error"] .string-sound-label,
+.string-sound-menu[data-state="error"] .string-sound-chevron { color: #ffd4ce; }
 .string-sound-label {
   color: #c7ebd4;
   font-size: .62rem;

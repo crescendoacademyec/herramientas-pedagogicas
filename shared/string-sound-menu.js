@@ -17,7 +17,17 @@
     const value = menu.querySelector('.string-sound-value');
     const list = menu.querySelector('.string-sound-options');
     const source = controls.querySelector('.sound-source-indicator');
-    if (source) source.hidden = true;
+    const setState = () => {
+      const state = source?.classList.contains('loading') ? 'loading'
+        : source?.classList.contains('osc') ? 'error' : 'ready';
+      menu.dataset.state = state;
+    };
+    if (source) {
+      source.hidden = true;
+      source.setAttribute('aria-hidden', 'true');
+      source.style.setProperty('display', 'none', 'important');
+      new MutationObserver(setState).observe(source, { attributes: true, attributeFilter: ['class'] });
+    }
 
     const selectedLabel = () => {
       const option = select.options[select.selectedIndex];
@@ -67,6 +77,7 @@
     document.getElementById('instrument')?.addEventListener('change', () => window.setTimeout(render, 0));
     new MutationObserver(render).observe(select, { childList: true, subtree: true });
     render();
+    setState();
   }
 
   if (document.readyState === 'complete') initStringSoundMenu();

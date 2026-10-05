@@ -1,2 +1,6 @@
 /* Requinteando concentra el estudio en el instrumento, el material y el sonido. */
 .requinteando-app .requinteando-hidden-control { display: none !important; }
+
+@media (min-width: 901px) {
+  .requinteando-app .field-key-signature { grid-column: 7; grid-row: 1; }
+}
