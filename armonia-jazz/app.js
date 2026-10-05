@@ -207,8 +207,10 @@
     document.getElementById("questionCount").textContent = lvl.quiz.length;
     var subtitleEl = document.getElementById("levelSubtitle");
     var subtitleText = "Nivel " + lvl.id + " · " + lvl.name + " — " + lvl.subtitle;
-    subtitleEl.textContent = subtitleText;
-    subtitleEl.title = subtitleText;
+    if (subtitleEl) {
+      subtitleEl.textContent = subtitleText;
+      subtitleEl.title = subtitleText;
+    }
     renderLevelsOverview();
   }
 

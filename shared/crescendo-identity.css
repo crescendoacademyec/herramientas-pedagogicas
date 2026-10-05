@@ -50,9 +50,33 @@ body .site-header .cr-brand {
   font-weight: 900;
 }
 
-/* Los cursos conservan su barra de herramientas; el nombre institucional no se
-   repite antes del título de la herramienta. */
-body .ca-site-header .ca-brand { display: none; }
+/* Los cursos usan el mismo título principal que el resto de la suite. */
+body .ca-site-header .ca-brand {
+  color: var(--crescendo-gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+body .topbar-inner { justify-content: flex-end; }
+
+/* Las páginas de curso trabajaban con una variable de tinta oscura que reduce
+   el contraste sobre el fondo negro. */
+body :is(.topbar, .view, .panel, .levels-overview, .overview-panel, .level-card) {
+  --ink: var(--crescendo-white);
+}
+
+/* Plantilla de portada para los tres cursos: unidad activa, mapa y niveles. */
+body .course-template-levels {
+  margin-top: 28px;
+  padding: clamp(18px, 3vw, 26px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  background: rgba(0,0,0,.18);
+}
+body .course-template-levels :is(p,span,small) { color: var(--crescendo-muted); }
+body .course-template-levels :is(h2,h3,h4,b,strong,em) { color: var(--crescendo-gold); }
+body .course-template-levels button:not(.active) { background: rgba(0,0,0,.28); color: var(--crescendo-white); }
+body .course-template-levels button.active { color: #17130a; }
 
 body > .suite-footer {
   margin-top: 0;
