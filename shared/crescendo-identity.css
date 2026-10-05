@@ -82,7 +82,7 @@ body .course-template-levels .module-tab.active {
   border-color: var(--crescendo-gold-light);
   box-shadow: 0 6px 18px rgba(212,168,79,.22);
 }
-body .course-template-levels .module-tab.active :is(em,span,small) { color: #17130a; }
+body .course-template-levels .module-tab.active :is(em,span,small) { color: #17130a !important; }
 
 body .topbar .main-nav {
   width: 100%;
