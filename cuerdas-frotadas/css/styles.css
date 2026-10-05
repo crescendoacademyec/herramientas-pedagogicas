@@ -60,16 +60,12 @@
     .topbar .brand {
       align-items: center;
       display: flex;
-      gap: 10px;
-      min-width: 0;
+      gap: 12px;
       margin: 0;
-      color: var(--text);
+      color: var(--gold);
       font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(1.28rem, 2.1vw, 1.72rem);
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
+      font-size: 1.7rem;
+      font-weight: 900;
     }
 
     .topbar .brand span { display: block; }
