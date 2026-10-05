@@ -1416,20 +1416,20 @@
 #keyboard .active.score-note-left,
 #keyboard.show-hand-left .hand-left.active.score-note-left,
 #keyboard.show-hand-right .hand-right.active.score-note-left {
-  background: linear-gradient(#46e1ef, #078da5);
-  box-shadow: 0 0 18px #27bed2;
+  background: linear-gradient(color-mix(in srgb, var(--active-color) 72%, white), var(--active-color));
+  box-shadow: 0 0 18px var(--active-color);
 }
 #keyboard .active.score-note-right,
 #keyboard.show-hand-left .hand-left.active.score-note-right,
 #keyboard.show-hand-right .hand-right.active.score-note-right {
-  background: linear-gradient(#ffeaa8, #dfad46);
-  box-shadow: 0 0 18px #dfad46;
+  background: linear-gradient(color-mix(in srgb, var(--active-color) 72%, white), var(--active-color));
+  box-shadow: 0 0 18px var(--active-color);
 }
 #keyboard .active.score-note-left.score-note-right,
 #keyboard.show-hand-left .hand-left.active.score-note-left.score-note-right,
 #keyboard.show-hand-right .hand-right.active.score-note-left.score-note-right {
-  background: linear-gradient(90deg, #27bed2 0 50%, #dfad46 50% 100%);
-  box-shadow: -4px 0 12px #27bed2, 4px 0 12px #dfad46;
+  background: linear-gradient(color-mix(in srgb, var(--active-color) 72%, white), var(--active-color));
+  box-shadow: 0 0 18px var(--active-color);
 }
 #keyboard .active.score-note-left .label,
 #keyboard .active.score-note-right .label {
