@@ -468,6 +468,8 @@
 @font-face { font-family: "MTF Improviso"; src: url("./assets/fonts/MTF-Improviso.otf") format("opentype"); font-display: swap; }</style></defs><!-- ... contenido SVG enorme ... --></svg></div></div>
   </main>
 
+  <footer class="site-footer suite-footer">Crescendo Academy · &copy; <span id="footerYear"></span>. Todos los derechos reservados.</footer>
+
   <div id="canvasTooltip" class="canvasTooltip" style="left: 631.705px; top: 148.794px;">Título</div>
   <input id="inlineEditor" class="inlineEditor hidden" type="text">
   <div id="degreeSuggestionMenu" class="degreeSuggestionMenu hidden"></div>
@@ -475,6 +477,7 @@
   <textarea id="inlineTextarea" class="inlineTextarea hidden"></textarea>
 
   <script src="js/web-mode.js"></script>
+  <script>document.getElementById('footerYear').textContent = new Date().getFullYear();</script>
   <script src="js/tonal-analysis.js"></script>
   <script src="js/reharmonization.js"></script>
   <script src="js/app.js"></script>

@@ -49,7 +49,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><div class="brand-mark">CA</div><div class="brand-copy"><strong>Mi Crescendo</strong><span>Registro Académico</span></div></div>
+  <div class="brand">Mi Crescendo</div>
   <div class="top-actions">
     <div class="header-social">
       <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
@@ -71,7 +71,6 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
 <main class="app">
 <section class="hero" id="loginView">
   <div class="hero-copy">
-    <span class="eyebrow">Crescendo Academy</span>
     <h1>Una historia clara de cada <em>proceso musical.</em></h1>
     <p>Clases, tareas, repertorio, objetivos y recursos en un mismo lugar. El alumno ve exactamente qué trabajar; el profesor conserva un registro ordenado y útil de cada proceso.</p>
     <div class="feature-row"><span class="feature-chip">Historial de clases</span><span class="feature-chip">Tareas y seguimiento</span><span class="feature-chip">Repertorio</span><span class="feature-chip">Objetivos</span><span class="feature-chip">Recursos</span></div>
@@ -120,12 +119,15 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit}
 </section>
 </main>
 
+<footer class="site-footer suite-footer">Crescendo Academy · &copy; <span id="footerYear"></span>. Todos los derechos reservados.</footer>
+
 <div class="modal-backdrop hidden" id="modalBackdrop" role="presentation"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-head"><h3 id="modalTitle">Formulario</h3><button class="modal-close" id="modalClose" type="button" aria-label="Cerrar">×</button></div><div id="modalBody"></div></div></div>
 <div class="toast hidden" id="toast" aria-live="polite"></div>
 
 <script>
 (() => {
 'use strict';
+document.getElementById('footerYear').textContent = new Date().getFullYear();
 // PRODUCCIÓN: pega aquí la URL /exec de la implementación de Google Apps Script.
 const API_URL = 'https://script.google.com/macros/s/AKfycbzvD7jppmjgC10trOmZZ31Vmudr63zoZ7mWfNc_4SeE9MKMFNu-r4-81qXlBa3qNLsBQg/exec';
 const $ = (s,root=document)=>root.querySelector(s);

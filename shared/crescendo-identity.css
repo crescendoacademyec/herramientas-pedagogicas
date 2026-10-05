@@ -31,6 +31,50 @@ body :is(h1,h2,h3,h4,h5,h6,.title,.page-title,.section-title,.eyebrow,.kicker) {
   color: var(--crescendo-gold);
 }
 
+/* El título de cada herramienta vive una sola vez en su encabezado. */
+body :is(.site-header > .brand, .topbar .brand) {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  color: var(--crescendo-gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+body .site-header .cr-brand {
+  color: var(--crescendo-gold);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.7rem;
+  font-weight: 900;
+}
+
+/* Los cursos conservan su barra de herramientas; el nombre institucional no se
+   repite antes del título de la herramienta. */
+body .ca-site-header .ca-brand { display: none; }
+
+body > .suite-footer {
+  margin-top: 0;
+  padding: 22px clamp(18px, 4vw, 56px);
+  border-top: 1px solid rgba(255,255,255,.1);
+  background: rgba(18,17,15,.9);
+  color: var(--crescendo-muted);
+  font-size: .78rem;
+  text-align: center;
+}
+
+body :is(.site-footer, .ca-site-footer) {
+  display: block;
+  margin-top: 40px;
+  padding: 22px clamp(18px, 4vw, 56px);
+  border-top: 1px solid rgba(255,255,255,.1);
+  background: rgba(18,17,15,.9);
+  color: var(--crescendo-muted);
+  font-size: .78rem;
+  text-align: center;
+}
+
 body :is(p,li,td,th,label,legend,.subtitle,.description,.muted) { color: inherit; }
 
 button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"] {

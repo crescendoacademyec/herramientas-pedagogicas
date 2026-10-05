@@ -240,7 +240,10 @@
 
 </div>
 
+<footer class="site-footer suite-footer">Crescendo Academy · &copy; <span id="footerYear"></span>. Todos los derechos reservados.</footer>
+
 <script>
+document.getElementById('footerYear').textContent = new Date().getFullYear();
 const RANGES = { B:[1,15], I:[16,30], N:[31,45], G:[46,60], O:[61,75] };
 const COL_KEYS = ['B','I','N','G','O'];
 const PATTERN_ORDER = ['B','I','N','G','O','FULL'];
