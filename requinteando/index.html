@@ -3635,7 +3635,7 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       renderStaffNotes([]);
     });
 
-    // Inicialización
+    // Inicialización de instrumentos
     window.addEventListener('load', function() {
       const s=readSettings();
       instrumentSel.value = (s.instrument&&INSTRUMENTS[s.instrument])?s.instrument:'requinto';
