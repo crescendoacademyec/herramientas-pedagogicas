@@ -88,16 +88,16 @@ body .topbar .main-nav {
   width: 100%;
   justify-content: center;
 }
-body :is(.jazz-course, .functional-course, .theory-course) {
+body:is(.jazz-course, .functional-course, .theory-course) {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
 }
-body :is(.jazz-course, .functional-course, .theory-course) :is(h1,h2,h3,h4,h5,h6,.lesson-title) {
+body:is(.jazz-course, .functional-course, .theory-course) :is(h1,h2,h3,h4,h5,h6,.lesson-title) {
   font-family: Georgia, "Times New Roman", serif;
 }
 
 /* Navegación común: Armonía Jazz es la referencia de tamaño y ritmo. */
-body :is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn {
+body:is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn {
   min-height: 0;
   padding: 9px 16px;
   border: 1px solid var(--line);
@@ -109,13 +109,13 @@ body :is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn {
   font-weight: 700;
   line-height: 1.2;
 }
-body :is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn:hover {
+body:is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn:hover {
   border-color: var(--crescendo-gold);
   background: transparent;
   color: var(--crescendo-white);
   box-shadow: none;
 }
-body :is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn.active {
+body:is(.jazz-course, .functional-course, .theory-course) .topbar .nav-btn.active {
   border-color: var(--crescendo-gold);
   background: var(--crescendo-gold);
   color: #17130a;
