@@ -1,4 +1,5 @@
 .field[hidden] { display: none !important; }
+.sound-source-indicator[hidden] { display: none !important; }
 .string-sound-menu { position: relative; display: inline-flex; z-index: 12; }
 .string-sound-trigger {
   display: inline-flex;
