@@ -1505,7 +1505,7 @@
     const SETTINGS_KEY = 'requinteando_settings_v1';
     function readSettings(){
       try{
-        return JSON.parse(localStorage.getItem(SETTINGS_KEY)||localStorage.getItem('diapasonVirtual_settings_v4')||localStorage.getItem('diapasonVirtual_settings_v3')||'{}');
+return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       }catch(e){return{}}
     }
     function saveSettings(){
