@@ -27,3 +27,9 @@ Esta versión parte de la Fase 5 y aplica una revisión musical, responsive y es
 
 ## Publicación
 Sube `index.html`, `css/`, `js/` y cualquier recurso adicional que ya use tu repositorio. La versión `diapason-virtual-standalone.html` se incluye para pruebas/archivo.
+
+## MusicXML con tablatura del autor
+
+Al cargar un archivo `.musicxml` o `.xml`, Requinteando lee las marcas técnicas de cada nota: cuerda (`technical/string`), traste (`technical/fret`) y dedo (`technical/fingering`). Con **Digitación → Tablatura del autor**, el diapasón resalta esas posiciones exactas durante la reproducción.
+
+La posición se valida contra el instrumento, afinación y capo elegidos. Si una nota no trae tablatura, o si los datos no coinciden con la configuración, la app muestra una digitación automática solo para esa nota e indica el motivo. Los archivos `.mxl` siguen reproduciéndose y se visualizan, pero usan la digitación automática porque el contenedor comprimido no expone aún sus anotaciones técnicas al lector.

@@ -913,7 +913,7 @@
 </style>
 <link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
 <link rel="stylesheet" href="../shared/string-sound-menu.css?v=20261005c">
-<link rel="stylesheet" href="requinteando.css?v=20261005-control-order">
+<link rel="stylesheet" href="requinteando.css?v=20261005-musicxml-tab">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261005-instrument-ui">
 </head>
 <body class="requinteando-app">
@@ -1143,9 +1143,10 @@
                 <option value="16">16 eventos</option>
               </select>
             </label>
-            <label>Interpretación
-              <select id="scoreTechniqueMode">
-                <option value="musical" selected>Musical</option>
+            <label>Digitación
+              <select id="scoreTechniqueMode" title="Prioriza la tablatura escrita por el autor cuando esté disponible">
+                <option value="source" selected>Tablatura del autor</option>
+                <option value="musical">Musical (automática)</option>
                 <option value="neutral">Geométrica</option>
               </select>
             </label>
@@ -1510,7 +1511,7 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       }catch(e){return{}}
     }
     function saveSettings(){
-      try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({instrument:instrumentSel.value,tuning:tuningSel.value,capo:+capoSel.value,orientation:orientationSel.value,labelMode:labelModeSel.value,keySignature:keySignatureSel?.value||'none',pattern:patternSel.value,voicingRange:voicingRangeSel.value,root:rootSel.value,chord:chordTypeSel.value,scale:scaleSel.value,pos:posSel.value,frets:visibleFrets,volume:+volumeSlider.value,soundType:soundTypeSel.value,metroBpm:+($("metroBpmValue")?.textContent||80),metroMeter:$("metroMeter")?.value||'4/4',metroPulse:$("metroPulse")?.value||'auto',countIn:$("scoreCountIn")?.value||'1',scoreClick:!!$("scoreMetroSync")?.checked,loopRepeats:+($("scoreLoopRepeats")?.value||0),loopBpmAdd:+($("scoreLoopBpmAdd")?.value||0),loopBpmEvery:+($("scoreLoopBpmEvery")?.value||1),fingeringView:scoreFingeringView?.value||'all',fingeringStrategy:scoreFingeringStrategy?.value||'phrase',phraseLength:+(scorePhraseLength?.value||8),techniqueMode:scoreTechniqueMode?.value||'musical'}))}catch(e){}
+      try{localStorage.setItem(SETTINGS_KEY,JSON.stringify({instrument:instrumentSel.value,tuning:tuningSel.value,capo:+capoSel.value,orientation:orientationSel.value,labelMode:labelModeSel.value,keySignature:keySignatureSel?.value||'none',pattern:patternSel.value,voicingRange:voicingRangeSel.value,root:rootSel.value,chord:chordTypeSel.value,scale:scaleSel.value,pos:posSel.value,frets:visibleFrets,volume:+volumeSlider.value,soundType:soundTypeSel.value,metroBpm:+($("metroBpmValue")?.textContent||80),metroMeter:$("metroMeter")?.value||'4/4',metroPulse:$("metroPulse")?.value||'auto',countIn:$("scoreCountIn")?.value||'1',scoreClick:!!$("scoreMetroSync")?.checked,loopRepeats:+($("scoreLoopRepeats")?.value||0),loopBpmAdd:+($("scoreLoopBpmAdd")?.value||0),loopBpmEvery:+($("scoreLoopBpmEvery")?.value||1),fingeringView:scoreFingeringView?.value||'all',fingeringStrategy:scoreFingeringStrategy?.value||'phrase',phraseLength:+(scorePhraseLength?.value||8),techniqueMode:scoreTechniqueMode?.value||'source'}))}catch(e){}
     }
 
     // Poblar selects
@@ -3059,7 +3060,7 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       return Math.min(scoreSteps.length-1,Math.max(0,currentStepIndex));
     }
 
-    function recommendFingering(midis){
+    function automaticFingering(midis){
       if(scoreFingeringStrategy?.value==='phrase'&&phrasePlanReady){
         const idx=currentPlanIndex();
         const plan=phrasePlan[idx];
@@ -3071,9 +3072,50 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       return states[0]?.cells||[];
     }
 
+    // MusicXML numera la cuerda 1 como la más aguda. El diapasón usa ese mismo orden.
+    // Una posición se acepta solo si cuerda, traste y altura escrita coinciden con la afinación/capo actuales.
+    function authoredTablatureFingering(midis){
+      const technique=techniqueForCurrent();
+      const notes=Array.isArray(technique?.notes)?technique.notes:[];
+      const requested=new Map();
+      midis.forEach(m=>requested.set(m,(requested.get(m)||0)+1));
+      const cells=[], rejected=[];
+      const maxDisplay=Math.max(0,TOTAL_FRETS-capoSemitones());
+      for(const hint of notes){
+        if(!hint.technicalString||hint.technicalFret==null) continue;
+        const string=hint.technicalString-1;
+        const fret=Number(hint.technicalFret);
+        const count=requested.get(hint.midi)||0;
+        if(!Number.isInteger(string)||string<0||string>=activePitches().length||!Number.isInteger(fret)||fret<0||fret>maxDisplay){
+          rejected.push(hint); continue;
+        }
+        const expectedMidi=activePitches()[string]+physicalFret(fret);
+        if(!count||expectedMidi!==hint.midi||cells.some(c=>c.string===string&&c.fret===fret)){
+          rejected.push(hint); continue;
+        }
+        cells.push({string,fret,midi:hint.midi,pc:((hint.midi%12)+12)%12,finger:hint.technicalFinger||null,authored:true});
+        requested.set(hint.midi,count-1);
+      }
+      const unresolved=[];
+      requested.forEach((count,midi)=>{for(let i=0;i<count;i++)unresolved.push(midi);});
+      return {cells, unresolved, rejected, available:notes.some(n=>n.technicalString&&n.technicalFret!=null)};
+    }
+
+    function resolveScoreFingering(midis){
+      const authored=authoredTablatureFingering(midis);
+      if(scoreTechniqueMode?.value==='source'&&authored.cells.length){
+        // Conserva la digitación editorial y calcula solo lo que no vino tabulado.
+        const occupied=new Set(authored.cells.map(c=>`${c.string}:${c.fret}`));
+        const fallback=automaticFingering(authored.unresolved).filter(c=>!occupied.has(`${c.string}:${c.fret}`));
+        return {cells:[...authored.cells,...fallback], authoredCount:authored.cells.length, rejectedCount:authored.rejected.length, available:authored.available};
+      }
+      return {cells:automaticFingering(midis), authoredCount:0, rejectedCount:authored.rejected.length, available:authored.available};
+    }
+
     function updateFingeringForMidis(midis,{remember=true}={}){
       scoreCandidateCells=[...new Set(midis)].flatMap(allPositionsForMidi);
-      scoreRecommendedCells=recommendFingering(midis);
+      const resolved=resolveScoreFingering(midis);
+      scoreRecommendedCells=resolved.cells;
       if(remember&&scoreRecommendedCells.length) previousRecommendedCells=scoreRecommendedCells.map(c=>({...c}));
       if(tutorMode){
         tutorExpectedKeys=new Set(scoreRecommendedCells.map(scoreCellKey));
@@ -3096,7 +3138,12 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
             const labels=[...(tech.labels||[])];
             const plan=phrasePlan[currentPlanIndex()];
             if(plan?.annotations)labels.push(...plan.annotations.filter(x=>/guía|cejilla|cambio/.test(x)));
-            techniqueDetail.textContent=labels.length?`Técnica: ${[...new Set(labels)].join(' · ')}`:'Técnica: digitación automática · sin articulación especial';
+            if(resolved.authoredCount){
+              const fallback=scoreRecommendedCells.length-resolved.authoredCount;
+              techniqueDetail.textContent=`Tablatura del autor · ${resolved.authoredCount} posición${resolved.authoredCount===1?'':'es'} exacta${resolved.authoredCount===1?'':'s'}${fallback?` · ${fallback} calculada${fallback===1?'':'s'}`:''}${resolved.rejectedCount?' · revisa afinación/capo':''}`;
+            }else if(resolved.available&&scoreTechniqueMode?.value==='source'){
+              techniqueDetail.textContent='Tablatura incompatible con la afinación o capo actuales · se usa digitación automática';
+            }else techniqueDetail.textContent=labels.length?`Técnica: ${[...new Set(labels)].join(' · ')}`:'Técnica: digitación automática · sin articulación especial';
           }
         }else fingeringDetail.textContent='No hay una posición tocable dentro del rango actual del instrumento.';
       }
@@ -3660,7 +3707,7 @@ return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
       if(scoreFingeringView&&s.fingeringView)scoreFingeringView.value=s.fingeringView;
       if(scoreFingeringStrategy&&s.fingeringStrategy)scoreFingeringStrategy.value=s.fingeringStrategy; else if(scoreFingeringStrategy)scoreFingeringStrategy.value='phrase';
       if(scorePhraseLength&&s.phraseLength)scorePhraseLength.value=String(s.phraseLength);
-      if(scoreTechniqueMode&&s.techniqueMode)scoreTechniqueMode.value=s.techniqueMode;
+      if(scoreTechniqueMode){const savedMode=s.techniqueMode;scoreTechniqueMode.value=(savedMode==='source'||savedMode==='neutral')?savedMode:'source';}
       refresh();
       drawBaseStaff();
       renderStaffNotes([]);
