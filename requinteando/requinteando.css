@@ -2,5 +2,11 @@
 .requinteando-app .requinteando-hidden-control { display: none !important; }
 
 @media (min-width: 901px) {
-  .requinteando-app .field-key-signature { grid-column: 7; grid-row: 1; }
+  .requinteando-app .panel {
+    grid-template-columns: minmax(0, 360px);
+    justify-content: start;
+  }
+  .requinteando-app .panel > .field,
+  .requinteando-app .panel > .field-key-signature,
+  .requinteando-app .panel > .field-frets { grid-column: 1; grid-row: auto; }
 }

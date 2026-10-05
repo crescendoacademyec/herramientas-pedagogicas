@@ -1152,7 +1152,9 @@
     justify-content:flex-end;
     white-space:nowrap;
     gap:5px;
+    padding-right:12px;
   }
+  .panel #muteBtn{margin-right:4px;}
   .panel #volume{width:64px;}
   .panel .sound-source-indicator{max-width:110px;overflow:hidden;text-overflow:ellipsis;}
 }
