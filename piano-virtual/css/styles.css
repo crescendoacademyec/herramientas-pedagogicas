@@ -444,6 +444,8 @@
     font-weight: 600;
   }
   .hand-btn svg{ width:19px; height:19px; display:block; }
+  #handLeftBtn svg{color:var(--hand-left-color);}
+  #handRightBtn svg{color:var(--hand-right-color);}
   .hand-icon-mirror{ transform: scaleX(-1); }
   .hand-btn:hover{ border-color: rgba(255,255,255,0.3); color:var(--text); }
   .hand-zone-btn{
@@ -479,8 +481,8 @@
     color:var(--muted);
     box-shadow:none;
   }
-  #handLeftBtn.active svg{color:var(--hand-left-color);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-left-color) 60%,transparent));}
-  #handRightBtn.active svg{color:var(--hand-right-color);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-right-color) 60%,transparent));}
+  #handLeftBtn.active svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-left-color) 60%,transparent));}
+  #handRightBtn.active svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-right-color) 60%,transparent));}
 
   /* Grupo de "rango de práctica" — eliminado (ver /areas/crescendo-web-tools.md si se retoma más adelante) */
   input[type=color]{
