@@ -10,7 +10,7 @@
     const menu = document.createElement('div');
     menu.className = 'string-sound-menu';
     menu.id = 'stringSoundMenu';
-    menu.innerHTML = '<button type="button" class="string-sound-trigger" aria-haspopup="listbox" aria-expanded="false" title="Cambiar sonido"><span class="string-sound-label">Sonido</span><span class="string-sound-value"></span><span class="string-sound-chevron" aria-hidden="true">▾</span></button><div class="string-sound-options" role="listbox" hidden></div>';
+    menu.innerHTML = '<button type="button" class="string-sound-trigger" aria-haspopup="listbox" aria-expanded="false" title="Cambiar sonido"><span class="string-sound-value"></span><span class="string-sound-chevron" aria-hidden="true">▾</span></button><div class="string-sound-options" role="listbox" hidden></div>';
     controls.insertBefore(menu, controls.querySelector('.sound-source-indicator') || null);
 
     const trigger = menu.querySelector('.string-sound-trigger');
