@@ -1209,6 +1209,10 @@
           </optgroup>
           <optgroup label="Progresiones de acordes">
             <option value="progression-251">Progresión · ii–V–I mayor</option>
+            <option value="progression-251-minor">Progresión · ii–V–i menor</option>
+            <option value="progression-1645">Progresión · I–vi–IV–V mayor</option>
+            <option value="progression-1564">Progresión · I–V–vi–IV mayor</option>
+            <option value="progression-minor-16437">Progresión · i–VI–III–VII menor</option>
             <option value="progression-blues">Progresión · blues de 12 compases</option>
           </optgroup>
         </select>
@@ -2374,9 +2378,18 @@
       });
     }
     function walkingTargets(kind){
-      const tonic=NOTE.indexOf(rootSel.value),bars=kind==='walking-blues'?[0,0,0,0,5,5,0,0,7,5,0,7]:[2,7,0];
-      const qualities=kind==='walking-blues'?bars.map(()=>[0,4,7,10]):[[0,3,7,10],[0,4,7,10],[0,4,7,11]];
-      const romans=kind==='walking-blues'?bars.map(x=>x===0?'I7':x===5?'IV7':'V7'):['ii7','V7','Imaj7'];
+      const tonic=NOTE.indexOf(rootSel.value);
+      const presets={
+        'walking-blues':{bars:[0,0,0,0,5,5,0,0,7,5,0,7],qualities:null,romans:null},
+        'walking-251':{bars:[2,7,0],qualities:[[0,3,7,10],[0,4,7,10],[0,4,7,11]],romans:['ii7','V7','Imaj7']},
+        'walking-251-minor':{bars:[2,7,0],qualities:[[0,3,6,10],[0,4,7,10],[0,3,7,10]],romans:['iiø7','V7','im7']},
+        'walking-1645':{bars:[0,9,5,7],qualities:[[0,4,7],[0,3,7],[0,4,7],[0,4,7]],romans:['I','vi','IV','V']},
+        'walking-1564':{bars:[0,7,9,5],qualities:[[0,4,7],[0,4,7],[0,3,7],[0,4,7]],romans:['I','V','vi','IV']},
+        'walking-minor-16437':{bars:[0,8,3,10],qualities:[[0,3,7],[0,4,7],[0,3,7],[0,4,7]],romans:['im','VI','III','VII']}
+      };
+      const preset=presets[kind]||presets['walking-251'],bars=preset.bars;
+      const qualities=kind==='walking-blues'?bars.map(()=>[0,4,7,10]):preset.qualities;
+      const romans=kind==='walking-blues'?bars.map(x=>x===0?'I7':x===5?'IV7':'V7'):preset.romans;
       const targets=[];
       bars.forEach((offset,bar)=>{
         const root=((tonic+offset)%12+12)%12,formula=qualities[bar],nextOffset=bars[(bar+1)%bars.length],nextRoot=((tonic+nextOffset)%12+12)%12;
@@ -4131,9 +4144,9 @@
       if(scoreFingeringStrategy&&s.fingeringStrategy)scoreFingeringStrategy.value=s.fingeringStrategy; else if(scoreFingeringStrategy)scoreFingeringStrategy.value='phrase';
       if(scorePhraseLength&&s.phraseLength)scorePhraseLength.value=String(s.phraseLength);
       if(scoreTechniqueMode&&s.techniqueMode)scoreTechniqueMode.value=s.techniqueMode;
-      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal','scale-full','scale-thirds','scale-ninth','scale-combined','walking-251','walking-blues','progression-251','progression-blues'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
+      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal','scale-full','scale-thirds','scale-ninth','scale-combined','walking-251','walking-blues','progression-251','progression-251-minor','progression-1645','progression-1564','progression-minor-16437','progression-blues'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
       const launchParams=new URLSearchParams(location.search),launchExercise=launchParams.get('exercise');
-      if(bassExerciseSel&&['walking-251','walking-blues','progression-251','progression-blues','scale-full','scale-thirds','scale-ninth','scale-combined'].includes(launchExercise)){
+      if(bassExerciseSel&&['walking-251','walking-blues','progression-251','progression-251-minor','progression-1645','progression-1564','progression-minor-16437','progression-blues','scale-full','scale-thirds','scale-ninth','scale-combined'].includes(launchExercise)){
         bassExerciseSel.value=launchExercise;if(!rootSel.value)rootSel.value='C';
       }
       if(rightHandPatternSel&&['free','im','mi','pick'].includes(s.rightHandPattern))rightHandPatternSel.value=s.rightHandPattern;
