@@ -2527,7 +2527,7 @@
         if(detected){ chordSymbolEl.textContent=NOTE[detected.root]+detected.def.suffix; chordQualityEl.textContent=detected.def.quality; }
         else { chordSymbolEl.textContent=`Notas: ${notes.map(n=>NOTE[n.pc]).join(' ')}`; chordQualityEl.textContent="No se reconoce un acorde con estas notas"; }
       } else {
-        chordSymbolEl.textContent=ephemeralMode?"Modo efímero":"Modo exploración";
+        chordSymbolEl.textContent="";
         chordQualityEl.textContent=ephemeralMode?"Borra cada nota 1,5 s después de tocarla":"Haz clic en las posiciones para seleccionar notas";
       }
     }
