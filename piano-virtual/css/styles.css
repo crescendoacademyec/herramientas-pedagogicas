@@ -1040,6 +1040,7 @@
   .piano-wrap{
     flex:0 0 18vh;
     position:relative;
+    margin-top:8px;
     background: transparent;
     padding:0 6px 4px;
   }
