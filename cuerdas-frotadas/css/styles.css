@@ -1259,6 +1259,8 @@
   .panel > .field:nth-child(8){grid-column:7!important;grid-row:1!important;}
   .panel > .field:nth-child(9){grid-column:1!important;grid-row:2!important;}
   .panel > .field:nth-child(10){grid-column:2!important;grid-row:2!important;}
+  .panel > .field:nth-child(9){max-width:128px!important;justify-self:start;}
+  .panel > .field:nth-child(10){max-width:142px!important;justify-self:start;}
   .panel > .field:nth-child(11){grid-column:8!important;grid-row:1!important;}
   /* La barra de acciones comparte la segunda fila con los tres controles restantes. */
   .panel > .field-frets{grid-column:3 / 9!important;grid-row:2!important;min-width:0;}
