@@ -713,6 +713,12 @@
       flex: 1 1 180px;
       min-width: 160px;
     }
+    #chordNameBox[aria-pressed="true"] {
+      background: rgba(212,168,79,.18);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px rgba(212,168,79,.14);
+    }
+    #chordNameBox:hover { border-color: rgba(212,168,79,.7); }
     #chordSymbol {
       display: block;
       color: var(--gold);

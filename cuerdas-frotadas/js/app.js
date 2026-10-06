@@ -116,7 +116,7 @@
       cvs=$("board"),ctx=cvs.getContext("2d"),
       legendButtons=[...document.querySelectorAll("[data-tone-filter]")],
       clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),ephemeralModeBtn=$("ephemeralModeBtn"),
-      chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),
+      chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),explorationModeBtn=$("chordNameBox"),
       volumeSlider=$("volume"),soundSourceIndicator=$("soundSourceIndicator");
 
     Object.entries(INSTRUMENTS).forEach(([key,ins])=>instrumentSel.add(new Option(ins.label,key)));
@@ -2600,11 +2600,15 @@
       draw();
     });
     function clearEphemeralTimers(){ephemeralTimers.forEach(timer=>clearTimeout(timer));ephemeralTimers.clear();}
-    ephemeralModeBtn.onclick=()=>{
-      ephemeralMode=!ephemeralMode;
+    function selectInteractionMode(mode){
+      ephemeralMode=mode==='ephemeral';
+      if(!ephemeralMode)clearEphemeralTimers();
       ephemeralModeBtn.setAttribute('aria-pressed',String(ephemeralMode));
       ephemeralModeBtn.classList.toggle('is-active',ephemeralMode);
-    };
+      explorationModeBtn.setAttribute('aria-pressed',String(!ephemeralMode));
+    }
+    ephemeralModeBtn.onclick=()=>selectInteractionMode('ephemeral');
+    explorationModeBtn.onclick=()=>selectInteractionMode('exploration');
     clearSelectionBtn.onclick=()=>{ clearEphemeralTimers(); manualSelections.clear(); hoverCell=null; draw(); };
     clearAllBtn.onclick=()=>{ clearEphemeralTimers(); rootSel.value=""; scaleSel.value=""; chordTypeSel.value=""; manualSelections.clear(); hoverCell=null; draw(); };
     minus.onclick=()=>{ if(numBlocks>1){numBlocks--;posVal.textContent=numBlocks;manualSelections.clear();draw();} };
