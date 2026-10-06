@@ -962,6 +962,14 @@
   }
   .panel .field { min-width: 0; }
   .panel select { min-width: 0; width: 100%; }
+  /* Los selectores breves conservan un ancho compacto y legible. */
+  .panel .field:nth-of-type(1) { min-width: 88px; }
+  .panel .field:nth-of-type(3) { min-width: 112px; }
+  .panel .field:nth-of-type(4) { min-width: 72px; }
+  .panel .field:nth-of-type(5),
+  .panel .field:nth-of-type(6),
+  .panel .field:nth-of-type(7),
+  .panel .field:nth-of-type(12) { min-width: 88px; }
   /* La fila superior reúne todos los controles de selección. */
   .panel .field:nth-of-type(1) { grid-column: 1; grid-row: 1; }
   .panel .field:nth-of-type(3) { grid-column: 2; grid-row: 1; }
@@ -975,7 +983,12 @@
   .panel .field:nth-of-type(9) { grid-column: 12; grid-row: 1; }
   .panel .field:nth-of-type(10) { grid-column: 13; grid-row: 1; }
   /* El patrón, los trastes y todas las acciones forman una única segunda fila. */
-  .panel .field:nth-of-type(11) { grid-column: 1 / span 2; grid-row: 2; }
+  .panel .field:nth-of-type(11) {
+    grid-column: 1 / span 2;
+    grid-row: 2;
+    justify-self: start;
+    width: 130px;
+  }
   .panel .field:nth-of-type(14) { grid-column: 3; grid-row: 2; }
   .panel .field-frets { grid-column: 4 / -1; grid-row: 2; min-width: 0; }
   .fret-control-row { flex-wrap: nowrap; gap: 6px; min-width: 0; }
