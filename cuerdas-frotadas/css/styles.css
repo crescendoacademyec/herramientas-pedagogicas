@@ -1242,28 +1242,26 @@
   }
 }
 
-@media (min-width:901px) and (max-width:1600px){
-  /* Siete selectores en la primera fila; los restantes conservan ancho completo debajo. */
+@media (min-width:901px){
+  /* Nueve controles compactos en la primera fila; rango y acciones debajo. */
   .panel{
-    grid-template-columns:repeat(7,minmax(0,1fr)) 112px;
+    grid-template-columns:repeat(9,minmax(0,1fr));
     column-gap:7px;
   }
   .panel > .field{max-width:none!important;grid-row:auto!important;grid-column:auto!important;}
-  /* Articulación se integra en el menú Sonido; ubicamos siete controles visibles. */
+  /* Articulación se integra en el menú Sonido. */
   .panel > .field:nth-child(1){grid-column:1!important;grid-row:1!important;}
   .panel > .field:nth-child(3){grid-column:2!important;grid-row:1!important;}
-  .panel > .field:nth-child(4){grid-column:3!important;grid-row:1!important;}
+  .panel > .field:nth-child(7){grid-column:3!important;grid-row:1!important;}
   .panel > .field:nth-child(5){grid-column:4!important;grid-row:1!important;}
-  .panel > .field:nth-child(6){grid-column:5!important;grid-row:1!important;}
-  .panel > .field:nth-child(7){grid-column:6!important;grid-row:1!important;}
-  .panel > .field:nth-child(8){grid-column:7!important;grid-row:1!important;}
-  .panel > .field:nth-child(9){grid-column:1!important;grid-row:2!important;}
-  .panel > .field:nth-child(10){grid-column:2!important;grid-row:2!important;}
-  .panel > .field:nth-child(9){max-width:128px!important;justify-self:start;}
-  .panel > .field:nth-child(10){max-width:142px!important;justify-self:start;}
-  .panel > .field:nth-child(11){grid-column:8!important;grid-row:1!important;}
-  /* La barra de acciones comparte la segunda fila con los tres controles restantes. */
-  .panel > .field-frets{grid-column:3 / 9!important;grid-row:2!important;min-width:0;}
+  .panel > .field:nth-child(8){grid-column:5!important;grid-row:1!important;}
+  .panel > .field:nth-child(6){grid-column:6!important;grid-row:1!important;}
+  .panel > .field:nth-child(9){grid-column:7!important;grid-row:1!important;}
+  .panel > .field:nth-child(10){grid-column:8!important;grid-row:1!important;}
+  .panel > .field:nth-child(4){grid-column:9!important;grid-row:1!important;}
+  .panel > .field:nth-child(11){grid-column:1!important;grid-row:2!important;}
+  /* La barra de acciones usa el resto de la segunda fila. */
+  .panel > .field-frets{grid-column:2 / 10!important;grid-row:2!important;min-width:0;}
   .panel .fret-control-row{
     grid-template-columns:minmax(96px,.76fr) minmax(105px,.84fr) minmax(108px,.88fr) minmax(112px,1.06fr) minmax(180px,1.42fr);
     gap:7px;

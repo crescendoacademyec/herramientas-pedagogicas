@@ -130,7 +130,7 @@
     populateTechniquePositions();
 
     /***************** Estado *************************/
-    let numBlocks=2;
+    let numBlocks=1;
     const toneVisibility={root:true,structural:true,tension:true,unavailable:true};
     const manualSelections=new Set(); // "s-rowIndex"
     const ephemeralTimers=new Map();
