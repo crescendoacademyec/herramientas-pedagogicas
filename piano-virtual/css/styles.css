@@ -468,17 +468,19 @@
   .hand-zone-btn:hover{border-color:var(--gold);color:var(--text);}
   .hand-zone-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
   #handLeftBtn.active{
-    background: var(--hand-left-color);
-    border-color: var(--hand-left-color);
-    color:#0b1a24;
-    box-shadow: 0 0 10px color-mix(in srgb, var(--hand-left-color) 55%, transparent);
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.14);
+    color:var(--muted);
+    box-shadow:none;
   }
   #handRightBtn.active{
-    background: var(--hand-right-color);
-    border-color: var(--hand-right-color);
-    color:#241a0b;
-    box-shadow: 0 0 10px color-mix(in srgb, var(--hand-right-color) 55%, transparent);
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.14);
+    color:var(--muted);
+    box-shadow:none;
   }
+  #handLeftBtn.active svg{color:var(--hand-left-color);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-left-color) 60%,transparent));}
+  #handRightBtn.active svg{color:var(--hand-right-color);filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-right-color) 60%,transparent));}
 
   /* Grupo de "rango de práctica" — eliminado (ver /areas/crescendo-web-tools.md si se retoma más adelante) */
   input[type=color]{
