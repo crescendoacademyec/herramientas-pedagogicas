@@ -1263,7 +1263,7 @@
   /* La barra de acciones usa el resto de la segunda fila. */
   .panel > .field-frets{grid-column:2 / 10!important;grid-row:2!important;min-width:0;}
   .panel .fret-control-row{
-    grid-template-columns:minmax(96px,.76fr) minmax(105px,.84fr) minmax(108px,.88fr) minmax(112px,1.06fr) minmax(180px,1.42fr);
+    grid-template-columns:max-content max-content minmax(155px,1.15fr) minmax(155px,1.15fr) minmax(180px,1.45fr);
     gap:7px;
   }
   .panel .fret-control-row #chordNameBox{min-width:120px;max-width:none;}
@@ -1279,3 +1279,36 @@
   .panel .sound-controls #volume{grid-column:1;grid-row:2;width:58px;margin:0;}
   .panel .sound-controls .sound-source-indicator{grid-column:2;grid-row:1 / 3;max-width:none;}
 }
+
+/* Modo efímero: misma jerarquía visual que el panel de exploración. */
+#ephemeralModeBtn{
+  align-items:center;
+  background:rgba(0,0,0,.28);
+  border:1px solid rgba(243,224,187,.35);
+  border-radius:10px;
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:44px;
+  padding:4px 14px;
+  text-align:center;
+  transition:background .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+#ephemeralModeBtn .mode-title{
+  color:var(--gold);
+  font-family:Georgia,"Times New Roman",serif;
+  font-size:1.1rem;
+  font-weight:900;
+  line-height:1.1;
+}
+#ephemeralModeBtn .mode-description{
+  color:var(--muted);
+  font-size:.7rem;
+  letter-spacing:.02em;
+  line-height:1.2;
+  margin-top:1px;
+}
+#ephemeralModeBtn:hover{border-color:rgba(212,168,79,.7);background:rgba(212,168,79,.1);}
+#ephemeralModeBtn[aria-pressed="true"]{background:rgba(212,168,79,.22);border-color:var(--gold);box-shadow:0 0 0 1px rgba(212,168,79,.18);}
+#ephemeralModeBtn[aria-pressed="true"] .mode-description{color:#f3d9a8;}

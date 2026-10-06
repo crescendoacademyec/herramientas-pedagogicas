@@ -2603,7 +2603,7 @@
     ephemeralModeBtn.onclick=()=>{
       ephemeralMode=!ephemeralMode;
       ephemeralModeBtn.setAttribute('aria-pressed',String(ephemeralMode));
-      ephemeralModeBtn.textContent=ephemeralMode?'Efímero activo':'Modo efímero';
+      ephemeralModeBtn.classList.toggle('is-active',ephemeralMode);
     };
     clearSelectionBtn.onclick=()=>{ clearEphemeralTimers(); manualSelections.clear(); hoverCell=null; draw(); };
     clearAllBtn.onclick=()=>{ clearEphemeralTimers(); rootSel.value=""; scaleSel.value=""; chordTypeSel.value=""; manualSelections.clear(); hoverCell=null; draw(); };
