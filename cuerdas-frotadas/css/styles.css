@@ -1310,5 +1310,6 @@
   transition:background .2s ease,color .2s ease,box-shadow .2s ease;
   width:auto;
 }
+.interaction-mode-picker #explorationModeBtn{padding-left:14px;padding-right:22px;}
 .interaction-mode-picker .mode-toggle-btn.active{background:var(--gold);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.28);}
 .interaction-mode-picker .mode-toggle-btn:not(.active):hover{color:var(--text);}
