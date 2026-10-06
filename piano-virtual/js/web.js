@@ -112,12 +112,13 @@ keyModeSelect.addEventListener('change', function(){ currentScaleMode=this.value
 
 // ---------- MANOS: selección para tocar + guías de registro independientes ----------
 function selectPlayingHand(hand){
-  selectedHand=hand;
-  handLeftBtn.classList.toggle('active',hand==='left');
-  handRightBtn.classList.toggle('active',hand==='right');
-  handLeftBtn.setAttribute('aria-pressed',String(hand==='left'));
-  handRightBtn.setAttribute('aria-pressed',String(hand==='right'));
-  keyboardEl.dataset.playingHand=hand;
+  selectedHand=selectedHand===hand?null:hand;
+  handLeftBtn.classList.toggle('active',selectedHand==='left');
+  handRightBtn.classList.toggle('active',selectedHand==='right');
+  handLeftBtn.setAttribute('aria-pressed',String(selectedHand==='left'));
+  handRightBtn.setAttribute('aria-pressed',String(selectedHand==='right'));
+  if(selectedHand)keyboardEl.dataset.playingHand=selectedHand;
+  else delete keyboardEl.dataset.playingHand;
   saveSettings();
 }
 function toggleHandZone(hand){

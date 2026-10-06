@@ -63,7 +63,7 @@ let keyElByMidi = {};
 let allNotes = [];
 let showHandLeft = false;
 let showHandRight = false;
-let selectedHand = 'right';
+let selectedHand = null;
 let currentKeyPc = null; // pitch-class (0-11) de la tonalidad elegida, o null si no hay ninguna
 
 // ---------- DOM REFS ----------
