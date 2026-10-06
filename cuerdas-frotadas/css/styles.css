@@ -1263,7 +1263,7 @@
   /* La barra de acciones usa el resto de la segunda fila. */
   .panel > .field-frets{grid-column:2 / 10!important;grid-row:2!important;min-width:0;}
   .panel .fret-control-row{
-    grid-template-columns:max-content max-content minmax(155px,1.15fr) minmax(155px,1.15fr) minmax(180px,1.45fr);
+    grid-template-columns:max-content max-content minmax(150px,1.08fr) minmax(180px,1.32fr) minmax(180px,1.45fr);
     gap:7px;
   }
   .panel .fret-control-row #chordNameBox{min-width:120px;max-width:none;}
@@ -1305,6 +1305,7 @@
 #ephemeralModeBtn .mode-description{
   color:var(--muted);
   font-size:.7rem;
+  font-weight:400;
   letter-spacing:.02em;
   line-height:1.2;
   margin-top:1px;
