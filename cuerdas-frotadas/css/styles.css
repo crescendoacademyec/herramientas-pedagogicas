@@ -1110,11 +1110,11 @@
   .panel > .field:nth-child(9){grid-column:9;grid-row:1;}
   .panel > .field:nth-child(10){grid-column:10;grid-row:1;}
 
-  /* Fila 2: rango y acciones. */
-  .panel > .field:nth-child(11){grid-column:1;grid-row:2;}
+  /* El rango queda al extremo derecho de la primera fila. */
+  .panel > .field:nth-child(11){grid-column:10;grid-row:1;}
 
   .panel > .field-frets{
-    grid-column:2 / 11;
+    grid-column:1 / 10;
     grid-row:2;
     align-self:end;
     min-width:0;
@@ -1243,7 +1243,7 @@
 @media (min-width:901px) and (max-width:1600px){
   /* Siete selectores en la primera fila; los restantes conservan ancho completo debajo. */
   .panel{
-    grid-template-columns:repeat(7,minmax(0,1fr));
+    grid-template-columns:repeat(7,minmax(0,1fr)) 112px;
     column-gap:7px;
   }
   .panel > .field{max-width:none!important;grid-row:auto!important;grid-column:auto!important;}
@@ -1257,9 +1257,9 @@
   .panel > .field:nth-child(8){grid-column:7!important;grid-row:1!important;}
   .panel > .field:nth-child(9){grid-column:1!important;grid-row:2!important;}
   .panel > .field:nth-child(10){grid-column:2!important;grid-row:2!important;}
-  .panel > .field:nth-child(11){grid-column:3!important;grid-row:2!important;}
+  .panel > .field:nth-child(11){grid-column:8!important;grid-row:1!important;}
   /* La barra de acciones comparte la segunda fila con los tres controles restantes. */
-  .panel > .field-frets{grid-column:4 / 8!important;grid-row:2!important;min-width:0;}
+  .panel > .field-frets{grid-column:3 / 9!important;grid-row:2!important;min-width:0;}
   .panel .fret-control-row{
     grid-template-columns:max-content max-content minmax(104px,1fr) minmax(150px,1.2fr);
     gap:5px;
