@@ -730,7 +730,7 @@
     }
 
     /* ===== BOTONES ===== */
-    #clearSelectionBtn, #clearAllBtn, #muteBtn {
+    #clearSelectionBtn, #clearAllBtn {
       display: inline-block;
       padding: 6px 14px;
       border-radius: 20px;
@@ -746,10 +746,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       transition: transform 0.1s, filter 0.15s;
     }
-    #clearSelectionBtn:hover, #clearAllBtn:hover, #muteBtn:hover { filter: brightness(1.1); }
-    #clearSelectionBtn:active, #clearAllBtn:active, #muteBtn:active { transform: scale(0.96); }
+    #clearSelectionBtn:hover, #clearAllBtn:hover { filter: brightness(1.1); }
+    #clearSelectionBtn:active, #clearAllBtn:active { transform: scale(0.96); }
     #clearSelectionBtn { background: var(--moss); color: var(--text); }
-    #muteBtn { background: #6a4e3a; color: var(--text); min-width: auto; padding: 6px 12px; font-size: 0.9rem; }
 
     .fret-control-row {
       display: flex;
@@ -1154,7 +1153,6 @@
     gap:5px;
     padding-right:12px;
   }
-  .panel #muteBtn{margin-right:4px;}
   .panel #volume{width:64px;}
   .panel .sound-source-indicator{max-width:110px;overflow:hidden;text-overflow:ellipsis;}
 }
@@ -1177,7 +1175,6 @@
   .panel .sound-controls{gap:3px;}
   .panel #volume{width:52px;}
   .panel .sound-source-indicator{max-width:92px;}
-  #muteBtn{padding:5px 8px;font-size:.72rem;}
 }
 
 /* En tablet/móvil se prioriza legibilidad por encima de forzar dos filas. */

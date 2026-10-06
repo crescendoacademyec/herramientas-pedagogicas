@@ -117,7 +117,7 @@
       legendButtons=[...document.querySelectorAll("[data-tone-filter]")],
       clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),
       chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),
-      muteBtn=$("muteBtn"),volumeSlider=$("volume"),soundSourceIndicator=$("soundSourceIndicator");
+      volumeSlider=$("volume"),soundSourceIndicator=$("soundSourceIndicator");
 
     Object.entries(INSTRUMENTS).forEach(([key,ins])=>instrumentSel.add(new Option(ins.label,key)));
     rootSel.add(new Option("— Ninguna —",""));
@@ -1036,7 +1036,6 @@
     let masterBus=null;
     let sfPlayer=null;
     let sfLoading=false;
-    let soundEnabled=true;
 
     function ensureCtx(){
       if(!audioCtx){
@@ -1100,7 +1099,6 @@
     }
 
     function playNote(midi, duration = 1.8){
-      if(!soundEnabled) return;
       const ctx = ensureCtx();
       if(!ctx) return;
       const vol = parseFloat(volumeSlider.value) / 10;
@@ -1141,11 +1139,6 @@
     }
 
     // Control de mute
-    muteBtn.textContent = "🔊";
-    muteBtn.onclick = function(){
-      soundEnabled = !soundEnabled;
-      this.textContent = soundEnabled ? "🔊" : "🔇";
-    };
 
     // Cargar sonido inicial
     setTimeout(() => loadSound('violin', 'legato'), 300);
@@ -1668,7 +1661,6 @@
     const scoreHighlightMidis = new Set(); // midis actualmente resaltados en diapasón/pentagrama
 
     function scoreNoteOn(midi) {
-      if (!soundEnabled) return;
       const ctx = ensureCtx();
       if (!ctx) return;
       const vol = parseFloat(volumeSlider.value) / 10;

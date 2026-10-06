@@ -737,7 +737,7 @@
     }
 
     /* ===== BOTONES ===== */
-    #clearSelectionBtn, #clearAllBtn, #muteBtn {
+    #clearSelectionBtn, #clearAllBtn {
       display: inline-block;
       padding: 6px 14px;
       border-radius: 20px;
@@ -753,10 +753,9 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
       transition: transform 0.1s, filter 0.15s;
     }
-    #clearSelectionBtn:hover, #clearAllBtn:hover, #muteBtn:hover { filter: brightness(1.1); }
-    #clearSelectionBtn:active, #clearAllBtn:active, #muteBtn:active { transform: scale(0.96); }
+    #clearSelectionBtn:hover, #clearAllBtn:hover { filter: brightness(1.1); }
+    #clearSelectionBtn:active, #clearAllBtn:active { transform: scale(0.96); }
     #clearSelectionBtn { background: var(--moss); color: var(--text); }
-    #muteBtn { background: #6a4e3a; color: var(--text); min-width: auto; padding: 6px 12px; font-size: 0.9rem; }
 
     .fret-control-row {
       display: flex;
@@ -1079,7 +1078,6 @@
             <label for="volume">Volumen</label>
             <input type="range" id="volume" min="0" max="7" step="0.1" value="4">
             <span class="sound-source-indicator" id="soundSourceIndicator">🎸 cargando...</span>
-            <button id="muteBtn" type="button">🔊</button>
           </div>
         </div>
       </div>
@@ -1477,7 +1475,6 @@
     const chordNameBox = $("chordNameBox");
     const chordSymbolEl = $("chordSymbol");
     const chordQualityEl = $("chordQualityLabel");
-    const muteBtn = $("muteBtn");
     const volumeSlider = $("volume");
     const soundTypeSel = $("soundType");
     const soundTypeLabel = $("soundTypeLabel");
@@ -1539,7 +1536,6 @@
     let hoverCell = null;
     let audioCtx = null;
     let masterBus = null;
-    let soundEnabled = true;
     let sfPlayer = null;
     let sfLoading = false;
 
@@ -1839,7 +1835,6 @@
 
     // Sonido (playNote)
     function playNote(midi, duration = 1.5, gainScale = 1) {
-      if (!soundEnabled) return null;
       const ctx = ensureCtx();
       if (!ctx) return null;
       const vol = (parseFloat(volumeSlider.value) / 10) * gainScale;
@@ -1880,12 +1875,6 @@
       osc.stop(ctx.currentTime + duration);
       return { stop: () => { try { osc.stop(ctx.currentTime); } catch(e) {} } };
     }
-
-    muteBtn.textContent = "🔊";
-    muteBtn.onclick = function() {
-      soundEnabled = !soundEnabled;
-      this.textContent = soundEnabled ? "🔊" : "🔇";
-    };
 
     // Controles
     minus.onclick = () => { if (visibleFrets > 4) { visibleFrets--; refresh(); saveSettings(); } };

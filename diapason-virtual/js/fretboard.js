@@ -201,7 +201,6 @@
     const chordNameBox = $("chordNameBox");
     const chordSymbolEl = $("chordSymbol");
     const chordQualityEl = $("chordQualityLabel");
-    const muteBtn = $("muteBtn");
     const volumeSlider = $("volume");
     const soundTypeSel = $("soundType");
     const soundTypeLabel = $("soundTypeLabel");
@@ -262,7 +261,6 @@
     let hoverCell = null;
     let audioCtx = null;
     let masterBus = null;
-    let soundEnabled = true;
     let sfPlayer = null;
     let sfLoading = false;
 
@@ -546,7 +544,6 @@
 
     // Sonido (playNote)
     function playNote(midi, duration = 1.5) {
-      if (!soundEnabled) return null;
       const ctx = ensureCtx();
       if (!ctx) return null;
       const vol = parseFloat(volumeSlider.value) / 10;
@@ -587,12 +584,6 @@
       osc.stop(ctx.currentTime + duration);
       return { stop: () => { try { osc.stop(ctx.currentTime); } catch(e) {} } };
     }
-
-    muteBtn.textContent = "🔊";
-    muteBtn.onclick = function() {
-      soundEnabled = !soundEnabled;
-      this.textContent = soundEnabled ? "🔊" : "🔇";
-    };
 
     // Controles
     minus.onclick = () => { if (visibleFrets > 4) { visibleFrets--; refresh(); saveSettings(); } };
