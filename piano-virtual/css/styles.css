@@ -470,16 +470,16 @@
   .hand-zone-btn:hover{border-color:var(--gold);color:var(--text);}
   .hand-zone-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
   #handLeftBtn.active{
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.14);
-    color:var(--muted);
-    box-shadow:none;
+    background:rgba(255,255,255,.13);
+    border-color:rgba(255,250,240,.7);
+    color:#fffaf0;
+    box-shadow:0 0 0 1px rgba(255,250,240,.08);
   }
   #handRightBtn.active{
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.14);
-    color:var(--muted);
-    box-shadow:none;
+    background:rgba(255,255,255,.13);
+    border-color:rgba(255,250,240,.7);
+    color:#fffaf0;
+    box-shadow:0 0 0 1px rgba(255,250,240,.08);
   }
   #handLeftBtn.active svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-left-color) 60%,transparent));}
   #handRightBtn.active svg{filter:drop-shadow(0 0 5px color-mix(in srgb,var(--hand-right-color) 60%,transparent));}
