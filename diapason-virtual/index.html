@@ -909,6 +909,71 @@
   .field-frets { grid-column: 1 / -1; }
 }
 
+
+/* ===== Modos de interacción y panel compacto ===== */
+.interaction-mode-picker {
+  align-items: center;
+  background: rgba(0,0,0,.35);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 999px;
+  display: inline-flex;
+  padding: 3px;
+  flex: 0 0 auto;
+}
+.interaction-mode-picker .mode-toggle-btn {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: .7rem;
+  font-weight: 700;
+  justify-content: center;
+  letter-spacing: .05em;
+  min-height: 30px;
+  padding: 7px 18px;
+  text-transform: uppercase;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease;
+  width: auto;
+}
+.interaction-mode-picker #explorationModeBtn { padding-left: 14px; padding-right: 22px; }
+.interaction-mode-picker .mode-toggle-btn.active {
+  background: var(--gold);
+  box-shadow: 0 4px 14px rgba(0,0,0,.28);
+  color: var(--ink);
+}
+.interaction-mode-picker .mode-toggle-btn:not(.active):hover { color: var(--text); }
+.sound-controls {
+  align-items: center;
+  display: grid;
+  gap: 2px 8px;
+  grid-template-columns: 78px auto;
+  grid-template-rows: auto auto;
+}
+.sound-controls label { grid-column: 1; grid-row: 1; }
+.sound-controls #volume { grid-column: 1; grid-row: 2; width: 78px; }
+.sound-controls .string-sound-menu { grid-column: 2; grid-row: 1 / span 2; }
+@media (min-width: 1180px) {
+  .panel {
+    grid-template-columns: repeat(9, minmax(76px, 1fr));
+    gap: 8px 7px;
+  }
+  .panel .field { min-width: 0; }
+  .panel .field:nth-of-type(12) { grid-column: 9; grid-row: 1; }
+  .panel .field-key-signature { grid-column: 8; grid-row: 1; }
+  .panel .field:nth-of-type(9) { grid-column: 1; grid-row: 2; }
+  .panel .field:nth-of-type(10) { grid-column: 2; grid-row: 2; }
+  .panel .field:nth-of-type(11) { grid-column: 3; grid-row: 2; }
+  .panel .field:nth-of-type(14) { grid-column: 4; grid-row: 2; }
+  .panel .field-frets { grid-column: 1 / -1; }
+}
+@media (max-width: 860px) {
+  .interaction-mode-picker { justify-content: center; }
+  .sound-controls { justify-content: center; }
+}
+
 </style>
 <link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
 <link rel="stylesheet" href="../shared/string-sound-menu.css?v=20261005c">
@@ -1086,6 +1151,10 @@
           <button id="clearAllBtn" type="button">Limpiar ajustes</button>
           <button id="clearSelectionBtn" type="button">Limpiar trastes</button>
           <button class="guitar-bank-menu" id="guitarBankMenu" type="button" aria-controls="guitarChordBank">Banco de acordes</button>
+          <div class="interaction-mode-picker" role="tablist" aria-label="Modo de interacción">
+            <button id="explorationModeBtn" class="mode-toggle-btn active" type="button" role="tab" aria-selected="true">Exploración</button>
+            <button id="ephemeralModeBtn" class="mode-toggle-btn" type="button" role="tab" aria-selected="false" title="Las notas seleccionadas desaparecen después de 1,5 segundos">Efímero</button>
+          </div>
           <div id="chordNameBox">
             <span id="chordSymbol"></span>
             <span id="chordQualityLabel"></span>
@@ -1474,6 +1543,8 @@
     const legendButtons = [...document.querySelectorAll("[data-tone-filter]")];
     const clearSelectionBtn = $("clearSelectionBtn");
     const clearAllBtn = $("clearAllBtn");
+    const explorationModeBtn = $("explorationModeBtn");
+    const ephemeralModeBtn = $("ephemeralModeBtn");
     const chordNameBox = $("chordNameBox");
     const chordSymbolEl = $("chordSymbol");
     const chordQualityEl = $("chordQualityLabel");
@@ -1535,6 +1606,8 @@
     const toneVisibility = {root:true, structural:true, tension:true, unavailable:true};
     const blankMode = () => rootSel.value === "" || (chordTypeSel.value === "" && scaleSel.value === "");
     const manualSelections = new Set();
+    const ephemeralTimers = new Map();
+    let ephemeralMode = false;
     let hoverCell = null;
     let audioCtx = null;
     let masterBus = null;
@@ -1708,6 +1781,22 @@
       return null;
     }
 
+    function detectScale(pcs) {
+      const unique = [...new Set(pcs)];
+      if (unique.length < 5) return null;
+      const sorted = unique.slice().sort((a,b) => a - b);
+      for (let root = 0; root < 12; root++) {
+        for (const [key, steps] of Object.entries(SCALE)) {
+          if (steps.length !== sorted.length) continue;
+          const target = [root];
+          for (let index = 0; index < steps.length - 1; index++) target.push((target.at(-1) + steps[index]) % 12);
+          target.sort((a,b) => a - b);
+          if (target.every((value,index) => value === sorted[index])) return { root, key };
+        }
+      }
+      return null;
+    }
+
     function parseChordValue(value = chordTypeSel.value) {
       const [typeKey, voicingKey] = value.split("|");
       const def = CHORD_TYPES[typeKey];
@@ -1862,6 +1951,24 @@
       return { stop: () => { try { osc.stop(ctx.currentTime); } catch(e) {} } };
     }
 
+    function clearEphemeralTimers() {
+      ephemeralTimers.forEach(timer => clearTimeout(timer));
+      ephemeralTimers.clear();
+    }
+
+    function selectInteractionMode(mode) {
+      ephemeralMode = mode === 'ephemeral';
+      if (!ephemeralMode) clearEphemeralTimers();
+      explorationModeBtn.classList.toggle('active', !ephemeralMode);
+      ephemeralModeBtn.classList.toggle('active', ephemeralMode);
+      explorationModeBtn.setAttribute('aria-selected', String(!ephemeralMode));
+      ephemeralModeBtn.setAttribute('aria-selected', String(ephemeralMode));
+      draw();
+    }
+
+    explorationModeBtn.onclick = () => selectInteractionMode('exploration');
+    ephemeralModeBtn.onclick = () => selectInteractionMode('ephemeral');
+
     // Controles
     minus.onclick = () => { if (visibleFrets > 4) { visibleFrets--; refresh(); saveSettings(); } };
     plus.onclick = () => { if (visibleFrets < maxVisibleFrets()) { visibleFrets++; refresh(); saveSettings(); } };
@@ -1953,20 +2060,32 @@
       const wasSelected = manualSelections.has(key);
       if (wasSelected) {
         manualSelections.delete(key);
+        if (ephemeralTimers.has(key)) {
+          clearTimeout(ephemeralTimers.get(key));
+          ephemeralTimers.delete(key);
+        }
       } else {
         manualSelections.add(key);
         const pitches = activePitches();
         const midi = pitches[cell.s] + physicalFret(cell.displayFret);
         playNote(midi, 1.8);
+        if (ephemeralMode) {
+          const timer = setTimeout(() => {
+            ephemeralTimers.delete(key);
+            if (manualSelections.delete(key)) draw();
+          }, 1500);
+          ephemeralTimers.set(key, timer);
+        }
       }
       draw();
     });
 
-    clearSelectionBtn.onclick = () => { manualSelections.clear(); hoverCell = null; draw(); };
+    clearSelectionBtn.onclick = () => { clearEphemeralTimers(); manualSelections.clear(); hoverCell = null; draw(); };
     clearAllBtn.onclick = () => {
       rootSel.value = "";
       scaleSel.value = "";
       populateChordOptions("");
+      clearEphemeralTimers();
       manualSelections.clear();
       hoverCell = null;
       refresh();
@@ -2368,19 +2487,24 @@
           });
           const selectedPcs = selectedNotes.map(n => n.pc);
           const detected = detectChord(selectedPcs);
+          const detectedScale = detected ? null : detectScale(selectedPcs);
           if (detected) {
             symbolEl.textContent = NOTE[detected.root] + detected.def.suffix;
             qualityEl.textContent = detected.def.quality;
+          } else if (detectedScale) {
+            const scaleName = detectedScale.key.replace(/_/g, ' ');
+            symbolEl.textContent = `Escala: ${NOTE[detectedScale.root]} ${scaleName}`;
+            qualityEl.textContent = "Las notas seleccionadas forman una escala";
           } else if (selectedNotes.length > 0) {
             symbolEl.textContent = `Notas: ${selectedNotes.map(n => NOTE[n.pc]).join(' ')}`;
-            qualityEl.textContent = "No se reconoce un acorde con estas notas";
+            qualityEl.textContent = "No se reconoce un acorde o escala con estas notas";
           } else {
-            symbolEl.textContent = "Modo exploración";
-            qualityEl.textContent = "Haz clic en los trastes para seleccionar notas";
+            symbolEl.textContent = "";
+            qualityEl.textContent = ephemeralMode ? "Borra cada nota 1,5 s después de tocarla" : "Haz clic en los trastes para seleccionar notas";
           }
         } else {
-          symbolEl.textContent = "Modo exploración";
-          qualityEl.textContent = "Haz clic en los trastes para seleccionar notas";
+          symbolEl.textContent = "";
+          qualityEl.textContent = ephemeralMode ? "Borra cada nota 1,5 s después de tocarla" : "Haz clic en los trastes para seleccionar notas";
         }
       }
     }
