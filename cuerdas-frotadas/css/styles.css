@@ -1255,14 +1255,14 @@
   .panel > .field:nth-child(6){grid-column:5!important;grid-row:1!important;}
   .panel > .field:nth-child(7){grid-column:6!important;grid-row:1!important;}
   .panel > .field:nth-child(8){grid-column:7!important;grid-row:1!important;}
-  .panel > .field:nth-child(9){grid-column:1 / 3!important;grid-row:2!important;}
-  .panel > .field:nth-child(10){grid-column:3 / 5!important;grid-row:2!important;}
+  .panel > .field:nth-child(9){grid-column:1!important;grid-row:2!important;}
+  .panel > .field:nth-child(10){grid-column:2!important;grid-row:2!important;}
   .panel > .field:nth-child(11){grid-column:8!important;grid-row:1!important;}
   /* La barra de acciones comparte la segunda fila con los tres controles restantes. */
-  .panel > .field-frets{grid-column:5 / 9!important;grid-row:2!important;min-width:0;}
+  .panel > .field-frets{grid-column:3 / 9!important;grid-row:2!important;min-width:0;}
   .panel .fret-control-row{
-    grid-template-columns:minmax(105px,1fr) minmax(115px,1fr) minmax(120px,1.08fr) minmax(185px,1.45fr);
-    gap:10px;
+    grid-template-columns:minmax(105px,.9fr) minmax(115px,.95fr) minmax(120px,1.08fr) minmax(185px,1.45fr);
+    gap:8px;
   }
   .panel .fret-control-row #chordNameBox{min-width:120px;max-width:none;}
   .panel .sound-controls{
