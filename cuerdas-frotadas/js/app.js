@@ -96,6 +96,20 @@
       }
       return null;
     }
+    function detectScale(pcs){
+      const unique=[...new Set(pcs)].sort((a,b)=>a-b);
+      if(unique.length<5)return null;
+      for(let root=0;root<12;root++){
+        for(const [key,steps] of Object.entries(SCALE)){
+          if(steps.length!==unique.length)continue;
+          const target=[root];
+          for(let i=0;i<steps.length-1;i++)target.push((target.at(-1)+steps[i])%12);
+          target.sort((a,b)=>a-b);
+          if(target.every((pc,index)=>pc===unique[index]))return {root,key};
+        }
+      }
+      return null;
+    }
 
     /***************** DOM refs *************************/
     const $=id=>document.getElementById(id),
@@ -2525,7 +2539,13 @@
         manualSelections.forEach(key=>{const [s,i]=key.split('-').map(Number);const midi=pitches[s]+rows[i].semi;notes.push({pc:midi%12});});
         const detected=detectChord(notes.map(n=>n.pc));
         if(detected){ chordSymbolEl.textContent=NOTE[detected.root]+detected.def.suffix; chordQualityEl.textContent=detected.def.quality; }
-        else { chordSymbolEl.textContent=`Notas: ${notes.map(n=>NOTE[n.pc]).join(' ')}`; chordQualityEl.textContent="No se reconoce un acorde con estas notas"; }
+        else {
+          const scaleDetected=detectScale(notes.map(n=>n.pc));
+          if(scaleDetected){
+            chordSymbolEl.textContent=`Escala de ${NOTE[scaleDetected.root]} ${scaleDetected.key.replace(/_/g,' ')}`;
+            chordQualityEl.textContent='Escala reconocida';
+          } else { chordSymbolEl.textContent=`Notas: ${notes.map(n=>NOTE[n.pc]).join(' ')}`; chordQualityEl.textContent="No se reconoce un acorde ni una escala"; }
+        }
       } else {
         chordSymbolEl.textContent="";
         chordQualityEl.textContent=ephemeralMode?"Borra cada nota 1,5 s después de tocarla":"Haz clic en las posiciones para seleccionar notas";
