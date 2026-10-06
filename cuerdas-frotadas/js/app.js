@@ -115,7 +115,7 @@
       minus=$("minus"),plus=$("plus"),posVal=$("posVal"),
       cvs=$("board"),ctx=cvs.getContext("2d"),
       legendButtons=[...document.querySelectorAll("[data-tone-filter]")],
-      clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),
+      clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),ephemeralModeBtn=$("ephemeralModeBtn"),
       chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),
       volumeSlider=$("volume"),soundSourceIndicator=$("soundSourceIndicator");
 
@@ -133,6 +133,8 @@
     let numBlocks=2;
     const toneVisibility={root:true,structural:true,tension:true,unavailable:true};
     const manualSelections=new Set(); // "s-rowIndex"
+    const ephemeralTimers=new Map();
+    let ephemeralMode=false;
     let hoverCell=null;
     const blankMode=()=>rootSel.value===""||(chordTypeSel.value===""&&scaleSel.value==="");
     const activeInstrument=()=>INSTRUMENTS[instrumentSel.value]||INSTRUMENTS.violin;
@@ -2580,17 +2582,31 @@
       const wasSelected = manualSelections.has(key);
       if(wasSelected) {
         manualSelections.delete(key);
+        if(ephemeralTimers.has(key)){clearTimeout(ephemeralTimers.get(key));ephemeralTimers.delete(key);}
       } else {
         manualSelections.add(key);
         const pitches = activePitches();
         const rows = rowsList();
         const midi = pitches[cell.s] + rows[cell.i].semi;
         playNote(midi, 1.8);
+        if(ephemeralMode){
+          const timer=setTimeout(()=>{
+            ephemeralTimers.delete(key);
+            if(manualSelections.delete(key))draw();
+          },1500);
+          ephemeralTimers.set(key,timer);
+        }
       }
       draw();
     });
-    clearSelectionBtn.onclick=()=>{ manualSelections.clear(); hoverCell=null; draw(); };
-    clearAllBtn.onclick=()=>{ rootSel.value=""; scaleSel.value=""; chordTypeSel.value=""; manualSelections.clear(); hoverCell=null; draw(); };
+    function clearEphemeralTimers(){ephemeralTimers.forEach(timer=>clearTimeout(timer));ephemeralTimers.clear();}
+    ephemeralModeBtn.onclick=()=>{
+      ephemeralMode=!ephemeralMode;
+      ephemeralModeBtn.setAttribute('aria-pressed',String(ephemeralMode));
+      ephemeralModeBtn.textContent=ephemeralMode?'Efímero activo':'Modo efímero';
+    };
+    clearSelectionBtn.onclick=()=>{ clearEphemeralTimers(); manualSelections.clear(); hoverCell=null; draw(); };
+    clearAllBtn.onclick=()=>{ clearEphemeralTimers(); rootSel.value=""; scaleSel.value=""; chordTypeSel.value=""; manualSelections.clear(); hoverCell=null; draw(); };
     minus.onclick=()=>{ if(numBlocks>1){numBlocks--;posVal.textContent=numBlocks;manualSelections.clear();draw();} };
     plus.onclick=()=>{ if(numBlocks<4){numBlocks++;posVal.textContent=numBlocks;manualSelections.clear();draw();} };
     rootSel.onchange=()=>{ if(chordTypeSel.value!=="")chordTypeSel.value=chordTypeSel.value; manualSelections.clear(); hoverCell=null; draw(); };
