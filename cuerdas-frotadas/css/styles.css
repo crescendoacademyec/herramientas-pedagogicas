@@ -1265,5 +1265,15 @@
     gap:5px;
   }
   .panel .fret-control-row #chordNameBox{min-width:104px;max-width:none;}
-  .panel .sound-controls{min-width:0;padding-right:0;}
+  .panel .sound-controls{
+    display:grid;
+    grid-template-columns:52px minmax(0,1fr);
+    grid-template-rows:auto auto;
+    gap:0 4px;
+    min-width:0;
+    padding-right:0;
+  }
+  .panel .sound-controls label{grid-column:1;grid-row:1;font-size:.55rem;line-height:1;}
+  .panel .sound-controls #volume{grid-column:1;grid-row:2;width:52px;margin:0;}
+  .panel .sound-controls .sound-source-indicator{grid-column:2;grid-row:1 / 3;max-width:none;}
 }
