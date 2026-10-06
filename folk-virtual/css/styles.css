@@ -932,7 +932,7 @@
 .sound-controls #volume { grid-column: 1; grid-row: 2; width: 78px; }
 .sound-controls .string-sound-menu { grid-column: 2; grid-row: 1 / span 2; }
 @media (min-width: 901px) {
-  .panel { grid-template-columns: .8fr .8fr .8fr .8fr .8fr 1.25fr 1.2fr 1.4fr 1.1fr 1.1fr .8fr; gap: 8px; }
+  .panel { grid-template-columns: .95fr .8fr .8fr .8fr .8fr 1.10fr 1.2fr 1.4fr 1.1fr 1.1fr .8fr; gap: 8px; }
   .panel .field { min-width: 0; }
   .panel select { min-width: 0; width: 100%; }
   #tuning, #orientation, #labelMode, #pattern, #voicingRange { min-width: 0; }
