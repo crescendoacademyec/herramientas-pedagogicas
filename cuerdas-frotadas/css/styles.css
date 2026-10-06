@@ -1292,10 +1292,9 @@
   border:1px solid rgba(255,255,255,.16);
   border-radius:999px;
   display:inline-flex;
-  gap:0;
   padding:3px;
 }
-.interaction-mode-picker button{
+.interaction-mode-picker .mode-toggle-btn{
   background:transparent;
   border:0;
   border-radius:999px;
@@ -1311,5 +1310,5 @@
   transition:background .2s ease,color .2s ease,box-shadow .2s ease;
   width:auto;
 }
-.interaction-mode-picker button:hover{color:var(--text);}
-.interaction-mode-picker button[aria-checked="true"]{background:var(--gold);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.28);}
+.interaction-mode-picker .mode-toggle-btn.active{background:var(--gold);color:var(--ink);box-shadow:0 4px 14px rgba(0,0,0,.28);}
+.interaction-mode-picker .mode-toggle-btn:not(.active):hover{color:var(--text);}

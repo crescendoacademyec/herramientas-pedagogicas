@@ -7,7 +7,7 @@
   <title>Cuerdas Frotadas</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
-  <link rel="stylesheet" href="css/styles.css?v=20261006-wider-volume">
+  <link rel="stylesheet" href="css/styles.css?v=20261006-piano-toggle-behavior">
 <link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
 <link rel="stylesheet" href="../shared/string-sound-menu.css?v=20261005c">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261005-instrument-ui">
@@ -153,9 +153,9 @@
         <div class="fret-control-row">
           <button id="clearAllBtn" type="button">Limpiar ajustes</button>
           <button id="clearSelectionBtn" type="button">Limpiar selección</button>
-          <div class="interaction-mode-picker" role="radiogroup" aria-label="Modo de interacción">
-            <button id="explorationModeBtn" type="button" role="radio" aria-checked="true">Exploración</button>
-            <button id="ephemeralModeBtn" type="button" role="radio" aria-checked="false" title="Las notas seleccionadas desaparecen después de 1,5 segundos">Efímero</button>
+          <div class="interaction-mode-picker" role="tablist" aria-label="Modo de interacción">
+            <button id="explorationModeBtn" class="mode-toggle-btn active" type="button" role="tab" aria-selected="true">Exploración</button>
+            <button id="ephemeralModeBtn" class="mode-toggle-btn" type="button" role="tab" aria-selected="false" title="Las notas seleccionadas desaparecen después de 1,5 segundos">Efímero</button>
           </div>
           <div id="chordNameBox">
             <span id="chordSymbol"></span>
@@ -903,7 +903,7 @@
 <script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
   <script src="js/live-staff.js"></script>
-  <script src="js/app.js?v=20261006-scale-recognition"></script>
+  <script src="js/app.js?v=20261006-piano-toggle-behavior"></script>
   <script src="js/vibrato.js"></script>
   <script src="js/metronome.js?v=20260925-beat-stop"></script>
   <script src="js/workspace-tabs.js"></script>

@@ -2623,8 +2623,10 @@
     function selectInteractionMode(mode){
       ephemeralMode=mode==='ephemeral';
       if(!ephemeralMode)clearEphemeralTimers();
-      ephemeralModeBtn.setAttribute('aria-checked',String(ephemeralMode));
-      explorationModeBtn.setAttribute('aria-checked',String(!ephemeralMode));
+      ephemeralModeBtn.classList.toggle('active',ephemeralMode);
+      explorationModeBtn.classList.toggle('active',!ephemeralMode);
+      ephemeralModeBtn.setAttribute('aria-selected',String(ephemeralMode));
+      explorationModeBtn.setAttribute('aria-selected',String(!ephemeralMode));
       draw();
     }
     ephemeralModeBtn.onclick=()=>selectInteractionMode('ephemeral');
