@@ -1035,6 +1035,7 @@
 @media (min-width:861px){
   .panel > .field:nth-child(17){grid-column:7;grid-row:2}
   .panel > .field:nth-child(18){grid-column:1;grid-row:3}
+  .panel > .field-frets{grid-column:2 / -1!important;grid-row:3!important;min-width:0}
   .panel .fret-control-row{grid-template-columns:auto auto minmax(175px,.9fr) minmax(200px,1.2fr) auto;gap:7px;align-items:center}
   .panel .sound-controls{display:grid;grid-template-columns:68px minmax(0,1fr);grid-template-rows:auto auto;gap:0 10px;min-width:0;white-space:nowrap}
   .panel .sound-controls label{grid-column:1;grid-row:1;font-size:.58rem}.panel .sound-controls #volume{grid-column:1;grid-row:2;width:68px}.panel .sound-controls .string-sound-menu{grid-column:2;grid-row:1 / span 2}
@@ -1205,6 +1206,10 @@
           <optgroup label="Walking bass">
             <option value="walking-251">Walking · ii–V–I mayor</option>
             <option value="walking-blues">Walking · blues de 12 compases</option>
+          </optgroup>
+          <optgroup label="Progresiones de acordes">
+            <option value="progression-251">Progresión · ii–V–I mayor</option>
+            <option value="progression-blues">Progresión · blues de 12 compases</option>
           </optgroup>
         </select>
       </div>
@@ -2406,8 +2411,11 @@
         route=chooseExerciseRoute(ints);
       } else if(kind==='horizontal') route=buildHorizontalExercise();
       else if(kind.startsWith('scale-')) route=buildScalePattern(kind);
-      else if(kind.startsWith('walking-')) route=chooseWalkingRoute(walkingTargets(kind));
-      if(!kind.startsWith('walking-'))route=applyExerciseDirection(route);
+      else if(kind.startsWith('walking-')||kind.startsWith('progression-')) {
+        const walkingKind=kind.replace(/^progression-/,'walking-');
+        route=chooseWalkingRoute(walkingTargets(walkingKind));
+      }
+      if(!kind.startsWith('walking-')&&!kind.startsWith('progression-'))route=applyExerciseDirection(route);
       return addExerciseFingerings(route);
     }
     function exerciseName(){
@@ -4123,9 +4131,9 @@
       if(scoreFingeringStrategy&&s.fingeringStrategy)scoreFingeringStrategy.value=s.fingeringStrategy; else if(scoreFingeringStrategy)scoreFingeringStrategy.value='phrase';
       if(scorePhraseLength&&s.phraseLength)scorePhraseLength.value=String(s.phraseLength);
       if(scoreTechniqueMode&&s.techniqueMode)scoreTechniqueMode.value=s.techniqueMode;
-      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal','scale-full','scale-thirds','scale-ninth','scale-combined','walking-251','walking-blues'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
+      if(bassExerciseSel&&['none','r5o','arpeggio1','pentatonic','horizontal','scale-full','scale-thirds','scale-ninth','scale-combined','walking-251','walking-blues','progression-251','progression-blues'].includes(s.bassExercise))bassExerciseSel.value=s.bassExercise;
       const launchParams=new URLSearchParams(location.search),launchExercise=launchParams.get('exercise');
-      if(bassExerciseSel&&['walking-251','walking-blues','scale-full','scale-thirds','scale-ninth','scale-combined'].includes(launchExercise)){
+      if(bassExerciseSel&&['walking-251','walking-blues','progression-251','progression-blues','scale-full','scale-thirds','scale-ninth','scale-combined'].includes(launchExercise)){
         bassExerciseSel.value=launchExercise;if(!rootSel.value)rootSel.value='C';
       }
       if(rightHandPatternSel&&['free','im','mi','pick'].includes(s.rightHandPattern))rightHandPatternSel.value=s.rightHandPattern;
