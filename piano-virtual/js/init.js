@@ -14,7 +14,7 @@ currentLang = savedSettings.lang || 'es';
 currentKeyPc = savedSettings.key==='' || savedSettings.key==null ? null : parseInt(savedSettings.key,10);
 currentScaleMode = savedSettings.keyMode || 'major';
 showHandLeft = !!(savedSettings.hands&&savedSettings.hands[0]); showHandRight=!!(savedSettings.hands&&savedSettings.hands[1]);
-selectedHand=['left','right'].includes(savedSettings.selectedHand)?savedSettings.selectedHand:null;
+selectedHand=null;
 if(selectedHand)keyboardEl.dataset.playingHand=selectedHand;
 else delete keyboardEl.dataset.playingHand;
 midiVelocityCurve=savedSettings.velocityCurve||'normal'; currentMidiRange=RANGES[currentMode];
