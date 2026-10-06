@@ -1258,5 +1258,12 @@
   .panel > .field:nth-child(9){grid-column:1!important;grid-row:2!important;}
   .panel > .field:nth-child(10){grid-column:2!important;grid-row:2!important;}
   .panel > .field:nth-child(11){grid-column:3!important;grid-row:2!important;}
-  .panel > .field-frets{grid-column:1 / -1!important;grid-row:3!important;}
+  /* La barra de acciones comparte la segunda fila con los tres controles restantes. */
+  .panel > .field-frets{grid-column:4 / 8!important;grid-row:2!important;min-width:0;}
+  .panel .fret-control-row{
+    grid-template-columns:max-content max-content minmax(104px,1fr) minmax(150px,1.2fr);
+    gap:5px;
+  }
+  .panel .fret-control-row #chordNameBox{min-width:104px;max-width:none;}
+  .panel .sound-controls{min-width:0;padding-right:0;}
 }
