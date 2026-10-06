@@ -110,16 +110,31 @@ keySelect.addEventListener('change', function() {
 });
 keyModeSelect.addEventListener('change', function(){ currentScaleMode=this.value; drawKeySignature(); updateChordDisplay(); saveSettings(); });
 
-// ---------- TOGGLE DE MANOS (independientes) ----------
-handLeftBtn.addEventListener('click', function() {
-  showHandLeft = !showHandLeft;
-  keyboardEl.classList.toggle('show-hand-left', showHandLeft);
-  handLeftBtn.classList.toggle('active', showHandLeft);
-  handLeftBtn.setAttribute('aria-pressed', String(showHandLeft)); saveSettings();
-});
-handRightBtn.addEventListener('click', function() {
-  showHandRight = !showHandRight;
-  keyboardEl.classList.toggle('show-hand-right', showHandRight);
-  handRightBtn.classList.toggle('active', showHandRight);
-  handRightBtn.setAttribute('aria-pressed', String(showHandRight)); saveSettings();
-});
+// ---------- MANOS: selección para tocar + guías de registro independientes ----------
+function selectPlayingHand(hand){
+  selectedHand=hand;
+  handLeftBtn.classList.toggle('active',hand==='left');
+  handRightBtn.classList.toggle('active',hand==='right');
+  handLeftBtn.setAttribute('aria-pressed',String(hand==='left'));
+  handRightBtn.setAttribute('aria-pressed',String(hand==='right'));
+  keyboardEl.dataset.playingHand=hand;
+  saveSettings();
+}
+function toggleHandZone(hand){
+  if(hand==='left'){
+    showHandLeft=!showHandLeft;
+    keyboardEl.classList.toggle('show-hand-left',showHandLeft);
+    handLeftZoneBtn.classList.toggle('active',showHandLeft);
+    handLeftZoneBtn.setAttribute('aria-pressed',String(showHandLeft));
+  }else{
+    showHandRight=!showHandRight;
+    keyboardEl.classList.toggle('show-hand-right',showHandRight);
+    handRightZoneBtn.classList.toggle('active',showHandRight);
+    handRightZoneBtn.setAttribute('aria-pressed',String(showHandRight));
+  }
+  saveSettings();
+}
+handLeftBtn.addEventListener('click',()=>selectPlayingHand('left'));
+handRightBtn.addEventListener('click',()=>selectPlayingHand('right'));
+handLeftZoneBtn.addEventListener('click',()=>toggleHandZone('left'));
+handRightZoneBtn.addEventListener('click',()=>toggleHandZone('right'));

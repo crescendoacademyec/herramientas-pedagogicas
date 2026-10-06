@@ -7,7 +7,7 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
 <title>Piano Virtual Pro</title>
-<link rel="stylesheet" href="css/styles.css?v=20261006-volume-label-top">
+<link rel="stylesheet" href="css/styles.css?v=20261006-hand-assignment">
 <link rel="stylesheet" href="css/chord-bank.css?v=20261005-active-key-color">
 <link rel="stylesheet" href="../shared/header-metronome.css?v=20260925-beat-stop">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261005-instrument-ui">
@@ -200,14 +200,20 @@
 
     <div class="right-indicators">
       <div class="hand-toggle-group">
-        <button type="button" class="hand-btn" id="handLeftBtn" title="Resaltar el registro de la mano izquierda" aria-pressed="false">
-          <span class="hand-btn-label">MI</span>
-          <svg class="hand-icon-mirror" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6-7a1.5 1.5 0 0 1 3 0v7-6a1.5 1.5 0 0 1 3 0v7-4a1.5 1.5 0 0 1 3 0v7c0 4-2.5 7-6 7h-1c-2.2 0-3.6-1-4.8-2.6L4 14a1.6 1.6 0 0 1 2.4-2.1L8 14"/></svg>
-        </button>
-        <button type="button" class="hand-btn" id="handRightBtn" title="Resaltar el registro de la mano derecha" aria-pressed="false">
-          <span class="hand-btn-label">MD</span>
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6-7a1.5 1.5 0 0 1 3 0v7-6a1.5 1.5 0 0 1 3 0v7-4a1.5 1.5 0 0 1 3 0v7c0 4-2.5 7-6 7h-1c-2.2 0-3.6-1-4.8-2.6L4 14a1.6 1.6 0 0 1 2.4-2.1L8 14"/></svg>
-        </button>
+        <div class="hand-control">
+          <button type="button" class="hand-btn" id="handLeftBtn" title="Seleccionar mano izquierda para las notas tocadas" aria-pressed="false">
+            <span class="hand-btn-label">MI</span>
+            <svg class="hand-icon-mirror" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6-7a1.5 1.5 0 0 1 3 0v7-6a1.5 1.5 0 0 1 3 0v7-4a1.5 1.5 0 0 1 3 0v7c0 4-2.5 7-6 7h-1c-2.2 0-3.6-1-4.8-2.6L4 14a1.6 1.6 0 0 1 2.4-2.1L8 14"/></svg>
+          </button>
+          <button type="button" class="hand-zone-btn" id="handLeftZoneBtn" title="Mostrar u ocultar la zona sugerida de la mano izquierda" aria-label="Mostrar zona sugerida de mano izquierda" aria-pressed="false">Z</button>
+        </div>
+        <div class="hand-control">
+          <button type="button" class="hand-btn" id="handRightBtn" title="Seleccionar mano derecha para las notas tocadas" aria-pressed="false">
+            <span class="hand-btn-label">MD</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12V5a1.5 1.5 0 0 1 3 0v6-7a1.5 1.5 0 0 1 3 0v7-6a1.5 1.5 0 0 1 3 0v7c0 4-2.5 7-6 7h-1c-2.2 0-3.6-1-4.8-2.6L4 14a1.6 1.6 0 0 1 2.4-2.1L8 14"/></svg>
+          </button>
+          <button type="button" class="hand-zone-btn" id="handRightZoneBtn" title="Mostrar u ocultar la zona sugerida de la mano derecha" aria-label="Mostrar zona sugerida de mano derecha" aria-pressed="false">Z</button>
+        </div>
       </div>
       <div class="quick-select" id="qsInstrument">
         <button type="button" class="instrument-box" id="qsInstrumentBox" aria-haspopup="listbox" aria-expanded="false" title="Cambiar el sonido del piano">
@@ -409,20 +415,20 @@
 <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js">
 </script>
 
-<script src="js/core.js"></script>
+<script src="js/core.js?v=20261006-hand-assignment"></script>
 <script src="../shared/piano-chord-patterns.js"></script>
 <script src="../shared/piano-voicings.js"></script>
-<script src="js/audio.js?v=20260925-control-icons"></script>
+<script src="js/audio.js?v=20261006-hand-assignment"></script>
 <script src="../cuerdas-frotadas/js/live-staff.js"></script>
 <script src="js/staff.js"></script>
 <script src="js/midi.js"></script>
 <script src="js/score.js?v=20260925-beat-stop"></script>
 <script src="js/tutor.js?v=20260925-audit"></script>
-<script src="js/web.js"></script>
+<script src="js/web.js?v=20261006-hand-assignment"></script>
 <script src="../shared/rhythm-engine.js?v=20260918-locking-in"></script>
 <script src="js/metronome.js?v=20260925-beat-stop"></script>
 <script src="js/chords.js"></script>
-<script src="js/init.js"></script>
+<script src="js/init.js?v=20261006-hand-assignment"></script>
 <script src="js/chord-bank.js?v=20260918-jazz-scale-practice"></script>
 </body>
 </html>

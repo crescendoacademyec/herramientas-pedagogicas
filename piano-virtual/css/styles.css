@@ -31,7 +31,7 @@
 
     /* Colores de referencia mano izquierda / mano derecha */
     --hand-left-color: #7fb8e0;
-    --hand-right-color: #e0a97f;
+    --hand-right-color: #d4a84f;
   }
   *{box-sizing:border-box;}
   html,body{
@@ -421,6 +421,7 @@
   }
 
   .hand-toggle-group{ display:flex; gap:6px; }
+  .hand-control{position:relative;display:flex;flex:0 0 auto;}
   .hand-btn{
     display:flex;
     flex-direction: column;
@@ -445,6 +446,27 @@
   .hand-btn svg{ width:19px; height:19px; display:block; }
   .hand-icon-mirror{ transform: scaleX(-1); }
   .hand-btn:hover{ border-color: rgba(255,255,255,0.3); color:var(--text); }
+  .hand-zone-btn{
+    align-items:center;
+    background:rgba(17,16,14,.9);
+    border:1px solid rgba(255,255,255,.2);
+    border-radius:999px;
+    bottom:3px;
+    color:var(--muted);
+    cursor:pointer;
+    display:flex;
+    font-size:.54rem;
+    font-weight:900;
+    height:17px;
+    justify-content:center;
+    padding:0;
+    position:absolute;
+    right:3px;
+    width:17px;
+    z-index:2;
+  }
+  .hand-zone-btn:hover{border-color:var(--gold);color:var(--text);}
+  .hand-zone-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
   #handLeftBtn.active{
     background: var(--hand-left-color);
     border-color: var(--hand-left-color);
@@ -1124,10 +1146,10 @@
 
   /* Referencia visual de mano izquierda / mano derecha (split en Do central) — independientes */
   #keyboard.show-hand-left .white-key.hand-left{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-left-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
   #keyboard.show-hand-right .white-key.hand-right{
-    background:linear-gradient(180deg, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--active-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
+    background:linear-gradient(180deg, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 0%, color-mix(in srgb, var(--hand-right-color) 45%, var(--white-key)) 85%, var(--white-key-shadow) 100%);
   }
   #keyboard.show-hand-left .black-key.hand-left{
     background:linear-gradient(180deg, color-mix(in srgb, var(--hand-left-color) 55%, #3c3c3c) 0%, color-mix(in srgb, var(--hand-left-color) 55%, var(--black-key)) 60%, #000 100%);
@@ -1445,3 +1467,7 @@
 /* El color elegido gobierna toda tecla presionada, incluso con guías o partituras activas. */
 #keyboard .white-key.active { background: color-mix(in srgb, var(--active-color) 58%, white) !important; box-shadow: 0 0 12px var(--active-color) !important; }
 #keyboard .black-key.active { background: color-mix(in srgb, var(--active-color) 72%, black) !important; box-shadow: 0 0 12px var(--active-color) !important; }
+#keyboard .white-key.active.played-hand-left { background:color-mix(in srgb,var(--hand-left-color) 58%,white) !important; box-shadow:0 0 12px var(--hand-left-color) !important; }
+#keyboard .black-key.active.played-hand-left { background:color-mix(in srgb,var(--hand-left-color) 72%,black) !important; box-shadow:0 0 12px var(--hand-left-color) !important; }
+#keyboard .white-key.active.played-hand-right { background:color-mix(in srgb,var(--hand-right-color) 58%,white) !important; box-shadow:0 0 12px var(--hand-right-color) !important; }
+#keyboard .black-key.active.played-hand-right { background:color-mix(in srgb,var(--hand-right-color) 72%,black) !important; box-shadow:0 0 12px var(--hand-right-color) !important; }

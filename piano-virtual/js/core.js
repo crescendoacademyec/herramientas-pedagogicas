@@ -63,6 +63,7 @@ let keyElByMidi = {};
 let allNotes = [];
 let showHandLeft = false;
 let showHandRight = false;
+let selectedHand = 'right';
 let currentKeyPc = null; // pitch-class (0-11) de la tonalidad elegida, o null si no hay ninguna
 
 // ---------- DOM REFS ----------
@@ -155,6 +156,8 @@ function updateKeyLanguage(){
 }
 const handLeftBtn = document.getElementById('handLeftBtn');
 const handRightBtn = document.getElementById('handRightBtn');
+const handLeftZoneBtn = document.getElementById('handLeftZoneBtn');
+const handRightZoneBtn = document.getElementById('handRightZoneBtn');
 const hintText = document.getElementById('hintText');
 
 const chordNameEl = document.getElementById('chordName');
@@ -164,7 +167,7 @@ const chordSubEl = document.getElementById('chordSub');
 const SETTINGS_KEY = 'pianoVirtual_settings_v2';
 function readSettings(){ try{return JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')||{}}catch(e){return {}} }
 function saveSettings(){
-  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify({mode:currentMode,display:currentDisplay,lang:currentLang,key:keySelect.value,keyMode:currentScaleMode,color:document.getElementById('activeColor').value,volume:document.getElementById('volume').value,hands:[showHandLeft,showHandRight],instrument:currentInstrumentId||'acoustic_grand_piano',velocityCurve:midiVelocityCurve,metroBpm:document.getElementById('metroBpm')?.value||80,metroMeter:document.getElementById('metroMeter')?.value||4,metroPulse:document.getElementById('metroPulse')?.value||'auto',metroPlacement:document.getElementById('metroPlacement')?.value||'all',scoreHandMode:document.getElementById('scoreHandMode')?.value||'both',scoreCountIn:document.getElementById('scoreCountIn')?.value||'1',scoreMetroSync:!!document.getElementById('scoreMetroSync')?.checked,scoreLoopRepeats:document.getElementById('scoreLoopRepeats')?.value||'0',scoreAutoTempoStep:document.getElementById('scoreAutoTempoStep')?.value||'0',scoreAutoTempoEvery:document.getElementById('scoreAutoTempoEvery')?.value||'3',tutorMode:document.getElementById('tutorMode')?.value||'off',tutorHand:document.getElementById('tutorHand')?.value||'right'})) }catch(e){}
+  try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify({mode:currentMode,display:currentDisplay,lang:currentLang,key:keySelect.value,keyMode:currentScaleMode,color:document.getElementById('activeColor').value,volume:document.getElementById('volume').value,hands:[showHandLeft,showHandRight],selectedHand,instrument:currentInstrumentId||'acoustic_grand_piano',velocityCurve:midiVelocityCurve,metroBpm:document.getElementById('metroBpm')?.value||80,metroMeter:document.getElementById('metroMeter')?.value||4,metroPulse:document.getElementById('metroPulse')?.value||'auto',metroPlacement:document.getElementById('metroPlacement')?.value||'all',scoreHandMode:document.getElementById('scoreHandMode')?.value||'both',scoreCountIn:document.getElementById('scoreCountIn')?.value||'1',scoreMetroSync:!!document.getElementById('scoreMetroSync')?.checked,scoreLoopRepeats:document.getElementById('scoreLoopRepeats')?.value||'0',scoreAutoTempoStep:document.getElementById('scoreAutoTempoStep')?.value||'0',scoreAutoTempoEvery:document.getElementById('scoreAutoTempoEvery')?.value||'3',tutorMode:document.getElementById('tutorMode')?.value||'off',tutorHand:document.getElementById('tutorHand')?.value||'right'})) }catch(e){}
 }
 const savedSettings = readSettings();
 

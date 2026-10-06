@@ -14,6 +14,8 @@ currentLang = savedSettings.lang || 'es';
 currentKeyPc = savedSettings.key==='' || savedSettings.key==null ? null : parseInt(savedSettings.key,10);
 currentScaleMode = savedSettings.keyMode || 'major';
 showHandLeft = !!(savedSettings.hands&&savedSettings.hands[0]); showHandRight=!!(savedSettings.hands&&savedSettings.hands[1]);
+selectedHand=savedSettings.selectedHand==='left'?'left':'right';
+keyboardEl.dataset.playingHand=selectedHand;
 midiVelocityCurve=savedSettings.velocityCurve||'normal'; currentMidiRange=RANGES[currentMode];
 noteDisplaySelect.value=currentDisplay; noteLangSelect.value=currentLang; keySelect.value=currentKeyPc===null?'':String(currentKeyPc); keyModeSelect.value=currentScaleMode;
 velocityCurveSelect.value=midiVelocityCurve; if(typeof renderVelocityMenu==='function')renderVelocityMenu(); if(savedSettings.volume!=null)volumeSlider.value=savedSettings.volume; if(savedSettings.metroBpm)metroBpm.value=savedSettings.metroBpm; if(savedSettings.metroMeter)metroMeter.value=savedSettings.metroMeter; if(savedSettings.metroPulse)metroPulse.value=savedSettings.metroPulse; if(savedSettings.metroPlacement&&document.getElementById('metroPlacement'))document.getElementById('metroPlacement').value=savedSettings.metroPlacement;
@@ -22,8 +24,10 @@ scoreHandMode.value=savedSettings.scoreHandMode||'both';scoreCountIn.value=saved
 [['beginner',modeBeginnerBtn],['intermediate',modeIntermediateBtn],['pro',modeProBtn]].forEach(([m,b])=>{const on=m===currentMode;b.classList.toggle('active',on);b.setAttribute('aria-selected',String(on))});
 updateKeyLanguage();
 qsNotes.sync(); qsLang.sync(); qsKey.sync(); qsMode.sync();
-handLeftBtn.classList.toggle('active',showHandLeft); handRightBtn.classList.toggle('active',showHandRight);
-handLeftBtn.setAttribute('aria-pressed',String(showHandLeft)); handRightBtn.setAttribute('aria-pressed',String(showHandRight));
+handLeftBtn.classList.toggle('active',selectedHand==='left'); handRightBtn.classList.toggle('active',selectedHand==='right');
+handLeftBtn.setAttribute('aria-pressed',String(selectedHand==='left')); handRightBtn.setAttribute('aria-pressed',String(selectedHand==='right'));
+handLeftZoneBtn.classList.toggle('active',showHandLeft); handRightZoneBtn.classList.toggle('active',showHandRight);
+handLeftZoneBtn.setAttribute('aria-pressed',String(showHandLeft)); handRightZoneBtn.setAttribute('aria-pressed',String(showHandRight));
 
 [volumeSlider,document.getElementById('activeColor')].forEach(el=>el&&el.addEventListener('change',saveSettings));
 runPhase31SelfTests();

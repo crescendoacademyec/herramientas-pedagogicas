@@ -244,6 +244,8 @@ function setKeyActive(midi, on) {
   const el = keyElByMidi[midi];
   if (el) {
     el.classList.toggle('active', on);
+    el.classList.toggle('played-hand-left', on && selectedHand === 'left');
+    el.classList.toggle('played-hand-right', on && selectedHand === 'right');
     if (!on) el.classList.remove('score-note-left', 'score-note-right');
   }
 }
