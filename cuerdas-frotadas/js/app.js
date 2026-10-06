@@ -116,7 +116,7 @@
       cvs=$("board"),ctx=cvs.getContext("2d"),
       legendButtons=[...document.querySelectorAll("[data-tone-filter]")],
       clearSelectionBtn=$("clearSelectionBtn"),clearAllBtn=$("clearAllBtn"),ephemeralModeBtn=$("ephemeralModeBtn"),
-      chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),explorationModeBtn=$("chordNameBox"),
+      chordSymbolEl=$("chordSymbol"),chordQualityEl=$("chordQualityLabel"),explorationModeBtn=$("explorationModeBtn"),
       volumeSlider=$("volume"),soundSourceIndicator=$("soundSourceIndicator");
 
     Object.entries(INSTRUMENTS).forEach(([key,ins])=>instrumentSel.add(new Option(ins.label,key)));
@@ -2527,8 +2527,8 @@
         if(detected){ chordSymbolEl.textContent=NOTE[detected.root]+detected.def.suffix; chordQualityEl.textContent=detected.def.quality; }
         else { chordSymbolEl.textContent=`Notas: ${notes.map(n=>NOTE[n.pc]).join(' ')}`; chordQualityEl.textContent="No se reconoce un acorde con estas notas"; }
       } else {
-        chordSymbolEl.textContent="Modo exploración";
-        chordQualityEl.textContent="Haz clic en las posiciones para seleccionar notas";
+        chordSymbolEl.textContent=ephemeralMode?"Modo efímero":"Modo exploración";
+        chordQualityEl.textContent=ephemeralMode?"Borra cada nota 1,5 s después de tocarla":"Haz clic en las posiciones para seleccionar notas";
       }
     }
 
@@ -2603,9 +2603,9 @@
     function selectInteractionMode(mode){
       ephemeralMode=mode==='ephemeral';
       if(!ephemeralMode)clearEphemeralTimers();
-      ephemeralModeBtn.setAttribute('aria-pressed',String(ephemeralMode));
-      ephemeralModeBtn.classList.toggle('is-active',ephemeralMode);
-      explorationModeBtn.setAttribute('aria-pressed',String(!ephemeralMode));
+      ephemeralModeBtn.setAttribute('aria-checked',String(ephemeralMode));
+      explorationModeBtn.setAttribute('aria-checked',String(!ephemeralMode));
+      draw();
     }
     ephemeralModeBtn.onclick=()=>selectInteractionMode('ephemeral');
     explorationModeBtn.onclick=()=>selectInteractionMode('exploration');
