@@ -469,6 +469,7 @@
   }
   .hand-zone-btn:hover{border-color:var(--gold);color:var(--text);}
   .hand-zone-btn.active{background:var(--gold);border-color:var(--gold);color:var(--ink);}
+  #handLeftZoneBtn{left:3px;right:auto;}
   #handLeftBtn.active{
     background:var(--gold);
     border-color:var(--gold);
