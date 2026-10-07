@@ -122,6 +122,7 @@ setTimeout(initSoundFont, 100);
 // ---------- SUSTAIN ----------
 let sustainOn = false;
 const sustainedNotes = new Set();
+const visuallySustainedNotes = new Set();
 
 function stopSoundNow(midi) {
   const ctx = ensureCtx();
@@ -154,6 +155,19 @@ function stopSoundNow(midi) {
 function releaseSustainedNotes() {
   sustainedNotes.forEach(midi => stopSoundNow(midi));
   sustainedNotes.clear();
+  visuallySustainedNotes.forEach(midi => {
+    setKeyActive(midi, false);
+    setStaffNote(midi, false);
+  });
+  visuallySustainedNotes.clear();
+}
+
+function preserveSustainedVisualNotes(notes) {
+  notes.forEach(midi => {
+    visuallySustainedNotes.add(midi);
+    setKeyActive(midi, true);
+    setStaffNote(midi, true);
+  });
 }
 
 function setSustain(on) {
@@ -173,6 +187,11 @@ function noteOn(n, velocity = 127) {
   if (sustainedNotes.has(n.midi)) {
     sustainedNotes.delete(n.midi);
     stopSoundNow(n.midi);
+  }
+  if (visuallySustainedNotes.has(n.midi)) {
+    visuallySustainedNotes.delete(n.midi);
+    setKeyActive(n.midi, false);
+    setStaffNote(n.midi, false);
   }
   const ctx = ensureCtx();
   const now = ctx.currentTime;

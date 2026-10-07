@@ -56,9 +56,18 @@ function panic(){
   Object.keys(activeSources).map(Number).forEach(stopSoundNow);
   heldKeys.clear(); updateChordDisplay();
 }
+function pauseForFocusLoss(){
+  if(!sustainOn){panic();return}
+  const notes=new Set([...sustainedNotes,...Object.keys(activeSources).map(Number)]);
+  Object.keys(activeSources).map(Number).forEach(stopSoundNow);
+  sustainedNotes.clear();
+  heldKeys.clear();
+  preserveSustainedVisualNotes(notes);
+  updateChordDisplay();
+}
 panicBtn.addEventListener('click', panic);
-window.addEventListener('blur', panic);
-document.addEventListener('visibilitychange', ()=>{if(document.hidden) panic()});
+window.addEventListener('blur', pauseForFocusLoss);
+document.addEventListener('visibilitychange', ()=>{if(document.hidden) pauseForFocusLoss()});
 velocityCurveSelect.addEventListener('change',()=>{midiVelocityCurve=velocityCurveSelect.value;renderVelocityMenu();saveSettings()});
 renderVelocityMenu();
 
