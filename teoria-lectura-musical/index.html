@@ -20,10 +20,10 @@
   <title>Teoría y Lectura Musical | Crescendo Academy</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
-  <link rel="stylesheet" href="styles.css?v=20261001-chromatic-piano-v1">
+  <link rel="stylesheet" href="styles.css?v=20261008-learning-route-v1">
   <script defer src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-  <script defer src="data.js?v=20261001-course-path-v1"></script>
-  <script defer src="app.js?v=20261001-chromatic-fretboard-v3"></script>
+  <script defer src="data.js?v=20261008-learning-route-v1"></script>
+  <script defer src="app.js?v=20261008-learning-route-v1"></script>
 <link rel="stylesheet" href="../shared/course-actions.css">
 <link rel="stylesheet" href="../shared/course-interactions.css?v=20260927">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261007">
@@ -86,7 +86,7 @@
           </div>
           <p>Esta app funciona como prerrequisito conceptual de Armonía Funcional.</p>
           <div class="progress-bar"><div id="homeProgressBar"></div></div>
-          <small id="homeProgressText">0/21 unidades exploradas</small>
+          <small id="homeProgressText">0 unidades estudiadas</small>
           <div class="home-progress-detail" id="homeProgressDetail"></div>
         </aside>
       </div>
@@ -207,7 +207,7 @@
     <section id="evaluacionView" class="view hidden">
       <div class="evaluation-page">
         <p class="kicker">Evaluación y progreso</p>
-        <h2>Diagnóstico, avance y evaluación final</h2>
+        <h2>Diagnóstico y evaluaciones por nivel</h2>
         <p class="lead">Esta sección no sustituye la práctica de lectura: sirve para medir comprensión conceptual y orientar qué nivel conviene reforzar.</p>
 
         <div class="evaluation-summary" id="evaluationSummary"></div>
@@ -221,10 +221,24 @@
           </article>
 
           <article class="evaluation-card">
-            <span class="level-number">Al finalizar</span>
-            <h3>Evaluación final</h3>
-            <p>Comprueba los fundamentos del Nivel 1 y continúa con las prácticas guiadas de los niveles 2 y 3.</p>
-            <button class="primary-btn" id="startFinalEvalBtn" type="button">Iniciar evaluación final</button>
+            <span class="level-number">Nivel 1</span>
+            <h3>Fundamentos</h3>
+            <p>Comprueba la lectura, el ritmo y los conceptos musicales de la primera ruta.</p>
+            <button class="primary-btn" id="startFinalEvalBtn" type="button">Evaluar fundamentos</button>
+          </article>
+
+          <article class="evaluation-card">
+            <span class="level-number">Nivel 2</span>
+            <h3>Lectura aplicada</h3>
+            <p>Comprueba claves, lectura rítmica y reconocimiento de la partitura.</p>
+            <button class="primary-btn" id="startAppliedEvalBtn" type="button">Evaluar lectura aplicada</button>
+          </article>
+
+          <article class="evaluation-card">
+            <span class="level-number">Nivel 3</span>
+            <h3>Lectura avanzada</h3>
+            <p>Comprueba métrica, estructura y lectura en contextos más complejos.</p>
+            <button class="primary-btn" id="startAdvancedEvalBtn" type="button">Evaluar lectura avanzada</button>
           </article>
 
           <article class="evaluation-card">
