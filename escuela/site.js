@@ -1,5 +1,38 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const heroChangingText = document.getElementById('heroChangingText');
+const heroMessages = [
+  'Escucha una idea y hazla sonar.',
+  'Comprende lo que estás tocando.',
+  'Practica a tu ritmo y crea música.'
+];
+let heroMessageIndex = 0;
+if (heroChangingText && !reducedMotion.matches) {
+  window.setInterval(() => {
+    if (document.hidden) return;
+    heroChangingText.classList.add('is-changing');
+    window.setTimeout(() => {
+      heroMessageIndex = (heroMessageIndex + 1) % heroMessages.length;
+      heroChangingText.textContent = heroMessages[heroMessageIndex];
+      heroChangingText.classList.remove('is-changing');
+    }, 350);
+  }, 4400);
+}
+
+if ('IntersectionObserver' in window && !reducedMotion.matches) {
+  const reveals = document.querySelectorAll('.reveal');
+  document.documentElement.classList.add('motion-ready');
+  const revealObserver = new IntersectionObserver(entries => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      entry.target.classList.add('is-visible');
+      revealObserver.unobserve(entry.target);
+    }
+  }, { threshold: .1, rootMargin: '0px 0px -28px 0px' });
+  reveals.forEach(element => revealObserver.observe(element));
+}
+
 const header = document.getElementById('siteHeader');
 const updateHeader = () => header.classList.toggle('scrolled', window.scrollY > 16);
 window.addEventListener('scroll', updateHeader, { passive: true });
