@@ -309,6 +309,8 @@
             position: relative;
             z-index: 1;
         }
+        .hero-school-link{position:relative;z-index:1;display:flex;align-items:center;gap:9px;width:max-content;margin:20px 0 0 auto;color:#75501a;font-size:.87rem;font-weight:800;text-decoration:none;border-bottom:1px solid rgba(117,80,26,.4);padding-bottom:4px;transition:color .18s,border-color .18s}
+        .hero-school-link:hover{color:#382607;border-color:currentColor}
         @media (max-width: 768px) {
             .hero h1 {
                 white-space: normal;
@@ -317,6 +319,7 @@
                 max-width: none;
                 text-align: left;
             }
+            .hero-school-link{margin-left:0}
         }
 
         /* ---------- Tools grid (fondo blanco, tarjetas blancas) ---------- */
@@ -679,6 +682,7 @@
         </div>
         <nav class="header-nav-cluster" aria-label="Navegación principal">
             <a class="nav-section-link active" href="#herramientas" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Herramientas</span></a>
+            <a class="nav-section-link" href="escuela/" title="Conocer la escuela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20H3v-9.5Z"/><path d="M9 20v-7h6v7"/></svg><span>La escuela</span></a>
             <a class="nav-section-link" href="mi-crescendo/" title="Abrir Mi Crescendo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg><span>Mi Crescendo</span></a>
         </nav>
         <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" class="school-logo-link" aria-label="Crescendo Academy" title="Crescendo Academy"><img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="school-logo"></a>
@@ -699,6 +703,7 @@
             <div class="eyebrow">Recursos interactivos</div>
             <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
             <p>Piano, guitarra/ukelele/requinto, cuerdas frotadas, instrumentos folclóricos de cuerda, bajo, metrónomo, afinador, entrenamiento auditivo, editor de partituras y análisis avanzado de acordes — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
+            <a class="hero-school-link" href="escuela/">Conoce la escuela <span aria-hidden="true">↗</span></a>
         </div>
     </section>
 
