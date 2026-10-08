@@ -187,7 +187,7 @@ window.TLM_DATA = {
         { title:"Intervalo armónico", html:"<p>Cuando dos alturas suenan simultáneamente, la relación interválica ya puede estudiarse como un fenómeno armónico.</p>" },
         { title:"Tríada", html:"<p>La tríada organiza tres clases de altura relacionadas. Fundamental, tercera y quinta permiten distinguir configuraciones básicas mayores, menores, aumentadas y disminuidas.</p>" },
         { title:"De melodía a armonía", html:"<p>Una nota melódica puede funcionar como fundamental, tercera, quinta o extensión de un acorde. Comprender esta relación prepara el análisis armónico sin perder de vista la línea melódica.</p>" },
-        { title:"De acorde a función", html:"<p>En una tonalidad, los acordes no son objetos aislados: pueden adquirir estabilidad, preparación o dirección. Ese es el punto donde comienza la armonía funcional.</p><p><a class='external-cta' href='https://crescendoacademyec.github.io/herramientas-pedagogicas/armonia-funcional/' target='_blank' rel='noopener'>Continuar a Armonía Funcional →</a></p>" }
+        { title:"De acorde a función", html:"<p>En una tonalidad, los acordes no son objetos aislados: pueden adquirir estabilidad, preparación o dirección. Ese es el punto donde comienza la armonía funcional.</p><p><a class='external-cta' href='https://crescendoacademyec.github.io/inicio/armonia-funcional/' target='_blank' rel='noopener'>Continuar a Armonía Funcional →</a></p>" }
       ]
     }
   ]

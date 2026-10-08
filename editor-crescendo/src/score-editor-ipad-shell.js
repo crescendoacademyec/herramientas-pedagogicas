@@ -379,7 +379,7 @@
     rail.setAttribute("aria-label", "Áreas del editor");
     rail.setAttribute("role", "tablist");
     const brand = element("a", "ipad-navigation-brand");
-    brand.href = "https://crescendoacademyec.github.io/herramientas-pedagogicas/";
+    brand.href = "https://crescendoacademyec.github.io/inicio/";
     brand.title = "Volver a Herramientas";
     brand.setAttribute("aria-label", "Editor Crescendo");
     brand.append(
