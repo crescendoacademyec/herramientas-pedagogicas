@@ -1,954 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="shared/header-icons.css?v=20260919-flat-logo-v2">
-    <title>Herramientas Pedagógicas — Crescendo Academy</title>
-    <meta name="description" content="Herramientas interactivas públicas de Crescendo Academy: Piano Virtual, Guitarra Virtual (guitarra, ukelele y requinto), Cuerdas Frotadas, Folk Virtual, Bajo Virtual, Metrónomo, Afinador, Entrenamiento auditivo, Editor Crescendo y ChordSync Pro.">
-    <style>
-        :root {
-            --ink: #0a0a0a;
-            --ink-soft: #161616;
-            --panel: #141414;
-            --panel-2: #1c1c1c;
-            --paper: #f5f2eb;
-            --brass: #f5a623;
-            --brass-bright: #ffcc33;
-            --brass-dim: rgba(245, 166, 35, 0.32);
-            --brass-faint: rgba(245, 166, 35, 0.14);
-            --gold-gradient: linear-gradient(135deg, #ffd166 0%, #f5a623 55%, #f47920 100%);
-            --moss: #157a7a;
-            --wine: #ef7d1a;
-            --line: rgba(10, 10, 10, 0.08);
-            --text: #0a0a0a;
-            --muted: rgba(10, 10, 10, 0.65);
-            --muted-2: rgba(10, 10, 10, 0.45);
-            --whatsapp: #25D366;
-
-            /* Cards claras */
-            --card-bg: #ffffff;
-            --card-bg-2: #fff8ec;
-            --card-text: #0a0a0a;
-            --card-muted: rgba(10, 10, 10, 0.70);
-            --card-accent: #ef8e0f;
-            --card-icon-bg: rgba(245, 166, 35, 0.14);
-            --card-icon-border: rgba(245, 166, 35, 0.55);
-            --card-moss-text: #0e6e6e;
-            --card-moss-bg: rgba(21, 122, 122, 0.10);
-            --card-moss-border: rgba(21, 122, 122, 0.30);
-
-            /* Colores de acento por tarjeta (paleta del flyer) */
-            --c-blue: #4fb9de;
-            --c-gold: #f3b02e;
-            --c-orange: #f0791a;
-            --c-teal: #157a7a;
-            --c-purple: #9b6b9b;
-            --c-rose: #d9696b;
-            --c-sage: #6b8c7b;
-            --c-maroon: #b34a5c;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            background: var(--paper);
-            color: var(--text);
-            font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: var(--paper);
-        }
-
-        a {
-            color: inherit;
-        }
-
-        ::selection {
-            background: var(--brass-dim);
-            color: var(--text);
-        }
-
-        /* ---------- Header (oscuro) ---------- */
-        .site-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px clamp(20px, 5vw, 64px) 18px;
-            background: var(--ink);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-family: "Fraunces", Georgia, serif;
-            font-optical-sizing: auto;
-            font-weight: 480;
-            font-size: 1.08rem;
-            letter-spacing: 0.01em;
-            color: var(--paper);
-        }
-        .brand-mark {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 1px solid var(--brass);
-            background: var(--gold-gradient);
-            color: #0a0a0a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Fraunces", serif;
-            font-weight: 600;
-            font-size: 0.92rem;
-            letter-spacing: 0.02em;
-        }
-        .site-header .tag {
-            font-size: 0.7rem;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.40);
-        }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .social-bar {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .social-bar a {
-            color: rgba(255, 255, 255, 0.55);
-            display: inline-flex;
-            transition: color 0.18s ease, transform 0.18s ease;
-        }
-        .social-bar a:hover {
-            color: var(--brass-bright);
-            transform: translateY(-2px);
-        }
-        .social-bar svg {
-            display: block;
-            width: 18px;
-            height: 18px;
-        }
-
-        .school-logo-link {
-            display: inline-block;
-            line-height: 0;
-        }
-        .school-logo {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.20);
-            transition: border-color 0.18s ease, transform 0.18s ease;
-        }
-        .school-logo:hover {
-            transform: scale(1.06);
-            border-color: var(--brass);
-        }
-
-        @media (max-width: 640px) {
-            .site-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-            .header-right {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .site-header .tag {
-                display: none;
-            }
-        }
-
-        @font-face {
-            font-family: "Bravura Home";
-            src: local("Bravura"), url("editor-crescendo/assets/fonts/Bravura.otf") format("opentype");
-            font-display: block;
-        }
-
-        /* ---------- Hero (fondo blanco, pentagrama estable y claves Bravura) ---------- */
-        .hero {
-            position: relative;
-            padding: clamp(32px, 5vw, 64px) clamp(20px, 6vw, 64px) clamp(48px, 7vw, 72px);
-            overflow: hidden;
-            background: var(--paper);
-        }
-
-        .hero-inner {
-            position: relative;
-            max-width: none;
-            margin-left: 0;
-            z-index: 1;
-        }
-
-        /* Pentagrama de borde a borde: es hijo directo del hero, no del bloque de texto. */
-        .hero .staff {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            top: 67%;
-            height: 120px;
-            transform: translateY(-50%);
-            pointer-events: none;
-            opacity: 0.55;
-            z-index: 0;
-        }
-        .hero .staff-lines {
-            position: absolute;
-            inset: 0;
-            opacity: 0.5;
-            background:
-                linear-gradient(var(--brass), var(--brass)) 0 10px / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 30px / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 50px / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 70px / 100% 2px no-repeat,
-                linear-gradient(var(--brass), var(--brass)) 0 90px / 100% 2px no-repeat;
-        }
-        /* Cada clave se ancla independientemente a las líneas del pentagrama. */
-        .hero .staff .clefs {
-            position: absolute;
-            top: 0;
-            left: clamp(28px, 5vw, 72px);
-            width: 180px;
-            height: 100%;
-        }
-        .hero .staff .clef {
-            font-family: "Bravura Home", "Bravura", serif;
-            color: var(--brass);
-            opacity: 0.55;
-            line-height: 1;
-            user-select: none;
-        }
-        .hero .staff .clef-treble {
-            position: absolute;
-            /* La espiral de la clave de sol abraza la segunda línea desde abajo. */
-            top: 34px;
-            left: 66px;
-            font-size: 5rem;
-        }
-        .hero .staff .clef-bass {
-            position: absolute;
-            /* Los dos puntos de la clave de fa enmarcan la segunda línea desde arriba. */
-            top: -3px;
-            left: 0;
-            font-size: 4.3rem;
-        }
-        @media (max-width: 768px) {
-            .hero .staff .clefs {
-                display: none;
-            }
-            .hero-inner {
-                margin-left: 0;
-            }
-        }
-
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.7rem;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--brass);
-            margin-bottom: 18px;
-            position: relative;
-            z-index: 1;
-        }
-        .eyebrow::before {
-            content: "";
-            width: 26px;
-            height: 1px;
-            background: var(--brass);
-            display: inline-block;
-        }
-
-        .hero h1 {
-            font-family: "Fraunces", "Times New Roman", serif;
-            font-optical-sizing: auto;
-            font-weight: 480;
-            font-size: clamp(2rem, 4vw, 3.45rem);
-            line-height: 1.06;
-            margin: 0 0 18px;
-            color: var(--text);
-            max-width: none;
-            white-space: nowrap;
-            position: relative;
-            z-index: 1;
-        }
-        .hero h1 em {
-            font-style: italic;
-            font-weight: 420;
-            color: var(--brass);
-        }
-
-        .hero p {
-            color: var(--muted);
-            font-size: 1.05rem;
-            line-height: 1.7;
-            max-width: min(62ch, 58%);
-            text-align: right;
-            margin: 0 0 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        .hero-school-link{position:relative;z-index:1;display:flex;align-items:center;gap:9px;width:max-content;margin:20px 0 0 auto;color:#75501a;font-size:.87rem;font-weight:800;text-decoration:none;border-bottom:1px solid rgba(117,80,26,.4);padding-bottom:4px;transition:color .18s,border-color .18s}
-        .hero-school-link:hover{color:#382607;border-color:currentColor}
-        @media (max-width: 768px) {
-            .hero h1 {
-                white-space: normal;
-            }
-            .hero p {
-                max-width: none;
-                text-align: left;
-            }
-            .hero-school-link{margin-left:0}
-        }
-
-        /* ---------- Tools grid (fondo blanco, tarjetas blancas) ---------- */
-        .tools {
-            padding: 0 clamp(20px, 6vw, 64px) clamp(60px, 8vw, 96px);
-            max-width: 1200px;
-            margin: 0 auto;
-            background: var(--paper);
-        }
-
-        .tools-head {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 20px;
-            border-bottom: 1px solid var(--line);
-            padding-bottom: 14px;
-            margin-bottom: 36px;
-            flex-wrap: wrap;
-        }
-        .tools-head h2 {
-            font-family: "Fraunces", serif;
-            font-optical-sizing: auto;
-            font-weight: 480;
-            font-size: clamp(2.4rem, 6vw, 4rem);
-            line-height: 1.06;
-            letter-spacing: -0.025em;
-            color: var(--text);
-            margin: 0;
-        }
-        .tools-head span {
-            font-size: 0.76rem;
-            letter-spacing: 0.06em;
-            color: var(--muted-2);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Tarjetas editoriales Crescendo: misma familia visual de Mi Crescendo */
-        .card {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-            min-height: 420px;
-            padding: 0 18px 18px;
-            overflow: hidden;
-            isolation: isolate;
-            background: linear-gradient(180deg, #211e1b, #171513);
-            border: 1px solid rgba(255,255,255,.13);
-            border-radius: 16px;
-            text-decoration: none;
-            transition: transform .24s ease, border-color .24s ease, box-shadow .24s ease;
-            color: #fffaf0;
-            box-shadow: 0 22px 60px rgba(0,0,0,.25);
-        }
-        .card::before {
-            content: "";
-            width: calc(100% + 36px);
-            height: 210px;
-            flex: 0 0 210px;
-            margin: 0 -18px 3px;
-            background-color: #171411;
-            background-image: var(--tool-image);
-            background-position: center;
-            background-size: 105%;
-            background-repeat: no-repeat;
-            border-bottom: 1px solid color-mix(in srgb, var(--card-color, var(--brass)) 28%, transparent);
-            filter: saturate(.9) contrast(1.04) brightness(.88);
-            transition: background-size .55s cubic-bezier(.2,.75,.2,1), filter .35s ease;
-        }
-        .card::after {
-            content: "";
-            position: absolute;
-            inset: 115px 0 auto;
-            height: 96px;
-            background: linear-gradient(180deg, transparent, rgba(17,15,13,.88));
-            pointer-events: none;
-        }
-        .card:hover,
-        .card:focus-visible {
-            transform: translateY(-6px);
-            border-color: color-mix(in srgb, var(--card-color, var(--brass)) 58%, transparent);
-            box-shadow: 0 24px 54px rgba(0,0,0,.46), 0 0 0 1px color-mix(in srgb, var(--card-color, var(--brass)) 16%, transparent);
-            outline: none;
-        }
-        .card:hover::before,
-        .card:focus-visible::before {
-            background-size: 114%;
-            filter: saturate(1.05) contrast(1.05) brightness(1);
-        }
-        .card:focus-visible {
-            box-shadow: 0 0 0 2px var(--card-color, var(--brass)), 0 24px 54px rgba(0,0,0,.46);
-        }
-
-        .grid .card:nth-child(1) { --tool-image: url("mi-crescendo/assets/tools/piano.webp"); }
-        .grid .card:nth-child(2) { --tool-image: url("mi-crescendo/assets/tools/guitarra.webp"); }
-        .grid .card:nth-child(3) { --tool-image: url("mi-crescendo/assets/tools/cuerdas.webp"); }
-        .grid .card:nth-child(4) { --tool-image: url("mi-crescendo/assets/tools/folk.webp"); }
-        .grid .card:nth-child(5) { --tool-image: url("mi-crescendo/assets/tools/bajo.webp"); }
-        .grid .card:nth-child(6) { --tool-image: url("mi-crescendo/assets/tools/metronomo.webp"); }
-        .grid .card:nth-child(7) { --tool-image: url("mi-crescendo/assets/tools/afinador.webp"); }
-        .grid .card:nth-child(8) { --tool-image: url("mi-crescendo/assets/tools/ear-training.webp"); }
-        .grid .card:nth-child(9) { --tool-image: url("mi-crescendo/assets/tools/velocidad-tono.webp"); }
-        .grid .card:nth-child(10) { --tool-image: url("mi-crescendo/assets/tools/frecuencias.webp"); }
-        .grid .card:nth-child(11) { --tool-image: url("mi-crescendo/assets/tools/chordsync.webp"); }
-        .grid .card:nth-child(12) { --tool-image: url("mi-crescendo/assets/tools/editor.webp"); }
-        .grid .card:nth-child(13) { --tool-image: url("mi-crescendo/assets/tools/guitarra.webp"); }
-
-        .card--blue {
-            --card-color: var(--c-blue);
-        }
-        .card--gold {
-            --card-color: var(--c-gold);
-        }
-        .card--orange {
-            --card-color: var(--c-orange);
-        }
-        .card--teal {
-            --card-color: var(--c-teal);
-        }
-        .card--purple {
-            --card-color: var(--c-purple);
-        }
-        .card--rose {
-            --card-color: var(--c-rose);
-        }
-        .card--sage {
-            --card-color: var(--c-sage);
-        }
-        .card--maroon {
-            --card-color: var(--c-maroon);
-        }
-
-        .card-icon {
-            display: none;
-        }
-        .card-icon svg {
-            width: 21px;
-            height: 21px;
-            stroke-width: 2;
-        }
-
-        .card h3 {
-            font-family: "Fraunces", serif;
-            font-optical-sizing: auto;
-            font-weight: 460;
-            font-size: 1.26rem;
-            color: #fffaf0;
-            margin: 0;
-        }
-        .card p {
-            color: rgba(255,250,240,.68);
-            font-size: 0.92rem;
-            line-height: 1.65;
-            margin: 0;
-            flex-grow: 1;
-        }
-
-        .card .cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 0.8rem;
-            letter-spacing: 0.02em;
-            color: var(--card-color, var(--card-accent));
-            margin-top: 2px;
-            font-weight: 600;
-        }
-        .card .cta svg {
-            width: 14px;
-            height: 14px;
-            transition: transform 0.2s ease;
-        }
-        .card:hover .cta svg {
-            transform: translateX(4px);
-        }
-
-        .card .tag-pill {
-            position: static;
-            align-self: flex-start;
-            font-size: 0.6rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--card-color, var(--brass));
-            background: rgba(10,9,8,.36);
-            border: 1px solid color-mix(in srgb, var(--card-color, var(--brass)) 42%, transparent);
-            padding: 4px 10px;
-            border-radius: 999px;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .card,
-            .card::before,
-            .card .cta svg { transition: none; }
-            .card:hover,
-            .card:focus-visible { transform: none; }
-            .card:hover::before,
-            .card:focus-visible::before { background-size: 105%; }
-        }
-
-        /* ---------- WhatsApp Float ---------- */
-        .whatsapp-float {
-            position: fixed;
-            bottom: 28px;
-            right: 28px;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--whatsapp);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.45);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            z-index: 999;
-            text-decoration: none;
-            color: white;
-        }
-        .whatsapp-float:hover {
-            transform: scale(1.07);
-            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
-        }
-        .whatsapp-float svg {
-            width: 30px;
-            height: 30px;
-            fill: white;
-        }
-
-        @media (max-width: 640px) {
-            .whatsapp-float {
-                bottom: 18px;
-                right: 18px;
-                width: 50px;
-                height: 50px;
-            }
-            .whatsapp-float svg {
-                width: 26px;
-                height: 26px;
-            }
-        }
-
-        /* ---------- Footer (oscuro) ---------- */
-        .site-footer {
-            padding: 22px clamp(20px, 6vw, 64px) 32px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            background: var(--ink);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            color: rgba(255, 255, 255, 0.40);
-            font-size: 0.78rem;
-        }
-        .site-footer .brand-line {
-            font-family: "Fraunces", serif;
-            color: rgba(255, 255, 255, 0.65);
-            letter-spacing: 0.01em;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .card,
-            .social-bar a,
-            .school-logo,
-            .whatsapp-float {
-                transition: none;
-            }
-        }
-
-        /* Distribución del catálogo público */
-        .grid .card:nth-child(7) {
-            grid-column: 1 / 2;
-        }
-        .grid .card:nth-child(8) {
-            grid-column: 2 / 3;
-        }
-        .grid .card:nth-child(9) {
-            grid-column: 3 / 4;
-        }
-        @media (max-width: 900px) {
-            .grid .card:nth-child(7),
-            .grid .card:nth-child(8),
-            .grid .card:nth-child(9),
-            .grid .card:nth-child(10),
-            .grid .card:nth-child(11),
-            .grid .card:nth-child(12),
-            .grid .card:nth-child(13),
-            .grid .card:nth-child(14) {
-                grid-column: auto;
-            }
-        }
-
-        /* ===== Header Crescendo unificado ===== */
-        html{scroll-behavior:smooth}
-        .site-header{
-            position:sticky;top:0;z-index:80;
-            display:grid;grid-template-columns:minmax(0,1fr) auto;
-            align-items:center;gap:18px;
-            padding:13px clamp(18px,4vw,56px);
-            background:rgba(18,17,15,.90);
-            -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
-            border-bottom:1px solid rgba(255,255,255,.12);
-            transition:background .4s ease,box-shadow .4s ease,border-color .4s ease;
-        }
-        .site-header.scrolled{background:rgba(18,17,15,.72);box-shadow:0 8px 28px rgba(0,0,0,.18)}
-        @supports (backdrop-filter:blur(16px)){
-            .site-header.scrolled{background:rgba(18,17,15,.52);-webkit-backdrop-filter:blur(22px) saturate(150%);backdrop-filter:blur(22px) saturate(150%);border-bottom-color:rgba(255,255,255,.08)}
-        }
-        @media (prefers-reduced-motion:reduce){.site-header{transition:none}}
-        .site-header .brand{justify-self:start;font-family:Georgia,"Times New Roman",serif;font-size:1.28rem;font-weight:900;color:#fffaf0}
-        .site-header .brand-mark{width:40px;height:40px;border:1px solid rgba(212,168,79,.42);background:rgba(212,168,79,.12);color:#d4a84f;font-size:1rem}
-        .header-right{justify-self:end;display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:nowrap}
-        .site-header .tag{display:none}
-        .social-bar{display:flex;align-items:center;gap:7px;flex-wrap:nowrap}
-        .social-bar a{
-            display:inline-grid;place-items:center;width:38px;height:38px;flex:0 0 38px;
-            border:1px solid rgba(255,255,255,.14);border-radius:50%;
-            background:rgba(255,255,255,.035);color:rgba(255,250,240,.72);
-            text-decoration:none;transition:color .18s,border-color .18s,background .18s,transform .12s,box-shadow .18s;
-        }
-        .social-bar a:hover{color:#f0b876;border-color:rgba(240,184,118,.62);background:rgba(217,138,61,.10);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.24)}
-        .social-bar svg{width:19px;height:19px;display:block}
-        .header-nav-cluster{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(0,0,0,.28);margin-left:3px}
-        .nav-section-link{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border-radius:999px;color:rgba(255,250,240,.68);text-decoration:none;font-size:.70rem;font-weight:750;letter-spacing:.025em;white-space:nowrap;transition:color .18s,background .18s}
-        .nav-section-link svg{width:16px;height:16px;flex:0 0 16px}
-        .nav-section-link:hover{background:rgba(212,168,79,.13);color:#f0b876}
-        .nav-section-link.active{background:rgba(212,168,79,.18);color:#f0b876;box-shadow:inset 0 0 0 1px rgba(212,168,79,.18)}
-        .school-logo-link{display:inline-grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border:1px solid rgba(212,168,79,.38);border-radius:50%;overflow:hidden;background:rgba(255,255,255,.035);margin-left:2px;line-height:0;transition:border-color .18s,background .18s,transform .12s,box-shadow .18s}
-        .school-logo{width:31px;height:31px;border:0;border-radius:50%;object-fit:cover;transition:none}
-        .school-logo-link:hover{border-color:rgba(240,184,118,.68);background:rgba(217,138,61,.10);transform:translateY(-2px);box-shadow:0 5px 18px rgba(0,0,0,.24)}
-        @media(max-width:980px){.site-header{grid-template-columns:1fr;justify-items:center}.site-header .brand{justify-self:center}.header-right{justify-self:center;flex-wrap:wrap;justify-content:center}}
-        @media(max-width:700px){.site-header{position:relative;display:flex;flex-direction:column;gap:10px;padding:12px 14px}.header-right{width:100%;justify-content:center;gap:7px}.social-bar{max-width:100%;overflow-x:auto;padding:2px;scrollbar-width:none}.social-bar::-webkit-scrollbar{display:none}.nav-section-link{padding:0 10px}}
-        @media(max-width:430px){.social-bar a{width:36px;height:36px;flex-basis:36px}.social-bar svg{width:18px;height:18px}.nav-section-link span{font-size:.65rem}}
-
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11110f">
+  <meta name="description" content="Conoce la forma de aprender música en Crescendo Academy: escucha, lectura, práctica instrumental y recursos interactivos conectados con el trabajo de clase.">
+  <title>La escuela | Crescendo Academy</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="escuela/styles.css?v=20261008-1">
 </head>
 <body>
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <header class="site-header">
-    <div class="brand"><span class="brand-mark">CA</span><span>Crescendo Academy</span></div>
-    <div class="header-right">
-        <div class="social-bar">
-            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></a>
-            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Correo electrónico" title="Correo electrónico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
-            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener noreferrer" aria-label="Hotmart" title="Hotmart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg></a>
-            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
-        </div>
-        <nav class="header-nav-cluster" aria-label="Navegación principal">
-            <a class="nav-section-link active" href="#herramientas" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Herramientas</span></a>
-            <a class="nav-section-link" href="escuela/" title="Conocer la escuela"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 4l9 6.5V20H3v-9.5Z"/><path d="M9 20v-7h6v7"/></svg><span>La escuela</span></a>
-            <a class="nav-section-link" href="mi-crescendo/" title="Abrir Mi Crescendo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg><span>Mi Crescendo</span></a>
-        </nav>
-        <a href="https://crescendoacademyec.github.io/herramientas-pedagogicas/" class="school-logo-link" aria-label="Crescendo Academy" title="Crescendo Academy"><img src="https://crescendoacademyec.github.io/herramientas-pedagogicas/logo_white.png" alt="Logo Crescendo Academy" class="school-logo"></a>
+  <header class="site-header" id="siteHeader">
+    <div class="header-inner">
+      <a class="brand" href="./" aria-label="Crescendo Academy, ir al inicio">
+        <img src="logo_white.png" alt="" width="38" height="38">
+        <span>Crescendo <em>Academy</em></span>
+      </a>
+      <nav class="main-nav" aria-label="Navegación principal">
+        <a href="#metodo">Método</a>
+        <a href="#recorridos">Recorridos</a>
+        <a href="#aula">Aula digital</a>
+        <a href="herramientas/">Herramientas</a>
+      </nav>
+      <a class="header-contact" href="#contacto">Hablemos <span aria-hidden="true">↗</span></a>
     </div>
-</header>
+  </header>
 
-    <section class="hero">
-        <!-- Cinco líneas de borde a borde y claves SMuFL Bravura. -->
-        <div class="staff" aria-hidden="true">
-            <div class="staff-lines"></div>
-            <div class="clefs" aria-hidden="true">
-                <span class="clef clef-bass">&#xE062;</span>
-                <span class="clef clef-treble">&#xE050;</span>
-            </div>
+  <main id="contenido">
+    <section class="hero section-wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span> La escuela de música</p>
+        <h1 id="hero-title">La música se aprende <em>haciéndola sonar.</em></h1>
+        <p class="hero-lead">En Crescendo Academy conectamos lo que escuchas, lo que comprendes y lo que tocas. Cada concepto puede convertirse en una experiencia musical, dentro y fuera de clase.</p>
+        <div class="hero-actions">
+          <a class="button button-gold" href="#metodo">Conoce nuestra forma de aprender <span aria-hidden="true">→</span></a>
+          <a class="text-link" href="#contacto">Quiero conversar sobre clases <span aria-hidden="true">↗</span></a>
         </div>
-        <div class="hero-inner">
-
-            <div class="eyebrow">Recursos interactivos</div>
-            <h1>Instrumentos <em>virtuales</em> para tus clases</h1>
-            <p>Piano, guitarra/ukelele/requinto, cuerdas frotadas, instrumentos folclóricos de cuerda, bajo, metrónomo, afinador, entrenamiento auditivo, editor de partituras y análisis avanzado de acordes — todo listo para proyectar en el aula, sin instalar nada. Elige una herramienta para empezar.</p>
-            <a class="hero-school-link" href="escuela/">Conoce la escuela <span aria-hidden="true">↗</span></a>
+        <div class="hero-note"><span class="note-dot" aria-hidden="true"></span> Aprender, practicar y volver a escuchar.</div>
+      </div>
+      <div class="hero-art" aria-label="Un recorrido musical: escuchar, comprender, tocar y crear">
+        <div class="art-top"><span>CRESCENDO / EN PRÁCTICA</span><span>01 — 04</span></div>
+        <div class="notation" aria-hidden="true">
+          <div class="staff-lines"></div>
+          <span class="note n1">♪</span><span class="note n2">♩</span><span class="note n3">♫</span>
+          <span class="sound-wave wave-1"></span><span class="sound-wave wave-2"></span><span class="sound-wave wave-3"></span>
         </div>
+        <div class="art-steps">
+          <div><span>01</span><strong>Escucha</strong><small>Reconoce el sonido</small></div>
+          <div><span>02</span><strong>Comprende</strong><small>Encuentra la idea</small></div>
+          <div><span>03</span><strong>Toca</strong><small>Llévala al instrumento</small></div>
+          <div><span>04</span><strong>Crea</strong><small>Úsala con intención</small></div>
+        </div>
+        <p class="art-caption">Del primer sonido a una decisión musical propia.</p>
+      </div>
     </section>
 
-    <section class="tools" id="herramientas">
-        <div class="tools-head">
-            <h2>Herramientas disponibles</h2>
-            <span>13 herramientas</span>
-        </div>
+    <div class="marquee" aria-label="Áreas de aprendizaje"><div class="marquee-inner"><span>ESCUCHA</span><i>✦</i><span>LECTURA</span><i>✦</i><span>RITMO</span><i>✦</i><span>INSTRUMENTO</span><i>✦</i><span>CREACIÓN</span></div></div>
 
-        <div class="grid">
-
-            <!-- Piano Virtual -->
-            <a class="card card--teal" href="piano-virtual/">
-                <span class="tag-pill">Teclado</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <rect x="3" y="5" width="18" height="14" rx="1.2"/>
-                        <line x1="7" y1="5" x2="7" y2="14"/>
-                        <line x1="11" y1="5" x2="11" y2="14"/>
-                        <line x1="15" y1="5" x2="15" y2="14"/>
-                        <line x1="19" y1="5" x2="19" y2="14"/>
-                    </svg>
-                </div>
-                <h3>Piano Virtual</h3>
-                <p>Piano interactivo con sonido de SoundFont o samples propios, lectura de partituras MusicXML/PDF y seguimiento de la partitura mientras suena.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Guitarra Virtual (antes Diapasón Virtual) -->
-            <a class="card card--orange" href="diapason-virtual/">
-                <span class="tag-pill">Cuerdas Percutidas</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="6" y1="5" x2="6" y2="19"/>
-                        <line x1="10" y1="5" x2="10" y2="19"/>
-                        <line x1="14" y1="5" x2="14" y2="19"/>
-                        <line x1="18" y1="5" x2="18" y2="19"/>
-                    </svg>
-                </div>
-                <h3>Guitarra Virtual</h3>
-                <p>Diapasón interactivo para guitarra, ukelele y requinto (afinación A-D-G-C-E-A) en una sola herramienta. Estudia escalas, acordes, posiciones y sigue partituras MusicXML/PDF con reproducción sincronizada.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Cuerdas Frotadas -->
-            <a class="card card--gold" href="cuerdas-frotadas/">
-                <span class="tag-pill">Cuerdas Frotadas</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <path d="M6 4c4 3 8 3 12 0"/>
-                        <path d="M6 20c4-3 8-3 12 0"/>
-                        <line x1="9" y1="4" x2="9" y2="20"/>
-                        <line x1="15" y1="4" x2="15" y2="20"/>
-                    </svg>
-                </div>
-                <h3>Cuerdas Frotadas</h3>
-                <p>Diapasón de cuerdas frotadas — violín, viola, violonchelo y contrabajo — con líneas guía y posiciones para practicar afinación y digitación.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Folk Virtual -->
-            <a class="card card--purple" href="folk-virtual/">
-                <span class="tag-pill">Cuerdas Folclóricas</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <line x1="4" y1="10" x2="20" y2="10"/>
-                        <line x1="4" y1="14" x2="20" y2="14"/>
-                        <line x1="7" y1="6" x2="7" y2="18"/>
-                        <line x1="11" y1="6" x2="11" y2="18"/>
-                        <line x1="15" y1="6" x2="15" y2="18"/>
-                        <line x1="19" y1="6" x2="19" y2="18"/>
-                    </svg>
-                </div>
-                <h3>Folk Virtual</h3>
-                <p>Diapasón para instrumentos folclóricos de cuerda: tiple, tres cubano (afinaciones E-B-G y E-C-G) y cuatro venezolano. Estudia escalas, acordes y posiciones con la misma interfaz del Diapasón Virtual.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Bajo Virtual (sustituye a Editor de partituras) -->
-            <a class="card card--blue" href="bass-virtual/">
-                <span class="tag-pill">Bajo</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <line x1="4" y1="12" x2="20" y2="12"/>
-                        <line x1="6" y1="6" x2="6" y2="18"/>
-                        <line x1="9" y1="6" x2="9" y2="18"/>
-                        <line x1="12" y1="6" x2="12" y2="18"/>
-                        <line x1="15" y1="6" x2="15" y2="18"/>
-                        <line x1="18" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </div>
-                <h3>Bajo Virtual</h3>
-                <p>Diapasón de bajo eléctrico de 4 y 5 cuerdas con trastes reales, puntos guía y sonido de bajo. Explora escalas, arpegios y posiciones.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Metrónomo -->
-            <a class="card card--orange" href="metronomo/">
-                <span class="tag-pill">Ritmo</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <circle cx="12" cy="12" r="9"/>
-                        <polyline points="12,6 12,12 16,14"/>
-                    </svg>
-                </div>
-                <h3>Metrónomo</h3>
-                <p>Herramienta para estudiar pulso, subdivisiones, swing, claves, polirritmias, polimetrías y rutinas de práctica con control fino.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Afinador -->
-            <a class="card card--sage" href="afinador/">
-                <span class="tag-pill">Afinación</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <circle cx="12" cy="12" r="9"/>
-                        <path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.5 5.5l2.8 2.8M15.7 15.7l2.8 2.8M18.5 5.5l-2.8 2.8M8.3 15.7l-2.8 2.8"/>
-                    </svg>
-                </div>
-                <h3>Afinador</h3>
-                <p>Detección de tono por micrófono en tiempo real. Afina guitarra, ukelele, requinto, violín, violonchelo y bajo con una interfaz visual clara y precisa.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Entrenamiento auditivo -->
-            <a class="card card--teal" href="ear-training/">
-                <span class="tag-pill">Audición</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <path d="M12 4a8 8 0 0 1 8 8 8 8 0 0 1-8 8 8 8 0 0 1-8-8 8 8 0 0 1 8-8z"/>
-                        <path d="M14 10a2 2 0 1 1-2 2 2 2 0 0 1 2-2z"/>
-                        <path d="M8 10a2 2 0 1 1-2 2 2 2 0 0 1 2-2z"/>
-                    </svg>
-                </div>
-                <h3>Entrenamiento auditivo</h3>
-                <p>8 niveles progresivos para desarrollar el oído musical: identificación de intervalos, acordes, progresiones armónicas, dominantes secundarios y modulaciones.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Cambiador de Velocidad y Tono -->
-            <a class="card card--purple" href="speed/">
-                <span class="tag-pill">Práctica</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <path d="M9 7v10l8-5-8-5z"/>
-                        <path d="M19 8v8M22 10v4"/>
-                    </svg>
-                </div>
-                <h3>Cambiador de Velocidad y Tono</h3>
-                <p>Cambia el tempo y el tono de un audio de forma independiente, marca un tramo en loop para estudiarlo y exporta el resultado en WAV, AIFF, MP3 o M4A.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Tabla de Frecuencias Interactiva -->
-            <a class="card card--sage" href="tabla-frecuencias/">
-                <span class="tag-pill">Referencia</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <path d="M3 20V9M8 20V4M13 20v-7M18 20V7M22 20v-3"/>
-                    </svg>
-                </div>
-                <h3>Tabla de Frecuencias Interactiva</h3>
-                <p>Explora el rango de cada instrumento y la voz en el espectro audible, y haz clic sobre cualquiera para ver recomendaciones de ecualización: qué cortar, qué realzar y por qué.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- ChordSync Pro (nueva herramienta) -->
-            <a class="card card--blue" href="chordsyncpro/">
-                <span class="tag-pill">Análisis</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <circle cx="7" cy="15" r="2.5" fill="currentColor"/>
-                        <circle cx="12" cy="8" r="2.5" fill="currentColor"/>
-                        <circle cx="17" cy="15" r="2.5" fill="currentColor"/>
-                        <line x1="7" y1="15" x2="12" y2="8" stroke="currentColor" stroke-width="1.6"/>
-                        <line x1="12" y1="8" x2="17" y2="15" stroke="currentColor" stroke-width="1.6"/>
-                    </svg>
-                </div>
-                <h3>ChordSync Pro</h3>
-                <p>Detecta automáticamente tonalidad, acordes, tempo y compás de una canción. Sincroniza la reproducción con la progresión, o usa el micrófono para análisis en vivo. Todo en el navegador.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-            <!-- Editor Crescendo -->
-            <a class="card card--gold" href="editor-crescendo/">
-                <span class="tag-pill">Notación</span>
-                <div class="card-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                        <path d="M4 19h16"/>
-                        <path d="M6 15.5 15.5 6l2.5 2.5L8.5 18H6v-2.5z"/>
-                        <circle cx="9" cy="5.5" r="1.3"/>
-                        <circle cx="13" cy="5.5" r="1.3"/>
-                    </svg>
-                </div>
-                <h3>Editor Crescendo</h3>
-                <p>Editor de partituras para escribir, organizar y reproducir ejercicios musicales: notación, cifrado, texto, teclado MIDI y exportación a MusicXML.</p>
-                <span class="cta">Abrir herramienta
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-                </span>
-            </a>
-
-        </div>
+    <section class="method section-wrap" id="metodo" aria-labelledby="method-title">
+      <div class="section-heading">
+        <div><p class="eyebrow dark-eyebrow"><span class="eyebrow-line"></span> Una idea, varias formas de vivirla</p><h2 id="method-title">Entender la música también es <em>escucharla y tocarla.</em></h2></div>
+        <p>La teoría tiene sentido cuando ayuda a reconocer lo que sucede en una canción, resolver una dificultad y expresar una idea. Por eso el estudio se conecta con ejercicios, instrumentos y repertorio.</p>
+      </div>
+      <div class="method-grid">
+        <article class="method-card"><span class="card-number">01 / ESCUCHAR</span><div class="method-symbol" aria-hidden="true">◉</div><h3>Primero, el oído</h3><p>Identificar pulso, alturas, intervalos y relaciones armónicas antes de depender solo de una explicación escrita.</p></article>
+        <article class="method-card"><span class="card-number">02 / COMPRENDER</span><div class="method-symbol" aria-hidden="true">𝄞</div><h3>Después, ponerle nombre</h3><p>La lectura y la teoría ayudan a ordenar lo escuchado: figuras, escalas, acordes, funciones y formas.</p></article>
+        <article class="method-card"><span class="card-number">03 / APLICAR</span><div class="method-symbol" aria-hidden="true">♬</div><h3>Finalmente, hacer música</h3><p>Pasar la idea al instrumento, probarla en una obra y volver a escuchar el resultado para seguir mejorando.</p></article>
+      </div>
     </section>
 
-    <footer class="site-footer">
-        <span class="brand-line">Crescendo Academy</span>
-        <span id="footerYear"></span>
-    </footer>
+    <section class="journeys" id="recorridos" aria-labelledby="journeys-title">
+      <div class="section-wrap journeys-inner">
+        <div class="journeys-intro"><p class="eyebrow"><span class="eyebrow-line"></span> Recorridos de aprendizaje</p><h2 id="journeys-title">Hay más de una puerta de entrada a la música.</h2><p>Estas áreas organizan los recursos de Crescendo. No son requisitos rígidos: se pueden combinar según lo que necesitas trabajar.</p></div>
+        <div class="journey-list">
+          <article class="journey"><span class="journey-index">01</span><div><h3>Primeros fundamentos</h3><p>Descubrir el pulso, escuchar con atención, reconocer notas y comenzar a leer música.</p><div class="journey-tags"><span>Oído</span><span>Ritmo</span><span>Lectura</span></div></div><a href="ear-training/" aria-label="Explorar entrenamiento auditivo">↗</a></article>
+          <article class="journey"><span class="journey-index">02</span><div><h3>Instrumento y práctica</h3><p>Ver, escuchar y probar posiciones, digitaciones, escalas y acordes sobre instrumentos virtuales.</p><div class="journey-tags"><span>Piano</span><span>Cuerdas</span><span>Bajo</span></div></div><a href="herramientas/#herramientas" aria-label="Explorar instrumentos virtuales">↗</a></article>
+          <article class="journey"><span class="journey-index">03</span><div><h3>Comprender para crear</h3><p>Relacionar melodía y armonía, trabajar una progresión, escribir, analizar e improvisar con intención.</p><div class="journey-tags"><span>Armonía</span><span>Notación</span><span>Creación</span></div></div><a href="editor-crescendo/" aria-label="Explorar Editor Crescendo">↗</a></article>
+        </div>
+      </div>
+    </section>
 
-    <!-- WhatsApp Float Button -->
-    <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Contactar por WhatsApp">
-        <svg viewBox="0 0 24 24" fill="currentColor">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
-    </a>
+    <section class="digital section-wrap" id="aula" aria-labelledby="digital-title">
+      <div class="section-heading"><div><p class="eyebrow dark-eyebrow"><span class="eyebrow-line"></span> El trabajo continúa</p><h2 id="digital-title">Un aula que acompaña <em>la práctica.</em></h2></div><p>Los recursos digitales sirven para volver sobre una idea, experimentar a tu ritmo y tener más claro qué practicar entre encuentros.</p></div>
+      <div class="digital-grid">
+        <article class="digital-feature">
+          <div class="feature-top"><span>MI CRESCENDO</span><span class="feature-spark" aria-hidden="true">✦</span></div>
+          <h3>Un lugar para seguir tu proceso.</h3>
+          <p>El portal reúne clases, tareas, repertorio, objetivos y recursos asignados. El alumno puede consultar su trabajo y el docente mantener un seguimiento ordenado.</p>
+          <a class="button button-light" href="mi-crescendo/">Conoce Mi Crescendo <span aria-hidden="true">↗</span></a>
+          <div class="feature-grid" aria-hidden="true"><span>Clases</span><span>Objetivos</span><span>Repertorio</span><span>Recursos</span></div>
+        </article>
+        <div class="resource-panel"><div class="resource-head"><span>HERRAMIENTAS ABIERTAS</span><span>EXPLORA / PRACTICA</span></div><h3>Escucha una idea. Mírala. Pruébala.</h3><p>Instrumentos y materiales interactivos para estudiar en el navegador.</p><div class="resource-links">
+          <a href="piano-virtual/"><span class="resource-icon">♩</span><span>Piano Virtual<small>Notas, partituras y sonido</small></span><b aria-hidden="true">↗</b></a>
+          <a href="diapason-virtual/"><span class="resource-icon">♮</span><span>Guitarra Virtual<small>Escalas, acordes y posiciones</small></span><b aria-hidden="true">↗</b></a>
+          <a href="metronomo/"><span class="resource-icon">◷</span><span>Metrónomo<small>Pulso, subdivisión y ritmo</small></span><b aria-hidden="true">↗</b></a>
+          <a href="ear-training/"><span class="resource-icon">◉</span><span>Entrenamiento auditivo<small>Escuchar y reconocer</small></span><b aria-hidden="true">↗</b></a>
+        </div><a class="all-resources" href="herramientas/#herramientas">Ver todas las herramientas <span aria-hidden="true">→</span></a></div>
+      </div>
+    </section>
 
-    <script>
-        document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();
-        const siteHeader = document.querySelector('.site-header');
-        const updateHeaderTransparency = () => siteHeader.classList.toggle('scrolled', window.scrollY > 16);
-        window.addEventListener('scroll', updateHeaderTransparency, { passive: true });
-        updateHeaderTransparency();
-    </script>
+    <section class="questions section-wrap" id="preguntas" aria-labelledby="questions-title">
+      <div><p class="eyebrow dark-eyebrow"><span class="eyebrow-line"></span> Antes de empezar</p><h2 id="questions-title">Algunas respuestas <em>útiles.</em></h2></div>
+      <div class="questions-list">
+        <details><summary>¿Puedo explorar las herramientas sin instalar nada?<span aria-hidden="true">+</span></summary><p>Sí. Las herramientas públicas funcionan desde el navegador. Algunas funciones, como tocar o usar el micrófono, pueden pedir permiso al dispositivo.</p></details>
+        <details><summary>¿Qué encontraré en Mi Crescendo?<span aria-hidden="true">+</span></summary><p>Es el espacio de seguimiento de clases, tareas, repertorio, objetivos y recursos. El acceso al portal del alumno utiliza un código personal.</p></details>
+        <details><summary>¿Cómo consulto qué clases puedo tomar?<span aria-hidden="true">+</span></summary><p>Escríbenos para conversar sobre tu instrumento, experiencia y objetivos. Así podremos indicarte las opciones disponibles sin asumir un plan único para todos.</p></details>
+      </div>
+    </section>
+
+    <section class="contact section-wrap" id="contacto" aria-labelledby="contact-title">
+      <div class="contact-text"><p class="eyebrow"><span class="eyebrow-line"></span> El siguiente paso</p><h2 id="contact-title">Cuéntanos qué música quieres <em>hacer.</em></h2><p>Si buscas orientación sobre clases o quieres conocer mejor los recursos de Crescendo, conversemos.</p></div>
+      <div class="contact-actions"><a class="button button-gold" href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener noreferrer">Conversar por WhatsApp <span aria-hidden="true">↗</span></a><a class="text-link" href="mailto:crescendoacademyec@gmail.com">Escribir por correo <span aria-hidden="true">↗</span></a></div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div><a class="footer-brand" href="./">Crescendo Academy</a><p>Aprender música es escuchar, comprender y hacer.</p></div><nav aria-label="Enlaces del pie"><a href="herramientas/">Herramientas</a><a href="mi-crescendo/">Mi Crescendo</a><a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer">Instagram</a><a href="#contenido">Volver arriba ↑</a></nav><small>© <span id="year"></span> Crescendo Academy</small></footer>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const header = document.getElementById('siteHeader');
+    const updateHeader = () => header.classList.toggle('scrolled', window.scrollY > 16);
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
+  </script>
 </body>
 </html>
