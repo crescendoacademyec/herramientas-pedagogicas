@@ -14,7 +14,7 @@
     practiceChecks: {},
     curriculumEvidence: {},
     curriculumVersion: 2,
-    quiz: null           // { levelSlug, student, course, date, answers: [], submitted:false, startedAt }
+    quiz: null           // Incluye una copia ordenada de las preguntas de cada intento nuevo.
   };
 
   function currentLevel() {
@@ -33,16 +33,22 @@
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       var saved = JSON.parse(raw);
-      state.levelIndex = saved.levelIndex || 0;
+      state.levelIndex = Number.isInteger(saved.levelIndex) && saved.levelIndex >= 0 && saved.levelIndex < LEVELS.length ? saved.levelIndex : 0;
       // La versión 2 añade una estación de preparación al inicio de cada nivel.
       // Conserva al estudiante en el mismo tema que estaba viendo antes del cambio.
-      state.topicIndex = (saved.topicIndex || 0) + ((saved.curriculumVersion || 1) < 2 ? 1 : 0);
+      state.topicIndex = Math.min(currentLevel().topics.length - 1, Math.max(0,
+        (saved.topicIndex || 0) + ((saved.curriculumVersion || 1) < 2 ? 1 : 0)));
       state.studiedTopics = saved.studiedTopics || {};
       state.practiceChecks = saved.practiceChecks || {};
       state.curriculumEvidence = saved.curriculumEvidence || {};
       state.curriculumVersion = 2;
-      if (saved.quiz && saved.quiz.startedAt && !saved.quiz.submitted) {
+      if (saved.quiz && saved.quiz.startedAt && LEVELS.some(function (level) { return level.slug === saved.quiz.levelSlug; })) {
         state.quiz = saved.quiz;
+        if (!Array.isArray(state.quiz.questionSnapshot)) {
+          // Los intentos anteriores conservan sus índices de respuesta originales.
+          state.quiz.questionSnapshot = LEVELS.find(function (level) { return level.slug === state.quiz.levelSlug; }).quiz;
+        }
+        if (!Array.isArray(state.quiz.answers) || state.quiz.answers.length !== state.quiz.questionSnapshot.length) state.quiz = null;
       }
     } catch (e) { /* ignorar estado corrupto */ }
   }
@@ -244,6 +250,8 @@
         if (!state.curriculumEvidence[key]) state.curriculumEvidence[key] = {};
         state.curriculumEvidence[key][input.dataset.evidenceStep] = input.checked;
         saveState();
+        var index = currentLevel().topics.findIndex(function (topic) { return topic.curriculumRole === key.split("-")[1]; });
+        if (index >= 0) updateTopicProgress(currentLevel().slug + "-" + index);
       });
     });
   }
@@ -262,8 +270,33 @@
         if (!state.practiceChecks[key]) state.practiceChecks[key] = {};
         state.practiceChecks[key][input.dataset.practiceStep] = input.checked;
         saveState();
+        updateTopicProgress(key);
       });
     });
+  }
+
+  function topicProgressLabel(level, index) {
+    var topic = level.topics[index];
+    var key = level.slug + "-" + index;
+    var studied = !!state.studiedTopics[key];
+    var checks = topic.curriculumRole
+      ? state.curriculumEvidence[level.slug + "-" + topic.curriculumRole] || {}
+      : state.practiceChecks[key] || {};
+    var steps = topic.curriculumRole === "entry" ? ["0", "1", "2"]
+      : topic.curriculumRole === "project" ? ["analysis", "sound", "review"]
+      : ["hear", "sing", "apply"];
+    var completed = steps.every(function (step) { return !!checks[step]; });
+    var progress = completed ? (topic.curriculumRole === "entry" ? "Diagnóstico completo"
+      : topic.curriculumRole === "project" ? "Proyecto completo" : "Práctica completa") : "";
+    return [studied ? "Estudiado" : "Pendiente", progress].filter(Boolean).join(" · ");
+  }
+
+  function updateTopicProgress(key) {
+    var level = currentLevel();
+    var index = Number(key.split("-")[1]);
+    if (!Number.isInteger(index) || !level.topics[index]) return;
+    var label = document.querySelector('#jazzTopicNav [data-topic-index="' + index + '"] small');
+    if (label) label.textContent = topicProgressLabel(level, index);
   }
 
   // ---------- Render: teoría ----------
@@ -284,7 +317,8 @@
       var link = document.createElement("button");
       link.type = "button";
       link.className = "course-topic-link" + (isOpen ? " active" : "");
-      link.innerHTML = '<span class="course-topic-number">' + (idx + 1) + '</span><span><b>' + topic.title + '</b><small>' + (isStudied ? 'Estudiado' : 'Pendiente') + '</small></span>';
+      link.dataset.topicIndex = idx;
+      link.innerHTML = '<span class="course-topic-number">' + (idx + 1) + '</span><span><b>' + topic.title + '</b><small>' + topicProgressLabel(lvl, idx) + '</small></span>';
       if (isOpen) link.setAttribute("aria-current", "page");
       link.addEventListener("click", function () { state.topicIndex = idx; saveState(); renderTheory(); });
       nav.appendChild(link);
@@ -341,6 +375,27 @@
   }
 
   // ---------- Cuestionario ----------
+  function shuffledQuestions(questions) {
+    return questions.map(function (question) {
+      var order = question.options.map(function (_, index) { return index; });
+      for (var index = order.length - 1; index > 0; index--) {
+        var other = Math.floor(Math.random() * (index + 1));
+        var swap = order[index]; order[index] = order[other]; order[other] = swap;
+      }
+      return {
+        prompt: question.prompt,
+        options: order.map(function (original) { return question.options[original]; }),
+        correctIndex: order.indexOf(question.correctIndex),
+        explanation: question.explanation
+      };
+    });
+  }
+
+  function quizQuestions() {
+    return state.quiz && Array.isArray(state.quiz.questionSnapshot)
+      ? state.quiz.questionSnapshot : currentLevel().quiz;
+  }
+
   function startQuiz() {
     var name = document.getElementById("studentName").value.trim();
     var course = document.getElementById("studentCourse").value.trim();
@@ -360,6 +415,7 @@
       course: course,
       date: date,
       answers: new Array(lvl.quiz.length).fill(null),
+      questionSnapshot: shuffledQuestions(lvl.quiz),
       submitted: false,
       startedAt: Date.now()
     };
@@ -400,7 +456,7 @@
 
     var list = document.getElementById("questionList");
     list.innerHTML = "";
-    lvl.quiz.forEach(function (item, qIdx) {
+    quizQuestions().forEach(function (item, qIdx) {
       var qCard = document.createElement("div");
       qCard.className = "question-card";
       var qHead = document.createElement("p");
@@ -410,23 +466,6 @@
 
       var optWrap = document.createElement("div");
       optWrap.className = "options";
-      var feedback = document.createElement("p");
-      feedback.className = "question-feedback hidden";
-
-      function applyFeedback(selectedIdx) {
-        var isCorrect = selectedIdx === item.correctIndex;
-        Array.prototype.forEach.call(optWrap.children, function (labelEl, oIdx) {
-          labelEl.classList.remove("opt-correct", "opt-incorrect");
-          if (oIdx === item.correctIndex) labelEl.classList.add("opt-correct");
-          else if (oIdx === selectedIdx) labelEl.classList.add("opt-incorrect");
-        });
-        feedback.classList.remove("hidden", "feedback-correct", "feedback-wrong");
-        feedback.classList.add(isCorrect ? "feedback-correct" : "feedback-wrong");
-        feedback.textContent = isCorrect
-          ? "Correcto."
-          : "Incorrecto. La respuesta correcta es: " + item.options[item.correctIndex] + (item.explanation ? " — " + item.explanation : "");
-      }
-
       item.options.forEach(function (opt, oIdx) {
         var id = "q" + qIdx + "_o" + oIdx;
         var label = document.createElement("label");
@@ -441,7 +480,6 @@
           state.quiz.answers[qIdx] = oIdx;
           saveState();
           updateAnsweredCount();
-          applyFeedback(oIdx);
         });
         var span = document.createElement("span");
         span.textContent = opt;
@@ -450,8 +488,6 @@
         optWrap.appendChild(label);
       });
       qCard.appendChild(optWrap);
-      qCard.appendChild(feedback);
-      if (state.quiz.answers[qIdx] !== null) applyFeedback(state.quiz.answers[qIdx]);
       list.appendChild(qCard);
     });
 
@@ -481,10 +517,10 @@
   function scoreQuiz() {
     var lvl = LEVELS.find(function (l) { return l.slug === state.quiz.levelSlug; });
     var correct = 0;
-    lvl.quiz.forEach(function (item, idx) {
+    quizQuestions().forEach(function (item, idx) {
       if (state.quiz.answers[idx] === item.correctIndex) correct++;
     });
-    var total = lvl.quiz.length;
+    var total = quizQuestions().length;
     var grade = total > 0 ? (correct / total) * 5 : 0;
     return { correct: correct, total: total, grade: grade, lvl: lvl };
   }
@@ -506,7 +542,7 @@
 
     var reviewList = document.getElementById("reviewList");
     reviewList.innerHTML = "<h3>Revisión de respuestas</h3>";
-    res.lvl.quiz.forEach(function (item, idx) {
+    quizQuestions().forEach(function (item, idx) {
       var userAns = state.quiz.answers[idx];
       var isCorrect = userAns === item.correctIndex;
       var row = document.createElement("div");
@@ -525,7 +561,7 @@
     rows.push([state.quiz.student, state.quiz.course || "", state.quiz.date, "Nivel " + res.lvl.id + " - " + res.lvl.name, res.correct, res.total, res.grade.toFixed(1)]);
     rows.push([]);
     rows.push(["#", "Pregunta", "Respuesta del estudiante", "Correcta", "¿Acertó?"]);
-    res.lvl.quiz.forEach(function (item, idx) {
+    quizQuestions().forEach(function (item, idx) {
       var userAns = state.quiz.answers[idx];
       var userText = userAns === null ? "(sin responder)" : item.options[userAns];
       var ok = userAns === item.correctIndex ? "Sí" : "No";
