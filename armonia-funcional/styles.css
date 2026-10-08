@@ -509,6 +509,8 @@ main {
   color: var(--muted);
   font-size: .78rem;
 }
+.topic-link.active small { color: #17130a; }
+.quiz-scope-fields [hidden] { display: none; }
 
 .theory-section {
   scroll-margin-top: 98px;
@@ -1903,7 +1905,7 @@ select:focus-visible,input:focus-visible,textarea:focus-visible{
 @media(max-width:980px){
   .quiz-start,.home-grid,.stats-grid{grid-template-columns:1fr}
   .theory-layout{grid-template-columns:1fr}
-  .theory-sidebar{position:static;max-height:none}
+  .theory-sidebar,.topic-grid{position:static;max-height:none}
 }
 @media(max-width:760px){
   .ca-site-header{padding-left:14px;padding-right:14px}

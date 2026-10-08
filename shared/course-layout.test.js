@@ -6,7 +6,7 @@ const functional = read('armonia-funcional/app.js');
 const jazz = read('armonia-jazz/app.js');
 const theory = read('teoria-lectura-musical/app.js');
 assert.match(functional, /nextCourse.hidden=view!=="theory"/);
-assert.match(functional, /findIndex\(s=>s.id===activeTheoryId\)!==5/);
+assert.match(functional, /atEndOfLearningRoute\(\)/);
 assert.match(functional, /prepend\(actions\)/);
 assert.match(functional, /view = "all"/);
 assert.match(jazz, /if \(!isOpen\) return/);

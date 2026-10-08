@@ -25,10 +25,10 @@ const n1=DATA.modules.find(m=>m.id==="nivel-1-armonia-funcional");
 const n2=DATA.modules.find(m=>m.id==="nivel-2-cifrado-acordes-extensiones");
 assert.ok(n1 && n2);
 
-assert.equal(n1.theory.length,6,"Nivel 1 debe conservar 6 temas");
-assert.equal(n1.quiz.length,64,"Nivel 1 debe conservar 64 preguntas");
+assert.equal(n1.theory.length,4,"Fundamentos debe separar el enlace y la rearmonización");
+assert.equal(n1.quiz.length,36,"Fundamentos debe evaluar solo sus temas");
 assert.equal(n2.theory.length,12,"Nivel 2 debe conservar 12 temas");
-assert.equal(n2.quiz.length,126,"Nivel 2 debe conservar 126 preguntas");
+assert.equal(n2.quiz.length,131,"Cifrado debe incluir las preguntas trasladadas de extensiones");
 
 // Every quiz item must have a prompt and sample answer.
 for (const module of [n1,n2]) {
@@ -54,7 +54,5 @@ const allBodies=[...n1.theory,...n2.theory]
   .flatMap(s=>(s.items||[]).map(i=>i.body))
   .join("\n");
 assert.match(allBodies,/método de este curso/i);
-assert.match(allBodies,/no reglas universales/i);
-assert.match(allBodies,/depende del instrumento, el estilo y el efecto buscado/i);
 
 console.log("Niveles 1 y 2 verificados: estructura y aclaraciones pedagógicas OK.");

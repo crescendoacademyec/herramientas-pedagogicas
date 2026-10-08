@@ -36,7 +36,7 @@ globalThis.__quizApi = {
 vm.runInContext(source, context);
 const api = context.__quizApi;
 
-assert.equal(api.STATE_SCHEMA_VERSION, 2);
+assert.equal(api.STATE_SCHEMA_VERSION, 3);
 const ds = api.defaultState();
 assert.equal(ds.quiz.attemptModuleId, null);
 api.setState(ds);
@@ -73,6 +73,6 @@ const normalized = api.normalizeStoredState({
 assert.deepEqual(Object.keys(normalized.studied),[]);
 assert.deepEqual(Object.keys(normalized.quiz.answers),[]);
 assert.equal(normalized.quiz.focusWarnings,0);
-assert.equal(normalized.schemaVersion,2);
+assert.equal(normalized.schemaVersion,3);
 
 console.log("Quiz engine Fase 2: OK");

@@ -3,6 +3,7 @@ const PIANO_NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", 
 const PIANO_FULL_RANGE = Object.freeze({ from: "C1", to: "C7" });
 const PIANO_SELECT_DEFAULT_RANGE = PIANO_FULL_RANGE;
 const MODULE_3_REMOVED_QUESTION_IDS = new Set([17, 20, 21, 22, 23, 24, 25, 26, 29, 30, 31, 32, 33, 34, 46]);
+let legacyQuizBanks = {};
 const MODULE_3_PIANO_PROMPTS = {
   1: "Seleccione una fundamental en registro ideal de bajo para Dm7.",
   2: "Seleccione una fundamental en registro ideal de bajo para F7.",
@@ -283,7 +284,7 @@ const MODULE_3_SHELL_ALTERNATIVES = {
 normalizeData();
 const LS_KEY = "armonia_funcional_crescendo_v2";
 const LEGACY_LS_KEYS = ["teoria_musical_local_app_v1"];
-const STATE_SCHEMA_VERSION = 2;
+const STATE_SCHEMA_VERSION = 3;
 let state = loadState();
 let currentView = "home";
 let quizResults = null;
@@ -303,6 +304,57 @@ function normalizeData() {
   normalizeVoicingQuiz();
   normalizePianoSelectQuestions();
   ensurePedagogicalExpansion();
+  legacyQuizBanks = Object.fromEntries(DATA.modules.map(module => [module.id, module.quiz.slice()]));
+  applyLearningSequence();
+}
+function applyLearningSequence() {
+  const byId = Object.fromEntries(DATA.modules.map(module => [module.id, module]));
+  const foundation = byId["nivel-1-armonia-funcional"];
+  const symbols = byId["nivel-2-cifrado-acordes-extensiones"];
+  const voicings = byId["nivel-3-principios-voicing"];
+  const diatonic = byId["nivel-4-armonia-diatonica-progresiones"];
+  const connections = byId["nivel-5-conexiones-funcionales"];
+  if (![foundation, symbols, voicings, diatonic, connections].every(Boolean)) return;
+
+  const moveTopic = (from, to, id, position) => {
+    const index = from.theory.findIndex(topic => topic.id === id);
+    if (index < 0) return;
+    to.theory.splice(position, 0, ...from.theory.splice(index, 1));
+  };
+  const moveQuestions = (from, to, ids, section) => {
+    const moving = from.quiz.filter(question => ids.has(question.id));
+    from.quiz = from.quiz.filter(question => !ids.has(question.id));
+    moving.forEach(question => to.quiz.push({...question, id:to.quiz.length + 1, section}));
+  };
+  const chordIntro = foundation.theory.find(topic => topic.id === "acordes");
+  const advancedTerms = new Set(["Superestructura", "Uso general de extensiones", "Dominantes con séptima menor"]);
+  const advancedItems = chordIntro.items.filter(item => advancedTerms.has(item.term));
+  chordIntro.items = chordIntro.items.filter(item => !advancedTerms.has(item.term));
+  symbols.theory.find(topic => topic.id === "nivel-2-reglas-extensiones").items.unshift(...advancedItems);
+  moveTopic(foundation, voicings, "enlace-voces", 0);
+  moveTopic(foundation, connections, "rearmonizacion", 2);
+  moveTopic(diatonic, connections, "nivel-4-puente-jazz", connections.theory.length);
+  moveQuestions(foundation, symbols, new Set([16,17,18,42,58]), "Extensiones y superestructura");
+  moveQuestions(foundation, voicings, new Set([19,20,21,22,23,24,25,26,27,28,43,44,45,59,60,61]), "Notas guía, enlace y voicings");
+  moveQuestions(foundation, connections, new Set([35,36,37,38,47,48,64]), "Rearmonización y préstamos");
+  moveQuestions(diatonic, connections, new Set([16,17,18]), "Puente hacia Armonía Jazz");
+  foundation.quiz.forEach(question => {
+    if (question.section === "II. Acordes, estructuras y extensiones") question.section = "II. Acordes y estructuras";
+    if (question.section === "III. Tonalidad, funciones armónicas y rearmonización") question.section = "III. Tonalidad y funciones";
+  });
+
+  DATA.modules = [foundation, diatonic, symbols, voicings, connections];
+  DATA.modules.forEach((module, moduleIndex) => {
+    module.level = `Nivel ${moduleIndex + 1}`;
+    module.theory.forEach((topic, topicIndex) => {
+      topic.title = topic.title.replace(/^\d+\./, `${topicIndex + 1}.`);
+    });
+  });
+  foundation.subtitle = "Escalas, intervalos, acordes básicos y función tonal.";
+  diatonic.subtitle = "Campo armónico, funciones, cadencias, inversiones y progresiones.";
+  symbols.subtitle = "Cifrado, séptimas y extensiones después de construir el campo armónico.";
+  voicings.subtitle = "Notas guía, registros y disposiciones aplicadas a progresiones.";
+  connections.subtitle = "Conducción, rearmonización, dominantes aplicados y puente hacia Jazz.";
 }
 function ensurePedagogicalExpansion() {
   if (DATA.modules.some(module => module.id === "nivel-5-conexiones-funcionales")) return;
@@ -588,17 +640,23 @@ function activeModule() {
   return DATA.modules.find(module => module.id === state.moduleId) || DATA.modules[0];
 }
 function moduleTheory() { return activeModule()?.theory || []; }
-function moduleQuiz() { return activeModule()?.quiz || []; }
+function moduleQuiz() {
+  if (state?.quiz?.active && Array.isArray(state.quiz.questionSnapshot)) return state.quiz.questionSnapshot;
+  return activeModule()?.quiz || [];
+}
 function defaultState() {
   return {
     moduleId: DATA.modules?.[0]?.id || "armonia-funcional-i",
     studied: {},
+    practice: {},
     quiz: {
       active: false,
       submitted: false,
       startedAt: null,
       submittedAt: null,
       attemptModuleId: null,
+      questionSnapshot: null,
+      mode: "brief",
       student: { name: "", course: "", date: "" },
       answers: {},
       focusWarnings: 0,
@@ -616,6 +674,9 @@ function normalizeStoredState(value) {
     studied: value.studied && typeof value.studied === "object" && !Array.isArray(value.studied)
       ? value.studied
       : {},
+    practice: value.practice && typeof value.practice === "object" && !Array.isArray(value.practice)
+      ? value.practice
+      : {},
     quiz: {
       ...defaults.quiz,
       ...(value.quiz && typeof value.quiz === "object" && !Array.isArray(value.quiz) ? value.quiz : {}),
@@ -627,7 +688,8 @@ function normalizeStoredState(value) {
       },
       answers: value.quiz?.answers && typeof value.quiz.answers === "object" && !Array.isArray(value.quiz.answers)
         ? value.quiz.answers
-        : {}
+        : {},
+      questionSnapshot: Array.isArray(value.quiz?.questionSnapshot) ? value.quiz.questionSnapshot : null
     },
     schemaVersion: STATE_SCHEMA_VERSION
   };
@@ -643,6 +705,9 @@ function normalizeStoredState(value) {
   loaded.quiz.attemptModuleId = typeof loaded.quiz.attemptModuleId === "string"
     ? loaded.quiz.attemptModuleId
     : (loaded.quiz.active || loaded.quiz.submitted ? loaded.moduleId : null);
+  if (loaded.quiz.active && !loaded.quiz.questionSnapshot && Number(value.schemaVersion || 0) < STATE_SCHEMA_VERSION) {
+    loaded.quiz.questionSnapshot = legacyQuizBanks[loaded.moduleId] || null;
+  }
 
   if ((loaded.quiz.active || loaded.quiz.submitted) &&
       loaded.quiz.attemptModuleId &&
@@ -749,6 +814,7 @@ function init() {
   populateChordReference();
   updateProgress();
   hydrateStudentFields();
+  renderQuizSetup();
   wireEvents();
   if (state.quiz.active && !state.quiz.submitted) {
     showView("quiz");
@@ -774,6 +840,8 @@ function wireEvents() {
     });
   });
   $("startQuizBtn").addEventListener("click", startQuiz);
+  $("quizScope").addEventListener("change", renderQuizSetup);
+  $("quizTopic").addEventListener("change", renderQuizSetup);
   $("startQuizBtn2").addEventListener("click", () => showView("quiz"));
   $("goTheoryBtn").addEventListener("click", () => showView("theory"));
   $("submitQuizBtn").addEventListener("click", submitQuiz);
@@ -809,7 +877,7 @@ function showView(view) {
   if (state.quiz.active && !state.quiz.submitted && view !== "quiz") view = "quiz";
   currentView = view;
   const nextCourse=document.querySelector(".next-course-cta");
-  if(nextCourse) nextCourse.hidden=view!=="theory" || moduleTheory().findIndex(s=>s.id===activeTheoryId)!==5;
+  if(nextCourse) nextCourse.hidden=view!=="theory" || !atEndOfLearningRoute();
   ["homeView","theoryView","chordsView","quizView"].forEach(id => $(id).classList.add("hidden"));
   $(`${view}View`).classList.remove("hidden");
   document.querySelectorAll(".nav-btn").forEach(btn => {
@@ -820,6 +888,9 @@ function showView(view) {
   });
   if (view === "quiz") renderQuiz();
   scrollPageTop();
+}
+function atEndOfLearningRoute() {
+  return state.moduleId === DATA.modules.at(-1)?.id && activeTheoryId === moduleTheory().at(-1)?.id;
 }
 function applyQuizLock(on) {
   document.body.classList.toggle("quiz-lock", !!on);
@@ -864,6 +935,7 @@ function selectModule(id) {
   renderHome();
   renderTheory();
   hydrateStudentFields();
+  renderQuizSetup();
   showView("home");
 }
 const METHOD_SPECIFIC_TERMS = new Set([
@@ -892,7 +964,7 @@ function renderTheory() {
       <span class="topic-link-number">${escapeHtml(section.title.split(".")[0])}</span>
       <span>
         <b>${escapeHtml(section.title.replace(/^\d+\.\s*/, ""))}</b>
-        <small>${section.items.length} conceptos · ${learned ? "estudiado" : "pendiente"}</small>
+        <small>${section.items.length} conceptos · ${learned ? "estudiado" : "pendiente"}${state.practice[section.id] >= (TOPIC_PRACTICE_BANK[section.id]?.length || Infinity) ? " · práctica lograda" : ""}</small>
       </span>
     </button>`;
   }).join("");
@@ -913,7 +985,7 @@ function renderTheory() {
   mountTopicPractices();
   window.CrescendoLab?.attach($("theoryDetail"),'functional');
   const cta=document.querySelector(".next-course-cta");
-  if(cta) cta.hidden=currentView!=="theory" || moduleTheory().findIndex(s=>s.id===activeTheoryId)!==5;
+  if(cta) cta.hidden=currentView!=="theory" || !atEndOfLearningRoute();
 }
 function selectTheoryTopic(id) {
   if (!moduleTheory().some(section => section.id === id)) return;
@@ -1255,14 +1327,17 @@ function updateProgress() {
   const total = moduleTheory().length;
   const pct = total ? done / total : 0;
   $("studyBar").style.width = `${pct * 100}%`;
-  setText("studyProgressText", `${done}/${total} temas estudiados`);
+  const practicedTopics = moduleTheory().filter(section => TOPIC_PRACTICE_BANK[section.id]?.length);
+  const practiced = practicedTopics.filter(section => state.practice[section.id] >= TOPIC_PRACTICE_BANK[section.id].length).length;
+  setText("studyProgressText", `${done}/${total} temas estudiados${practicedTopics.length ? ` · ${practiced}/${practicedTopics.length} prácticas logradas` : ""}`);
 }
 function resetStudy() {
-  if (!confirm("¿Borrar el progreso de estudio marcado?")) return;
+  if (!confirm("¿Borrar las marcas de estudio y práctica de este nivel?")) return;
   const currentIds = new Set(moduleTheory().map(section => section.id));
   Object.keys(state.studied).forEach(id => {
     if (currentIds.has(id)) delete state.studied[id];
   });
+  currentIds.forEach(id => delete state.practice[id]);
   saveState(); renderTheory(); updateProgress();
 }
 function hydrateStudentFields() {
@@ -1270,6 +1345,41 @@ function hydrateStudentFields() {
   $("studentCourse").value = state.quiz.student.course || "";
   $("studentDate").value = state.quiz.student.date || new Date().toISOString().slice(0,10);
   updateStudentMeta();
+}
+function quizSections() {
+  return [...new Set((activeModule()?.quiz || []).map(question => question.section || "General"))];
+}
+function renderQuizSetup() {
+  const scope = $("quizScope"), topic = $("quizTopic"), field = $("quizTopicField");
+  if (!scope || !topic || !field) return;
+  const previous = topic.value;
+  topic.innerHTML = quizSections().map(section => `<option value="${escapeAttr(section)}">${escapeHtml(section)}</option>`).join("");
+  if (quizSections().includes(previous)) topic.value = previous;
+  field.hidden = scope.value !== "topic";
+  const count = scope.value === "full" ? activeModule().quiz.length
+    : scope.value === "topic" ? activeModule().quiz.filter(question => question.section === topic.value).length
+    : Math.min(10, activeModule().quiz.length);
+  setText("quizScopeSummary", `${count} preguntas de ${activeModule().title}. Las prácticas por tema están disponibles también en el módulo teórico.`);
+}
+function shuffleQuestions(questions) {
+  const copy = questions.slice();
+  for (let index = copy.length - 1; index > 0; index--) {
+    const target = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[target]] = [copy[target], copy[index]];
+  }
+  return copy;
+}
+function selectedQuizQuestions() {
+  const bank = activeModule().quiz;
+  const scope = $("quizScope")?.value || "brief";
+  if (scope === "full") return bank;
+  if (scope === "topic") return bank.filter(question => question.section === $("quizTopic")?.value);
+  const groups = quizSections().map(section => shuffleQuestions(bank.filter(question => (question.section || "General") === section)));
+  const firstPass = shuffleQuestions(groups.map(group => group[0]).filter(Boolean));
+  const chosen = firstPass.slice(0, 10);
+  const rest = shuffleQuestions(bank.filter(question => !chosen.includes(question)));
+  chosen.push(...rest.slice(0, Math.max(0, Math.min(10, bank.length) - chosen.length)));
+  return chosen.sort((a, b) => bank.indexOf(a) - bank.indexOf(b));
 }
 function updateStudentMeta() {
   state.quiz.student = {
@@ -1299,6 +1409,8 @@ function startQuiz() {
   state.quiz.answers = {};
   state.quiz.focusWarnings = 0;
   state.quiz.result = null;
+  state.quiz.mode = $("quizScope")?.value || "brief";
+  state.quiz.questionSnapshot = selectedQuizQuestions().map(question => ({...question}));
   saveState();
   applyQuizLock(true);
   showView("quiz");
@@ -1319,15 +1431,15 @@ function renderQuiz() {
   setText("activeStudent", state.quiz.student.name || "Sin nombre");
   setText("focusWarnings", state.quiz.focusWarnings || 0);
   updateQuizProgressUI();
-  $("questionList").innerHTML = moduleQuiz().map(renderQuestion).join("");
+  $("questionList").innerHTML = moduleQuiz().map((question, index) => renderQuestion(question, index)).join("");
   bindAnswerEvents();
 }
-function renderQuestion(q) {
+function renderQuestion(q, position) {
   const body = renderQuestionBody(q);
   const diagram = q.diagram ? `<div class="question-diagram">${renderPianoDiagram(q.diagram)}</div>` : "";
   return `<article class="question-card" id="q-${q.id}">
     <div class="section-label">${escapeHtml(q.section || "")}</div>
-    <div class="question-head"><div class="qnum">${q.id}.</div><h3>${escapeHtml(q.prompt)}</h3></div>
+    <div class="question-head"><div class="qnum">${position + 1}.</div><h3>${escapeHtml(q.prompt)}</h3></div>
     ${diagram}
     ${body}
   </article>`;
@@ -1702,7 +1814,7 @@ function renderQuizResult(result) {
   setText("resultDate", result.student.date || "Sin fecha");
   setText("resultWarnings", result.focusWarnings || 0);
   const wrap = $("reviewList");
-  wrap.innerHTML = result.details.map(d => {
+  wrap.innerHTML = result.details.map((d, index) => {
     const label = d.status === "correct"
       ? "Correcta"
       : d.status === "partial"
@@ -1711,7 +1823,7 @@ function renderQuizResult(result) {
           ? "Sin respuesta"
           : "Incorrecta";
     return `<details class="review-item">
-      <summary>${d.id}. ${escapeHtml(label)} · ${d.points.toFixed(2)} punto(s)</summary>
+      <summary>${index + 1}. ${escapeHtml(label)} · ${d.points.toFixed(2)} punto(s)</summary>
       <div class="review-meta"><b>Pregunta:</b> ${escapeHtml(d.prompt)}</div>
       <div class="review-meta"><b>Respuesta del estudiante:</b> ${escapeHtml(d.given || "Sin respuesta")}</div>
       <div class="review-meta"><b>Referencia de respuesta:</b> ${escapeHtml(d.sampleAnswer)}</div>
@@ -1766,11 +1878,13 @@ function downloadCSV() {
 function newAttempt() {
   if (!confirm("¿Crear un nuevo intento? Se borrarán las respuestas actuales y el resultado guardado en este navegador.")) return;
   const studied = state.studied;
+  const practice = state.practice;
   const moduleId = state.moduleId;
   state = defaultState();
   state.studied = studied;
+  state.practice = practice;
   state.moduleId = moduleId;
-  saveState(); hydrateStudentFields(); renderQuiz(); showView("quiz");
+  saveState(); hydrateStudentFields(); renderQuizSetup(); renderQuiz(); showView("quiz");
 }
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]));
@@ -3078,7 +3192,7 @@ function mountTopicPractices() {
     const bank = TOPIC_PRACTICE_BANK[topicId] || [];
     if (!bank.length) return;
     let index = 0;
-    let correct = 0;
+    const correctAnswers = new Set();
     let answered = false;
     const scoreEl = root.querySelector("[data-practice-score]");
     const questionEl = root.querySelector("[data-practice-question]");
@@ -3100,7 +3214,8 @@ function mountTopicPractices() {
           answered = true;
           const picked = Number(btn.dataset.practiceChoice);
           const isCorrect = picked === q.answer;
-          if (isCorrect) correct += 1;
+          if (isCorrect) correctAnswers.add(index);
+          else correctAnswers.delete(index);
           questionEl.querySelectorAll("[data-practice-choice]").forEach(option => {
             option.disabled = true;
             const value = Number(option.dataset.practiceChoice);
@@ -3108,7 +3223,16 @@ function mountTopicPractices() {
             else if (value === picked) option.classList.add("wrong");
           });
           feedbackEl.textContent = `${isCorrect ? "Correcto. " : "Revisa: "}${q.explain}`;
-          scoreEl.textContent = `${correct}/${bank.length}`;
+          scoreEl.textContent = `${correctAnswers.size}/${bank.length}`;
+          if (correctAnswers.size > Number(state.practice[topicId] || 0)) {
+            state.practice[topicId] = correctAnswers.size;
+            saveState();
+            if (correctAnswers.size === bank.length) {
+              const nav = [...document.querySelectorAll("[data-topic-select]")].find(button => button.dataset.topicSelect === topicId);
+              nav?.querySelector("small")?.append(" · práctica lograda");
+            }
+            updateProgress();
+          }
         });
       });
       nextBtn.disabled = bank.length <= 1;
@@ -3119,7 +3243,7 @@ function mountTopicPractices() {
     });
     resetBtn.addEventListener("click", () => {
       index = 0;
-      correct = 0;
+      correctAnswers.clear();
       scoreEl.textContent = `0/${bank.length}`;
       render();
     });

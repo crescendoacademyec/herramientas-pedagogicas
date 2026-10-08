@@ -21,7 +21,7 @@
   <title>Armonía funcional: aspectos esenciales | Crescendo Academy</title>
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../shared/header-icons.css?v=20260919-flat-logo-v2">
-<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./styles.css?v=20261008-learning-sequence-v2">
 <link rel="stylesheet" href="../shared/music-practice.css">
 <script defer src="../shared/course-sound.js?v=20260928-capsule"></script>
 <link rel="stylesheet" href="../shared/course-sound.css?v=20260928-capsule">
@@ -30,9 +30,9 @@
 <link rel="stylesheet" href="../shared/practice-lab.css">
 <script defer src="../shared/practice-lab.js?v=20260928-timbres"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
-  <script defer="" src="./data.js"></script>
+  <script defer="" src="./data.js?v=20261008-learning-sequence-v2"></script>
   <script defer="" src="./chords-ref.js"></script>
-<script defer="" src="./app.js?v=20260928-timbres-v2"></script>
+<script defer="" src="./app.js?v=20261008-learning-sequence-v3"></script>
 <link rel="stylesheet" href="../shared/course-actions.css">
 <link rel="stylesheet" href="../shared/course-interactions.css?v=20260927">
   <link rel="stylesheet" href="../shared/crescendo-identity.css?v=20261007">
@@ -112,8 +112,8 @@
     <section id="homeView" class="view">
       <div class="hero">
         <div class="hero-copy">
-          <p id="moduleLabel" class="module-label">Nivel 3 · Principios de voicing</p>
-          <p id="moduleIntro" class="hero-summary">Registros, shell voicings, posición cerrada, Spread, Skip 2, extensiones y acompañamiento bajo/acorde.</p>
+          <p id="moduleLabel" class="module-label">Nivel 1 · Conocimientos esenciales</p>
+          <p id="moduleIntro" class="hero-summary">Escalas, intervalos, acordes básicos y función tonal.</p>
           <div class="hero-actions">
             <button id="goTheoryBtn" class="primary-btn" type="button">Entrar al módulo teórico</button>
             <button id="startQuizBtn2" class="ghost-btn" type="button">Ir al cuestionario</button>
@@ -121,18 +121,18 @@
         </div>
         <aside class="overview-panel" aria-label="Resumen del curso">
           <div class="stats-grid">
-            <div class="stat"><strong id="topicCount">6</strong><span>temas teóricos</span></div>
-            <div class="stat"><strong id="questionCount">39</strong><span>preguntas</span></div>
+            <div class="stat"><strong id="topicCount">4</strong><span>temas teóricos</span></div>
+            <div class="stat"><strong id="questionCount">36</strong><span>preguntas en el banco</span></div>
             <div class="stat"><strong id="autoGrade">0–5.0</strong><span>escala de calificación</span></div>
           </div>
           <div class="study-progress">
             <div class="progress-bar"><div id="studyBar" style="width: 0%;"></div></div>
-            <div id="studyProgressText" class="small-note">0/6 temas estudiados</div>
+            <div id="studyProgressText" class="small-note">0/4 temas estudiados</div>
           </div>
         </aside>
       </div>
       <section class="course-template-roadmap" aria-label="Mapa de estudio de Armonía funcional">
-        <div><p class="kicker">Mapa de estudio</p><h3>Escalas → acordes → funciones → progresiones → voicings</h3></div>
+        <div><p class="kicker">Mapa de estudio</p><h3>Escalas → funciones → progresiones → extensiones → voicings → rearmonización</h3></div>
         <p>Elige un nivel para ver los temas, preguntas y práctica que corresponden a esa etapa.</p>
       </section>
       <section class="module-picker course-template-levels" aria-labelledby="modulePickerTitle">
@@ -140,23 +140,7 @@
           <p class="kicker">Niveles disponibles</p>
           <h2 id="modulePickerTitle">Elige el nivel que quieres estudiar</h2>
         </div>
-        <div id="moduleTabs" class="module-tabs"><button class="module-tab " data-module="nivel-1-armonia-funcional" type="button">
-      <em>Nivel 1</em>
-      <span>Conocimientos esenciales</span>
-      <small>6 temas · 64 preguntas</small>
-    </button><button class="module-tab " data-module="nivel-2-cifrado-acordes-extensiones" type="button">
-      <em>Nivel 2</em>
-      <span>Cifrado de acordes y extensiones</span>
-      <small>12 temas · 126 preguntas</small>
-    </button><button class="module-tab active" data-module="nivel-3-principios-voicing" type="button">
-      <em>Nivel 3</em>
-      <span>Principios de voicing</span>
-      <small>6 temas · 39 preguntas</small>
-    </button><button class="module-tab" data-module="nivel-4-armonia-diatonica-progresiones" type="button">
-      <em>Nivel 4</em>
-      <span>Armonía diatónica y progresiones</span>
-      <small>6 temas · 18 preguntas</small>
-    </button></div>
+        <div id="moduleTabs" class="module-tabs" aria-live="polite"></div>
       </section>
     </section>
 
@@ -886,6 +870,11 @@
             <label class="field"><span>Curso</span><input id="studentCourse" type="text" placeholder="Curso o grupo"></label>
             <label class="field"><span>Fecha</span><input id="studentDate" type="date"></label>
           </div>
+          <div class="form-grid quiz-scope-fields">
+            <label class="field"><span>Tipo de cuestionario</span><select id="quizScope"><option value="brief">Práctica breve · hasta 10 preguntas</option><option value="topic">Un tema</option><option value="full">Examen completo</option></select></label>
+            <label class="field" id="quizTopicField" hidden><span>Tema para practicar</span><select id="quizTopic"></select></label>
+          </div>
+          <p id="quizScopeSummary" class="small-note" aria-live="polite"></p>
           <div class="form-actions"><button id="startQuizBtn" class="primary-btn" type="button">Iniciar cuestionario bloqueado</button></div>
         </div>
         <div class="lock-panel">
@@ -898,7 +887,7 @@
         <div class="quiz-toolbar panel">
           <div class="quiz-status">
             <span class="pill ok">Estudiante: <span id="activeStudent">-</span></span>
-            <span class="pill" id="answeredCount">0/64 respondidas</span>
+            <span class="pill" id="answeredCount">0 preguntas respondidas</span>
             <span class="pill warn" role="status" aria-live="polite" title="Dato informativo; no modifica la nota.">Incidencias de foco: <span id="focusWarnings">0</span></span>
           </div>
           <button id="submitQuizBtn" class="primary-btn" type="button">Entregar y calificar</button>
@@ -916,7 +905,7 @@
           <div>
             <h2>Resultado del cuestionario</h2>
             <p class="small-note">Estudiante: <b id="resultStudent">-</b> · Curso: <b id="resultCourse">-</b> · Fecha: <b id="resultDate">-</b></p>
-            <p><b id="rawPoints">0/64 puntos</b> · Incidencias de foco: <b id="resultWarnings">0</b></p>
+            <p><b id="rawPoints">0 puntos</b> · Incidencias de foco: <b id="resultWarnings">0</b></p>
             <div class="result-actions">
               <button id="downloadCsvBtn" class="soft-btn" type="button">Descargar resultado CSV</button>
               <button id="printResultBtn" class="ghost-btn" type="button">Imprimir / guardar PDF</button>

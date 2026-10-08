@@ -25,9 +25,9 @@ vm.runInContext(src,context);
 
 const api=context.__v3;
 const module3=api.DATA.modules.find(m=>m.id==="nivel-3-principios-voicing");
-assert.equal(module3.quiz.length,39,"Nivel 3 debe mantener 39 preguntas activas");
+assert.equal(module3.quiz.filter(q=>q.type==="pianoSelect").length,39,"Voicings debe mantener 39 ejercicios de piano");
 
-for(const q of module3.quiz){
+for(const q of module3.quiz.filter(item=>item.type==="pianoSelect")){
   assert.equal(q.type,"pianoSelect",`P${q.id}: se esperaba pianoSelect`);
   const accept=q.accept;
   assert.ok(accept,`P${q.id}: falta criterio accept`);
@@ -65,4 +65,4 @@ const wrong=["C2","G3","B3","D4"];
 const wrongScore=api.gradePianoSelection(q5,wrong).points;
 assert.equal(wrongScore,0,`layout no debe premiar armonía incorrecta: ${wrongScore}`);
 
-console.log("Nivel 3 verificado: 39 preguntas, criterios y rangos OK.");
+console.log("Voicings verificado: 39 ejercicios de piano, criterios y rangos OK.");

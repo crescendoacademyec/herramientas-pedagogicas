@@ -4,7 +4,7 @@ window.APP_DATA = {
       "id": "nivel-1-armonia-funcional",
       "level": "Nivel 1",
       "title": "Conocimientos esenciales",
-      "subtitle": "Escalas, intervalos, acordes, enlace, tonalidad y rearmonización.",
+      "subtitle": "Escalas, intervalos, acordes y función tonal.",
       "theory": [
         {
           "id": "escalas-intervalos",
@@ -13,11 +13,11 @@ window.APP_DATA = {
           "items": [
             {
               "term": "Escala",
-              "body": "Una escala es un conjunto de notas organizadas por alturas. Los sonidos diatónicos pertenecen a la escala; los cromáticos no pertenecen a ella."
+              "body": "Una escala organiza alturas alrededor de una referencia mediante un patrón de intervalos. Una nota cromática queda fuera de la colección diatónica de una tonalidad concreta; también existen escalas y colecciones cromáticas."
             },
             {
               "term": "Intervalo",
-              "body": "Un intervalo es la distancia entre dos notas medida en semitonos."
+              "body": "Un intervalo es la distancia entre dos alturas. Su tamaño escrito se cuenta con nombres de nota y su cualidad se determina con los semitonos: por ejemplo, Do–Mi es una tercera mayor."
             },
             {
               "term": "Nombre general y específico",
@@ -217,10 +217,10 @@ window.APP_DATA = {
           "section": "I. Escalas e intervalos",
           "type": "multipleChoice",
           "prompt": "Seleccione la definición correcta de intervalo.",
-          "sampleAnswer": "Un intervalo es la distancia entre dos notas medida en semitonos.",
+          "sampleAnswer": "Un intervalo relaciona dos alturas; su tamaño escrito y su cualidad describen esa distancia.",
           "choices": [
             "La relación funcional entre dos acordes dentro de una tonalidad.",
-            "La distancia entre dos notas medida en semitonos.",
+            "La distancia entre dos alturas, descrita por tamaño escrito y cualidad.",
             "La organización de notas por alturas dentro de una escala.",
             "La distancia entre dos acordes medida por sus fundamentales."
           ],
