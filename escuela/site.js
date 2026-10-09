@@ -1,5 +1,10 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
+const presentation = document.querySelector('.presentation');
+presentation?.addEventListener('toggle', () => {
+  if (!presentation.open) presentation.querySelector('video')?.pause();
+});
+
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const heroChangingText = document.getElementById('heroChangingText');
 const heroMessages = [
@@ -111,6 +116,7 @@ const sectionDestination = (targets, y, direction, viewport) => {
 
 const settleSection = () => {
   if (!sectionMotion.matches || performance.now() < suppressSettleUntil) return;
+  if ([...document.querySelectorAll('video')].some(video => !video.paused && !video.ended)) return;
   const offset = header.getBoundingClientRect().height;
   const maxY = document.documentElement.scrollHeight - window.innerHeight;
   const targets = [...document.querySelectorAll('.home-slide')]
