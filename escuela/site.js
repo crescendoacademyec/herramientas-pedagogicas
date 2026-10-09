@@ -75,25 +75,38 @@ window.addEventListener('scroll', updateActiveNavigation, { passive: true });
 window.addEventListener('hashchange', updateActiveNavigation);
 updateActiveNavigation();
 
-// Keep the gentle section settling used on the institutional site limited to desktop.
+// Settle in the user's direction after a third of a screen-sized section.
 const sectionMotion = window.matchMedia('(min-width:901px) and (prefers-reduced-motion:no-preference)');
 let settleTimer;
 let frameId = 0;
 let animating = false;
 let lastY = window.scrollY;
 let direction = 0;
-let suppressSettleUntil = 0;
+let suppressSettleUntil = performance.now() + 1200;
 
 const cancelSettle = () => {
   clearTimeout(settleTimer);
   cancelAnimationFrame(frameId);
+  if (animating) lastY = window.scrollY;
   animating = false;
-  lastY = window.scrollY;
 };
 
 const syncSectionMotion = () => {
   cancelSettle();
   document.documentElement.classList.toggle('fast-section-scroll', sectionMotion.matches);
+};
+
+const sectionDestination = (targets, y, direction, viewport) => {
+  for (let i = 0; i < targets.length - 1; i++) {
+    const start = targets[i];
+    const end = targets[i + 1];
+    if (y <= start + 2 || y >= end - 2) continue;
+    const travel = end - start;
+    // Long sections remain freely scrollable until their last screen is visible.
+    if (direction > 0 && y - start >= Math.max(travel / 3, travel - viewport * 2 / 3)) return end;
+    if (direction < 0 && end - y >= Math.max(travel / 3, travel - viewport * 2 / 3)) return start;
+  }
+  return null;
 };
 
 const settleSection = () => {
@@ -103,21 +116,23 @@ const settleSection = () => {
   const targets = [...document.querySelectorAll('.home-slide')]
     .map(section => Math.max(0, Math.min(maxY, section.getBoundingClientRect().top + window.scrollY - offset)));
   if (!targets.length) return;
-  const nearest = targets.reduce((best, y) => Math.abs(y - window.scrollY) < Math.abs(best - window.scrollY) ? y : best, targets[0]);
-  const distance = nearest - window.scrollY;
-  if (Math.abs(distance) < 2 || Math.abs(distance) > window.innerHeight * .38 || distance * direction < 0) return;
+  const destination = sectionDestination(targets, window.scrollY, direction, window.innerHeight - offset);
+  if (destination === null) return;
+  const distance = destination - window.scrollY;
 
   const startY = window.scrollY;
   const startTime = performance.now();
   animating = true;
   const tick = now => {
-    const progress = Math.min(1, (now - startTime) / 120);
+    const progress = Math.min(1, (now - startTime) / 240);
     const eased = 1 - Math.pow(1 - progress, 3);
-    window.scrollTo({ top: startY + distance * eased, behavior: 'auto' });
+    // Avoid restarting CSS smooth scrolling on every animation frame.
+    window.scrollTo({ top: startY + distance * eased, behavior: 'instant' });
     if (progress < 1) frameId = requestAnimationFrame(tick);
     else {
       animating = false;
       lastY = window.scrollY;
+      direction = 0;
     }
   };
   frameId = requestAnimationFrame(tick);
@@ -129,7 +144,7 @@ window.addEventListener('scroll', () => {
   if (Math.abs(change) > 1) direction = Math.sign(change);
   lastY = window.scrollY;
   clearTimeout(settleTimer);
-  if (sectionMotion.matches && performance.now() >= suppressSettleUntil) settleTimer = setTimeout(settleSection, 40);
+  if (sectionMotion.matches && performance.now() >= suppressSettleUntil) settleTimer = setTimeout(settleSection, 90);
 }, { passive: true });
 
 for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
