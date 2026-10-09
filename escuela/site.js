@@ -111,9 +111,9 @@ const settleSection = () => {
   const startTime = performance.now();
   animating = true;
   const tick = now => {
-    const progress = Math.min(1, (now - startTime) / 180);
+    const progress = Math.min(1, (now - startTime) / 120);
     const eased = 1 - Math.pow(1 - progress, 3);
-    window.scrollTo({ top: startY + distance * eased, behavior: 'instant' });
+    window.scrollTo({ top: startY + distance * eased, behavior: 'auto' });
     if (progress < 1) frameId = requestAnimationFrame(tick);
     else {
       animating = false;
@@ -129,7 +129,7 @@ window.addEventListener('scroll', () => {
   if (Math.abs(change) > 1) direction = Math.sign(change);
   lastY = window.scrollY;
   clearTimeout(settleTimer);
-  if (sectionMotion.matches && performance.now() >= suppressSettleUntil) settleTimer = setTimeout(settleSection, 80);
+  if (sectionMotion.matches && performance.now() >= suppressSettleUntil) settleTimer = setTimeout(settleSection, 40);
 }, { passive: true });
 
 for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
