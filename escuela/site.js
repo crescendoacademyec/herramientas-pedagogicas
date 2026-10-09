@@ -98,7 +98,7 @@ const syncSectionMotion = () => {
 
 const settleSection = () => {
   if (!sectionMotion.matches || performance.now() < suppressSettleUntil) return;
-  const offset = header.getBoundingClientRect().height + 18;
+  const offset = header.getBoundingClientRect().height;
   const maxY = document.documentElement.scrollHeight - window.innerHeight;
   const targets = [...document.querySelectorAll('.home-slide')]
     .map(section => Math.max(0, Math.min(maxY, section.getBoundingClientRect().top + window.scrollY - offset)));
