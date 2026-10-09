@@ -1,10 +1,5 @@
 document.getElementById('year').textContent = new Date().getFullYear();
 
-const presentation = document.querySelector('.presentation');
-presentation?.addEventListener('toggle', () => {
-  if (!presentation.open) presentation.querySelector('video')?.pause();
-});
-
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const heroChangingText = document.getElementById('heroChangingText');
 const heroMessages = [
