@@ -44,6 +44,37 @@ const updateHeaderHeight = () => {
 updateHeaderHeight();
 if ('ResizeObserver' in window) new ResizeObserver(updateHeaderHeight).observe(header);
 
+const navigationLinks = [...document.querySelectorAll('.main-nav a[href^="#"]')];
+const contactLink = document.querySelector('.header-contact[href^="#"]');
+const navigationTargets = navigationLinks
+  .map(link => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+  .filter(item => item.section);
+if (contactLink) {
+  const contactSection = document.querySelector(contactLink.getAttribute('href'));
+  if (contactSection) navigationTargets.push({ link: contactLink, section: contactSection });
+}
+
+const setActiveNavigation = activeLink => {
+  for (const { link } of navigationTargets) {
+    const active = link === activeLink;
+    link.classList.toggle('is-active', active);
+    if (active) link.setAttribute('aria-current', 'location');
+    else link.removeAttribute('aria-current');
+  }
+};
+
+const updateActiveNavigation = () => {
+  const marker = window.innerHeight * .38;
+  let current = null;
+  for (const item of navigationTargets) {
+    if (item.section.getBoundingClientRect().top <= marker) current = item;
+  }
+  setActiveNavigation(current?.link);
+};
+window.addEventListener('scroll', updateActiveNavigation, { passive: true });
+window.addEventListener('hashchange', updateActiveNavigation);
+updateActiveNavigation();
+
 // Keep the gentle section settling used on the institutional site limited to desktop.
 const sectionMotion = window.matchMedia('(min-width:901px) and (prefers-reduced-motion:no-preference)');
 let settleTimer;
