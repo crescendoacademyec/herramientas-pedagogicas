@@ -14,7 +14,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** un paso que contiene un silencio de redonda a 120 BPM debe durar 2 segundos. Los cinco lectores devuelven **0,25 segundos**. Descartan el silencio antes de calcular la duración y usan un valor fijo de medio pulso. También queda comprometida la sincronización del cursor y del tutor.
 
-**Evidencia:** prueba de las funciones de producción con una entrada OSMD de silencio. Archivos: [Piano](../piano-virtual/js/tutor.js), función `triggerCurrentStepNotes`, línea 176; [Diapasón](../diapason-virtual/js/score.js), `getCurrentStepData`, 745; [Bajo](../bass-virtual/js/score.js), 768; [Folk](../folk-virtual/js/score.js), 750; [Cuerdas](../cuerdas-frotadas/js/app.js), 1892.
+**Evidencia:** prueba de las funciones de producción con una entrada OSMD de silencio. Archivos: [Piano](../herramientas/piano-virtual/js/tutor.js), función `triggerCurrentStepNotes`, línea 176; [Diapasón](../herramientas/diapason-virtual/js/score.js), `getCurrentStepData`, 745; [Bajo](../herramientas/bass-virtual/js/score.js), 768; [Folk](../herramientas/folk-virtual/js/score.js), 750; [Cuerdas](../herramientas/cuerdas-frotadas/js/app.js), 1892.
 
 **Corrección propuesta:** separar la línea temporal de los ataques audibles y avanzar según la diferencia entre timestamps de eventos, respetando silencios y duraciones de voces independientes.
 
@@ -22,7 +22,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** un compás de 4/4 con una redonda en una voz y cuatro negras en otra debe durar cuatro pulsos. El parser devuelve duraciones que suman **siete pulsos**, y el programador las consume en serie. A 120 BPM el compás tarda 3,5 s en vez de 2 s.
 
-**Evidencia:** reproducido en navegador con MusicXML sintético y el parser copiado directamente del código auditado. [Caso ejecutable](metronomo-polyphony-probe.html). [Código](../metronomo/index.html), `parseMusicXmlEvents`, 1273; `scheduleScoreEvent`, 1403.
+**Evidencia:** reproducido en navegador con MusicXML sintético y el parser copiado directamente del código auditado. [Caso ejecutable](metronomo-polyphony-probe.html). [Código](../herramientas/metronomo/index.html), `parseMusicXmlEvents`, 1273; `scheduleScoreEvent`, 1403.
 
 **Corrección propuesta:** calcular tiempo hasta el siguiente inicio, no usar la duración máxima de las notas como separación de ataques. Mantener duraciones por nota aparte.
 
@@ -30,7 +30,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** comenzar una secuencia con muestras sin cargar y detenerla antes de finalizar la carga. Al resolver la carga se envían igualmente los dos ataques de la prueba. Sus tiempos ya están en el pasado, por lo que pueden coincidir al ejecutarse.
 
-**Evidencia:** prueba con carga diferida y reloj simulado; **dos ataques después de Detener**, esperado cero. [Código](../ear-training/js/audio.js), `playNotes`, 101; `playSequence`, 123. `playSequence` tampoco espera a las promesas de `playNotes`.
+**Evidencia:** prueba con carga diferida y reloj simulado; **dos ataques después de Detener**, esperado cero. [Código](../herramientas/ear-training/js/audio.js), `playNotes`, 101; `playSequence`, 123. `playSequence` tampoco espera a las promesas de `playNotes`.
 
 **Corrección propuesta:** cargar antes de fijar el instante inicial; utilizar un identificador de reproducción invalidado al detener, cambiar ejercicio o instrumento. Revisar también la liberación de nodos futuros, que se programa respecto al momento de agendar y no a su inicio.
 
@@ -38,7 +38,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** paso de negra a 120 BPM perteneciente solo a la mano excluida. Debería conservar 0,5 s de tiempo aunque no suene. Devuelve **0,25 s** porque filtra las notas antes de calcular el tiempo del paso.
 
-**Evidencia:** prueba focalizada de `triggerCurrentStepNotes` con el filtro desactivando esa nota. [Código](../piano-virtual/js/tutor.js), 176–205.
+**Evidencia:** prueba focalizada de `triggerCurrentStepNotes` con el filtro desactivando esa nota. [Código](../herramientas/piano-virtual/js/tutor.js), 176–205.
 
 **Corrección propuesta:** aplicar el filtro solo al audio y al resaltado, nunca a la línea temporal.
 
@@ -46,7 +46,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** la nota que continúa una ligadura de prolongación no debe generar otro `noteOn`. La ruta revisada genera **un ataque nuevo**. El código recorre todas las notas con altura y no distingue las continuaciones de ligadura.
 
-**Evidencia:** prueba focalizada de la función de reproducción con una nota marcada como continuación; revisión del código en [tutor.js](../piano-virtual/js/tutor.js), 176–201. No se hizo una escucha física de todas las variantes de ligadura importadas.
+**Evidencia:** prueba focalizada de la función de reproducción con una nota marcada como continuación; revisión del código en [tutor.js](../herramientas/piano-virtual/js/tutor.js), 176–201. No se hizo una escucha física de todas las variantes de ligadura importadas.
 
 **Corrección propuesta:** unir duración y estado de las notas ligadas, conservando voz y altura; cancelar correctamente los temporizadores al pausar y reiniciar.
 
@@ -54,7 +54,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** frecuencia de 164,82 Hz, segundo armónico de Mi2 a 82,41 Hz. `closestStringIndex` selecciona correctamente Mi2, pero `handlePitch` compara 164,82 contra 82,41 y muestra **+1200 cents**, en vez de normalizar el armónico reconocido.
 
-**Evidencia:** prueba numérica de selección y fórmula; [código](../afinador/index.html), 1332 y 1490. Que el detector entregue ese armónico depende del instrumento, micrófono y señal; no se afirma que ocurra con toda nota tocada.
+**Evidencia:** prueba numérica de selección y fórmula; [código](../herramientas/afinador/index.html), 1332 y 1490. Que el detector entregue ese armónico depende del instrumento, micrófono y señal; no se afirma que ocurra con toda nota tocada.
 
 **Corrección propuesta:** devolver también el armónico estimado y calcular el desvío contra esa referencia, con controles de estabilidad que eviten confundir octavas reales.
 
@@ -64,7 +64,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Causa:** el manejador asigna el nuevo `currentTime` y después llama a `pausePlayback()`, cuyo `refreshCurrentTime()` sobrescribe el destino con la posición antigua.
 
-**Evidencia:** ejecutado con el manejador original y reloj simulado. [Código](../speed/index.html), clic en la onda, 1602; `pausePlayback`, 1148.
+**Evidencia:** ejecutado con el manejador original y reloj simulado. [Código](../herramientas/speed/index.html), clic en la onda, 1602; `pausePlayback`, 1148.
 
 **Corrección propuesta:** guardar el destino aparte y asignarlo después de pausar.
 
@@ -72,7 +72,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** abrir la app. La consola informa `ReferenceError: saveSettings is not defined`. Cambiar BPM también llama a esa función. El registro de eventos de cambio de compás/pulso falla en la inicialización.
 
-**Evidencia:** observado en navegador local. [Código](../cuerdas-frotadas/js/metronome.js), 18 y 21. La app dispone de `saveStringsPrefs`, no de la función invocada por ese módulo.
+**Evidencia:** observado en navegador local. [Código](../herramientas/cuerdas-frotadas/js/metronome.js), 18 y 21. La app dispone de `saveStringsPrefs`, no de la función invocada por ese módulo.
 
 **Corrección propuesta:** conectar el metrónomo al mecanismo real de preferencias y comprobar su restauración. Esto no significa que toda la app o el botón de reproducción estén inutilizados.
 
@@ -80,7 +80,7 @@ Fecha: 20 de septiembre de 2026. Código base: `7003258`.
 
 **Caso:** abrir la app. `IntersectionObserver` rechaza `rootMargin: 'calc(-1 * var(--header-height)) 0px -68% 0px'`: solo admite longitudes en píxeles o porcentajes, no esa expresión CSS.
 
-**Evidencia:** error real de navegador. [Código](../historia-del-jazz/index.html), 2964–2974. Falla este observador que actualiza el estilo activo y `aria-current`; otro observador anterior sigue existiendo, por lo que no se concluye que toda la navegación esté rota.
+**Evidencia:** error real de navegador. [Código](../herramientas/historia-del-jazz/index.html), 2964–2974. Falla este observador que actualiza el estilo activo y `aria-current`; otro observador anterior sigue existiendo, por lo que no se concluye que toda la navegación esté rota.
 
 **Corrección propuesta:** calcular la altura y pasar un valor en píxeles; reconstruir el observador si cambia la cabecera.
 

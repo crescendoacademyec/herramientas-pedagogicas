@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Tabla de frecuencias interactiva: rango de cada instrumento y voz en el espectro audible, con recomendaciones de ecualización al hacer clic.">
+<title>Tabla de Frecuencias Interactiva</title>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/header-icons.css?v=20260919-flat-logo-v2">
+<style>
+:root {
+    --ink: #161514;
+    --charcoal: #24201d;
+    --charcoal2: #1c1916;
+    --paper: #fbf7f0;
+    --cream: #f1e6d2;
+    --gold: #d4a84f;
+    --gold-dim: rgba(212,168,79,0.35);
+    --gold-soft: rgba(212,168,79,0.16);
+    --moss: #476357;
+    --wine: #7a3b3b;
+    --line: rgba(255,255,255,0.14);
+    --text: #fffaf0;
+    --muted: rgba(255,250,240,0.68);
+    --panel: rgba(255, 250, 240, 0.09);
+    --accent: #d4a84f;
+    --accent-hover: #e5bd67;
+    --text-dim: rgba(255, 250, 240, 0.7);
+}
+* { box-sizing: border-box; }
+body {
+    background:
+        radial-gradient(circle at 74% 6%, rgba(212, 168, 79, 0.14), transparent 40%),
+        radial-gradient(circle at 6% 90%, rgba(212, 168, 79, 0.07), transparent 42%),
+        var(--ink);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ===== HEADER (unificado con la suite) ===== */
+.site-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px clamp(20px, 5vw, 64px);
+    border-bottom: 1px solid var(--line);
+    background: rgba(22, 21, 20, 0.82);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    position: relative; z-index: 3;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-family: Georgia, "Times New Roman", serif; font-size: 1.05rem; letter-spacing: 0.02em; color: var(--gold); }
+.site-header .tag { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.header-right { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.social-bar { display: flex; align-items: center; gap: 14px; }
+.social-bar a { color: var(--muted); display: inline-flex; align-items:center; justify-content:center; transition: color 0.15s ease, transform 0.15s ease; }
+.social-bar a:hover { color: var(--gold); transform: scale(1.1); }
+.social-bar svg { display: block; width: 19px; height: 19px; }
+.school-logo-link { display: inline-block; line-height: 0; }
+.school-logo { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--gold-dim); }
+@media (max-width: 640px) {
+    .site-header { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .header-right { width: 100%; justify-content: space-between; }
+    .site-header .tag { display: none; }
+}
+
+/* ===== HERO ===== */
+.app-shell { margin: 0 auto; max-width: 1600px; padding: clamp(28px, 5vw, 56px) clamp(12px, 2vw, 32px) 70px; position: relative; z-index: 1; }
+.tool-hero { display: grid; gap: 12px; margin-bottom: 30px; max-width: 900px; }
+.eyebrow { color: #9ab8aa; font-size: 0.78rem; font-weight: 1000; letter-spacing: 0.16em; margin: 0; text-transform: uppercase; }
+.tool-hero h1 { color: var(--text); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.3rem, 4.6vw, 3.7rem); line-height: 0.98; margin: 0; }
+.tool-hero p { color: var(--text-dim); font-size: 1rem; line-height: 1.7; margin: 0; max-width: 780px; }
+
+/* ===== CONTROLES ===== */
+.controls-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin-bottom: 22px; padding: 14px 16px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+}
+.chip-group { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
+.chip {
+    border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05);
+    color: var(--text-dim); padding: 7px 14px; border-radius: 999px; font-size: 0.78rem;
+    font-weight: 600; cursor: pointer; transition: 0.18s; letter-spacing: 0.02em;
+}
+.chip:hover { border-color: var(--gold-dim); color: var(--text); }
+.chip.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.toggle-label {
+    display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--text-dim);
+    cursor: pointer; user-select: none; white-space: nowrap;
+}
+.toggle-label input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+
+/* ===== GRÁFICO ===== */
+.chart-wrap {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 8px clamp(10px,2vw,22px) 18px; overflow-x: auto;
+    box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+}
+.chart-inner { min-width: 0; width:100%; position: relative; }
+
+/* regla de frecuencias */
+.freq-ruler { position: relative; height: 34px; margin-left: var(--label-w, 168px); border-bottom: 1px solid var(--line); }
+.tick { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.1); }
+.tick span {
+    position: absolute; top: 4px; left: 4px; font-size: 0.68rem; color: var(--muted);
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+
+/* bandas generales de fondo (subgraves/bajo/medios/presencia/brillo) */
+.band-overlay { position: absolute; top: 34px; bottom: 0; left: var(--label-w, 168px); right: 0; pointer-events: none; z-index: 0; }
+.band {
+    position: absolute; top: 0; bottom: 0;
+    border-left: 1px dashed rgba(255,255,255,0.08); border-right: 1px dashed rgba(255,255,255,0.08);
+}
+.band-label {
+    position: absolute; top: 6px; font-size: 0.62rem; color: rgba(255,250,240,0.45);
+    text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap;
+    background: rgba(22,21,20,0.55); padding: 1px 5px; border-radius: 4px;
+}
+
+/* filas de instrumentos */
+.rows { position: relative; z-index: 1; margin-top: 26px; }
+.row {
+    display: flex; align-items: center; gap: 0; padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.row:last-child { border-bottom: none; }
+.row-label {
+    width: var(--label-w, 168px); flex: none; font-size: 0.8rem; font-weight: 700; color: var(--text);
+    padding-right: 12px; display: flex; align-items: center; gap: 8px;
+}
+.row-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold-dim); flex: none; }
+.row-track { position: relative; flex: 1; height: 26px; }
+.bar-harm {
+    position: absolute; top: 8px; height: 10px; border-radius: 6px;
+    background: linear-gradient(90deg, rgba(241,230,210,0.5), rgba(241,230,210,0.16));
+    border: 1px solid rgba(241,230,210,0.28);
+}
+.bar-fund {
+    position: absolute; top: 4px; height: 18px; border-radius: 7px;
+    background: linear-gradient(90deg, #b5893c, var(--gold));
+    cursor: pointer; transition: filter 0.15s, transform 0.15s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.bar-fund:hover, .bar-fund:focus-visible { filter: brightness(1.18); transform: scaleY(1.08); outline: none; }
+.bar-fund.selected { filter: brightness(1.28); box-shadow: 0 0 0 2px var(--cream), 0 4px 14px rgba(212,168,79,0.5); }
+
+/* leyenda */
+.legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 0.74rem; color: var(--text-dim); }
+.legend-item { display: flex; align-items: center; gap: 7px; }
+.legend-swatch { width: 20px; height: 10px; border-radius: 4px; flex: none; }
+.legend-swatch.fund { background: linear-gradient(90deg, #b5893c, var(--gold)); }
+.legend-swatch.harm { background: linear-gradient(90deg, rgba(241,230,210,0.5), rgba(241,230,210,0.16)); border: 1px solid rgba(241,230,210,0.28); }
+
+/* ===== PANEL DE DETALLE ===== */
+.detail-overlay {
+    position: fixed; inset: 0; background: rgba(10,9,8,0.55); backdrop-filter: blur(2px);
+    z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.22s;
+}
+.detail-overlay.open { opacity: 1; pointer-events: auto; }
+.detail-panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw);
+    background: linear-gradient(180deg, var(--charcoal), var(--charcoal2));
+    border-left: 1px solid var(--line); z-index: 21;
+    transform: translateX(100%); transition: transform 0.28s cubic-bezier(.2,.7,.3,1);
+    overflow-y: auto; padding: 26px 24px 40px;
+}
+.detail-panel.open { transform: translateX(0); }
+.detail-close {
+    position: absolute; top: 18px; right: 18px; width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,0.08); border: 1px solid var(--line); color: var(--text);
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s;
+}
+.detail-close:hover { background: var(--accent); color: var(--ink); }
+.detail-eyebrow { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.14em; color: #9ab8aa; font-weight: 800; margin: 0 0 6px; }
+.detail-title { font-family: Georgia, serif; font-size: 1.7rem; margin: 0 0 4px; padding-right: 40px; }
+.detail-range { font-size: 0.86rem; color: var(--gold); font-weight: 700; margin-bottom: 18px; font-variant-numeric: tabular-nums; }
+.detail-section { margin-bottom: 20px; }
+.detail-section h4 {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim);
+    margin: 0 0 10px; display: flex; align-items: center; gap: 6px;
+}
+.detail-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.detail-list li {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 9px; padding: 9px 12px; font-size: 0.84rem; line-height: 1.5;
+}
+.detail-list.cut li { border-left: 3px solid var(--wine); }
+.detail-list.boost li { border-left: 3px solid var(--moss); }
+.detail-list.comp li { border-left: 3px solid var(--gold); }
+.freq-tag { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.detail-tips { font-size: 0.84rem; color: var(--text-dim); line-height: 1.7; background: rgba(255,255,255,0.04); border-radius: 9px; padding: 12px 14px; border: 1px dashed rgba(255,255,255,0.14); }
+.detail-empty { font-size: 0.86rem; color: var(--text-dim); text-align: center; padding: 60px 10px; }
+.detail-empty svg { width: 40px; height: 40px; opacity: 0.4; margin-bottom: 12px; }
+
+/* nota de fuentes */
+.sources-note { margin-top: 26px; font-size: 0.74rem; color: var(--text-dim); line-height: 1.7; }
+.sources-note b { color: var(--text); }
+
+/* búsqueda + botones de modo */
+.search-input {
+    background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    border-radius: 999px; padding: 8px 14px; font-size: 0.8rem; min-width: 180px;
+}
+.search-input::placeholder { color: var(--text-dim); }
+.search-input:focus { outline: none; border-color: var(--gold-dim); }
+.mode-btn {
+    border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: var(--text-dim);
+    padding: 7px 14px; border-radius: 999px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: 0.18s;
+}
+.mode-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+.mode-btn.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.link-btn {
+    border: none; background: none; color: var(--gold); font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 7px 4px;
+}
+.link-btn:hover { color: var(--accent-hover); }
+
+/* tabla de sibilancia */
+.sib-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+.sib-table td { padding: 7px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-dim); }
+.sib-table td:last-child { color: var(--gold); font-weight: 700; text-align: right; }
+
+/* notas persistentes */
+.notes-area {
+    width: 100%; min-height: 70px; resize: vertical; background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.14); border-radius: 9px; color: var(--text);
+    padding: 10px 12px; font-size: 0.82rem; font-family: inherit; line-height: 1.5;
+}
+.notes-area:focus { outline: none; border-color: var(--gold-dim); }
+
+/* reglas de oro */
+.golden-rules {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px clamp(16px,3vw,26px); margin-top: 22px;
+}
+.golden-rules h3 { font-family: Georgia, serif; font-size: 1.15rem; margin: 0 0 14px; color: var(--cream); }
+.golden-rules ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.golden-rules li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.86rem; color: var(--text-dim); line-height: 1.5; }
+.rule-num {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold-soft);
+    color: var(--gold); font-size: 0.72rem; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+
+/* glosario / técnicas — mismo patrón de panel deslizante */
+.glossary-item { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.glossary-item b { color: var(--gold); font-size: 0.86rem; }
+.glossary-item p { margin: 4px 0 0; font-size: 0.82rem; color: var(--text-dim); line-height: 1.55; }
+
+/* ===== TABS DE MODO (Tabla / Entrenamiento) ===== */
+.mode-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+.mode-tab {
+    flex: 1; text-align: left; padding: 16px 20px; border-radius: 12px;
+    background: var(--panel); border: 1px solid var(--line); color: var(--text-dim);
+    cursor: pointer; transition: 0.18s;
+}
+.mode-tab b { display: block; font-family: Georgia, serif; font-size: 1.05rem; color: var(--text); margin-bottom: 3px; }
+.mode-tab span { font-size: 0.78rem; }
+.mode-tab:hover { border-color: var(--gold-dim); }
+.mode-tab.active { background: linear-gradient(135deg, rgba(212,168,79,0.16), rgba(212,168,79,0.05)); border-color: var(--gold-dim); }
+.mode-tab.active b { color: var(--gold); }
+.view-section { display: none; }
+.view-section.active { display: block; }
+
+/* ===== ENTRENAMIENTO AUDITIVO ===== */
+.ear-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+    padding: clamp(18px, 3vw, 30px); box-shadow: 0 22px 60px rgba(0,0,0,0.28);
+}
+.ear-intro { color: var(--text-dim); font-size: 0.92rem; line-height: 1.7; margin: 0 0 22px; max-width: 720px; }
+.ear-intro b { color: var(--text); }
+.ear-settings { display: flex; flex-wrap: wrap; gap: 22px; margin-bottom: 22px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.ear-settings-group label.group-label { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; font-weight: 700; }
+.ear-settings-group .chip-group { display: flex; gap: 8px; }
+
+.ear-transport { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
+.ear-btn-primary {
+    background: var(--accent); border: none; border-radius: 999px; color: var(--ink);
+    padding: 12px 24px; font-size: 0.86rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 14px 32px rgba(0,0,0,0.25); transition: 0.18s;
+}
+.ear-btn-primary:hover { background: var(--accent-hover); }
+.ear-btn-ghost {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    border-radius: 999px; padding: 11px 20px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.18s;
+}
+.ear-btn-ghost:hover:not(:disabled) { border-color: var(--gold-dim); color: var(--gold); }
+.ear-btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.ear-score { margin-left: auto; font-size: 0.84rem; color: var(--text-dim); font-weight: 700; }
+
+.ear-question { font-size: 0.9rem; color: var(--text); margin: 0 0 14px; font-weight: 600; }
+.ear-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.ear-opt {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.16); color: var(--text);
+    padding: 12px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+    transition: 0.15s; font-variant-numeric: tabular-nums;
+}
+.ear-opt:hover:not(:disabled) { border-color: var(--gold-dim); background: rgba(212,168,79,0.08); }
+.ear-opt:disabled { cursor: default; }
+.ear-opt.correct { background: rgba(71,99,87,0.35); border-color: var(--moss); color: #cdeadb; }
+.ear-opt.wrong { background: rgba(122,59,59,0.35); border-color: var(--wine); color: #f2cfcf; }
+
+.ear-feedback { font-size: 0.88rem; font-weight: 700; min-height: 20px; margin-bottom: 6px; }
+.ear-feedback.ok { color: #8fd6b0; }
+.ear-feedback.bad { color: #e39b9b; }
+
+/* subpestañas (tipo de sonido / modo aprender-examen) */
+.ear-subtabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.ear-subtabs.small { margin-top: 4px; margin-bottom: 18px; }
+.ear-subtab {
+    border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05); color: var(--text-dim);
+    padding: 9px 18px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: 0.18s;
+}
+.ear-subtab:hover { border-color: var(--gold-dim); color: var(--text); }
+.ear-subtab.active { background: var(--accent); color: var(--ink); border-color: transparent; }
+.ear-type-panel { display: none; }
+.ear-type-panel.active { display: block; }
+.ear-mode-panel { display: none; }
+.ear-mode-panel.active { display: block; }
+
+/* grilla de frecuencias del modo Aprender */
+.ear-freq-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.ear-freq-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); color: var(--text-dim);
+    padding: 9px 14px; border-radius: 9px; font-size: 0.8rem; font-weight: 700; cursor: pointer;
+    transition: 0.15s; font-variant-numeric: tabular-nums;
+}
+.ear-freq-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+.ear-freq-btn.playing { background: var(--accent); color: var(--ink); border-color: transparent; box-shadow: 0 0 0 2px var(--gold-soft); }
+
+/* ===== ANALIZADOR DE ESPECTRO ===== */
+.analyzer-top-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 20px; margin-bottom: 16px; }
+.analyzer-left-col { flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.analyzer-left-col .ear-intro { margin: 0; }
+.analyzer-source-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.analyzer-file-label { cursor: pointer; display: inline-flex; align-items: center; }
+.analyzer-filename { font-size: 0.8rem; color: var(--text-dim); }
+
+.analyzer-link-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.analyzer-link-input { flex: 1; min-width: 220px; }
+.analyzer-embed-block {
+    flex: 0 0 300px; width: 300px; max-width: 100%; margin-left: auto;
+    background: rgba(0,0,0,0.28); border: 1px solid var(--line); border-radius: 12px;
+    padding: 14px;
+}
+.analyzer-embed-wrap { position: relative; width: 100%; max-width: 100%; margin: 0; }
+.analyzer-embed-wrap.yt { padding-top: 56.25%; height: 0; border-radius: 8px; overflow: hidden; }
+.analyzer-embed-wrap.yt iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.analyzer-embed-wrap.sp { max-width: 100%; }
+.analyzer-embed-wrap.sp iframe { width: 100%; height: 152px; border: 0; border-radius: 8px; display: block; }
+.analyzer-embed-wrap.sp.tall iframe { height: 352px; }
+.analyzer-player-btns { display: flex; align-items: center; gap: 12px; }
+.analyzer-embed-hint { margin: 10px 0 0; font-size: 0.76rem; color: var(--text-dim); line-height: 1.6; }
+@media (max-width: 680px) {
+    .analyzer-top-row { flex-direction: column; }
+    .analyzer-embed-block { flex-basis: auto; width: 100%; margin-left: 0; }
+}
+
+.analyzer-setting { display:flex; align-items:center; gap:7px; font-size:.78rem; color:var(--text-dim); }
+.mini-select { background:rgba(0,0,0,.28); color:var(--text); border:1px solid var(--line); border-radius:8px; padding:6px 8px; }
+.analyzer-metrics { display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; margin:8px 0 12px; padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:rgba(0,0,0,.2); }
+.analyzer-metrics div { display:grid; gap:2px; min-width:130px; }
+.analyzer-metrics span,.analyzer-metrics small { font-size:.68rem; color:var(--text-dim); }
+.analyzer-metrics b { color:var(--gold); font-variant-numeric:tabular-nums; font-size:.9rem; }
+.analyzer-metrics small { flex:1 1 240px; line-height:1.45; }
+
+.analyzer-canvas-wrap {
+    position: relative; height: 280px; background: rgba(0,0,0,0.35);
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; margin-top: 4px;
+}
+#analyzerCanvas { display: block; width: 100%; height: 100%; }
+.analyzer-empty {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: 0.85rem; text-align: center; padding: 0 20px; pointer-events: none;
+}
+.analyzer-axis-row {
+    position: relative; height: 18px; margin-top: 6px;
+    font-size: 0.68rem; color: rgba(255,250,240,0.45); font-variant-numeric: tabular-nums;
+}
+.analyzer-axis-row .axis-tick { position: absolute; top: 0; white-space: nowrap; transform: translateX(-50%); }
+.analyzer-axis-row .axis-tick:first-child { transform: translateX(0); }
+.analyzer-axis-row .axis-tick:last-child { transform: translateX(-100%); }
+.analyzer-ref-wrap { margin-top: 18px; padding: 8px clamp(10px,2vw,22px) 12px; }
+.analyzer-ref-wrap .chart-inner { min-width: 0; }
+.analyzer-ref-wrap .row { padding: 3px 0; }
+.analyzer-ref-wrap .row-label { font-size: 0.68rem; }
+.analyzer-ref-wrap .row-track { height: 16px; }
+.analyzer-ref-wrap .bar-fund { top: 3px; height: 10px; }
+.analyzer-ref-wrap .bar-harm { top: 6px; height: 5px; }
+.analyzer-ref-wrap.hidden { display: none; }
+
+.analyzer-hover-line {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: rgba(255,250,240,0.55); pointer-events: none;
+    display: none; z-index: 2;
+}
+.analyzer-hover-label {
+    position: absolute; top: 8px; transform: translateX(-50%);
+    background: rgba(15,13,10,0.88); border: 1px solid var(--gold-dim, rgba(212,168,79,0.5));
+    color: var(--text); font-size: 0.72rem; font-weight: 700; font-variant-numeric: tabular-nums;
+    padding: 3px 8px; border-radius: 6px; white-space: nowrap; pointer-events: none;
+    display: none; z-index: 3;
+}
+.analyzer-db-axis {
+    position: absolute; left: 6px; top: 0; bottom: 0; width: 46px;
+    pointer-events: none; z-index: 1;
+}
+.analyzer-db-axis .db-tick {
+    position: absolute; left: 0; right: 0; transform: translateY(-50%);
+    font-size: 0.62rem; color: rgba(255,250,240,0.4); font-variant-numeric: tabular-nums;
+}
+
+/* ===== FOOTER ===== */
+.site-footer {
+    padding: 26px clamp(20px, 6vw, 64px) 40px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    color: var(--muted); font-size: 0.78rem;
+    background: rgba(22, 21, 20, 0.82); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    margin-top: 20px;
+}
+
+@media (max-width: 720px) {
+    :root { --label-w: 108px; }
+    .row-label { font-size: 0.7rem; }
+    .detail-panel { width: 100vw; }
+}
+
+.ear-adaptive-status{
+    margin-top:8px; color:var(--muted); font-size:.74rem; line-height:1.4;
+}
+.ear-stats-card{
+    margin-top:18px; padding:14px; border:1px solid var(--line);
+    border-radius:12px; background:rgba(0,0,0,.22);
+}
+.ear-stats-head{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    margin-bottom:10px; flex-wrap:wrap; font-size:.8rem;
+}
+.ear-stats-summary{ color:var(--text-dim); font-size:.76rem; margin-bottom:10px; line-height:1.5; }
+.ear-stats-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(110px,1fr)); gap:7px;
+}
+.ear-stats-grid.compact{ grid-template-columns:repeat(auto-fit,minmax(92px,1fr)); }
+.ear-stat{
+    border:1px solid rgba(255,255,255,.09); border-radius:9px;
+    padding:8px 9px; background:rgba(255,255,255,.035);
+}
+.ear-stat strong{ display:block; font-size:.76rem; color:var(--cream); }
+.ear-stat span{ display:block; margin-top:3px; font-size:.68rem; color:var(--muted); }
+.ear-stat.weak{ border-color:rgba(182,101,67,.5); }
+.ear-stat.strong{ border-color:rgba(71,99,87,.65); }
+
+
+.ear-progress-wrap{ margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.08); }
+.ear-progress-title{ color:var(--muted); font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:7px; }
+.ear-progress-strip{ display:flex; flex-wrap:wrap; gap:4px; min-height:14px; }
+.ear-progress-dot{ width:11px; height:11px; border-radius:3px; background:rgba(255,255,255,.12); }
+.ear-progress-dot.ok{ background:#6ca486; }
+.ear-progress-dot.bad{ background:#a85d52; }
+.ear-progress-dot.boost{ box-shadow:inset 0 0 0 1px rgba(212,168,79,.65); }
+.ear-progress-dot.cut{ box-shadow:inset 0 0 0 1px rgba(154,184,170,.75); }
+#earDirOptions .ear-opt{ min-width:150px; font-weight:800; }
+
+
+.practice-session-card{
+    margin-bottom:20px; padding:16px 18px; border:1px solid var(--line);
+    border-radius:14px; background:linear-gradient(145deg,rgba(212,168,79,.09),rgba(0,0,0,.18));
+    box-shadow:0 16px 44px rgba(0,0,0,.18);
+}
+.practice-session-head{ display:flex; justify-content:space-between; align-items:center; gap:14px; flex-wrap:wrap; }
+.practice-session-kicker{ font-size:.66rem; color:var(--gold); text-transform:uppercase; letter-spacing:.12em; margin-bottom:3px; }
+.practice-session-actions{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.practice-goal-label{ display:flex; align-items:center; gap:7px; color:var(--muted); font-size:.74rem; }
+.practice-goal-label select{
+    background:rgba(0,0,0,.35); color:var(--text); border:1px solid var(--line);
+    border-radius:8px; padding:7px 9px;
+}
+.practice-session-metrics{
+    display:grid; grid-template-columns:repeat(4,minmax(120px,1fr)); gap:9px; margin-top:14px;
+}
+.practice-metric{ padding:10px 11px; border:1px solid rgba(255,255,255,.07); border-radius:10px; background:rgba(0,0,0,.2); }
+.practice-metric span{ display:block; color:var(--muted); font-size:.65rem; text-transform:uppercase; letter-spacing:.07em; }
+.practice-metric strong{ display:block; margin-top:4px; font-size:.84rem; color:var(--cream); line-height:1.25; }
+.practice-progress-track{ height:7px; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.08); margin-top:12px; }
+.practice-progress-fill{ height:100%; width:0%; background:linear-gradient(90deg,#b5893c,var(--gold)); transition:width .22s ease; }
+.practice-session-note{ margin-top:8px; font-size:.72rem; color:var(--text-dim); line-height:1.45; }
+.practice-history{ margin-top:12px; border-top:1px solid rgba(255,255,255,.08); padding-top:10px; }
+.practice-history summary{ cursor:pointer; color:var(--cream); font-size:.76rem; font-weight:700; }
+.practice-history-list{ display:grid; gap:7px; margin-top:10px; }
+.practice-history-row{
+    display:grid; grid-template-columns:minmax(120px,1.5fr) repeat(3,minmax(70px,.7fr));
+    gap:8px; align-items:center; padding:8px 9px; border-radius:9px;
+    background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.06);
+    font-size:.7rem; color:var(--muted);
+}
+.practice-history-row strong{ color:var(--cream); font-size:.72rem; }
+.practice-history-actions{ margin-top:9px; }
+@media(max-width:760px){
+    .practice-session-metrics{ grid-template-columns:repeat(2,minmax(120px,1fr)); }
+    .practice-history-row{ grid-template-columns:1fr 1fr; }
+}
+@media(max-width:440px){
+    .practice-session-metrics{ grid-template-columns:1fr; }
+}
+
+/* Keep filters and viewing tools in separate, predictable rows. */
+.controls-bar { display:grid; gap:14px; }
+.filter-row { display:flex; flex-wrap:wrap; align-items:center; gap:14px; }
+#categoryChips { flex:1 1 480px; }
+.filter-row .search-input { flex:0 1 240px; min-width:0; }
+.view-options { display:flex; flex-wrap:wrap; align-items:center; gap:10px; border-top:1px solid var(--line); padding-top:14px; }
+.tick:last-child { transform:translateX(-1px); }
+.tick:last-child span { left:auto; right:4px; }
+.row-track { min-width:0; }
+@media(max-width:700px) {
+  .mode-tabs { flex-direction:column; }
+  .mode-tab { min-width:0; }
+  .chart-inner { --label-w:120px; }
+  .row-label { font-size:.7rem; padding-right:8px; }
+  .band-label { display:none; }
+  .tick:nth-child(even):not(:last-child) span { display:none; }
+  .filter-row .search-input { flex:1 1 100%; }
+}
+@media(max-width:440px) {
+  .chart-inner { --label-w:96px; }
+  .tick span { font-size:.58rem; }
+  .tick:nth-child(3) span,.tick:nth-child(7) span,.tick:nth-child(9) span { display:none; }
+  .view-options .toggle-label { white-space:normal; }
+}
+.catalog-hint { color:var(--text-dim); font-size:.8rem; margin:0 0 12px; }
+#catalogCount { color:var(--gold); margin-left:8px; }
+.catalog-sources,.instrument-sources { margin:18px 0; color:var(--text-dim); font-size:.8rem; line-height:1.65; }
+.catalog-sources summary,.instrument-sources summary { color:var(--gold); cursor:pointer; }
+.catalog-sources a,.instrument-sources a { color:var(--gold); }
+.catalog-sources ul,.instrument-sources ul { padding-left:20px; }
+.frequency-cursor-line { position:absolute; top:0; bottom:0; width:1px; background:#f0cd74; box-shadow:0 0 4px #16130c; z-index:4; pointer-events:none; }
+.frequency-cursor-label { position:fixed; z-index:1000; pointer-events:none; padding:6px 10px; border:1px solid #d4a84f; border-radius:7px; color:#fff4d3; background:#17150f; font:600 13px/1.3 system-ui,sans-serif; box-shadow:0 3px 12px #0006; white-space:nowrap; }
+.frequency-cursor-line[hidden],.frequency-cursor-label[hidden] { display:none; }
+.frequency-touch-control{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:.8rem;margin:12px 0;color:var(--text-dim)}.frequency-touch-control input{flex:1 1 160px;min-width:100px}.frequency-touch-control output{min-width:72px;color:var(--gold)}
+</style>
+<link rel="stylesheet" href="processing.css?v=20260926">
+<link rel="stylesheet" href="mix-map.css?v=20260927-space">
+  <link rel="stylesheet" href="../../shared/crescendo-identity.css?v=20261004">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="brand">Tabla de Frecuencias</div>
+    <div class="header-right">
+        <div class="tag">Herramientas para clases de música</div>
+        <div class="social-bar">
+            <a href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener" aria-label="WhatsApp">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+            </a>
+            <a href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            <a href="mailto:crescendoacademyec@gmail.com" aria-label="Gmail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </a>
+            <a href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener" aria-label="Hotmart">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7V2h12v5"/><path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M8 12h8"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+        </div>
+        <a href="https://crescendoacademyec.github.io/inicio/" target="_blank" rel="noopener" class="school-logo-link" aria-label="Página de la escuela">
+            <img src="https://crescendoacademyec.github.io/inicio/logo_white.png" alt="Logo Crescendo Academy" class="school-logo" />
+        </a>
+    </div>
+</header>
+
+<main class="app-shell">
+    <section class="tool-hero">
+        <p class="eyebrow">Referencia técnica</p>
+        <p>Explora dónde vive cada instrumento y la voz en el espectro audible (20 Hz – 20 kHz), y haz clic sobre cualquier barra para ver qué cortar, qué realzar y por qué.</p>
+    </section>
+
+    <link rel="stylesheet" href="eq-visual.css?v=20261010-4"><div class="mode-tabs" id="modeTabs">
+        <button class="mode-tab active" data-view="chart">
+            <b>Tabla de referencia</b>
+            <span>Rangos de frecuencia y recomendaciones de EQ por instrumento</span>
+        </button>
+        <button class="mode-tab" data-view="eq"><b>Ecualizador visual</b><span>Construye curvas con frecuencia, ganancia, Q y filtros</span></button><button class="mode-tab" data-view="ear">
+            <b>Entrenamiento auditivo</b>
+            <span>Entrena frecuencias, EQ, compresión y balance con comparaciones auditivas</span>
+        </button>
+        <button class="mode-tab" data-view="processing"><b>Procesamiento y dinámica</b><span>EQ, filtros, compresión y limitación con ejemplos A/B</span></button>
+        <button class="mode-tab" data-view="mix"><b>Mapa de mezcla</b><span>Paneo, registro y profundidad por estilo</span></button>
+        <button class="mode-tab" data-view="analyzer">
+            <b>Analizador de espectro</b>
+            <span>Sube o graba audio y compáralo contra la tabla de instrumentos</span>
+        </button>
+    </div>
+
+    <section class="view-section active" id="viewChart">
+    <div class="controls-bar">
+        <div class="filter-row">
+        <div class="chip-group" id="categoryChips" role="group" aria-label="Familia de instrumentos">
+            <button class="chip active" data-cat="todos">Todos</button>
+            <button class="chip" data-cat="voz">Voz</button>
+            <button class="chip" data-cat="percusion">Percusión</button>
+            <button class="chip" data-cat="cuerdas">Cuerdas</button>
+            <button class="chip" data-cat="viento">Viento</button>
+            <button class="chip" data-cat="teclas">Teclas</button>
+        </div>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar instrumento…" aria-label="Buscar instrumento">
+        </div>
+        <div class="view-options" role="group" aria-label="Opciones de visualización">
+        <button class="mode-btn" id="simpleToggle">Modo: Mezclador</button>
+        <button class="mode-btn active" id="rangeModeToggle" title="Alterna entre registro acústico y zona práctica de mezcla">Rango: Registro real</button>
+        <button class="mode-btn" id="compareToggle">Comparar dos</button>
+        <button class="link-btn" id="glossaryBtn">Glosario</button>
+        <button class="link-btn" id="techniquesBtn">Serie vs. Paralela</button>
+        <label class="toggle-label">
+            <input type="checkbox" id="bandsToggle" checked>
+            Mostrar rangos generales
+        </label>
+        </div>
+    </div>
+
+    <p class="catalog-hint">Todos muestra el catálogo completo. Desplázate hacia abajo o filtra por familia. <span id="catalogCount" aria-live="polite"></span></p>
+    <div class="chart-wrap">
+        <div class="chart-inner" id="chartInner">
+            <div class="band-overlay" id="bandOverlay"></div>
+            <div class="freq-ruler" id="freqRuler"></div>
+            <div class="rows" id="rows"></div>
+        </div>
+        <div class="legend">
+            <div class="legend-item"><span class="legend-swatch fund"></span> <span id="primaryLegendLabel">Registro fundamental orientativo</span></div>
+            <div class="legend-item"><span class="legend-swatch harm"></span> Armónicos / parciales y ataque</div>
+            <div class="legend-item">Pasa el cursor → frecuencia · Clic en una barra → EQ</div>
+        </div>
+    </div>
+
+    <p class="sources-note">
+        La vista <b>Registro real</b> muestra el registro acústico orientativo de instrumentos tonales; en percusión muestra <b>energía principal o una ventana orientativa de exploración</b>, según la ficha. El sintetizador muestra la ventana audible, porque su espectro depende del patch. La vista <b>Zona de mezcla</b> conserva las franjas prácticas usadas por las recomendaciones de EQ. Son referencias aproximadas, no límites absolutos. Todos los instrumentos incluyen una franja de armónicos o parciales. En los instrumentos tonales detallados muestra los armónicos 2.º–16.º calculados sobre su registro; en percusión detallada es una ventana de exploración hasta 20 kHz. No indica energía uniforme ni un límite acústico. Consulta el alcance en cada ficha.
+    </p>
+
+    <details class="catalog-sources">
+      <summary>Fuentes y cómo leer los rangos</summary>
+      <p>Notas en sonido real, con Do central = C4 y La4 = 440 Hz. Las voces usan la referencia de catalogación de Yale; no indican límites fisiológicos. Los registros instrumentales dependen del modelo, el repertorio y la técnica. Un rango de notas no describe por sí solo el espectro de una grabación.</p>
+      <ul>
+        <li><a href="https://pressbooks.macalester.digital/multimodalmusicianship/chapter/instrument-transpositions-ranges/" target="_blank" rel="noopener noreferrer">Macalester College</a>: registros y transposición.</li>
+        <li><a href="https://yalelibrary.atlassian.net/wiki/spaces/YMD/pages/202030334" target="_blank" rel="noopener noreferrer">Yale University Library</a>: referencias vocales.</li>
+        <li><a href="https://cmtext.indiana.edu/appendices/appendix_B.php" target="_blank" rel="noopener noreferrer">Indiana University</a>: notas y frecuencias.</li>
+        <li><a href="https://online.berklee.edu/takenote/what-is-eq-in-music-10-audio-equalization-tips/" target="_blank" rel="noopener noreferrer">Berklee Online</a>: fundamentos de EQ, no recetas por instrumento.</li>
+        <li>Adler, <i>The Study of Orchestration</i>; VSL Academy; documentación de Yamaha y The Met: registros y variantes. Cada ficha incluye su referencia.</li>
+      </ul>
+      <p>Consejos de mezcla sintetizados del material de estudio aportado: <i>Vocal Mixing Reference Guide</i>, <i>Sección de Cuerdas HTC</i>, <i>Chapter 5</i> y <i>Aprende a utilizar tu ecualizador</i>. No representan una certificación ni un aval institucional.</p>
+    </details>
+    <div class="golden-rules">
+        <h3>Reglas de oro fáciles de recordar</h3>
+        <ul id="goldenRulesList"></ul>
+    </div>
+    </section>
+
+    <section class="view-section" id="viewMix"><div id="mixMap"></div></section>
+    <section class="view-section" id="viewProcessing"><div class="processing-module" id="processingLab"></div></section>
+    <section class="view-section" id="viewEQ" aria-label="Ecualizador visual"></section><section class="view-section" id="viewEar">
+        <details class="processing-module"><summary>Entrenamiento de mezcla y dinámica · EQ, compresión y limitación</summary><div id="processingPractice"></div></details>
+
+        <div class="practice-session-card" id="practiceSessionCard">
+            <div class="practice-session-head">
+                <div>
+                    <div class="practice-session-kicker">Sesión de práctica</div>
+                    <strong id="practiceSessionTitle">Sesión actual</strong>
+                </div>
+                <div class="practice-session-actions">
+                    <label class="practice-goal-label">
+                        Meta
+                        <select id="practiceGoalSelect" aria-label="Meta de rondas">
+                            <option value="10">10 rondas</option>
+                            <option value="20" selected>20 rondas</option>
+                            <option value="30">30 rondas</option>
+                            <option value="50">50 rondas</option>
+                        </select>
+                    </label>
+                    <button class="ear-btn-ghost" type="button" onclick="window.dispatchEvent(new CustomEvent('crescendo:export-progress'))">Exportar progreso</button><button class="ear-btn-ghost" id="practiceEndBtn" type="button">Terminar sesión</button>
+                </div>
+            </div>
+            <div class="practice-session-metrics">
+                <div class="practice-metric"><span>Rondas</span><strong id="practiceRounds">0 / 20</strong></div>
+                <div class="practice-metric"><span>Precisión</span><strong id="practiceAccuracy">—</strong></div>
+                <div class="practice-metric"><span>Tiempo</span><strong id="practiceTime">00:00</strong></div>
+                <div class="practice-metric"><span>Foco sugerido</span><strong id="practiceFocus">Empieza una ronda</strong></div>
+            </div>
+            <div class="practice-progress-track" aria-hidden="true">
+                <div class="practice-progress-fill" id="practiceProgressFill"></div>
+            </div>
+            <div class="practice-session-note" id="practiceSessionNote">
+                La sesión empieza con tu primera respuesta y se guarda localmente al terminar.
+            </div>
+            <details class="practice-history">
+                <summary>Historial de sesiones</summary>
+                <div id="practiceHistoryList" class="practice-history-list"></div>
+                <div class="practice-history-actions">
+                    <button class="link-btn" id="practiceHistoryClear" type="button">Borrar historial de sesiones</button>
+                </div>
+            </details>
+        </div>
+
+        <div class="ear-card">
+            <p class="ear-intro">
+                Entrena tres habilidades por separado: reconocer <b>frecuencias en ruido rosa</b>, identificar
+                <b>boost vs. cut</b> sin mezclar esa decisión con la frecuencia, y reconocer <b>tono puro</b>.
+                Usa <b>Aprender</b> antes de pasar a <b>Examen</b>.
+            </p>
+
+            <div class="ear-subtabs" id="earTypeTabs">
+                <button class="ear-subtab active" data-type="noise">Ruido rosa (EQ)</button>
+                <button class="ear-subtab" data-type="direction">Boost vs. Cut</button>
+                <button class="ear-subtab" data-type="tone">Tono puro</button>
+            </div>
+
+            <!-- ============ RUIDO ROSA ============ -->
+            <div class="ear-type-panel active" id="earPanel-noise">
+                <div class="ear-settings">
+                    <div class="ear-settings-group">
+                        <label class="group-label">Dificultad</label>
+                        <div class="chip-group" id="earDifficultyChips">
+                            <button class="chip" data-diff="initial">Inicial · 12 dB</button>
+                            <button class="chip active" data-diff="intermediate">Intermedio · 6 dB</button>
+                            <button class="chip" data-diff="advanced">Avanzado · 3 dB</button>
+                            <button class="chip" data-diff="adaptive">Adaptativo</button>
+                        </div>
+                        <div class="ear-adaptive-status" id="earAdaptiveStatus">Nivel fijo: Intermedio</div>
+                    </div>
+                    <div class="ear-settings-group">
+                        <label class="group-label">Ganancia (dB)</label>
+                        <div class="chip-group" id="earGainChips">
+                            <button class="chip" data-gain="3">3 dB</button>
+                            <button class="chip active" data-gain="6">6 dB</button>
+                            <button class="chip" data-gain="9">9 dB</button>
+                            <button class="chip" data-gain="12">12 dB</button>
+                        </div>
+                    </div>
+                    <div class="ear-settings-group">
+                        <label class="group-label">Opciones de respuesta (examen)</label>
+                        <div class="chip-group" id="earOptChips">
+                            <button class="chip" data-opt="3">3</button>
+                            <button class="chip active" data-opt="5">5</button>
+                            <button class="chip" data-opt="9">9 (todas)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ear-subtabs small" id="earNoiseModeTabs">
+                    <button class="ear-subtab active" data-mode="learn">🎧 Aprender</button>
+                    <button class="ear-subtab" data-mode="quiz">📝 Examen</button>
+                </div>
+
+                <div class="ear-mode-panel active" id="earNoiseLearn">
+                    <p class="ear-question">Toca una frecuencia para escucharla con el realce activo (ruido rosa + boost). Vuelve a tocarla para detener.</p>
+                    <div class="ear-freq-grid" id="earNoiseLearnGrid"></div>
+                </div>
+
+                <div class="ear-mode-panel" id="earNoiseQuiz">
+                    <div class="ear-transport">
+                        <button class="ear-btn-primary" id="earPlayBtn">▶ Reproducir ronda</button>
+                        <button class="ear-btn-ghost" id="earAbBtn" disabled>A/B: escuchando modificado</button>
+                        <button class="ear-btn-ghost" id="earResetScore">Reiniciar puntaje</button>
+                        <span class="ear-score" id="earScore">Aciertos: 0 / 0 (0%)</span>
+                    </div>
+                    <p class="ear-question">¿Cuál frecuencia fue modificada?</p>
+                    <div class="ear-options" id="earOptions">
+                        <span style="color:var(--text-dim);font-size:0.85rem;">Presiona "Reproducir ronda" para empezar.</span>
+                    </div>
+                    <div class="ear-feedback" id="earFeedback"></div>
+                    <button class="ear-btn-primary" id="earNextBtn" style="display:none;">Siguiente ronda →</button>
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Estadísticas por banda</strong>
+                            <button class="ear-btn-ghost" id="earStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid" id="earStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earNoiseProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ============ BOOST VS. CUT ============ -->
+            <div class="ear-type-panel" id="earPanel-direction">
+                <p class="ear-intro" style="margin-bottom:16px;">
+                    Aquí la frecuencia se muestra explícitamente: tu única tarea es decidir si escuchas un
+                    <b>realce (boost)</b> o un <b>corte (cut)</b>. Así entrenas la dirección del cambio sin mezclarla
+                    con la identificación de frecuencia.
+                </p>
+                <div class="ear-settings">
+                    <div class="ear-settings-group">
+                        <label class="group-label">Dificultad</label>
+                        <div class="chip-group" id="earDirGainChips">
+                            <button class="chip" data-gain="12">Inicial · 12 dB</button>
+                            <button class="chip active" data-gain="6">Intermedio · 6 dB</button>
+                            <button class="chip" data-gain="3">Avanzado · 3 dB</button>
+                        </div>
+                    </div>
+                    <div class="ear-settings-group">
+                        <label class="group-label">Selección de banda</label>
+                        <div class="chip-group" id="earDirBandMode">
+                            <button class="chip active" data-mode="adaptive">Adaptativa</button>
+                            <button class="chip" data-mode="random">Aleatoria</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ear-subtabs small" id="earDirectionModeTabs">
+                    <button class="ear-subtab active" data-mode="learn">🎧 Aprender</button>
+                    <button class="ear-subtab" data-mode="quiz">📝 Examen</button>
+                </div>
+
+                <div class="ear-mode-panel active" id="earDirectionLearn">
+                    <p class="ear-question">Elige una banda y alterna Boost / Referencia / Cut para memorizar el contraste.</p>
+                    <div class="ear-freq-grid" id="earDirLearnGrid"></div>
+                    <div class="ear-transport" style="margin-top:16px;">
+                        <button class="ear-btn-ghost" id="earDirLearnBoost">+ Boost</button>
+                        <button class="ear-btn-ghost" id="earDirLearnRef">Referencia</button>
+                        <button class="ear-btn-ghost" id="earDirLearnCut">− Cut</button>
+                    </div>
+                    <div class="ear-adaptive-status" id="earDirLearnStatus">Selecciona una frecuencia.</div>
+                </div>
+
+                <div class="ear-mode-panel" id="earDirectionQuiz">
+                    <div class="ear-transport">
+                        <button class="ear-btn-primary" id="earDirPlayBtn">▶ Reproducir ronda</button>
+                        <button class="ear-btn-ghost" id="earDirAbBtn" disabled>A/B: modificado</button>
+                        <button class="ear-btn-ghost" id="earDirResetScore">Reiniciar puntaje</button>
+                        <span class="ear-score" id="earDirScore">Aciertos: 0 / 0 (0%)</span>
+                    </div>
+                    <p class="ear-question" id="earDirQuestion">La frecuencia aparecerá aquí al iniciar una ronda.</p>
+                    <div class="ear-options" id="earDirOptions">
+                        <button class="ear-opt" data-dir="boost" disabled>+ Realce (Boost)</button>
+                        <button class="ear-opt" data-dir="cut" disabled>− Corte (Cut)</button>
+                    </div>
+                    <div class="ear-feedback" id="earDirFeedback"></div>
+                    <button class="ear-btn-primary" id="earDirNextBtn" style="display:none;">Siguiente ronda →</button>
+
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Progreso Boost vs. Cut</strong>
+                            <button class="ear-btn-ghost" id="earDirStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earDirStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid" id="earDirStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earDirProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============ TONO PURO ============ -->
+            <div class="ear-type-panel" id="earPanel-tone">
+                <p class="ear-intro" style="margin-bottom:16px;">Las 31 bandas ISO clásicas de un ecualizador gráfico, de 20 Hz a 20 kHz.</p>
+                <div class="ear-settings">
+                    <div class="ear-settings-group">
+                        <label class="group-label">Opciones de respuesta (examen)</label>
+                        <div class="chip-group" id="earToneDifficultyChips">
+                            <button class="chip active" data-tone-diff="guided">Guiado</button>
+                            <button class="chip" data-tone-diff="adaptive">Adaptativo</button>
+                        </div>
+                        <div class="ear-adaptive-status" id="earToneAdaptiveStatus">Modo guiado</div>
+                        <div class="chip-group" id="earToneOptChips">
+                            <button class="chip" data-opt="3">3</button>
+                            <button class="chip active" data-opt="5">5</button>
+                            <button class="chip" data-opt="9">9</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ear-subtabs small" id="earToneModeTabs">
+                    <button class="ear-subtab active" data-mode="learn">🎧 Aprender</button>
+                    <button class="ear-subtab" data-mode="quiz">📝 Examen</button>
+                </div>
+
+                <div class="ear-mode-panel active" id="earToneLearn">
+                    <p class="ear-question">Toca una frecuencia para escuchar el tono puro (onda seno). Vuelve a tocarla para detener.</p>
+                    <div class="ear-freq-grid" id="earToneLearnGrid"></div>
+                </div>
+
+                <div class="ear-mode-panel" id="earToneQuiz">
+                    <div class="ear-transport">
+                        <button class="ear-btn-primary" id="earTonePlayBtn">▶ Reproducir ronda</button>
+                        <button class="ear-btn-ghost" id="earToneResetScore">Reiniciar puntaje</button>
+                        <span class="ear-score" id="earToneScore">Aciertos: 0 / 0 (0%)</span>
+                    </div>
+                    <p class="ear-question">¿Cuál es el tono?</p>
+                    <div class="ear-options" id="earToneOptions">
+                        <span style="color:var(--text-dim);font-size:0.85rem;">Presiona "Reproducir ronda" para empezar.</span>
+                    </div>
+                    <div class="ear-feedback" id="earToneFeedback"></div>
+                    <button class="ear-btn-primary" id="earToneNextBtn" style="display:none;">Siguiente ronda →</button>
+                    <div class="ear-stats-card">
+                        <div class="ear-stats-head">
+                            <strong>Estadísticas por frecuencia</strong>
+                            <button class="ear-btn-ghost" id="earToneStatsReset" type="button">Borrar historial</button>
+                        </div>
+                        <div class="ear-stats-summary" id="earToneStatsSummary">Aún no hay datos suficientes.</div>
+                        <div class="ear-stats-grid compact" id="earToneStatsGrid"></div>
+                        <div class="ear-progress-wrap">
+                            <div class="ear-progress-title">Últimas rondas</div>
+                            <div class="ear-progress-strip" id="earToneProgress" aria-label="Historial reciente"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="view-section" id="viewAnalyzer">
+        <div class="ear-card">
+            <div class="analyzer-top-row">
+                <div class="analyzer-left-col">
+                    <p class="ear-intro">
+                        Sube un archivo de audio, pega un link de <b>YouTube</b> o <b>Spotify</b>, o graba con el micrófono
+                        para ver el <b>espectro de frecuencias en vivo</b>, dibujado sobre el mismo eje logarítmico
+                        (20 Hz – 20 kHz) de la tabla de referencia. Activa "Mostrar instrumentos" para comparar tu mezcla
+                        contra dónde vive cada instrumento.
+                    </p>
+
+                    <div class="analyzer-source-row">
+                        <label class="ear-btn-ghost analyzer-file-label">
+                            Elegir archivo de audio
+                            <input type="file" id="analyzerFileInput" accept="audio/*" style="display:none;">
+                        </label>
+                        <button class="ear-btn-ghost" id="analyzerMicBtn">🎙 Usar micrófono</button>
+                        <div class="analyzer-player-btns" id="analyzerPlayerBtns" style="display:none;">
+                            <button class="ear-btn-ghost" id="analyzerShareTabBtn">🔊 Analizar audio del reproductor</button>
+                            <button class="link-btn" id="analyzerEmbedRemoveBtn">Quitar reproductor</button>
+                        </div>
+                        <span class="analyzer-filename" id="analyzerFileName"></span>
+                    </div>
+
+                    <div class="analyzer-link-row">
+                        <input type="text" class="search-input analyzer-link-input" id="analyzerLinkInput" placeholder="Pega un link de YouTube o Spotify…">
+                        <button class="ear-btn-ghost" id="analyzerLinkBtn">Cargar</button>
+                    </div>
+                </div>
+
+                <div class="analyzer-embed-block" id="analyzerEmbedBlock" style="display:none;">
+                    <div class="analyzer-embed-wrap" id="analyzerEmbedWrap"></div>
+                    <p class="analyzer-embed-hint" id="analyzerEmbedHint"></p>
+                </div>
+            </div>
+
+            <audio id="analyzerAudioEl" controls style="display:none; width:100%; margin-bottom:16px;"></audio>
+
+            <div class="ear-settings" style="border-bottom:none;padding-bottom:0;">
+                <label class="toggle-label">
+                    <input type="checkbox" id="analyzerOverlayToggle" checked>
+                    Mostrar instrumentos según filtros de la tabla
+                </label>
+                <label class="toggle-label">
+                    <input type="checkbox" id="analyzerFreezeToggle">
+                    Congelar espectro (pausar el dibujo)
+                </label>
+                <label class="analyzer-setting">FFT
+                    <select id="analyzerFftSelect" class="mini-select">
+                        <option value="4096">4096</option><option value="8192" selected>8192</option><option value="16384">16384</option>
+                    </select>
+                </label>
+                <label class="analyzer-setting">Suavizado
+                    <select id="analyzerSmoothSelect" class="mini-select">
+                        <option value="0.55">Bajo</option><option value="0.82" selected>Medio</option><option value="0.92">Alto</option>
+                    </select>
+                </label>
+            </div>
+
+            <div class="analyzer-metrics" id="analyzerMetrics">
+                <div><span>Pico dominante</span><b id="analyzerPeakNow">—</b></div>
+                <div><span>Peak hold</span><b id="analyzerPeakHold">—</b></div>
+                <button class="ear-btn-ghost" id="analyzerPeakReset" type="button">Reiniciar peak hold</button>
+                <small>Lectura en dBFS aproximados; no equivale a SPL calibrado.</small>
+            </div>
+
+            <div class="analyzer-canvas-wrap" id="analyzerCanvasWrap">
+                <canvas id="analyzerCanvas"></canvas>
+                <div class="analyzer-db-axis" id="analyzerDbAxis"></div>
+                <div class="analyzer-empty" id="analyzerEmpty">Elige un archivo o activa el micrófono para ver el espectro.</div>
+                <div class="analyzer-hover-line" id="analyzerHoverLine"></div>
+                <div class="analyzer-hover-label" id="analyzerHoverLabel"></div>
+            </div>
+            <div class="analyzer-axis-row" id="analyzerAxisRow"></div>
+
+            <div class="chart-wrap analyzer-ref-wrap" id="analyzerRefWrap">
+                <div class="chart-inner">
+                    <div class="freq-ruler" id="analyzerRefRuler"></div>
+                    <div class="rows" id="analyzerRefRows"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="site-footer">
+    <span>Crescendo Academy · <span id="footerYear"></span>. Todos los derechos reservados.</span>
+</footer>
+
+<div class="detail-overlay" id="detailOverlay"></div>
+<aside class="detail-panel" id="detailPanel">
+    <button class="detail-close" id="detailClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <div id="detailContent">
+        <div class="detail-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto;"><path d="M9 7v10l8-5-8-5z"/></svg>
+            Haz clic en cualquier instrumento del gráfico para ver sus recomendaciones de ecualización.
+        </div>
+    </div>
+</aside>
+
+<div class="detail-overlay" id="glossaryOverlay"></div>
+<aside class="detail-panel" id="glossaryPanel">
+    <button class="detail-close" id="glossaryClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <p class="detail-eyebrow">Referencia</p>
+    <h3 class="detail-title">Glosario</h3>
+    <div id="glossaryContent"></div>
+</aside>
+
+<div class="detail-overlay" id="techOverlay"></div>
+<aside class="detail-panel" id="techPanel">
+    <button class="detail-close" id="techClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+    <p class="detail-eyebrow">Técnicas de compresión</p>
+    <h3 class="detail-title">Serie vs. Paralela</h3>
+    <div id="techContent"></div>
+</aside>
+
+<script src="data.js?v=20260926-audit"></script>
+<script src="instrument-catalog.js?v=20260926-audit"></script>
+<script src="eq-response.js?v=20261010-4"></script><script src="app.js?v=20261010-4"></script><script src="eq-visual.js?v=20261010-4"></script>
+<script src="processing-dsp.js?v=20260926-audit"></script>
+<script src="ear.js?v=20260926-audit"></script>
+<script src="processing-exercises.js?v=20260926-audit"></script>
+<script src="processing-lab.js?v=20260926-audit"></script>
+<script src="analyzer.js?v=20260926-audit"></script>
+<script src="mix-presets.js?v=20260926-genres-expanded"></script>
+<script src="mix-space.js?v=20260927-space"></script>
+<script src="mix-map.js?v=20260927-space"></script>
+<script src="frequency-cursor.js?v=20260926-audit"></script>
+<script>
+document.getElementById('modeTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.mode-tab');
+  if (!btn) return;
+  const view = btn.dataset.view;
+  document.querySelectorAll('.mode-tab').forEach((t) => t.classList.toggle('active', t === btn));
+  document.getElementById('viewChart').classList.toggle('active', view === 'chart');
+  document.getElementById('viewEQ').classList.toggle('active', view === 'eq');
+  document.getElementById('viewEar').classList.toggle('active', view === 'ear');
+  document.getElementById('viewProcessing').classList.toggle('active', view === 'processing');
+  document.getElementById('viewMix').classList.toggle('active', view === 'mix');
+  document.getElementById('viewAnalyzer').classList.toggle('active', view === 'analyzer');
+  window.dispatchEvent(new CustomEvent('crescendo:view-change', { detail: { view } }));
+});
+</script>
+<script>document.getElementById('footerYear').textContent = '© ' + new Date().getFullYear();</script>
+</body>
+</html>

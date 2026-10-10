@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Diapasón Virtual de cuerdas frotadas: violín, viola, violonchelo y contrabajo, con líneas guía y posiciones." />
+  <title>Cuerdas Frotadas</title>
+  <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../shared/header-icons.css?v=20260919-flat-logo-v2">
+  <link rel="stylesheet" href="css/styles.css?v=20261006-aligned-exploration">
+<link rel="stylesheet" href="../../shared/header-metronome.css?v=20260925-beat-stop">
+<link rel="stylesheet" href="../../shared/string-sound-menu.css?v=20261005c">
+  <link rel="stylesheet" href="../../shared/crescendo-identity.css?v=20261005-instrument-ui">
+</head>
+<body>
+  <header class="topbar">
+    <h1 class="brand"><span>Cuerdas Frotadas</span></h1>
+    <div class="header-metronome" aria-label="Metrónomo">
+      <button class="metro-play" id="metroToggle" aria-label="Iniciar metrónomo" type="button" title="Iniciar / detener metrónomo">▶</button>
+      <div class="metro-bpm"><span class="metro-label">BPM</span><div class="metro-stepper"><button id="metroDown" type="button" aria-label="Bajar BPM">−</button><span id="metroBpmValue">80</span><button id="metroUp" type="button" aria-label="Subir BPM">+</button></div></div>
+      <button id="metroTap" type="button">Tap</button>
+      <select id="metroMeter" title="Compás"><option>2/4</option><option>3/4</option><option selected>4/4</option><option>6/8</option></select>
+      <select id="metroPulse" title="Figura de pulso"><option value="auto" selected>Pulso auto</option><option value="quarter">♩</option><option value="eighth">♪</option><option value="dottedQuarter">♩.</option></select>
+      <span class="metro-beat" id="metroBeat" aria-label="Metrónomo detenido">—</span>
+    </div>
+    <div class="social-bar">
+      <a class="social-link" href="https://www.instagram.com/crescendoacademy.ec/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" title="Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      </a>
+      <a class="social-link" href="https://api.whatsapp.com/send?phone=593984064179" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" title="WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+      </a>
+      <a class="social-link" href="https://www.facebook.com/profile.php?id=61575680608380" target="_blank" rel="noopener noreferrer" aria-label="Facebook" title="Facebook">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      </a>
+      <a class="social-link" href="mailto:crescendoacademyec@gmail.com" aria-label="Correo electrónico" title="Correo electrónico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </a>
+      <a class="social-link" href="https://hotmart.com/es/club/crescendo-academy" target="_blank" rel="noopener noreferrer" aria-label="Hotmart" title="Hotmart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 7V2h12v5"/>
+          <path d="M3 7h18v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/>
+          <path d="M8 12h8"/>
+        </svg>
+      </a>
+      <a class="social-link" href="https://www.youtube.com/@crescendoacademyec" target="_blank" rel="noopener noreferrer" aria-label="YouTube" title="YouTube">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+        </svg>
+      </a>
+      <a href="https://crescendoacademyec.github.io/inicio/" target="_blank" rel="noopener noreferrer" class="academy-link" aria-label="Herramientas pedagógicas de Crescendo Academy" title="Herramientas pedagógicas">
+        <img src="https://crescendoacademyec.github.io/inicio/logo_white.png" alt="Logo Crescendo Academy" class="school-logo" />
+      </a>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="hero">
+      <p class="eyebrow">Aplicación musical</p>
+      <p>Explora escalas, arpegios y posiciones en violín, viola, violonchelo y contrabajo, con líneas guía en lugar de trastes y el diapasón cónico real del instrumento.</p>
+    </section>
+
+    <!-- Panel de controles -->
+    <section class="panel" aria-label="Controles del diapasón virtual">
+      <div class="field">
+        <label for="instrument">Instrumento</label>
+        <select id="instrument"></select>
+      </div>
+      <div class="field">
+        <label for="articulation">Articulación</label>
+        <select id="articulation">
+          <option value="legato">Legato (arco)</option>
+          <option value="pizzicato">Pizzicato</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="orientation">Orientación</label>
+        <select id="orientation">
+          <option value="right">Diestro</option>
+          <option value="left">Zurdo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="techPosition">Posición técnica</label>
+        <select id="techPosition"></select>
+      </div>
+      <div class="field">
+        <label for="labelMode">Mostrar</label>
+        <select id="labelMode">
+          <option value="notes">Notas</option>
+          <option value="intervals">Intervalos</option>
+          <option value="degrees">Grados</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="keySignature">Tonalidad</label>
+        <select id="keySignature" title="Armadura independiente de la escala o acorde">
+          <option value="auto" selected>Automática</option>
+          <option value="none">— Sin armadura —</option>
+          <option value="0">C mayor / A menor · sin alteraciones</option>
+          <option value="1">G mayor / E menor · 1♯</option>
+          <option value="2">D mayor / B menor · 2♯</option>
+          <option value="3">A mayor / F♯ menor · 3♯</option>
+          <option value="4">E mayor / C♯ menor · 4♯</option>
+          <option value="5">B mayor / G♯ menor · 5♯</option>
+          <option value="6">F♯ mayor / D♯ menor · 6♯</option>
+          <option value="7">C♯ mayor / A♯ menor · 7♯</option>
+          <option value="-1">F mayor / D menor · 1♭</option>
+          <option value="-2">B♭ mayor / G menor · 2♭</option>
+          <option value="-3">E♭ mayor / C menor · 3♭</option>
+          <option value="-4">A♭ mayor / F menor · 4♭</option>
+          <option value="-5">D♭ mayor / B♭ menor · 5♭</option>
+          <option value="-6">G♭ mayor / E♭ menor · 6♭</option>
+          <option value="-7">C♭ mayor / A♭ menor · 7♭</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="spellingMode">Grafía</label>
+        <select id="spellingMode" title="Preferencia enharmónica para notas y accidentales">
+          <option value="auto" selected>Automática</option>
+          <option value="sharps">Preferir ♯</option>
+          <option value="flats">Preferir ♭</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="root">Fundamental</label>
+        <select id="root"></select>
+      </div>
+      <div class="field">
+        <label for="chordType">Tipo de acorde</label>
+        <select id="chordType"></select>
+      </div>
+      <div class="field">
+        <label for="scale">Escala / Modo</label>
+        <select id="scale"></select>
+      </div>
+      <div class="field">
+        <label>Rango del diapasón</label>
+        <div class="btnBox"><button id="minus">−</button><span id="posVal">1</span><button id="plus">＋</button></div>
+      </div>
+      <div class="field-frets">
+        <div class="fret-control-row">
+          <button id="clearAllBtn" type="button">Limpiar ajustes</button>
+          <button id="clearSelectionBtn" type="button">Limpiar selección</button>
+          <div class="interaction-mode-picker" role="tablist" aria-label="Modo de interacción">
+            <button id="explorationModeBtn" class="mode-toggle-btn active" type="button" role="tab" aria-selected="true">Exploración</button>
+            <button id="ephemeralModeBtn" class="mode-toggle-btn" type="button" role="tab" aria-selected="false" title="Las notas seleccionadas desaparecen después de 1,5 segundos">Efímero</button>
+          </div>
+          <div id="chordNameBox">
+            <span id="chordSymbol"></span>
+            <span id="chordQualityLabel"></span>
+          </div>
+          <div class="sound-controls">
+            <label for="volume">Volumen</label>
+            <input type="range" id="volume" min="0" max="7" step="0.1" value="4">
+            <span class="sound-source-indicator" id="soundSourceIndicator">🎻 cargando...</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="technique-strip" id="techniqueStrip" aria-live="polite"></div>
+
+    <section class="strings-tutor" id="stringsTutorPanel" aria-label="Tutor de partitura para cuerdas frotadas">
+      <div class="strings-tutor-head">
+        <div>
+          <strong>Tutor de partitura</strong>
+          <span>MusicXML → cuerda · posición · dedo · arco</span>
+        </div>
+        <label class="tutor-toggle"><input type="checkbox" id="tutorEnabled"> Activar Tutor</label>
+      </div>
+      <div class="strings-tutor-controls">
+        <label>Criterio
+          <select id="tutorCriterion">
+            <option value="phrase">Frase · continuidad</option>
+            <option value="position">Priorizar posición elegida</option>
+            <option value="string">Minimizar cambios de cuerda</option>
+          </select>
+        </label>
+        <label>Cuerdas al aire
+          <select id="tutorOpenStrings">
+            <option value="neutral">Equilibrado</option>
+            <option value="avoid">Evitar cuando sea posible</option>
+            <option value="prefer">Favorecer</option>
+          </select>
+        </label>
+        <label>Arco
+          <select id="tutorBowMode">
+            <option value="score">Respetar partitura</option>
+            <option value="alternate">Alternar ↓ ↑ si no está indicado</option>
+            <option value="free">Sin sugerencia automática</option>
+          </select>
+        </label>
+        <label>Frase
+          <select id="tutorPhraseLength">
+            <option value="4">4 eventos</option>
+            <option value="8" selected>8 eventos</option>
+            <option value="12">12 eventos</option>
+            <option value="16">16 eventos</option>
+          </select>
+        </label>
+        <button id="tutorAnalyzeBtn" type="button">Analizar frase</button>
+      </div>
+      <div class="strings-tutor-readout">
+        <div><small>Paso</small><strong id="tutorStep">—</strong></div>
+        <div><small>Nota</small><strong id="tutorNote">—</strong></div>
+        <div><small>Cuerda</small><strong id="tutorString">—</strong></div>
+        <div><small>Dedo</small><strong id="tutorFinger">—</strong></div>
+        <div><small>Posición</small><strong id="tutorPosition">—</strong></div>
+        <div><small>Arco</small><strong id="tutorBow">—</strong></div>
+      </div>
+      <div class="strings-tutor-technique" id="tutorTechnique">Carga un MusicXML para analizar digitación, cambios de posición y articulaciones.</div>
+      <div class="strings-tutor-status" id="tutorStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="bow-practice" id="bowPracticePanel" aria-label="Práctica de arco para cuerdas frotadas">
+      <div class="bow-practice-head">
+        <div>
+          <strong>Práctica de arco</strong>
+          <span>Técnica · dirección · distribución · cambios de cuerda · metrónomo</span>
+        </div>
+        <button id="bowPracticeStart" type="button">Iniciar ejercicio</button>
+      </div>
+      <div class="bow-practice-controls">
+        <label>Técnica
+          <select id="bowTechnique">
+            <option value="detache">Détaché</option>
+            <option value="legato">Legato</option>
+            <option value="staccato">Staccato</option>
+            <option value="martele">Martelé</option>
+            <option value="spiccato">Spiccato</option>
+            <option value="tremolo">Trémolo</option>
+          </select>
+        </label>
+        <label>Dirección
+          <select id="bowDirection">
+            <option value="alternate">Alternar ↓ ↑</option>
+            <option value="score">Seguir Tutor/partitura</option>
+            <option value="down">Solo ↓</option>
+            <option value="up">Solo ↑</option>
+          </select>
+        </label>
+        <label>Cuerdas
+          <select id="bowStringPattern">
+            <option value="s1">1ª cuerda</option>
+            <option value="s2">2ª cuerda</option>
+            <option value="s3">3ª cuerda</option>
+            <option value="s4">4ª cuerda</option>
+            <option value="12">Cruce 1ª ↔ 2ª</option>
+            <option value="23">Cruce 2ª ↔ 3ª</option>
+            <option value="34">Cruce 3ª ↔ 4ª</option>
+            <option value="1234">Cruce 1–2–3–4</option>
+            <option value="tutor">Ruta del Tutor</option>
+          </select>
+        </label>
+        <label>Golpes / pulso
+          <select id="bowStrokesPerPulse">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label>Distribución
+          <select id="bowDistribution">
+            <option value="auto">Automática</option>
+            <option value="whole">Arco entero</option>
+            <option value="half">½ arco</option>
+            <option value="third">⅓ de arco</option>
+            <option value="quarter">¼ de arco</option>
+          </select>
+        </label>
+        <label>Duración
+          <select id="bowMeasures">
+            <option value="2">2 compases</option>
+            <option value="4" selected>4 compases</option>
+            <option value="8">8 compases</option>
+          </select>
+        </label>
+      </div>
+      <div class="bow-practice-readout">
+        <div><small>Compás / pulso</small><strong id="bowPracticeStep">—</strong></div>
+        <div><small>Arco</small><strong id="bowPracticeDirection">—</strong></div>
+        <div><small>Cuerda</small><strong id="bowPracticeString">—</strong></div>
+        <div><small>Distribución</small><strong id="bowPracticeDistribution">—</strong></div>
+        <div><small>Técnica</small><strong id="bowPracticeTechnique">—</strong></div>
+      </div>
+      <div class="bow-practice-guide" id="bowPracticeGuide">Selecciona una técnica y pulsa “Iniciar ejercicio”. El ejercicio se sincroniza con el metrónomo del encabezado.</div>
+      <div class="bow-practice-status" id="bowPracticeStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="intonation-practice" id="intonationPanel" aria-label="Entrenamiento de entonación para cuerdas frotadas">
+      <div class="intonation-head">
+        <div>
+          <strong>Entonación</strong>
+          <span>Micrófono · cents · referencia · drone · desplazamientos</span>
+        </div>
+        <button id="intonationMicBtn" type="button">Activar micrófono</button>
+      </div>
+      <div class="intonation-controls">
+        <label>Objetivo
+          <select id="intonationTargetMode">
+            <option value="open">Cuerda al aire</option>
+            <option value="manual">Nota manual</option>
+            <option value="tutor">Nota del Tutor</option>
+          </select>
+        </label>
+        <label>Cuerda
+          <select id="intonationString"></select>
+        </label>
+        <label>Nota
+          <select id="intonationNote"></select>
+        </label>
+        <label>A4
+          <select id="intonationA4">
+            <option value="440" selected>440 Hz</option>
+            <option value="441">441 Hz</option>
+            <option value="442">442 Hz</option>
+            <option value="443">443 Hz</option>
+          </select>
+        </label>
+        <label>Tolerancia
+          <select id="intonationTolerance">
+            <option value="5">±5 cents</option>
+            <option value="10" selected>±10 cents</option>
+            <option value="15">±15 cents</option>
+          </select>
+        </label>
+        <label>Drone
+          <select id="intonationDroneMode">
+            <option value="off">Apagado</option>
+            <option value="target">Nota objetivo</option>
+            <option value="open">Cuerda al aire</option>
+          </select>
+        </label>
+        <button id="intonationReferenceBtn" type="button">Tocar referencia</button>
+        <button id="intonationDroneBtn" type="button">Iniciar drone</button>
+      </div>
+      <div class="intonation-meter" id="intonationMeter">
+        <div class="intonation-note-box"><small>Objetivo</small><strong id="intonationTargetLabel">—</strong><span id="intonationTargetHz">— Hz</span></div>
+        <div class="intonation-scale" aria-label="Medidor de afinación de menos 50 a más 50 cents">
+          <span class="intonation-zero"></span>
+          <span class="intonation-zone"></span>
+          <span class="intonation-needle" id="intonationNeedle"></span>
+          <span class="intonation-tick tminus">−50</span><span class="intonation-tick tzero">0</span><span class="intonation-tick tplus">+50</span>
+        </div>
+        <div class="intonation-note-box detected"><small>Detectado</small><strong id="intonationDetectedLabel">—</strong><span id="intonationCents">— cents</span></div>
+      </div>
+      <div class="intonation-feedback" id="intonationFeedback">Selecciona una referencia y activa el micrófono. La lectura usa temperamento igual y muestra la desviación en cents.</div>
+      <div class="intonation-shift">
+        <label>Desplazamiento
+          <select id="intonationShift">
+            <option value="0">Sin ejercicio</option>
+            <option value="2">+2 semitonos</option>
+            <option value="3">+3 semitonos</option>
+            <option value="5">+5 semitonos</option>
+            <option value="7">+7 semitonos</option>
+            <option value="12">+8va</option>
+          </select>
+        </label>
+        <button id="intonationShiftBtn" type="button">Preparar desplazamiento</button>
+        <span id="intonationShiftGuide">Practica primero la referencia y después desplázate hacia la nota objetivo sin usar líneas como si fueran trastes.</span>
+      </div>
+      <div class="intonation-status" id="intonationStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="shift-practice" id="shiftPracticePanel" aria-label="Práctica de cambios de posición">
+      <div class="shift-practice-head">
+        <div>
+          <strong>Cambios de posición</strong>
+          <span>origen · destino · dedo guía · llegada afinada</span>
+        </div>
+        <button id="shiftPracticeStart" type="button">Iniciar ejercicio</button>
+      </div>
+      <div class="shift-practice-controls">
+        <label>Cuerda
+          <select id="shiftString"></select>
+        </label>
+        <label>Origen
+          <select id="shiftOrigin"></select>
+        </label>
+        <label>Destino
+          <select id="shiftDestination"></select>
+        </label>
+        <label>Dedo guía
+          <select id="shiftGuideFinger">
+            <option value="auto">Automático</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+          </select>
+        </label>
+        <label>Tipo de cambio
+          <select id="shiftMotion">
+            <option value="guide">Dedo guía · contacto ligero</option>
+            <option value="silent">Preparación silenciosa</option>
+            <option value="gliss">Glissando controlado</option>
+          </select>
+        </label>
+        <label>Arco
+          <select id="shiftBow">
+            <option value="free">Libre</option>
+            <option value="same">Mismo arco</option>
+            <option value="change">Cambio de arco</option>
+            <option value="alternate">Alternar ↓ ↑</option>
+          </select>
+        </label>
+        <label>Repeticiones
+          <select id="shiftRepetitions">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+            <option value="8">8</option>
+          </select>
+        </label>
+        <label class="shift-check"><input id="shiftUseIntonation" type="checkbox" checked> Verificar llegada con Entonación</label>
+      </div>
+      <div class="shift-practice-readout">
+        <div><small>Paso</small><strong id="shiftStep">—</strong></div>
+        <div><small>Origen</small><strong id="shiftOriginReadout">—</strong></div>
+        <div><small>Destino</small><strong id="shiftDestinationReadout">—</strong></div>
+        <div><small>Dedo guía</small><strong id="shiftFingerReadout">—</strong></div>
+        <div><small>Arco</small><strong id="shiftBowReadout">—</strong></div>
+      </div>
+      <div class="shift-practice-actions">
+        <button id="shiftPlayOrigin" type="button">Tocar origen</button>
+        <button id="shiftPlayDestination" type="button">Tocar destino</button>
+        <button id="shiftSendToIntonation" type="button">Enviar llegada a Entonación</button>
+      </div>
+      <div class="shift-practice-guide" id="shiftPracticeGuide">El objetivo es desplazar la mano como una unidad y llegar afinado, sin tratar las líneas guía como trastes físicos.</div>
+      <div class="shift-practice-status" id="shiftPracticeStatus" aria-live="polite"></div>
+    </section>
+
+
+    <section class="double-stop-practice" id="doubleStopPanel" aria-label="Dobles cuerdas e intervalos">
+      <div class="double-stop-head">
+        <div><strong>Dobles cuerdas · intervalos</strong><span>Entrenamiento de afinación relativa y resonancia entre cuerdas vecinas.</span></div>
+        <button id="doubleStopAnalyze" type="button">Preparar intervalo</button>
+      </div>
+      <div class="double-stop-controls">
+        <label>Par de cuerdas
+          <select id="doubleStopPair"></select>
+        </label>
+        <label>Intervalo
+          <select id="doubleStopInterval">
+            <option value="0">Unísono</option>
+            <option value="3">3ª menor</option>
+            <option value="4" selected>3ª mayor</option>
+            <option value="5">4ª justa</option>
+            <option value="7">5ª justa</option>
+            <option value="8">6ª menor</option>
+            <option value="9">6ª mayor</option>
+            <option value="12">Octava</option>
+          </select>
+        </label>
+        <label>Sistema
+          <select id="doubleStopTemperament">
+            <option value="equal">Temperamento igual</option>
+            <option value="pure">Afinación relativa pura</option>
+          </select>
+        </label>
+        <label>Zona
+          <select id="doubleStopZone">
+            <option value="auto">Automática</option>
+            <option value="position">Posición técnica actual</option>
+            <option value="low">Registro bajo</option>
+          </select>
+        </label>
+        <label>Drone
+          <select id="doubleStopDroneMode">
+            <option value="lower">Nota inferior</option>
+            <option value="upper">Nota superior</option>
+            <option value="open">Cuerda vecina al aire</option>
+            <option value="off">Sin drone</option>
+          </select>
+        </label>
+      </div>
+      <div class="double-stop-readout">
+        <div><small>Nota inferior</small><strong id="doubleStopLower">—</strong></div>
+        <div><small>Nota superior</small><strong id="doubleStopUpper">—</strong></div>
+        <div><small>Digitación</small><strong id="doubleStopFingering">—</strong></div>
+        <div><small>Ajuste relativo</small><strong id="doubleStopCents">—</strong></div>
+        <div><small>Relación</small><strong id="doubleStopRatio">—</strong></div>
+      </div>
+      <div class="double-stop-actions">
+        <button id="doubleStopPlayLower" type="button">Tocar inferior</button>
+        <button id="doubleStopPlayUpper" type="button">Tocar superior</button>
+        <button id="doubleStopPlayTogether" type="button">Tocar doble cuerda</button>
+        <button id="doubleStopDrone" type="button">Iniciar drone</button>
+        <button id="doubleStopTuneLower" type="button">Afinar inferior</button>
+        <button id="doubleStopTuneUpper" type="button">Afinar superior</button>
+      </div>
+      <div class="double-stop-guide" id="doubleStopGuide">Prepara un intervalo. Para comprobar afinación con micrófono, trabaja una nota a la vez o usa una nota como drone.</div>
+      <div class="double-stop-status" id="doubleStopStatus" aria-live="polite"></div>
+    </section>
+
+
+    <section class="vibrato-practice" id="vibratoPanel" aria-label="Vibrato y estabilidad de afinación">
+      <div class="vibrato-head">
+        <div>
+          <strong>Vibrato · estabilidad de afinación</strong>
+          <span>Analiza centro, amplitud, velocidad y regularidad sobre una nota sostenida.</span>
+        </div>
+        <button id="vibratoMicBtn" type="button">Usar micrófono</button>
+      </div>
+      <div class="vibrato-controls">
+        <label>Objetivo
+          <select id="vibratoTarget">
+            <option value="intonation" selected>Objetivo de Entonación</option>
+            <option value="tutor">Nota activa del Tutor</option>
+          </select>
+        </label>
+        <label>Ejercicio
+          <select id="vibratoMode">
+            <option value="stable">Nota estable · sin vibrato</option>
+            <option value="continuous" selected>Vibrato continuo</option>
+            <option value="delayed">Entrada retardada de vibrato</option>
+          </select>
+        </label>
+        <label>Ancho objetivo
+          <select id="vibratoWidth">
+            <option value="15">±15 cents · estrecho</option>
+            <option value="25" selected>±25 cents · medio</option>
+            <option value="40">±40 cents · amplio</option>
+          </select>
+        </label>
+        <label>Velocidad objetivo
+          <select id="vibratoRate">
+            <option value="4">4 Hz</option>
+            <option value="5">5 Hz</option>
+            <option value="6" selected>6 Hz</option>
+            <option value="7">7 Hz</option>
+          </select>
+        </label>
+        <label>Duración
+          <select id="vibratoDuration">
+            <option value="4">4 s</option>
+            <option value="6" selected>6 s</option>
+            <option value="8">8 s</option>
+          </select>
+        </label>
+        <button id="vibratoReferenceBtn" type="button">Tocar referencia</button>
+        <button id="vibratoStartBtn" type="button">Iniciar análisis</button>
+      </div>
+      <div class="vibrato-readout">
+        <div><small>Centro</small><strong id="vibratoCenter">—</strong></div>
+        <div><small>Ancho</small><strong id="vibratoMeasuredWidth">—</strong></div>
+        <div><small>Velocidad</small><strong id="vibratoMeasuredRate">—</strong></div>
+        <div><small>Regularidad</small><strong id="vibratoRegularity">—</strong></div>
+        <div><small>Entrada</small><strong id="vibratoOnset">—</strong></div>
+      </div>
+      <div class="vibrato-chart-wrap">
+        <canvas id="vibratoChart" width="960" height="180" aria-label="Gráfico del vibrato en cents"></canvas>
+      </div>
+      <div class="vibrato-guide" id="vibratoGuide">El centro ideal permanece cerca de la afinación objetivo. El ancho y la velocidad son parámetros descriptivos, no una única norma estética.</div>
+      <div class="vibrato-status" id="vibratoStatus" aria-live="polite"></div>
+    </section>
+
+
+
+    <section class="scale-practice" id="scalePracticePanel" aria-label="Escalas y arpegios digitados para cuerdas frotadas">
+      <div class="scale-practice-head">
+        <div>
+          <strong>Escalas y arpegios · digitación guiada</strong>
+          <span>Genera una ruta tocable por cuerda, posición y dedo, adaptada al instrumento activo.</span>
+        </div>
+        <button id="scalePracticeBuild" type="button">Preparar ruta</button>
+      </div>
+      <div class="scale-practice-controls">
+        <label>Material
+          <select id="scalePracticeKind">
+            <option value="scale" selected>Escala seleccionada</option>
+            <option value="arpeggio">Arpegio seleccionado</option>
+          </select>
+        </label>
+        <label>Extensión
+          <select id="scalePracticeOctaves">
+            <option value="1">1 octava</option>
+            <option value="2" selected>2 octavas</option>
+            <option value="3">3 octavas</option>
+          </select>
+        </label>
+        <label>Dirección
+          <select id="scalePracticeDirection">
+            <option value="up">Ascendente</option>
+            <option value="down">Descendente</option>
+            <option value="updown" selected>Sube y baja</option>
+          </select>
+        </label>
+        <label>Criterio de digitación
+          <select id="scalePracticeCriterion">
+            <option value="position" selected>Continuidad de posición</option>
+            <option value="string">Minimizar cambios de cuerda</option>
+            <option value="compact">Recorrido compacto</option>
+          </select>
+        </label>
+        <label>Arco
+          <select id="scalePracticeBow">
+            <option value="alternate" selected>Détaché · ↓ ↑</option>
+            <option value="slur2">Legato · 2 notas por arco</option>
+            <option value="slur4">Legato · 4 notas por arco</option>
+            <option value="free">Libre</option>
+          </select>
+        </label>
+        <label>Tempo de práctica
+          <select id="scalePracticeSubdivision">
+            <option value="1">1 nota por pulso</option>
+            <option value="2" selected>2 notas por pulso</option>
+            <option value="4">4 notas por pulso</option>
+          </select>
+        </label>
+        <button id="scalePracticeStart" type="button">Iniciar Tutor</button>
+        <button id="scalePracticePlay" type="button">Escuchar ruta</button>
+      </div>
+      <div class="scale-practice-readout">
+        <div><small>Paso</small><strong id="scalePracticeStep">—</strong></div>
+        <div><small>Nota</small><strong id="scalePracticeNote">—</strong></div>
+        <div><small>Cuerda</small><strong id="scalePracticeString">—</strong></div>
+        <div><small>Dedo</small><strong id="scalePracticeFinger">—</strong></div>
+        <div><small>Posición</small><strong id="scalePracticePosition">—</strong></div>
+        <div><small>Arco</small><strong id="scalePracticeBowReadout">—</strong></div>
+      </div>
+      <div class="scale-practice-guide" id="scalePracticeGuide">Selecciona una fundamental y una escala o arpegio; luego prepara la ruta.</div>
+      <div class="scale-practice-status" id="scalePracticeStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="technical-patterns" id="technicalPatternsPanel" aria-label="Secuencias y patrones técnicos para cuerdas frotadas">
+      <div class="technical-patterns-head">
+        <div>
+          <strong>Secuencias y patrones técnicos</strong>
+          <span>Transforma la escala o arpegio seleccionado en estudios de coordinación, cruces y regularidad con arco.</span>
+        </div>
+        <button id="technicalPatternBuild" type="button">Preparar patrón</button>
+      </div>
+      <div class="technical-patterns-controls">
+        <label>Material
+          <select id="technicalPatternMaterial">
+            <option value="scale" selected>Escala seleccionada</option>
+            <option value="arpeggio">Arpegio seleccionado</option>
+          </select>
+        </label>
+        <label>Patrón
+          <select id="technicalPatternType">
+            <option value="thirds" selected>Terceras diatónicas</option>
+            <option value="groups3">Grupos de 3 notas</option>
+            <option value="groups4">Grupos de 4 notas</option>
+            <option value="1231">Patrón 1–2–3–1</option>
+            <option value="broken">Arpegio quebrado · 1–3–2–4</option>
+            <option value="crossing">Cruces de cuerda planificados</option>
+          </select>
+        </label>
+        <label>Extensión
+          <select id="technicalPatternOctaves">
+            <option value="1">1 octava</option>
+            <option value="2" selected>2 octavas</option>
+            <option value="3">3 octavas</option>
+          </select>
+        </label>
+        <label>Dirección
+          <select id="technicalPatternDirection">
+            <option value="up">Ascendente</option>
+            <option value="down">Descendente</option>
+            <option value="updown" selected>Sube y baja</option>
+          </select>
+        </label>
+        <label>Arco / agrupación
+          <select id="technicalPatternBow">
+            <option value="alternate" selected>Détaché · ↓ ↑</option>
+            <option value="slur2">2 notas por arco</option>
+            <option value="slur3">3 notas por arco</option>
+            <option value="slur4">4 notas por arco</option>
+            <option value="free">Libre</option>
+          </select>
+        </label>
+        <label>Subdivisión
+          <select id="technicalPatternSubdivision">
+            <option value="1">1 nota por pulso</option>
+            <option value="2" selected>2 notas por pulso</option>
+            <option value="3">3 notas por pulso</option>
+            <option value="4">4 notas por pulso</option>
+          </select>
+        </label>
+        <button id="technicalPatternStart" type="button">Iniciar Tutor</button>
+        <button id="technicalPatternPlay" type="button">Escuchar patrón</button>
+      </div>
+      <div class="technical-patterns-readout">
+        <div><small>Paso</small><strong id="technicalPatternStep">—</strong></div>
+        <div><small>Nota</small><strong id="technicalPatternNote">—</strong></div>
+        <div><small>Cuerda</small><strong id="technicalPatternString">—</strong></div>
+        <div><small>Dedo</small><strong id="technicalPatternFinger">—</strong></div>
+        <div><small>Posición</small><strong id="technicalPatternPosition">—</strong></div>
+        <div><small>Arco</small><strong id="technicalPatternBowReadout">—</strong></div>
+      </div>
+      <div class="technical-patterns-guide" id="technicalPatternGuide">Selecciona una fundamental y material; luego prepara un patrón técnico.</div>
+      <div class="technical-patterns-status" id="technicalPatternStatus" aria-live="polite"></div>
+    </section>
+
+    <section class="rhythm-precision" id="rhythmPrecisionPanel" aria-label="Precisión rítmica y coordinación de arco">
+      <div class="rhythm-precision-head">
+        <div>
+          <strong>Precisión rítmica y coordinación de arco</strong>
+          <span>Practica ataques respecto al metrónomo, subdivisiones, síncopas y acentos. La evaluación mide el momento del ataque; no intenta medir la intensidad física del arco.</span>
+        </div>
+        <button id="rhythmStart" type="button">Iniciar ejercicio</button>
+      </div>
+      <div class="rhythm-precision-controls">
+        <label>Patrón rítmico
+          <select id="rhythmPattern">
+            <option value="quarters">Negras</option>
+            <option value="eighths" selected>Corcheas</option>
+            <option value="triplets">Tresillos</option>
+            <option value="sixteenths">Semicorcheas</option>
+            <option value="syncopation">Síncopa · ataque anticipado</option>
+            <option value="mixed">Cambio de subdivisión</option>
+          </select>
+        </label>
+        <label>Acentos
+          <select id="rhythmAccents">
+            <option value="bar" selected>Primer ataque del compás</option>
+            <option value="twoFour">Pulsos 2 y 4</option>
+            <option value="offbeat">Contratiempos</option>
+            <option value="every3">Cada 3 ataques</option>
+            <option value="none">Sin acentos</option>
+          </select>
+        </label>
+        <label>Arco
+          <select id="rhythmBow">
+            <option value="alternate" selected>Alternar ↓ ↑</option>
+            <option value="accentDown">Acento siempre ↓</option>
+            <option value="slur2">2 ataques por arco</option>
+            <option value="free">Libre</option>
+          </select>
+        </label>
+        <label>Duración
+          <select id="rhythmMeasures">
+            <option value="2">2 compases</option>
+            <option value="4" selected>4 compases</option>
+            <option value="8">8 compases</option>
+          </select>
+        </label>
+        <label>Tolerancia
+          <select id="rhythmTolerance">
+            <option value="40">±40 ms · precisa</option>
+            <option value="60" selected>±60 ms · normal</option>
+            <option value="90">±90 ms · inicial</option>
+          </select>
+        </label>
+        <button id="rhythmTap" type="button" class="rhythm-tap">Golpe de arco · R</button>
+        <button id="rhythmStop" type="button" class="secondary-action">Detener</button>
+      </div>
+      <div class="rhythm-precision-readout">
+        <div><small>Objetivo</small><strong id="rhythmTarget">—</strong></div>
+        <div><small>Desfase</small><strong id="rhythmDelta">—</strong></div>
+        <div><small>Error medio</small><strong id="rhythmMeanError">—</strong></div>
+        <div><small>Precisión</small><strong id="rhythmAccuracy">—</strong></div>
+        <div><small>Racha</small><strong id="rhythmStreak">0</strong></div>
+        <div><small>Arco</small><strong id="rhythmBowReadout">—</strong></div>
+      </div>
+      <div class="rhythm-timeline" aria-hidden="true"><span class="rhythm-center"></span><span id="rhythmTimingNeedle" class="rhythm-timing-needle"></span></div>
+      <div class="rhythm-precision-guide" id="rhythmGuide">Inicia el ejercicio y realiza cada ataque con el botón «Golpe de arco» o la tecla R.</div>
+      <div class="rhythm-precision-status" id="rhythmStatus" aria-live="polite"></div>
+    </section>
+
+    <!-- ===== FILA SUPERIOR: pentagrama + diapasón ===== -->
+    <div class="top-row">
+      <div class="staff-left">
+        <div id="staffSvg" role="img" aria-label="Pentagrama del instrumento"><div data-live-score></div><div data-live-labels></div></div>
+      </div>
+      <div class="board-wrap" aria-label="Diapasón del instrumento seleccionado">
+        <canvas id="board"></canvas>
+        <div id="fretLabel">I</div>
+      </div>
+    </div>
+
+    <!-- ===== FILA INFERIOR: carga de partituras ===== -->
+    <div class="bottom-row">
+      <div class="staff-right">
+        <iframe id="pdfViewer" class="pdf-viewer" src=""></iframe>
+        <iframe id="webViewer" class="pdf-viewer web-viewer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <div id="osmdContainer" class="osmd-container"></div>
+        <div id="imageContainer">
+          <img id="imageViewer" src="" alt="Imagen cargada">
+        </div>
+
+        <div class="web-controls" id="webControls">
+          <input type="text" id="webUrlInput" placeholder="Pega un enlace (https://...)">
+          <button type="button" id="webLoadBtn" title="Cargar la página aquí">Cargar página</button>
+          <button type="button" id="webOpenNewTabBtn" title="Abrir en una pestaña nueva">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </button>
+          <button type="button" class="pdf-clear-btn" id="webClearBtn" title="Cerrar la página web">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Cerrar
+          </button>
+          <div class="web-load-note" id="webLoadNote" style="display:none;"></div>
+        </div>
+
+        <div class="score-play-controls" id="scorePlayControls">
+          <button type="button" class="score-play-btn secondary" id="scorePrevBtn" title="Retroceder una nota">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+          </button>
+          <button type="button" class="score-play-btn" id="scorePlayBtn" title="Reproducir partitura (o barra espaciadora)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Play
+          </button>
+          <button type="button" class="score-play-btn" id="scorePauseBtn" title="Pausar (o barra espaciadora)">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg> Pausa
+          </button>
+          <button type="button" class="score-play-btn" id="scoreStopBtn" title="Detener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14"/></svg> Stop
+          </button>
+          <button type="button" class="score-play-btn secondary" id="scoreNextBtn" title="Avanzar una nota">
+            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+          </button>
+          <div class="score-tempo" title="Tempo de reproducción">
+            <span class="score-tempo-label">BPM</span>
+            <button type="button" class="score-tempo-btn" id="scoreTempoDown" aria-label="Disminuir velocidad" title="Disminuir velocidad">−</button>
+            <input type="number" id="scoreTempo" min="20" max="300" value="100" step="5" inputmode="numeric">
+            <button type="button" class="score-tempo-btn" id="scoreTempoUp" aria-label="Aumentar velocidad" title="Aumentar velocidad">+</button>
+          </div>
+          <button type="button" class="score-play-btn secondary" id="scoreZoomOutBtn" title="Alejar partitura">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <button type="button" class="score-play-btn secondary" id="scoreZoomInBtn" title="Acercar partitura">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="14" y2="8"/><line x1="11" y1="11" x2="14" y2="11"/></svg>
+          </button>
+          <span style="width:1px;align-self:stretch;background:rgba(255,255,255,0.25);margin:0 2px;"></span>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopStartBtn" title="Marcar inicio del tramo a repetir (en la posición actual)">A</button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopEndBtn" title="Marcar fin del tramo a repetir (en la posición actual)">B</button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopBtn" title="Repetir en bucle el tramo marcado" disabled>
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+            Loop
+          </button>
+          <button type="button" class="score-play-btn secondary" id="scoreLoopClearBtn" title="Quitar marcas del tramo">
+            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <div class="score-advanced" title="Repeticiones del loop">
+            <span>Rep.</span><select id="scoreLoopRepeats"><option value="0">∞</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="6">6</option><option value="8">8</option></select>
+          </div>
+          <div class="score-advanced" title="Aumentar BPM al completar repeticiones">
+            <span>+BPM</span><select id="scoreBpmIncrement"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="5">5</option><option value="10">10</option></select>
+            <span>/</span><select id="scoreIncrementEvery"><option value="1">1 rep</option><option value="2">2 rep</option><option value="4">4 rep</option></select>
+          </div>
+          <div class="score-advanced" title="Compases de entrada antes de reproducir">
+            <span>Entrada</span><select id="scoreCountIn"><option value="0">0</option><option value="1">1 compás</option><option value="2">2 compases</option></select>
+          </div>
+          <label class="score-advanced score-check" title="Sincronizar el metrónomo del header con el tempo de la partitura"><input id="scoreSyncMetro" type="checkbox"> Click</label>
+        </div>
+
+        <div class="pdf-controls">
+          <label for="pdfUpload" title="Selecciona un archivo PDF, MusicXML o imagen con la partitura o foto">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Cargar partitura
+          </label>
+          <input type="file" id="pdfUpload" accept=".pdf,.xml,.musicxml,.mxl,.png,.jpg,.jpeg,.gif,.webp,.bmp,.svg" class="file-input-hidden">
+          <span class="score-status" id="scoreStatus"></span>
+          <button type="button" class="pdf-clear-btn" id="pdfClearBtn" title="Quitar la partitura actual">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LEYENDA ===== -->
+    <div class="legend">
+      <button class="legend-item" type="button" data-tone-filter="root" aria-pressed="true"><span class="dot g"></span>Fundamental</button>
+      <button class="legend-item" type="button" data-tone-filter="structural" aria-pressed="true"><span class="dot b"></span>Sonido estructural</button>
+      <button class="legend-item" type="button" data-tone-filter="tension" aria-pressed="true"><span class="dot o"></span>Tensión disponible</button>
+      <button class="legend-item" type="button" data-tone-filter="unavailable" aria-pressed="true"><span class="dot r"></span>No disponible</button>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <p>Crescendo Academy · &copy; <span id="footerYear"></span>. Todos los derechos reservados.</p>
+</footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="../../shared/score-playback-timing.js?v=20260925"></script>
+<script src="https://cdn.jsdelivr.net/npm/soundfont-player@0.12.0/dist/soundfont-player.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/opensheetmusicdisplay@1.8.4/build/opensheetmusicdisplay.min.js"></script>
+  <script src="js/live-staff.js"></script>
+  <script src="js/app.js?v=20261006-piano-toggle-behavior"></script>
+  <script src="js/vibrato.js"></script>
+  <script src="js/metronome.js?v=20260925-beat-stop"></script>
+  <script src="js/workspace-tabs.js"></script>
+<script src="../../shared/string-sound-menu.js?v=20261006-name-only"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ function setup(){
  class AudioContext{constructor(){this.currentTime=10;this.state='running';this.destination={};}createGain(){return {gain:{value:1},connect(){}};}}
  const context={AudioContext,localStorage:{getItem:()=>null,setItem(){}},Soundfont:{instrument:(ctx,name,options)=>{calls.push({ctx,name,options});return new Promise(resolve=>pending.push(()=>resolve({play:(midi,time)=>{heard.push({name,midi,time});return {stop(){}};}})));}}};context.window=context;
  vm.createContext(context);vm.runInContext(fs.readFileSync(__dirname+'/course-sound.js','utf8'),context);
- vm.runInContext(fs.readFileSync(__dirname+'/../armonia-jazz/theory-visuals.js','utf8'),context);
+ vm.runInContext(fs.readFileSync(__dirname+'/../herramientas/armonia-jazz/theory-visuals.js','utf8'),context);
  return {context,calls,heard,pending};
 }
 const tick=()=>new Promise(setImmediate);

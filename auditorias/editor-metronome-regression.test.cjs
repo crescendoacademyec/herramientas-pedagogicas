@@ -2,7 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
-const source = fs.readFileSync(require('node:path').join(__dirname, '../editor-crescendo/src/app.js'), 'utf8');
+const source = fs.readFileSync(require('node:path').join(__dirname, '../herramientas/editor-crescendo/src/app.js'), 'utf8');
 function fixture() {
   const timers = new Map(); let id = 0;
   const indicator = { textContent: '', classList: { toggle() {} }, setAttribute() {} };

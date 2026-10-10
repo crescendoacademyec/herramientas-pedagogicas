@@ -29,7 +29,7 @@ for(const kind of ['key','interval','scale','chord'])for(const clef of ['treble'
   assert.ok(!svg.includes('NaN'));assert.ok(!svg.includes('undefined'));
   assert.ok(!svg.includes(q.answer),'El pentagrama no debe revelar la respuesta');
 }
-require('../ear-training/js/data.js');require('../ear-training/js/generators.js');
+require('../herramientas/ear-training/js/data.js');require('../herramientas/ear-training/js/generators.js');
 for(const scale of P.scales){
   const round=window.ETGenerators.generate(9,{register:'mid',forcedConceptIds:['scale:'+scale.id]});
   assert.equal(round.options[round.correctIdx].id,'scale:'+scale.id);

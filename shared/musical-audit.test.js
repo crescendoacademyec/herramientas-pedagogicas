@@ -7,7 +7,7 @@ for(const root of ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B','C#'])fo
  assert.equal(notes.at(-1).diatonic-notes[0].diatonic,7,scale.id+' closes on tonic letter');
  for(const n of notes)assert.ok(Number.isFinite(n.midi)&&Math.abs(n.alter)<=2,`${root}/${scale.id}`);
 }
-const j=load(__dirname+'/../armonia-jazz/theory-visuals.js',s=>s.replace('{ mount: mount }','{ mount: mount, suffixIntervals, VISUALS }')).TheoryVisuals;
+const j=load(__dirname+'/../herramientas/armonia-jazz/theory-visuals.js',s=>s.replace('{ mount: mount, playNotes: playNotes }','{ mount: mount, playNotes: playNotes, suffixIntervals, VISUALS }')).TheoryVisuals;
 for(const [suffix,expected] of [['',[0,4,7]],['m7',[0,3,7,10]],['maj7',[0,4,7,11]],['7',[0,4,7,10]],['m7♭5',[0,3,6,10]],['dim7',[0,3,6,9]],['m(maj7)',[0,3,7,11]],['7alt',[0,4,6,10,13,15]]])assert.deepEqual(Array.from(j.suffixIntervals(suffix)),expected);
 const v=j.VISUALS;
 assert.equal(v.pedal.pedal,true);

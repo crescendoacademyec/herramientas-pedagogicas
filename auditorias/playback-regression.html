@@ -5,7 +5,7 @@
 (async()=>{
 const rows=[];const check=(label,actual,expected)=>{const pass=JSON.stringify(actual)===JSON.stringify(expected);rows.push({label,actual,expected,pass});if(!pass)throw Error(label);};
 try{
-const source=await (await fetch('../metronomo/index.html')).text();
+const source=await (await fetch('../herramientas/metronomo/index.html')).text();
 const begin=source.indexOf('function parseMusicXmlEvents('),end=source.indexOf('async function extractMxl',begin);
 const parse=new Function(source.slice(begin,end)+';return parseMusicXmlEvents;')();
 const note=(duration,pitch='C',extra='')=>`<note>${extra}${pitch?`<pitch><step>${pitch}</step><octave>4</octave></pitch>`:'<rest/>'}<duration>${duration}</duration><type>${duration===4?'whole':duration===2?'half':'quarter'}</type></note>`;
