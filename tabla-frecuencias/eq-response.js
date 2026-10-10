@@ -14,6 +14,12 @@ function coefficients(b){
 }
 function response(b,f){
  if(!b.enabled)return 0;
+ // Butterworth prototype with bilinear frequency warping. No resonant peak.
+ if(b.type==='highpass'||b.type==='lowpass'){
+  const slope=[6,12,24,36,48].includes(b.slope)?b.slope:12;
+  const ratio=Math.tan(Math.PI*f/96000)/Math.tan(Math.PI*b.frequency/96000);
+  return -10*Math.log10(1+Math.pow(b.type==='lowpass'?ratio:1/ratio,2*slope/6));
+ }
  const a=coefficients(b),w=2*Math.PI*f/96000;
  const power=(i)=>(a[i]+a[i+1]*Math.cos(w)+a[i+2]*Math.cos(2*w))**2+(a[i+1]*Math.sin(w)+a[i+2]*Math.sin(2*w))**2;
  return 10*Math.log10(Math.max(1e-12,power(0))/Math.max(1e-12,power(3)));
@@ -29,7 +35,7 @@ function instrumentExample(inst){
   const frequency=frequencyFromText(item.f);
   if(!frequency){unspecified.push(item.f+': '+item.r);continue;}
   const type=/debajo/i.test(item.f)&&gain<0?'highpass':/adelante/i.test(item.f)?'highshelf':'peaking';
-  bands.push({frequency,gain,type,q:1,enabled:true,label:item.f+' · '+item.r});
+  bands.push({frequency,gain,type,q:1,slope:12,enabled:true,label:item.f+' · '+item.r});
  }
  return {bands,unspecified};
 }
