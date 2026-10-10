@@ -581,12 +581,12 @@ a { color: inherit; text-decoration: none; }
         <p>Explora dónde vive cada instrumento y la voz en el espectro audible (20 Hz – 20 kHz), y haz clic sobre cualquier barra para ver qué cortar, qué realzar y por qué.</p>
     </section>
 
-    <div class="mode-tabs" id="modeTabs">
+    <link rel="stylesheet" href="eq-visual.css?v=20261010-1"><div class="mode-tabs" id="modeTabs">
         <button class="mode-tab active" data-view="chart">
             <b>Tabla de referencia</b>
             <span>Rangos de frecuencia y recomendaciones de EQ por instrumento</span>
         </button>
-        <button class="mode-tab" data-view="ear">
+        <button class="mode-tab" data-view="eq"><b>Ecualizador visual</b><span>Construye curvas con frecuencia, ganancia, Q y filtros</span></button><button class="mode-tab" data-view="ear">
             <b>Entrenamiento auditivo</b>
             <span>Entrena frecuencias, EQ, compresión y balance con comparaciones auditivas</span>
         </button>
@@ -662,7 +662,7 @@ a { color: inherit; text-decoration: none; }
 
     <section class="view-section" id="viewMix"><div id="mixMap"></div></section>
     <section class="view-section" id="viewProcessing"><div class="processing-module" id="processingLab"></div></section>
-    <section class="view-section" id="viewEar">
+    <section class="view-section" id="viewEQ" aria-label="Ecualizador visual"></section><section class="view-section" id="viewEar">
         <details class="processing-module"><summary>Entrenamiento de mezcla y dinámica · EQ, compresión y limitación</summary><div id="processingPractice"></div></details>
 
         <div class="practice-session-card" id="practiceSessionCard">
@@ -1042,7 +1042,7 @@ a { color: inherit; text-decoration: none; }
 
 <script src="data.js?v=20260926-audit"></script>
 <script src="instrument-catalog.js?v=20260926-audit"></script>
-<script src="app.js?v=20260926-audit"></script>
+<script src="eq-response.js?v=20261010-1"></script><script src="app.js?v=20261010-1"></script><script src="eq-visual.js?v=20261010-1"></script>
 <script src="processing-dsp.js?v=20260926-audit"></script>
 <script src="ear.js?v=20260926-audit"></script>
 <script src="processing-exercises.js?v=20260926-audit"></script>
@@ -1059,6 +1059,7 @@ document.getElementById('modeTabs').addEventListener('click', (e) => {
   const view = btn.dataset.view;
   document.querySelectorAll('.mode-tab').forEach((t) => t.classList.toggle('active', t === btn));
   document.getElementById('viewChart').classList.toggle('active', view === 'chart');
+  document.getElementById('viewEQ').classList.toggle('active', view === 'eq');
   document.getElementById('viewEar').classList.toggle('active', view === 'ear');
   document.getElementById('viewProcessing').classList.toggle('active', view === 'processing');
   document.getElementById('viewMix').classList.toggle('active', view === 'mix');

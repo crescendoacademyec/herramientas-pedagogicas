@@ -242,3 +242,9 @@ selecciones (cada instrumento de los 184 mapas) conservaron exactamente las
 coordenadas SVG de figuras, etiquetas y guías en la vista de profundidad; el caso
 K-pop también se comprobó en la vista de registro. Se probaron las siete consultas
 solicitadas, recuperación de un filtro incompatible y cápsula con clic/flechas.
+
+## Ecualizador visual (octubre 2026)
+
+- Respuesta de biquads calculada con Audio EQ Cookbook de Robert Bristow-Johnson, publicado por W3C: https://www.w3.org/TR/audio-eq-cookbook/ . Referencia a 96 kHz; suma de magnitudes en dB para bandas en cascada. Shelves con S=1; HPF/LPF de segundo orden. No hay procesamiento ni reproducción de audio.
+- Material proporcionado para consulta: *Aprende a utilizar tu ecualizador*, páginas 8–11 y 15–16 (parámetros, filtros y barrido). Se redactaron explicaciones originales; no se distribuyen el PDF ni sus gráficos. Se aclara que Q alto estrecha campanas, y que los ajustes dependen de cada grabación.
+- Los botones de las fichas toman la zona indicada en el catálogo; para rangos usan el centro geométrico. ±3 dB y Q=1 son ejemplos didácticos propios, no valores extraídos del libro ni recomendaciones obligatorias.

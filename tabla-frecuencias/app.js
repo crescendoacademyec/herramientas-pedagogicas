@@ -219,12 +219,20 @@
     }).join('')}</ul><p>Las fuentes explican registros y principios acústicos. Las ventanas de visualización y los consejos de mezcla son una síntesis orientativa; no son espectros medidos por estas instituciones.</p></details>`;
   }
 
+  function eqExample(inst, item, gain) {
+    const frequency = window.EQResponse.frequencyFromText(item.f);
+    if (!frequency) return '';
+    const type = /debajo/i.test(item.f) && gain < 0 ? 'highpass' : /adelante/i.test(item.f) ? 'highshelf' : 'peaking';
+    const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return `<button class="eq-example-btn" data-frequency="${frequency}" data-gain="${gain}" data-type="${type}" data-context="${escape(inst.name + ' · ' + item.f + ' · ' + item.r)}">Ver ejemplo en el ecualizador →</button>`;
+  }
+
   function eqHtml(inst) {
     const cutsHtml = inst.cuts.length
-      ? '<ul class="detail-list cut">' + inst.cuts.map(c => `<li><span class="freq-tag">${c.f}</span>${c.r}</li>`).join('') + '</ul>'
+      ? '<ul class="detail-list cut">' + inst.cuts.map(c => `<li><span class="freq-tag">${c.f}</span>${c.r}${eqExample(inst,c,-3)}</li>`).join('') + '</ul>'
       : '<p class="detail-tips">Sin corte fijo recomendado: decide según la grabación.</p>';
     const boostsHtml = inst.boosts.length
-      ? '<ul class="detail-list boost">' + inst.boosts.map(b => `<li><span class="freq-tag">${b.f}</span>${b.r}</li>`).join('') + '</ul>'
+      ? '<ul class="detail-list boost">' + inst.boosts.map(b => `<li><span class="freq-tag">${b.f}</span>${b.r}${eqExample(inst,b,3)}</li>`).join('') + '</ul>'
       : '<p class="detail-tips">Sin realce fijo recomendado: comprueba primero el balance.</p>';
     let deesserHtml = '';
     if (inst.deesser) {

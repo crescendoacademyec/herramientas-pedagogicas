@@ -1,0 +1,7 @@
+const {test}=require('node:test');const assert=require('node:assert/strict');const {response,frequencyFromText}=require('../eq-response.js');
+const band=(type,gain=0,q=.707)=>({type,gain,q,frequency:1000,enabled:true});
+test('flat and bypassed bands are transparent',()=>{for(const f of [20,1000,20000]){assert.ok(Math.abs(response(band('peaking'),f))<1e-7);assert.equal(response({...band('highpass'),enabled:false},f),0);}});
+test('bell centre reaches requested gain and Q narrows its width',()=>{assert.ok(Math.abs(response(band('peaking',6),1000)-6)<1e-7);assert.ok(response(band('peaking',6,8),1500)<response(band('peaking',6,.5),1500));assert.ok(Math.abs(response(band('peaking',-6),1000)+6)<1e-7);});
+test('pass filters have -3 dB cutoff and reject correct side',()=>{for(const type of ['highpass','lowpass'])assert.ok(Math.abs(response(band(type),1000)+3.01)<.01);assert.ok(response(band('highpass'),20)<-60);assert.ok(response(band('lowpass'),20000)<-50);});
+test('shelves reach gain at the appropriate end; notch rejects centre',()=>{assert.ok(Math.abs(response(band('lowshelf',6),20)-6)<.01);assert.ok(Math.abs(response(band('highshelf',-6),20000)+6)<.01);assert.ok(response(band('notch'),1000)<-70);});
+test('frequency zones use logarithmic midpoint and ignore unspecified zones',()=>{assert.equal(frequencyFromText('500 Hz'),500);assert.ok(Math.abs(frequencyFromText('1.5–3 kHz')-Math.sqrt(1500*3000))<.01);assert.equal(frequencyFromText('Graves no musicales'),null);});
