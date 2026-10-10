@@ -23,5 +23,15 @@ function frequencyFromText(text){
  const factor=/kHz/i.test(text)?1000:1,values=nums.slice(0,2).map(n=>Number(n.replace(',','.'))*factor);
  return Math.max(20,Math.min(20000,values.length===2?Math.sqrt(values[0]*values[1]):values[0]));
 }
-const api={coefficients,response,frequencyFromText};if(typeof module==='object')module.exports=api;else root.EQResponse=api;
+function instrumentExample(inst){
+ const bands=[], unspecified=[];
+ for(const [items,gain] of [[inst.cuts||[],-3],[inst.boosts||[],3]])for(const item of items){
+  const frequency=frequencyFromText(item.f);
+  if(!frequency){unspecified.push(item.f+': '+item.r);continue;}
+  const type=/debajo/i.test(item.f)&&gain<0?'highpass':/adelante/i.test(item.f)?'highshelf':'peaking';
+  bands.push({frequency,gain,type,q:1,enabled:true,label:item.f+' · '+item.r});
+ }
+ return {bands,unspecified};
+}
+const api={coefficients,response,frequencyFromText,instrumentExample};if(typeof module==='object')module.exports=api;else root.EQResponse=api;
 })(typeof window==='object'?window:globalThis);
